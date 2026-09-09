@@ -1501,7 +1501,7 @@ document.addEventListener("click", e => {
     const cells = owned.map(it => `
       <button class="pickitem ${p.runner === it.id ? "sel" : ""}" data-pick="${it.id}">
         <span class="pic">${itemSVG(p, it.id)}</span>
-        <span class="nm">${it.nm}</span></button>`).join("");
+        <span class="nm">${nameOf(it)}</span></button>`).join("");
     const d = sheet(`<h3>${t("trk_" + id)}</h3>
       <div class="muted" style="margin-top:2px">${t("trk_" + id + "s")}</div>
       <div class="tiny" style="margin:16px 0 8px">${t("whichRacer")}</div>

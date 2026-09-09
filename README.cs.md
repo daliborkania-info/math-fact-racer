@@ -155,3 +155,11 @@ MIT. Dělejte si s tím, co chcete, včetně rozdání všem rodičům ve tříd
 <https://github.com/daliborkania-info/math-fact-racer>
 
 Hostování zajišťuje GitHub Pages: v repozitáři *Settings → Pages → Source: Deploy from a branch → main → / (root)*. Stránka pak žije na `https://daliborkania-info.github.io/math-fact-racer/` a aktualizuje se při každém pushi.
+
+---
+
+## Stav projektu
+
+Kompletní zachycení rozhodnutí, mechaniky, architektury, opravených chyb a plánu
+dalších kroků je v [docs/PROJECT-STATE.md](docs/PROJECT-STATE.md). Slouží zároveň
+jako podklad pro pokračování v jiné konverzaci.

@@ -155,3 +155,12 @@ MIT. Do what you like with it, including handing it to every parent in the class
 <https://github.com/daliborkania-info/math-fact-racer>
 
 Hosting is GitHub Pages: repository *Settings → Pages → Source: Deploy from a branch → main → / (root)*. The page then lives at `https://daliborkania-info.github.io/math-fact-racer/` and updates on every push.
+
+---
+
+## Project state and handover
+
+A full snapshot of the design decisions, mechanics, architecture, fixed bugs and
+the roadmap lives in [docs/PROJECT-STATE.md](docs/PROJECT-STATE.md). It is written
+in Czech, the working language of the project, and is meant to be readable on its
+own by anyone picking the project up later.

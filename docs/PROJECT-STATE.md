@@ -1,0 +1,327 @@
+# Stav projektu a předávací dokument
+
+Poslední aktualizace: 9. září 2026
+
+Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
+kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
+kódu, seznam opravených chyb, které se nesmí vrátit, a plán dalšího kroku.
+
+**Pokud jsi nová session, začni tímhle:** přečti tenhle soubor celý, pak `README.cs.md`
+kvůli zdůvodnění mechaniky a `src/app.js` kvůli kódu. Nepřepisuj hotová rozhodnutí
+z oddílu Nedotknutelné principy, aniž by o to uživatel výslovně požádal, jsou to
+odpovědi na konkrétní výzkum a na testování s dítětem.
+
+---
+
+## 1. Co to je
+
+Webová hra na procvičování malé násobilky a základního počítání pro děti zhruba
+sedm až deset let, postavená jako kolo na závodním okruhu. Vznikla pro syna
+uživatele (osm let, třetí třída) a je určená k rozdání rodičům spolužáků.
+
+Jeden soběstačný HTML soubor, žádný účet, žádné reklamy, žádné sledování, po
+prvním načtení funguje offline. Rozhraní česky, anglicky a německy.
+
+Uživatel se jmenuje Dalibor, komunikace probíhá česky, kód a komentáře jsou
+anglicky. Uživatel preferuje stručné odpovědi bez vaty a v linuxových postupech
+editor `micro` místo `nano`.
+
+---
+
+## 2. Kde co leží
+
+Pracovní složka je `~/Dokumenty/Kladska/math-fact-racer`, je to git repozitář.
+
+```
+index.html                sestavený hratelný soubor, tohle se otevírá a tohle se hostuje
+build.py                  složí index.html ze zdrojů v src/
+src/index.template.html   kostra dokumentu se třemi značkami
+src/styles.css            všechny styly
+src/i18n.js               všechny texty rozhraní, cs / en / de, 173 klíčů
+src/app.js                engine, obrazovky, interakce
+tests/                    regresní testy nad jsdom, viz tests/README.md
+docs/PROJECT-STATE.md     tenhle soubor
+README.md                 anglické README, hlavní, odkazuje na české
+README.cs.md              české README s podrobným zdůvodněním mechaniky
+manifest.webmanifest      pro přidání na plochu telefonu
+sw.js                     drobná offline cache pro hostovanou kopii
+icon.svg, icon-*.png      ikony aplikace
+dist/artifact.html        build bez obalu html/head/body, negitovaný
+```
+
+Po každé změně ve `src/` je nutné spustit `python3 build.py`. Editovat přímo
+`index.html` je chyba, přepíše se.
+
+---
+
+## 3. Nedotknutelné principy
+
+Tyhle věci se nemění bez výslovného pokynu uživatele. Každá je odpovědí na
+konkrétní zjištění z výzkumu, podrobné zdůvodnění včetně odkazů je v `README.cs.md`.
+
+Odpověď se píše na číselné klávesnici, nikdy se nevybírá z možností. Vybavení
+z paměti staví paměťovou stopu, poznávání ne.
+
+Čas se měří, ale nikde neběží odpočet ani stopky. Rychlost přidává body, nikdy
+neubírá a nikde není vidět jako tlak.
+
+Chyba nikdy neubírá body ani nevrací auto zpět. Auto se za chybu nepohne, ukáže
+se správný výsledek a příklad se vrátí jako otázka navíc.
+
+Dítě vždycky dojede celé kolo a vždycky dostane medaili a mince. Neexistuje stav,
+ve kterém závod skončí neúspěchem.
+
+Soupeřem je vlastní nejlepší jízda na téže trati, nikdy jiné dítě. Žádné žebříčky.
+
+Cílová úspěšnost je kolem osmdesáti procent, tomu odpovídá poměr sedmdesát ku
+třiceti mezi zvládnutým a slabým učivem v každém závodě.
+
+Žádný text v dětské části nesmí obsahovat učitelský žargon. Slovo "spoj" bylo
+z celé aplikace vymýceno, používá se "příklad".
+
+Nikdy nepoužívat licencované postavičky. Pokémoni a podobné byly výslovně
+odmítnuty a nahrazeny vlastními kreslenými tvory.
+
+---
+
+## 4. Herní mechanika do detailu
+
+**Závod.** Výchozí délka je dvacet otázek, nastavitelná na 10, 15, 20 nebo 25.
+Jeden závod je přesně jedno kolo okruhu.
+
+**Pohyb.** Auto se posune o `1/n0` kola za každou správnou odpověď, kde `n0` je
+původní počet otázek. Za chybu se neposune vůbec. Kdo si všechny chyby opraví,
+dojede přesně na sto procent.
+
+**Chyba.** Auto zabrzdí, zobrazí se `příklad = výsledek`, příklad se vloží do
+fronty o tři pozice dál jako otázka navíc. Závod se tím prodlouží, trať ne.
+Jeden příklad se vrací nejvýš dvakrát a závod nepřesáhne `n0 + 6` otázek.
+
+**Body.** Nezávisle na poloze se sbírají body, normalizované na stovkovou škálu
+násobitelem `20 / n0`. Rozpětí za jednu odpověď: 6,5 bleskově, 5,9 rychle,
+5,3 normálně, 4,7 pomalu, 4,6 za opravený pokus, 0,6 za chybu. Tři a víc
+správných v řadě přidají turbo bonus až 0,6 bodu.
+
+**Medaile.** Zlatá od 115 bodů, stříbrná od 100, bronzová od 85, pod tím
+"Kolo dojeto". Dvacet správných normálním tempem dá zhruba 106.
+
+**Soupeř.** Duch ve vedlejším pruhu, poloha se počítá jako
+`moje poloha na kole minus (moje body minus body rekordu) / 100`. Porovnává se
+jen rekord se stejným počtem otázek.
+
+**Mince.** `round(body / 5 * n0 / 20) + medaile * 4 + 6 za překonání rekordu
++ 5 za den v řadě`.
+
+**Leitnerova krabička.** Každý příklad má úroveň 0 až 5. Správná a rychlá
+odpověď posune o jedna nahoru až na 5, správná pomalá posune nahoru jen do
+úrovně 3. Chyba srazí na 1, pokud byl na 3 a výš, jinak o jedna dolů.
+
+**Zvládnutí trati.** `součet(min(3, úroveň)) / (3 * počet příkladů)`. Roste od
+prvního závodu a přímo předpovídá odemknutí další trati.
+
+**Odemykání.** Prahy zvládnutí: t2 od 0,7 na t1, t3 od 0,7 na t2, t4 od 0,7 na
+t3, t5 od 0,65 na t4, dělení od 0,55 celé násobilky, do stovky od 0,6 na do
+dvaceti. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
+tak jako tak. Rodič může každou trať přebít ručně.
+
+**Výběr příkladů.** Váha podle úrovně `[7, 8, 6.5, 3.4, 1.6, 0.8]`, zvýšená
+u dlouho neviděných a u těch, kde je víc chyb než úspěchů. Neviděné mají váhu
+3,2 a je jich na závod omezený počet. U násobilkových tratí je zhruba sedmdesát
+procent otázek z ohniska trati a třicet z dřívějších.
+
+**Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
+je zhruba polovina toho. U počítání do sta se prahy násobí 1,9.
+
+---
+
+## 5. Trati
+
+Deset tratí, každá má vlastní generovaný okruh a prostředí.
+
+| id | obsah |
+| --- | --- |
+| t1 | násobilka 1, 2, 5, 10 |
+| t2 | násobilka 3, 4 |
+| t3 | násobilka 6, 7 |
+| t4 | násobilka 8, 9 |
+| t5 | celá malá násobilka |
+| d1 | dělení |
+| a20 | sčítání a odčítání do 20 |
+| a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
+| mix | vše odemčené dohromady |
+| weak | jen příklady s nejnižší úrovní |
+
+Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
+`s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky. Kanonicky vždy
+`a <= b`, komutativita se sbaluje.
+
+---
+
+## 6. Datový model
+
+Vše v `localStorage` pod klíčem `math-fact-racer-v1`.
+
+```js
+DB = { profiles: [...], current: "id", sound: true, lang: "cs", pin: "hash" }
+
+profil = {
+  id, name, lang,
+  facts: { "m7x8": {lv, reps, ok, bad, best, seen} },
+  best:  { "t1": {dist, hist, n0} },     // rekordy tratí
+  done:  { "t1": 3 },                    // nejlepší medaile
+  trackRuns: { "t1": 8 },
+  owned: [...], runner: "ri_auto", xp: { "pet_kiki": 120 },
+  coins, force: {}, autoUnlock, qCount, speedMode,
+  streak, lastDay, bestStreak, runs, totalOk, totalAns, msSum, msN
+}
+```
+
+PIN je uložený jen jako hash funkcí `hashPin`. Není to skutečné zabezpečení,
+jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
+
+Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
+pokud je nemá. Nové migrace patří do `load()`.
+
+---
+
+## 7. Architektura kódu
+
+`src/app.js` je rozdělený na očíslované oddíly.
+
+1. Jazyk. `t(key, ...)`, `num()`, `applyLang()`, `langSeg()`. `render()` na začátku
+   volá `applyLang()`, které podle jména obrazovky vybere buď rodičovský jazyk
+   `DB.lang`, nebo dětský `profil.lang`. Rodičovské obrazovky jsou vyjmenované
+   v `PARENT_VIEWS`.
+2. Úložiště. `load`, `save`, `P()`, `newProfile`, `touchStreak`.
+3. Příklady. Generování, klíče, výběr do závodu, zápis odpovědi do krabičky.
+4. Sbírka a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
+5. Závodní okruh. Uzavřená Bézierova křivka z osazeného generátoru, geometrie se
+   počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `circuit(id)`,
+   `atU(c, u)`, `circuitSVG`, `circuitThumb`.
+6. Zvuk. Syntetizované tóny, žádné soubory.
+7. Obrazovky. `viewPlayers`, `viewMap`, `viewGame`, `viewResult`, `viewCollection`,
+   `viewSetPin`, `viewGate`, `viewParent`.
+8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem.
+
+**Pozor na jednu past.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
+proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
+způsobilo chybu.
+
+---
+
+## 8. Testy
+
+V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
+`tests/README.md`. Testy načítají sestavený `index.html`, takže před během je
+nutné pustit `build.py`.
+
+Po každé změně mechaniky pusť `flow.test.js` a `items.test.js`, po každé změně
+textů `i18n.test.js` a `names.test.js`.
+
+---
+
+## 9. Chyby, které už byly opravené
+
+Nesmí se vrátit. Každá z nich vznikla při vývoji a byla nahlášená uživatelem.
+
+Auto se posouvalo i za chybnou odpověď. Poloha se počítala z bodů místo ze
+správných odpovědí.
+
+Hra pokračovala i po projetí cílem. Poloha se počítala z bodů, takže rychlé dítě
+nasbíralo cílovou vzdálenost dřív, než mu došly otázky.
+
+Po chybné poslední odpovědi auto skočilo do cíle. Bylo to řešené doháněním na
+konci závodu, což vypadalo jako odměna za chybu. Odstraněno, chyba místo toho
+závod prodlouží.
+
+Jména závodníků se zobrazovala jako `undefined`. Při stěhování textů do slovníku
+se opravil jen jeden ze dvou výskytů.
+
+Přepínač rychlosti v rodičovské sekci nefungoval, protože používal atribut
+`data-k`, který zabírá číselná klávesnice. Přejmenováno na `data-sp`.
+
+Heatmapa přetékala přes okraj obrazovky. Vyřešeno `minmax(0, 1fr)` a obalem
+s vodorovným posuvem.
+
+Bílý text na světlém podkladu na úvodní obrazovce. Světlý oblouk přes spodek
+fialové hlavičky se překrýval s podtitulkem, nahrazeno zaoblením hlavičky.
+
+---
+
+## 10. Kde to teď stojí
+
+Repozitář je založený a má tři commity. **Ještě nebyl odeslán na GitHub.**
+Uživatel má SSH klíč, který je na GitHubu registrovaný jako deploy key
+repozitáře Obsidian-SecondBrain, ne jako klíč účtu, takže push zatím neprojde.
+Řešení je překlopit ten klíč z repozitáře na účet, nebo vyrobit druhý účtový
+klíč a rozlišit je aliasem v `~/.ssh/config`.
+
+Po pushi zbývá zapnout GitHub Pages, tedy Settings, Pages, zdroj větev `main`
+a složka root. Odkaz `https://daliborkania-info.github.io/math-fact-racer/`
+je už v obou README předvyplněný.
+
+Hra je zároveň publikovaná jako artefakt na claude.ai, ten se aktualizuje
+nahráním `dist/artifact.html`.
+
+---
+
+## 11. Další krok, rozšíření o učivo třetí třídy
+
+Uživatel chce naskenovat učebnici matematiky pro třetí třídu a rozšířit hru
+o další látku. Postup byl dohodnutý takto.
+
+**Fáze jedna.** Uživatel pošle jednu kapitolu jako pilot, ideálně tu, kterou
+třída zrovna probírá. Z fotek vznikne mapa učiva, tedy tabulka s tématem, typem
+úlohy, formátem odpovědi, číselným rozsahem, typickými chybami a poznámkou, jestli
+to patří do závodu nebo do druhého režimu.
+
+**Fáze dvě.** Nad tou tabulkou se dohodne mechanika u každého tématu.
+
+**Fáze tři.** Teprve pak se píší generátory a obrazovky, po tématech.
+
+**Rozhodnutí, která už padla.**
+
+Pokrýt se má nakonec všechno: numerace a počítání do tisíce, dělení se zbytkem
+a násobky deseti, jednotky, čas a peníze, a taky geometrie a slovní úlohy.
+
+Navázání na školu bude obojí. Výchozí je adaptivní režim, rodič ale může
+v rodičovské sekci nastavit kapitolu, kde třída je, a hra pak servíruje
+převážně to učivo.
+
+Jako pilot se doporučilo dělení se zbytkem. Je to jádrová látka třetí třídy,
+vyžaduje jeden nový vstupní prvek, tedy druhé políčko na zbytek, a přitom se
+celé odehraje uvnitř existujícího závodu.
+
+**Zásadní hranice návrhu.** Závod je trenažér plynulosti, ne přemýšlení. Patří
+do něj jen to, co se má zautomatizovat a kde je jedna číselná odpověď. Slovní
+úlohy, geometrie a čtení z tabulek potřebují druhý režim bez stopek a bez bodů
+za rychlost, protože odměňovat rychlost u úlohy, kde je hlavní práce pečlivé
+čtení, učí dítě hádat. Pracovně se pro ten druhý režim uvažovalo o názvu
+servis nebo dílna.
+
+**Autorská práva.** Z naskenované učebnice se nesmí přebírat zadání ani obrázky.
+Legálně a užitečně se z ní bere jen struktura, tedy jaká témata, v jakém pořadí,
+v jakém rozsahu a jakým typem úlohy. Příklady se pak generují vlastní. Je to
+i lepší produkt, protože generátor jich vyrobí neomezeně a umí je stupňovat.
+
+**Co si vyžádá úpravu architektury.** Témata dostanou vedle obtížnosti i pozici
+v učebnici, tedy číslo kapitoly. Rodičovská sekce dostane přepínač kapitoly.
+Tabulka zvládnutých příkladů přestane být mřížka deset krát deset a stane se
+z ní seznam témat s pruhy, ve kterém bude mřížka násobilky jednou položkou.
+Dělení se zbytkem potřebuje dvě vstupní políčka, porovnávání čísel tři velká
+tlačítka místo klávesnice, řazení čísel přetahování.
+
+---
+
+## 12. Hotový prompt pro novou session
+
+> Pokračujeme v projektu Math Fact Racer, což je hra na procvičování násobilky
+> pro mého osmiletého syna. Repozitář je v `~/Dokumenty/Kladska/math-fact-racer`.
+> Přečti si nejdřív `docs/PROJECT-STATE.md`, je tam kompletní stav, mechanika,
+> architektura a plán. Pak `README.cs.md` kvůli zdůvodnění návrhu a `src/app.js`
+> kvůli kódu. Zdroje se editují v `src/`, po každé změně se pouští
+> `python3 build.py` a testy z `tests/`. Piš mi česky, kód a komentáře anglicky.
+> Nedotknutelné principy z oddílu 3 neměň bez mého pokynu.
+>
+> Dneska chci [doplň, například: poslat ti první kapitolu učebnice k analýze /
+> dodělat push na GitHub / opravit tohle a tamto].

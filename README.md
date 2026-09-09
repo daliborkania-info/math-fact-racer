@@ -4,7 +4,7 @@
 
 Times tables practice for children of roughly seven to ten, played as a lap around a race circuit. One HTML file, no account, no ads, no tracking, no network needed after the page has loaded once. Interface in Czech, English and German.
 
-**[▶ Play it here](https://dalibork.github.io/math-fact-racer/)** — and see [Put it on the phone as an app](#put-it-on-the-phone-as-an-app) below for the two taps that turn it into a proper icon on the home screen.
+**[▶ Play it here](https://daliborkania-info.github.io/math-fact-racer/)** — and see [Put it on the phone as an app](#put-it-on-the-phone-as-an-app) below for the two taps that turn it into a proper icon on the home screen.
 
 ---
 
@@ -87,7 +87,7 @@ The only opponent is your own record on that track. Leaderboards can motivate, b
 
 The game runs in the browser, but two taps turn it into an icon on the home screen that opens full screen with no browser chrome, exactly like an installed app. It then also works without a signal.
 
-Open the game first: **[dalibork.github.io/math-fact-racer](https://dalibork.github.io/math-fact-racer/)**
+Open the game first: **[daliborkania-info.github.io/math-fact-racer](https://daliborkania-info.github.io/math-fact-racer/)**
 
 ### iPhone and iPad
 
@@ -147,3 +147,11 @@ To add a language, add a block to `I18N` in `src/i18n.js` with the same keys as 
 ## Licence
 
 MIT. Do what you like with it, including handing it to every parent in the class.
+
+---
+
+## Repository
+
+<https://github.com/daliborkania-info/math-fact-racer>
+
+Hosting is GitHub Pages: repository *Settings → Pages → Source: Deploy from a branch → main → / (root)*. The page then lives at `https://daliborkania-info.github.io/math-fact-racer/` and updates on every push.

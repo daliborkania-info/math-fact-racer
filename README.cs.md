@@ -4,7 +4,7 @@
 
 Procvičování malé násobilky pro děti zhruba od sedmi do deseti let, hrané jako kolo na závodním okruhu. Jeden HTML soubor, žádný účet, žádné reklamy, žádné sledování a po prvním načtení ani žádné připojení. Rozhraní česky, anglicky a německy.
 
-**[▶ Spustit hru](https://dalibork.github.io/math-fact-racer/)** — a níž v kapitole [Jak z toho na mobilu udělat aplikaci](#jak-z-toho-na-mobilu-udělat-aplikaci) jsou dva kroky, po kterých z toho je ikona na ploše.
+**[▶ Spustit hru](https://daliborkania-info.github.io/math-fact-racer/)** — a níž v kapitole [Jak z toho na mobilu udělat aplikaci](#jak-z-toho-na-mobilu-udělat-aplikaci) jsou dva kroky, po kterých z toho je ikona na ploše.
 
 ---
 
@@ -87,7 +87,7 @@ Jediným soupeřem je vlastní rekord na dané trati. Žebříčky umí motivova
 
 Hra běží v prohlížeči, ale dvěma klepnutími z ní uděláte ikonu na ploše, která se otvírá na celou obrazovku bez lišt prohlížeče, přesně jako nainstalovaná aplikace. Funguje potom i bez signálu.
 
-Nejdřív otevřete hru: **[dalibork.github.io/math-fact-racer](https://dalibork.github.io/math-fact-racer/)**
+Nejdřív otevřete hru: **[daliborkania-info.github.io/math-fact-racer](https://daliborkania-info.github.io/math-fact-racer/)**
 
 ### iPhone a iPad
 
@@ -147,3 +147,11 @@ Přidání jazyka: doplňte do `I18N` v `src/i18n.js` blok se stejnými klíči 
 ## Licence
 
 MIT. Dělejte si s tím, co chcete, včetně rozdání všem rodičům ve třídě.
+
+---
+
+## Repozitář
+
+<https://github.com/daliborkania-info/math-fact-racer>
+
+Hostování zajišťuje GitHub Pages: v repozitáři *Settings → Pages → Source: Deploy from a branch → main → / (root)*. Stránka pak žije na `https://daliborkania-info.github.io/math-fact-racer/` a aktualizuje se při každém pushi.

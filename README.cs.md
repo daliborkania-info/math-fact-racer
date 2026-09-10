@@ -150,6 +150,22 @@ MIT. Dělejte si s tím, co chcete, včetně rozdání všem rodičům ve tříd
 
 ---
 
+## Podpora projektu
+
+Hra je zdarma a zůstane zdarma. Žádné reklamy, žádné sledování, žádný účet, žádná placená verze, žádné odemykání za peníze. Nic z toho se nezmění, ať se stane cokoli.
+
+Jestli vám ale doma udělala radost a chcete, aby v ní přibývalo další učivo, tohle je způsob, jak to podpořit. Rozdělané mám dělení se zbytkem, počítání do tisíce, jednotky, čas a peníze, slovní úlohy a postupně i látku dalších ročníků. Píšu to po večerech vedle práce, takže každý příspěvek je hlavně signál, že to někdo používá a že má smysl v tom pokračovat.
+
+Je to zcela dobrovolné. Nic se tím neodemyká, nic se tím nezrychluje a ve hře se nijak nepozná, kdo přispěl a kdo ne. Klidně tenhle odstavec přeskočte a hrajte dál, je to naprosto v pořádku a nic vám tím neuteče.
+
+Orientačně jedno kafe, tedy padesát nebo sto korun. Víc opravdu není potřeba.
+
+<img src="docs/support-qr.png" alt="QR kód pro platbu" width="180">
+
+Namiřte na kód mobil z bankovní aplikace, účet se vyplní sám a částku si zadáte vlastní. Kdo radši ručně: **2800927751/2010**.
+
+---
+
 ## Repozitář
 
 <https://github.com/daliborkania-info/math-fact-racer>

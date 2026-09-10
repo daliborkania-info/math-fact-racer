@@ -313,7 +313,43 @@ tlačítka místo klávesnice, řazení čísel přetahování.
 
 ---
 
-## 12. Hotový prompt pro novou session
+## 12. Dobrovolná podpora projektu
+
+Hra zůstává zdarma, MIT, bez reklam a bez sledování. Vedle toho je v README
+sekce s výzvou k dobrovolnému příspěvku, umístěná až za Licencí, tedy dole.
+Formulace musí vždy splnit tři věci: říct, že hra je a zůstane zdarma; říct,
+co konkrétně se za příspěvky bude vyvíjet dál, tedy učivo třetí třídy a další
+ročníky; a explicitně říct, že nepřispět je naprosto v pořádku a že se to ve
+hře nijak nepozná. Žádné odemykání, žádné počítadlo cíle, žádný tlak.
+
+**Zvolený kanál.** QR platba podle českého standardu SPAYD, obrázek přímo
+v repozitáři. Nulové poplatky, žádná registrace pro dárce, rodič to zvládne
+na tři klepnutí v bankovní aplikaci. QR se generuje skriptem `tools/make-qr.py`
+knihovnou `segno`, není závislé na žádné externí službě.
+
+**Zamítnuté kanály a proč.** Buy Me a Coffee si bere pět procent navždy
+a podporuje jen kartu. Ko-fi je levnější, nula procent z jednorázových
+příspěvků, ale pořád je to anglická platforma s registrací, což je pro české
+rodiče zbytečná bariéra. GitHub Sponsors má nulový poplatek a Česko je
+podporované, ale dárce potřebuje účet na GitHubu. Patreon a Herohero jsou
+předplatné, špatný tvar pro jednorázové poděkování. Donio a Darujme potřebují
+kampaň nebo právní formu.
+
+**Odložené, pro zahraničí.** Až bude hra mířit i mimo Česko, přibude druhý
+QR kód podle evropského standardu EPC069-12, známého jako EPC QR nebo
+GiroCode. Ten čtou německé a rakouské bankovní aplikace a pokrývá celou SEPA,
+takže jedním obrázkem obslouží i německou jazykovou verzi, která už v aplikaci
+je. Vedle toho se dá později doplnit Ko-fi jako kartová varianta pro ty, kdo
+nemají evropský účet. Zatím se nedělá nic z toho.
+
+**Daňová poznámka.** Bezúplatný příjem od nepříbuzné osoby je osvobozený
+zhruba do 15 000 Kč ročně od jednoho dárce. Příspěvky velikosti kafe se k tomu
+nepřiblíží. Limity se novelami mění, u čehokoli většího ověřit u Finanční
+správy.
+
+---
+
+## 13. Hotový prompt pro novou session
 
 > Pokračujeme v projektu Math Fact Racer, což je hra na procvičování násobilky
 > pro mého osmiletého syna. Repozitář je v `~/Dokumenty/Kladska/math-fact-racer`.

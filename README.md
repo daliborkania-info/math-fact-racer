@@ -150,6 +150,20 @@ MIT. Do what you like with it, including handing it to every parent in the class
 
 ---
 
+## Supporting the project
+
+The game is free and will stay free. No ads, no tracking, no account, no paid tier, nothing locked behind money. None of that is going to change.
+
+If it earned its keep at your house and you would like more material added, this is the way to back it. Next up are division with remainders, numbers to a thousand, units, time and money, word problems, and eventually the curriculum of later school years. It gets written in the evenings around a day job, so a contribution is mostly a signal that someone out there is using it.
+
+It is entirely voluntary. Nothing unlocks, nothing speeds up, and the game cannot tell who contributed and who did not. Skip this section and keep playing, that is completely fine and you miss nothing.
+
+The payment QR code below follows the Czech SPAYD standard, which Czech banking apps read directly. Account number for a manual transfer: **2800927751/2010**, IBAN **CZ49 2010 0000 0028 0092 7751**, BIC **FIOBCZPPXXX**. A card option for people outside the SEPA area is on the list, not built yet.
+
+<img src="docs/support-qr.png" alt="Payment QR code" width="180">
+
+---
+
 ## Repository
 
 <https://github.com/daliborkania-info/math-fact-racer>

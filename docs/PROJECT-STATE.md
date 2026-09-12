@@ -5,8 +5,8 @@ postavení dílny
 
 **Kde se přestalo a kudy dál:** `add_sub_1000` je hotový a s ním trať `a1000`.
 Hotová je i **dílna**, druhý režim bez stopek a bez bodů za rychlost, zatím
-s jednou zakázkou, penězi. Na řadě je dvojice `mult_beyond` a `div_beyond`.
-Hotový prompt je na konci, v oddílu 14.
+s jednou zakázkou, penězi. Na řadě je **krok 1 z `docs/PLAN.md`**, tedy
+rodičovská heatmapa nad všemi rodinami. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -44,13 +44,14 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 185 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 242 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
 tests/fixtures/           zamrazené profily starších verzí, jen se přidávají
 docs/PROJECT-STATE.md     tenhle soubor
-docs/ROADMAP.md           produktovy plan, vc. resersi o motivaci a inkluzi
+docs/ROADMAP.md           produktový plán, včetně rešerší o motivaci a inkluzi
+docs/PLAN.md              implementační plán, sedm kroků, co se kde mění
 docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
 docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
 tools/make-qr.py          generátor toho QR kódu
@@ -595,7 +596,10 @@ teď přes `as100`. Je to prohloubení, ne odemčení, a navíc potřebuje díln
 počítání předmětů na obrázku, nic pro závod. Dílna, do které patří, už stojí,
 takže zbývá jen ten generátor a kresba počítaných věcí.
 
-**Vrstva nad tímhle je v `docs/ROADMAP.md`**, tedy co s hrou jako s produktem:
+**Jak se to bude dělat, je v `docs/PLAN.md`**, sedm kroků od heatmapy po pátý
+ročník, u každého konkrétní zásahy do kódu, migrace a testy.
+
+**Proč právě takhle, je v `docs/ROADMAP.md`**, tedy co s hrou jako s produktem:
 volba světa místo závodu pro děti, které závodění neláká, sbírky vázané na
 Leitnerovu krabičku, mapa jako svět a seznam věcí, které se do dětské hry
 přidat nesmí. Vzniklo to z rešerše, u každého zjištění je odkaz na studii.
@@ -838,30 +842,32 @@ množiny `VALID` a vlastní okruh, který ověří, že každý kbelík dělá t
 slibuje. V `tests/flow.test.js` sedí natvrdo počet okruhů na mapě a počet
 zamčených kapitol, obojí je potřeba posunout.
 
-### Prompt pro nejbližší krok, tedy `mult_beyond` a `div_beyond`
+### Prompt pro nejbližší krok, tedy rodičovskou heatmapu
 
-Použij tenhle, pokud se pokračuje tam, kde se přestalo.
+Použij tenhle, pokud se pokračuje tam, kde se přestalo. Je to krok 1
+z `docs/PLAN.md`; další kroky mají v tom souboru vlastní zadání a stačí v tomhle
+promptu vyměnit poslední odstavec.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
 >
-> Přečti si celý `docs/PROJECT-STATE.md`, pak `docs/kurikulum/README.md`
-> a `docs/kurikulum/nns-matysek-3.md` kvůli učivu a `src/app.js` kvůli kódu.
-> Zvlášť si všimni oddílu 12c, tam je soupis toho, co v kódu překáží, a co už
-> je z něj hotové, a konce oddílu 14, kde je kontrolní seznam pro novou rodinu.
+> Přečti si celý `docs/PROJECT-STATE.md` kvůli stavu a mechanice, pak
+> `docs/PLAN.md` kvůli tomu, co se dělá dál a v jakém pořadí, a `src/app.js`
+> kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
+> něco navržené tak, jak je; jsou tam odkazy na studie.
 >
-> Dneska chci `mult_beyond` a `div_beyond`, tedy násobení a dělení mimo rozsah
-> malé násobilky. Odemknou kapitoly 14, 16 a 31 třetího ročníku. Jsou to dvě
-> rodiny, ale jedno téma a jedna trať, stejně jako plus a minus sdílejí trať
-> do tisíce; dělení je obrácené násobení téhož kbelíku. Stupně vem z mapy
-> třetího ročníku: sedmý díl je drží do sta, osmý je pouští do tisíce.
+> Dneska chci krok 1 z plánu, tedy rodičovskou heatmapu nad všemi rodinami
+> příkladů. Dneska ukazuje jen malou násobilku, takže dítě, které dva měsíce
+> jezdí sčítání do sta, hodiny a dílnu, tam vidí nulu. Chci dva tvary
+> zobrazení, mřížku pro násobilku a dělení a pás dlaždic pro kbelíkové rodiny,
+> a souhrn nahoře přepočítaný jako vážený průměr přes otevřené tratě. Podrobnosti
+> jsou v plánu.
 >
-> Zbytek postupu je v kontrolním seznamu na konci oddílu 14. Zdroje se editují
-> v `src/`, nikdy ne `index.html`. Po každé změně `python3 build.py` a pak testy
-> z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové chování patří do testů, ne
-> jen do kódu. Žádná změna nesmí připravit existující profil o postup, hlídá to
-> `tests/migration.test.js`, a pokud sáhneš na datový model, přidej do
-> `tests/fixtures/legacy-profiles.json` další zamrazený profil.
+> Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
+> build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové
+> chování patří do testů, ne jen do kódu. Žádná změna nesmí připravit existující
+> profil o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
+> model, přidej do `tests/fixtures/legacy-profiles.json` další zamrazený profil.
 >
 > Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
 > principy z oddílu 3 neměň bez mého pokynu. Push dělám sám, jen commituj

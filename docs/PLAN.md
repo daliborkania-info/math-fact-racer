@@ -1,0 +1,251 @@
+# Implementační plán
+
+Sepsáno 12. září 2026. Pořadí je převzaté z `ROADMAP.md`, oddíl 5. Tenhle soubor
+říká, **jak** to udělat: kde v kódu se sahá, co to udělá s datovým modelem, co
+se musí dopsat do testů a na co se dá naběhnout.
+
+Každý krok je velikostí zhruba jedna session. Kroky 1 a 2 nic nepřestavují,
+krok 3 a 4 přestavují mapu a je záměr udělat je, dokud je tratí třináct.
+
+Kontrolní seznam pro každou novou rodinu příkladů je na konci
+`PROJECT-STATE.md`, oddíl 14. Tenhle plán ho nenahrazuje, jen říká, v jakém
+pořadí se bude používat.
+
+---
+
+## Krok 1. Rodičovská heatmapa nad všemi rodinami
+
+**Proč první.** Nikoho neblokuje, nemění datový model a je to jediná obrazovka,
+která dnes rodiči lže. S každým dalším generátorem lže víc, takže čím dřív, tím
+levněji.
+
+**Co je špatně dnes.** `viewParent()` skládá mřížku jedenáct krát jedenáct
+natvrdo přes `mk()`, takže vidět je jen malá násobilka. Souhrn nahoře,
+`mAll`, počítá zvládnutí taky jen z `MULT`. Dítě, které dva měsíce jezdí
+sčítání do sta, hodiny a dílnu, uvidí v rodičovské sekci nulu.
+
+**Návrh.** Dva tvary zobrazení, protože rodiny nemají stejný tvar:
+
+- **Mřížka** pro to, co je součin dvou os: násobilka a dělení, deset krát deset.
+- **Pás dlaždic** pro všechno ostatní, tedy jedna dlaždice na klíč: stupně do
+  dvaceti, kbelíky do sta a do tisíce, kbelíky hodin, kroky dílny.
+
+Jedna funkce `heatBlock(p, spec)`, kde `spec` je `{title, kind:"grid"|"strip",
+keys, labelAt}`. Rodina si řekne, co chce vykreslit; obrazovka o rodinách neví.
+
+**Souhrn nahoře** přepočítat jako vážený průměr zvládnutí přes tratě, které jsou
+otevřené, váhou je počet klíčů trati. Tratě `mix` a `weak` se do průměru
+nepočítají, protože nemají vlastní učivo.
+
+**Zásahy.** `viewParent()` v oddílu 7, styly `.heat` a `.heatwrap`, nové texty
+`sec*` a popisky bloků ve třech jazycích.
+
+**Testy.** Do `flow.test.js` kontrola, že rodičovská sekce obsahuje blok pro
+každou rodinu, kterou profil má v krabičce. Do `i18n.test.js` nic navíc, ale
+pozor na dynamicky skládané klíče, ty se přidávají do pole `dyn`.
+
+**Pasti.** Rodičovské obrazovky běží v jazyce rodiče, ne dítěte, viz
+`PARENT_VIEWS`. Mřížka přetékala přes okraj, je na to `minmax(0, 1fr)` a obal
+s vodorovným posuvem; pás dlaždic musí udělat totéž.
+
+---
+
+## Krok 2. Vlna A, generátory na klávesnici
+
+**Proč druhé.** Odemkne dvanáct kapitol třetí třídy a nesáhne na nic hotového.
+Zároveň je to obsah do okna třetího až šestého týdne, kdy podle rešerše opadá
+novost; viz `ROADMAP.md`, oddíl 3.
+
+**Pořadí uvnitř vlny** podle `PROJECT-STATE.md`, oddíl 12b:
+
+1. `mult_beyond` + `div_beyond`, kapitoly 14, 16, 31
+2. `rounding_10` + `rounding_100`, kapitoly 7, 26
+3. `chain_3`, kapitola 11
+4. `order_of_ops`, kapitoly 13, 30
+5. `mult_div_10_100` + `mult_round`, kapitola 28
+6. `unit_convert` + `time_convert`, kapitoly 18, 29
+7. `missing_operand` + `inverse_check`, kapitola 5
+
+**Návrh písmen hlaviček.** Obsazené je `a c d k m n p r s w`, volné zůstává
+`b e f g h i j l o q t u v x y z`. Pozor: `h` je vnitřní id kbelíků do sta,
+`b` id kbelíků do tisíce, `t` je jméno překladové funkce a jako hlavička by
+mátlo. Návrh k potvrzení:
+
+| rodina | hlavička | klíče |
+| --- | --- | --- |
+| `mult_beyond` + `div_beyond` | `x` | `xm1`, `xd1`, znaménko uvnitř jako u tisícovky |
+| `rounding_10` + `rounding_100` | `o` | `o1` desítky, `o2` stovky |
+| `chain_3` | `q` | `q1` až `q3` podle oboru |
+| `order_of_ops` | `z` | `z1` bez závorek, `z2` se závorkami |
+| `mult_div_10_100` + `mult_round` | `g` | `gm1`, `gd1` |
+| `unit_convert` + `time_convert` | `u` | `u1` délka, `u2` hmotnost, `u3` objem, `u4` čas |
+
+**`missing_operand` a `inverse_check` jsou jiný typ zásahu.** Nejsou to
+samostatné rodiny, ale modifikátory existujících: vezmou hotový příklad a schovají
+jiný člen. Proto jdou nakonec a proto nedostávají hlavičku. Sáhne se na
+`itemFromKey()`, které dnes obaluje `rawItem()`; modifikátor je druhý obal.
+Pozor, aby se klíč nezměnil, jinak by se rozpadla krabička.
+
+**Testy.** Každá rodina si dopíše řádek do tabulky `RANGE` v `items.test.js`,
+klíče do seznamu `keys` i do množiny `VALID` a vlastní okruh, který ověří, že
+kbelík dělá to, co slibuje. V `flow.test.js` sedí natvrdo počet okruhů na mapě
+a počet zamčených kapitol, obojí se posouvá.
+
+**Pasti.** `thresholds()` je jediné místo, kde se dá tiše zapomenout: bez
+násobitele dostane rodina prahy pro jednociferné vybavování a děti budou mít
+samé pomalé odpovědi. Odpověď nad 999 potřebuje `maxLen: 4` přímo na položce.
+
+---
+
+## Krok 3. Sbírky vázané na Leitnerovu krabičku
+
+**Proč před mapou.** Sbírka určuje, co mapa ukazuje, takže se dělá dřív, jinak
+se mapa předělává dvakrát.
+
+**Princip.** Sbírka není odměna vedle učení, je to jeho obrázek. Jedno místo
+ve sbírce se zaplní ve chvíli, kdy se jeden příklad dostane v krabičce na
+úroveň 4. Nedá se to nasbírat obcházením a zároveň to zviditelňuje krabičku,
+o které dítě dnes neví. Zdůvodnění a studie jsou v `ROADMAP.md`, oddíl 3.
+
+**Velikost sbírky** je počet klíčů trati, tedy `trackKeys(p, tr).length`.
+Násobilková trať má tak čtyřicet až pětapadesát míst, kbelíková dvanáct.
+To je v pořádku, různé planety mají různě velké sbírky.
+
+**Jednou rozsvícené místo nezhasne.** Tohle je rozhodnutí, ne detail. Když
+dítě příklad zapomene a úroveň spadne pod čtyři, hvězda musí zůstat. Zhasínající
+sbírka by trestala za to, na co je celá hra postavená, tedy že se zapomíná
+a opakuje. Znamená to **nové pole v profilu**, `p.stars = { "m7x8": true }`,
+protože z `facts` to dopočítat nejde.
+
+**Datový model a migrace.** `seedStars(p)` v `load()` i ve větvi `import`
+dopočítá hvězdy ze současného stavu krabičky, tedy pro každý klíč s `lv >= 4`.
+Tím starší profil nepřijde o nic, co si zaslouží. Do
+`tests/fixtures/legacy-profiles.json` přibude další zamrazený profil, viz
+pravidlo v `PROJECT-STATE.md`, oddíl 3.
+
+**Kresba.** Sbíraný předmět se kreslí parametricky jako všechno ostatní, tvar
+podle prostředí trati: hvězda ve vesmíru, květina na louce, kámen v jeskyni,
+mušle u moře. Jedna funkce `tokenSVG(kind, filled)`.
+
+**Obrazovky.** Sbírka trati na výsledkové obrazovce jako řádek "rozsvítily se
+dvě nové hvězdy" a celý inventář jako nová obrazovka dostupná z mapy.
+
+**Testy.** Do `items.test.js`: hvězda se rozsvítí při přechodu na úroveň 4
+a nezhasne při poklesu. Do `migration.test.js` fixture bez `stars`, která se
+musí doplnit z krabičky.
+
+---
+
+## Krok 4. Mapa jako svět a volba světa
+
+**Proč teď.** Tratí je třináct a s každou rodinou z vlny A přibude další.
+Přestavba se má dělat, dokud je malá.
+
+### 4a. Volba světa
+
+**Co se mění.** Prostředí tratí a nabídka jezdců. **Ne učivo, ne obtížnost,
+ne pořadí odemykání.** Je to jedna verze hry s jiným kabátem, ne dvě hry; proč
+právě takhle, je v `ROADMAP.md`, oddíl 2.
+
+```js
+const WORLDS = [
+  {id:"circuit", env:{t1:"meadow", ...}, rides:["ri_auto", ...]},
+  {id:"trail",   env:{t1:"forest", ...}, rides:["pet_*", ...]},
+  {id:"sky",     ...},
+  {id:"deep",    ...}
+];
+```
+
+**Jeden bod zásahu na prostředí.** Dnes se čte `tr.env` na třech místech,
+v `viewMap()` dvakrát a v `viewGame()` jednou. Zavést `envOf(p, tr)` a nahradit
+všechna tři; `TRACKS` si pak nechá `env` jako výchozí hodnotu pro svět `circuit`.
+
+**Texty.** Jména tratí zůstávají, mění se jen hrstka slov, kde "kolo" a "jezdec"
+znějí ve stezce nebo v hlubině divně. Řešit to přes `t()`: nejdřív hledat
+`w_<svet>_<klic>`, teprve pak `<klic>`. Tím se ve slovníku objeví jen ty klíče,
+které se opravdu liší, a zbytek se nekopíruje čtyřikrát.
+
+**Datový model.** `p.world`, výchozí `"circuit"`. Migrace triviální, ale patří
+do `seedShop()` sousedství, tedy do `load()` i do importu.
+
+**Pozor na nedotknutelný princip.** Svět nesmí měnit nic, co ovlivňuje obtížnost
+nebo srovnání s rekordem. Rekordy tratí se ukládají pod `tr.id`, takže přepnutí
+světa je nechává být; to je správně a musí to tak zůstat.
+
+### 4b. Mapa jako svět
+
+**Co se mění.** `viewMap()` místo svislého seznamu karet rozmístí tratě
+v prostoru. Zamčená trať je vidět, ale je tmavá.
+
+**Pravidlo, které se nesmí porušit.** Klepnutí na trať na ni skočí rovnou.
+Přelet mezi místy je ozdoba, kterou jde přeskočit, nikdy povinná cesta; jediná
+studie, kterou se k tomu podařilo najít, hlásí u povinného průchodu centrem
+pokles pocitu kompetence a autonomie.
+
+**Přístupnost.** Tratě zůstávají tlačítka, ne obrázkové oblasti: musí jít
+proklikat klávesnicí a mít viditelný focus. Rozmístění se počítá v JS ze stejného
+seedu jako okruhy, aby bylo pokaždé stejné, a musí se vejít do 375 pixelů
+na šířku.
+
+**Testy.** `flow.test.js` dnes počítá okruhy na mapě přes `.thumb svg path`
+a klepe na `[data-act="play"]`; obojí musí přežít přestavbu, jinak se testy
+přepisují zbytečně.
+
+---
+
+## Krok 5. Vlna B, nové vstupní prvky
+
+Pořadí a rozbor jsou v `PROJECT-STATE.md`, oddíly 12b a 12c bod B.
+
+1. `pad2`, dvě políčka, a s ním `div_remainder`, klíč `r{dělenec}x{dělitel}`.
+   Nejdřív je potřeba dodělat pojem aktivního políčka v `tap()`, `typedText()`
+   a `questionHTML()`, odhadem půl dne. `check` tam má dostat opravdové dvě
+   hodnoty, ne slepené číslo; finta hodina krát sto plus minuty je u zbytku
+   křehká, protože nerozliší špatný zápis od špatného výsledku.
+2. `pad3` a `place_value`.
+3. `pick` a dvojice `parity` s `digit_count`.
+4. `cmp` a porovnávání, schválně poslední: je to poznávání, ne vybavování.
+
+`record()` bere správnost jako ano nebo ne, takže "podíl dobře, zbytek špatně"
+spadne do krabičky jako celá chyba. Změna by sáhla na datový model a tím na
+migrační test.
+
+---
+
+## Krok 6. Vlna C, další zakázky do dílny
+
+Dílna stojí, takže další téma je jen další záznam v `JOBS` plus generátor plus
+texty. Postup je stejný jako u peněz, viz `PROJECT-STATE.md`, oddíl 4b.
+
+1. `count_objects`, odemkne kapitoly 1 až 3 prvního ročníku, poslední díru
+   v celém prvním ročníku. Potřebuje kresbu počítaných věcí a vstupní prvek,
+   kde se klepe na předměty nebo se píše počet.
+2. `word_problem`, slovní úlohy. Neodemkne ani jednu kapitolu, protože ty jsou
+   hratelné přes počítání, ale je jich v třetí třídě plno a nikde se necvičí.
+   Je to zároveň první zakázka, kde se musí řešit generování textu, ne čísel.
+3. `written_mult` a `fraction_read`, obojí potřebuje další vstupní prvek.
+
+---
+
+## Krok 7. Čtvrtý a pátý ročník
+
+Mapy k nim leží v `docs/kurikulum/nns-matysek-4.md` a `-5.md`, ale vznikly jen
+z obsahů, ne z prolistovaných stránek, a témata s neznámým formátem odpovědi
+jsou značená `?`. Než se zapnou v aplikaci, chce to je ověřit, jinak by v nich
+bylo zamčené skoro všechno. Jak se učebnice čtou, je v `PROJECT-STATE.md`,
+oddíl 11.
+
+---
+
+## Co se v žádném kroku nesmí stát
+
+Shrnutí toho, co hlídají testy a co je rozepsané v `PROJECT-STATE.md`, oddíl 3,
+a v `ROADMAP.md`, oddíl 4.
+
+- Žádná změna nepřipraví existující profil o postup. Sáhneš-li na datový model,
+  přibude zamrazený profil do `tests/fixtures/legacy-profiles.json`.
+- Odemčená trať se sama nezavře. Rozsvícená hvězda sama nezhasne.
+- Do dílny se nikdy nedostanou stopky ani body za rychlost.
+- Žádné náhodné odměny, žádný trest za přerušenou sérii, žádné srovnávání
+  s jinými dětmi, žádná sbírka bez dosažitelného konce.
+- Co hra neumí, to nenabízí.

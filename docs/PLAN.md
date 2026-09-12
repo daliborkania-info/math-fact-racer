@@ -107,6 +107,12 @@ samé pomalé odpovědi. Odpověď nad 999 potřebuje `maxLen: 4` přímo na pol
 **Proč před mapou.** Sbírka určuje, co mapa ukazuje, takže se dělá dřív, jinak
 se mapa předělává dvakrát.
 
+Krok má dvě části. **3a** je sbírka nad tratěmi, **3b** je dílna, která dneska
+nemá ani sbírku, ani prostředí, ani pocit, že se někam došlo. Obě části sdílí
+jedno pravidlo a jedno nové pole v profilu, takže se dělají spolu.
+
+### 3a. Sbírka nad tratěmi
+
 **Princip.** Sbírka není odměna vedle učení, je to jeho obrázek. Jedno místo
 ve sbírce se zaplní ve chvíli, kdy se jeden příklad dostane v krabičce na
 úroveň 4. Nedá se to nasbírat obcházením a zároveň to zviditelňuje krabičku,
@@ -138,6 +144,61 @@ dvě nové hvězdy" a celý inventář jako nová obrazovka dostupná z mapy.
 **Testy.** Do `items.test.js`: hvězda se rozsvítí při přechodu na úroveň 4
 a nezhasne při poklesu. Do `migration.test.js` fixture bez `stars`, která se
 musí doplnit z krabičky.
+
+### 3b. Dílna: obrázek, který se odkrývá, a vlastní sbírka
+
+**Co je špatně dnes.** Dílna má součástky a nátěry, a nic víc. Závod má okruh,
+krajinu, ducha vlastního rekordu a medaili; dílna má bílý papír a řadu teček.
+To je zčásti záměr, roadmapa v oddílu 4 chce odměnu ve tvaru klíče k obsahu,
+ne platu za výkon, a součástky ten tvar mají. Ale mlčení není totéž co klid:
+dítě uprostřed zakázky nemá na obrazovce nic, co by rostlo.
+
+**Návrh: kruh, který odkrývá vlastního závodníka.** Nad pultem stojí malý
+kruhový výřez a v něm obrázek toho, co už dítě ve sbírce má, tedy `itemSVG(p,
+p.runner)`, jeho vlastní stroj nebo zvíře, včetně nátěru. Kruh je rozdělený na
+tolik dílů, kolik má zakázka úloh, a jeden díl se odkryje za každou vyřešenou
+úlohu. Na konci zakázky je obrázek celý.
+
+**Proč zrovna tohle, a proč to není odměna za výkon.** Odkrývá se něco, co dítě
+už vlastní, takže se nedá nic vyhrát ani prohrát a nic nového se nekupuje za
+výkon. Je to zpětná vazba ve tvaru obrázku, ne cena. Zároveň to splňuje pravidlo
+z roadmapy, oddíl 4: nic náhodného, dítě přesně vidí, kolik dílů zbývá. A vyplní
+to místo, které na obrazovce dílny stejně je; pás nad mincemi byl donedávna
+prázdný kvůli chybě v rozvržení, viz `PROJECT-STATE.md`, oddíl 9.
+
+**Opravená úloha odkrývá taky.** Jinak by se z kruhu stalo měřidlo bezchybnosti
+a dílna by začala hodnotit výkon, což je přesně to, čemu se vyhýbá. Dílu se
+nedá ubrat.
+
+**Kresba.** Jedna funkce `revealSVG(inner, done, total)`, kruhový klip
+z `total` výsečí, `done` z nich průhledných, zbytek matný překryv v barvě
+papíru dílny. Počítá se v JS jako všechno ostatní, žádný obrázkový soubor.
+Výseče, ne postupné prolínání, protože dítě má umět spočítat, kolik zbývá.
+
+**Trvalá sbírka dílny.** Kruh žije jen uvnitř jedné zakázky. Vedle toho platí
+pravidlo z 3a beze změny: klíč dílny, který se dostane v krabičce na úroveň 4,
+rozsvítí místo ve sbírce a už nezhasne. Sbírka dílny je tedy dneska třímístná,
+`wm1` až `wm3`, a s každou další zakázkou z kroku 6 povyroste. **Pozor, 3a
+počítá velikost sbírky jako `trackKeys(p, tr).length` a dílna žádná trať není**,
+takže `stars` musí umět i klíče, které pod žádnou trať nespadají; jinak se na
+dílnu zapomene přesně tak, jako se na ni zapomnělo v rodičovské heatmapě.
+
+**Co za posledním nátěrem.** Nátěry stojí dohromady 390 součástek a plná
+zakázka dá patnáct, takže po zhruba šestadvaceti zakázkách je obchod prázdný
+a součástky přestanou k něčemu být. Roadmapa chce dosažitelné dno, to tohle
+splňuje, ale neříká, co je za ním. Rozhodnout se to má tady, ne až to dítě
+najde. Nejlevnější slušná odpověď je nechat součástky dál přibývat a ukázat
+je jako celkový počet, ne jako peněženku, ke které nic nepatří. Tohle je jediný
+bod celého kroku, který **potřebuje rozhodnutí uživatele**, ne jen napsání.
+
+**Zásahy.** `viewJob()` nad `#counter`, `revealSVG()` vedle `coinSVG()`,
+`JOB.ok` už se počítá, takže nic nového do stavu zakázky nepřibývá. Do sbírky
+`seedStars()` beze změny, jen se nesmí filtrovat podle tratí.
+
+**Testy.** Do `flow.test.js`: kruh má tolik dílů, kolik má zakázka úloh, po
+první vyřešené úloze je odkrytý právě jeden, opravená úloha taky odkrývá,
+a po dokončení zakázky je odkrytý celý. Do `items.test.js` kontrola, že se
+`stars` rozsvítí i nad klíčem dílny.
 
 ---
 
@@ -186,6 +247,11 @@ v prostoru. Zamčená trať je vidět, ale je tmavá.
 Přelet mezi místy je ozdoba, kterou jde přeskočit, nikdy povinná cesta; jediná
 studie, kterou se k tomu podařilo najít, hlásí u povinného průchodu centrem
 pokles pocitu kompetence a autonomie.
+
+**Dílna je na mapě taky.** Dnes je to karta pod tratěmi, výrazně jiná, teplé
+barvy a ikona nářadí. V rozmístěném světě musí zůstat stejně odlišná a stejně
+dosažitelná jedním klepnutím, tedy vlastní místo, ne trať v řadě ostatních.
+Až bude mít sbírku z kroku 3b, ukazuje se na ní jako u tratí.
 
 **Přístupnost.** Tratě zůstávají tlačítka, ne obrázkové oblasti: musí jít
 proklikat klávesnicí a mít viditelný focus. Rozmístění se počítá v JS ze stejného
@@ -249,8 +315,10 @@ a v `ROADMAP.md`, oddíl 4.
 
 - Žádná změna nepřipraví existující profil o postup. Sáhneš-li na datový model,
   přibude zamrazený profil do `tests/fixtures/legacy-profiles.json`.
-- Odemčená trať se sama nezavře. Rozsvícená hvězda sama nezhasne.
-- Do dílny se nikdy nedostanou stopky ani body za rychlost.
+- Odemčená trať se sama nezavře. Rozsvícená hvězda sama nezhasne. Odkrytý díl
+  kruhu v dílně se uvnitř zakázky nezakryje, ani po chybě.
+- Do dílny se nikdy nedostanou stopky ani body za rychlost. Ani oklikou přes
+  obrázek, který by se odkrýval jen za bezchybné řešení.
 - Žádné náhodné odměny, žádný trest za přerušenou sérii, žádné srovnávání
   s jinými dětmi, žádná sbírka bez dosažitelného konce.
 - Co hra neumí, to nenabízí.

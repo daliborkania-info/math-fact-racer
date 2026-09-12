@@ -274,6 +274,14 @@ vybratelnou, aniž by vyrobila trať. Proto se rozdělilo `isPlayable()`, tedy j
 vybrat, od `schoolReady()`, tedy dělá trať na mapě. Zakázka, která je zrovna
 v kapitole, to říká štítkem na kartě.
 
+**Dílna je zatím tichá a zčásti je to záměr.** Nemá sbírku, prostředí ani nic,
+co by při práci rostlo. Součástky mají podle roadmapy, oddíl 4, správný tvar
+odměny, tedy klíč k obsahu místo platu za výkon, ale mlčení není totéž co klid.
+Doplní to krok 3b v `docs/PLAN.md`: kruh nad pultem, který za každou vyřešenou
+úlohu odkryje díl obrázku vlastního závodníka, a trvalá sbírka nad klíči dílny.
+Jedna věc tam čeká na rozhodnutí, totiž co se součástkami, až budou všechny
+nátěry koupené.
+
 **Klíče dílny začínají na `w`.** Ukládají se do stejné Leitnerovy krabičky jako
 příklady, ale žádný pool závodu je vyrobit neumí a trať "co ti nejde" je
 vyfiltruje. `record()` s `ms = null` posune úroveň bez měření času a nezapočítá

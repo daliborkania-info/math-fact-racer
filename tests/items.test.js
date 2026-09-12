@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,effectiveChapter,visibleTracks,chapterOf,trackById};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -119,30 +119,31 @@ if(inFocus<run1.length*0.5){stBad++;console.log('druhy stupen nenese zavod',inFo
 if(inFocus===run1.length){stBad++;console.log('chybi opakovani drivejsiho uciva');}
 console.log('chyb ve stupnich do dvaceti:',stBad);
 
-// 7. kapitola, kterou hra neumi, spadne na nejblizsi drivejsi hratelnou
-let fbBad=0, fellBack=0, noTrack=0;
+// 7. neumime-li kapitolu, nesmi jit vybrat, a ulozeny profil se srovna
+let selBad=0, offered=0, blocked=0;
 for(const c of A.CURRICULA){
-  let lastPlayable=null;
+  const ok=A.playableChapters(c);
+  if(!ok.length){selBad++;console.log('kurikulum bez jedine hratelne kapitoly',c.id);continue;}
   for(const ch of c.chapters){
-    const q=A.newProfile('F'); q.curriculum=c.id; q.chapter=ch.n;
-    A.DB.profiles=[q]; A.DB.current=q.id;
-    const eff=A.effectiveChapter(q);
-    const own=A.poolSize(A.poolKeys(ch.pool))>=4;
-    if(own){
-      lastPlayable=ch;
-      if(!eff||eff.n!==ch.n){fbBad++;console.log('hratelna kapitola se nepouzila',c.id,ch.n);}
-    } else if(lastPlayable){
-      fellBack++;
-      if(!eff){fbBad++;console.log('chybi navrat na drivejsi kapitolu',c.id,ch.n);continue;}
-      if(eff.n!==lastPlayable.n){fbBad++;console.log('spatny navrat',c.id,ch.n,'->',eff.n,'cekano',lastPlayable.n);}
-      if(eff.n>ch.n){fbBad++;console.log('navrat dopredu, to by ucil neprobrane',c.id,ch.n,'->',eff.n);}
-      if(!A.schoolReady(q)){fbBad++;console.log('trat po navratu chybi',c.id,ch.n);}
-      if(A.buildRun(q,A.trackById('school')).length!==20){fbBad++;console.log('zavod po navratu nema 20 otazek',c.id,ch.n);}
-    } else {
-      noTrack++;
-      if(eff){fbBad++;console.log('navrat pred prvni hratelnou kapitolu',c.id,ch.n);}
-      if(A.schoolReady(q)){fbBad++;console.log('trat vznikla bez hratelne kapitoly',c.id,ch.n);}
-    }
+    if(A.isPlayable(ch)) offered++; else blocked++;
+  }
+  // volba ucebnice musi skocit na prvni hratelnou kapitolu, ne na prvni v knize
+  const q=A.newProfile('S'); q.curriculum=c.id; q.chapter=ok[0].n;
+  A.DB.profiles=[q]; A.DB.current=q.id;
+  if(!A.schoolReady(q)){selBad++;console.log('prvni hratelna kapitola nedela trat',c.id,ok[0].n);}
+  // profil ulozeny na nehratelne kapitole se srovna dozadu, nikdy dopredu
+  for(const ch of c.chapters){
+    if(A.isPlayable(ch)) continue;
+    const r=A.newProfile('R'); r.curriculum=c.id; r.chapter=ch.n;
+    A.normalizeChapter(r);
+    const got=c.chapters.find(x=>x.n===r.chapter);
+    if(!A.isPlayable(got)){selBad++;console.log('srovnani skoncilo na nehratelne kapitole',c.id,ch.n,'->',r.chapter);continue;}
+    const earlier=ok.filter(x=>x.n<ch.n);
+    const cekano=earlier.length?earlier[earlier.length-1].n:ok[0].n;
+    if(r.chapter!==cekano){selBad++;console.log('spatne srovnani',c.id,ch.n,'->',r.chapter,'cekano',cekano);}
   }
 }
-console.log('kapitol s navratem:',fellBack,'| bez trate:',noTrack,'| chyb:',fbBad);
+// bez kurikula se kapitola vynuluje
+const rn=A.newProfile('X'); rn.curriculum='neexistuje'; rn.chapter=5; A.normalizeChapter(rn);
+if(rn.chapter!==null){selBad++;console.log('kapitola prezila zruseni ucebnice');}
+console.log('nabizenych kapitol:',offered,'| zamcenych:',blocked,'| chyb:',selBad);

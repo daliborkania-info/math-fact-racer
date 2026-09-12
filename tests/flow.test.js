@@ -97,18 +97,15 @@ ok('ucebnice ulozena a kapitola prednastavena',
    'kapitola '+DBg().profiles[0].chapter);
 ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length===33,
    qa('[data-act="chaptersel"] option').length+' kapitol');
-ok('u hratelne kapitoly se slibuje trat', /jede přesně podle téhle kapitoly/.test(txt()));
+const opts=()=>qa('[data-act="chaptersel"] option');
+const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===24, zamcene().length+' zamcenych z 33');
+ok('dvacitka je mezi zamcenymi', zamcene().includes(16) && zamcene().includes(27));
+ok('hratelne kapitoly zamcene nejsou', !zamcene().includes(1) && !zamcene().includes(12));
+ok('vysvetleni k sedym kapitolam je videt', /Šedé kapitoly/.test(txt()));
+ok('u vybrane kapitoly se slibuje trat', /jede přesně podle téhle kapitoly/.test(txt()));
 const chs=sel('[data-act="chaptersel"]');
-chs.value='16'; chs.dispatchEvent(new w.Event('change',{bubbles:true}));
-ok('kapitola bez generatoru rekne, podle ceho trat pojede',
-   /zatím neumí generovat/.test(txt()) && /12\. Opakování do sta/.test(txt()));
-click(q('[data-act="map"]'));
-ok('trat je na mape i u kapitoly bez generatoru', /Co máte ve škole/.test(txt()));
-ok('trat nese nahradni kapitolu', /Opakování do sta/.test(txt()));
-click(q('[data-act="gate"]'));
-d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
-const chs2=sel('[data-act="chaptersel"]');
-chs2.value='2'; chs2.dispatchEvent(new w.Event('change',{bubbles:true}));
+chs.value='2'; chs.dispatchEvent(new w.Event('change',{bubbles:true}));
 ok('kapitola prepnuta', DBg().profiles[0].chapter===2);
 click(qa('[data-act="chaptermode"]').find(b=>b.dataset.cm==='hard'));
 ok('rezim kapitoly ulozen', DBg().profiles[0].chapterMode==='hard');
@@ -127,6 +124,12 @@ cs2.value=''; cs2.dispatchEvent(new w.Event('change',{bubbles:true}));
 ok('ucebnice se da zase vypnout', DBg().profiles[0].curriculum===null);
 click(q('[data-act="map"]'));
 ok('trat podle skoly zmizela z mapy', !/Co máte ve škole/.test(txt()));
+const raw=DBg(); raw.profiles[0].curriculum='nns-matysek-3'; raw.profiles[0].chapter=16;
+const dom3=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'https://x.test/',
+  beforeParse(win){ win.localStorage.setItem('math-fact-racer-v1', JSON.stringify(raw)); }});
+await wait(50);
+const srovnano=JSON.parse(dom3.window.localStorage.getItem('math-fact-racer-v1')).profiles[0];
+ok('ulozena zamcena kapitola se pri nacteni srovna dozadu', srovnano.chapter===12, 'kapitola '+srovnano.chapter);
 click(q('[data-act="gate"]'));
 d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
 

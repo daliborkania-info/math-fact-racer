@@ -66,10 +66,7 @@ function load(){
     p.chapterMode = p.chapterMode || "soft";
     // a curriculum that no longer exists must not strand the profile
     if(p.curriculum && !curriculumById(p.curriculum)){ p.curriculum = null; p.chapter = null; }
-    if(p.curriculum && !chapterOf(p)){
-      const cur = curriculumById(p.curriculum);
-      p.chapter = cur.chapters.length ? cur.chapters[0].n : null;
-    }
+    if(p.curriculum) normalizeChapter(p);
   }
 }
 function save(){
@@ -217,23 +214,27 @@ function poolKeys(spec){
   }
   return [...new Set(out)];
 }
-/* The chapter the race actually runs on. A parent sets where the class
-   is, which is a fact about school, not a question about the game. Plenty
-   of those chapters are topics with no generator yet, and going silent
-   would make the setting look broken. So the race falls back to the most
-   recent earlier chapter it can play, which is material the child has
-   already met and which the Leitner box wants revisited anyway. */
-function effectiveChapter(p){
-  const cur = curriculumById(p && p.curriculum);
-  const sel = chapterOf(p);
-  if(!cur || !sel) return null;
-  const upto = cur.chapters.filter(ch => ch.n <= sel.n);
-  for(let i = upto.length - 1; i >= 0; i--){
-    if(poolSize(poolKeys(upto[i].pool)) >= 4) return upto[i];
-  }
-  return null;
+/* A chapter is offered only when the game can actually generate it.
+   Chapters whose topic has no generator yet stay visible in the list so
+   the parent sees the whole book, but they cannot be picked, because a
+   setting that quietly does nothing reads as broken. */
+function playableChapters(cur){
+  return cur ? cur.chapters.filter(ch => poolSize(poolKeys(ch.pool)) >= 4) : [];
 }
-function schoolPool(p){ const ch = effectiveChapter(p); return ch ? poolKeys(ch.pool) : []; }
+function isPlayable(ch){ return !!ch && poolSize(poolKeys(ch.pool)) >= 4; }
+/* Pull a stored chapter back onto a playable one. Runs on load and after
+   an import, so a profile saved before a generator was removed, or edited
+   by hand, can never point at a chapter that produces nothing. */
+function normalizeChapter(p){
+  const cur = curriculumById(p.curriculum);
+  if(!cur){ p.chapter = null; return; }
+  const ok = playableChapters(cur);
+  if(!ok.length){ p.curriculum = null; p.chapter = null; return; }
+  if(isPlayable(cur.chapters.find(ch => ch.n === p.chapter))) return;
+  const earlier = ok.filter(ch => ch.n < p.chapter);
+  p.chapter = (earlier.length ? earlier[earlier.length - 1] : ok[0]).n;
+}
+function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) : []; }
 /* How much variety a pool can actually produce. A bucket key inside 100
    is a whole family of sums rather than a single fact, so it counts for
    more than one. A chapter drives its own track only when it can fill a
@@ -244,14 +245,14 @@ function poolSize(keys){
   for(const k of keys) n += (k[0] === "p" || k[0] === "n") ? 4 : 1;
   return n;
 }
-function schoolReady(p){ return !!effectiveChapter(p); }
+function schoolReady(p){ return isPlayable(chapterOf(p)); }
 function visibleTracks(p){
   const rest = TRACKS.filter(tr => tr.op !== "school");
   return schoolReady(p) ? [trackById("school")].concat(rest) : rest;
 }
 function trackName(p, tr){ return t("trk_" + tr.id); }
 function trackSub(p, tr){
-  if(tr.op === "school"){ const ch = effectiveChapter(p); return ch ? esc(ch.name) : t("trk_schools"); }
+  if(tr.op === "school"){ const ch = chapterOf(p); return ch ? esc(ch.name) : t("trk_schools"); }
   return t("trk_" + tr.id + "s");
 }
 
@@ -401,13 +402,12 @@ function buildRun(p, tr){
     // dropping spaced review would break the strongest part of the design.
     const focus = schoolPool(p);
     const cur = curriculumById(p.curriculum);
-    const eff = effectiveChapter(p);
-    if((p.chapterMode || "soft") === "hard" || !cur || !eff){
+    if((p.chapterMode || "soft") === "hard" || !cur || !focus.length){
       keys = sampleKeys(p, focus, n, 6);
     } else {
       const earlier = [];
       for(const ch of cur.chapters){
-        if(ch.n >= eff.n) break;
+        if(ch.n >= p.chapter) break;
         earlier.push(...poolKeys(ch.pool));
       }
       const review = [...new Set(earlier)].filter(k => !focus.includes(k));
@@ -1473,14 +1473,6 @@ function heatColor(lv, has){
   if(!has) return "#dfe6f7";
   return ["#f2557f", "#ff8a5c", "#ffb020", "#ffd93d", "#8bd94f", "#12b36a"][lv] || "#dfe6f7";
 }
-/* What the chosen chapter will actually do, said plainly. */
-function chapterStatus(p){
-  const sel = chapterOf(p), eff = effectiveChapter(p);
-  if(!sel) return "";
-  if(!eff) return t("chapterNoTrack");
-  if(eff.n === sel.n) return t("chapterOnMap");
-  return t("chapterFallback", eff.n + ". " + esc(eff.name));
-}
 function viewParent(p){
   let heat = `<span class="heat hdr"></span>`;
   for(let b = 1; b <= 10; b++) heat += `<span class="heat hdr">${b}</span>`;
@@ -1546,15 +1538,16 @@ function viewParent(p){
           <div class="muted" style="margin:16px 0 8px">${t("chapterLabel")}</div>
           <select class="field" data-act="chaptersel">
             ${curriculumById(p.curriculum).chapters.map(ch =>
-              `<option value="${ch.n}" ${p.chapter === ch.n ? "selected" : ""}>${ch.n}. ${esc(ch.name)}</option>`).join("")}
+              `<option value="${ch.n}"${p.chapter === ch.n ? " selected" : ""}${isPlayable(ch) ? "" : " disabled"}>${ch.n}. ${esc(ch.name)}</option>`).join("")}
           </select>
           <div class="muted" style="margin:6px 0 0;font-size:12px">${esc((chapterOf(p) || {}).src || "")}</div>
+          <div class="muted" style="margin-top:10px">${t("chapterGreyed")}</div>
           <div class="muted" style="margin:16px 0 8px">${t("chapterModeLabel")}</div>
           <div class="seg">
             ${[["soft", t("chapterSoft")], ["hard", t("chapterHard")]].map(([k,l]) =>
               `<button class="${(p.chapterMode || "soft") === k ? "on" : ""}" data-act="chaptermode" data-cm="${k}">${l}</button>`).join("")}
           </div>
-          <div class="muted" style="margin-top:10px">${chapterStatus(p)}</div>` : ""}
+          <div class="muted" style="margin-top:10px">${t("chapterOnMap")}</div>` : ""}
         <div class="muted" style="margin-top:14px">${t("curriculumNote")}</div>
       </div>
 
@@ -1769,6 +1762,8 @@ document.addEventListener("click", e => {
       const i = DB.profiles.findIndex(x => x.id === DB.current);
       obj.id = DB.current;
       DB.profiles[i] = Object.assign(newProfile(obj.name || t("defaultName")), obj);
+      if(DB.profiles[i].curriculum && !curriculumById(DB.profiles[i].curriculum)) DB.profiles[i].curriculum = null;
+      normalizeChapter(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>
@@ -1795,10 +1790,9 @@ document.addEventListener("change", e => {
   const p = P();
   if(!p) return;
   if(el.dataset.act === "curriculumsel"){
-    const id = el.value || null;
-    p.curriculum = id;
-    const cur = curriculumById(id);
-    p.chapter = cur && cur.chapters.length ? cur.chapters[0].n : null;
+    p.curriculum = el.value || null;
+    const ok = playableChapters(curriculumById(p.curriculum));
+    p.chapter = ok.length ? ok[0].n : null;
     save(); render();
     return;
   }

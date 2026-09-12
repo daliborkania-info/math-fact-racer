@@ -311,15 +311,20 @@ té kapitoly jako podtitulek. Bylo to zvolené proti variantě, kdy by kapitola
 překreslovala všechny existující tratě. Tohle je menší zásah, dítě tomu rozumí
 a ostatní tratě fungují beze změny.
 
-**Kapitola bez generátoru není slepá ulička.** Rodič nastavuje, kde je třída,
-což je fakt o škole, ne otázka na hru. Většina kapitol jsou ale zatím témata
-bez generátoru, a kdyby hra v takové chvíli mlčela, vypadalo by nastavení jako
-rozbité. Proto `effectiveChapter()` hledá nejbližší dřívější kapitolu, kterou
-hra zahrát umí, a trať jede podle ní. Je to učivo, které dítě už probralo,
-takže opakování dává smysl a Leitnerova krabička ho stejně chce vracet.
-Rodičovská sekce to napíše konkrétně, tedy podle které kapitoly se skutečně
-jede. Dopředu se nikdy neskáče, to by učilo neprobrané. Nikdy nepoužívej
-`chapterOf()` tam, kde jde o obsah závodu, to je jen vybraná kapitola.
+**Co hra neumí, to nenabízí.** Kapitola bez generátoru je v seznamu vidět,
+ale je nevybratelná, tedy `disabled`. Je to rozhodnutí uživatele a platí
+i do budoucna: nikdy nesmí jít nastavit něco, co se pak tiše nestane. Dřív
+tam byla jen poznámka "zatím neumíme", kterou navíc rozbalovací nabídka
+usekla, a rodič si nastavil kapitolu, se kterou se nic nedělo. To je horší
+než nenabídnout ji vůbec.
+
+Rozhoduje `isPlayable(ch)`, tedy jestli `poolSize` vyjde aspoň na čtyři.
+`playableChapters(cur)` vrací, co jde vybrat, a volba učebnice skáče na první
+z nich, ne na první kapitolu v knize. `normalizeChapter(p)` srovná uložený
+profil na nejbližší dřívější hratelnou kapitolu, nikdy dopředu, a volá se
+v `load()` a po importu zálohy, aby profil nikdy neukazoval na kapitolu,
+která nic negeneruje. Seznam ukazuje celou knihu schválně, aby rodič viděl,
+kde třída je, i když to hra ještě neumí.
 
 **Pozor na dvě věci v kódu.** Pool je popsaný deklarativně, tedy `mult`, `div`,
 `as20` a `as100`, a `poolKeys()` ho překládá na klíče příkladů. Nikdy do

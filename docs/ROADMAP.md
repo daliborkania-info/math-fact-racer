@@ -11,7 +11,7 @@ zjištění je odkaz. Kde přímý důkaz není, je to napsané.
 
 ## 1. Stav
 
-Čtrnáct tratí, 74 hratelných kapitol z 95, jedna zakázka v dílně, tři jazyky.
+Patnáct tratí, 76 hratelných kapitol z 95, jedna zakázka v dílně, tři jazyky.
 Podrobně v `PROJECT-STATE.md`, oddíly 5 a 11.
 
 ## 2. Aby hra chytla i děti, které závodění neláká
@@ -117,8 +117,8 @@ nátlaková. Každá sbírka má mít dosažitelné dno.
    nulové riziko.
 3. **Sbírky vázané na úroveň v krabičce.** Před mapou, protože určují, co mapa
    ukazuje.
-4. **Mapa jako svět** a **volba světa**. Jedna přestavba, a má se stihnout,
-   dokud je tratí čtrnáct.
+4. **Mapa jako svět** a **volba světa**. Jedna přestavba, a tratí je už
+   patnáct, tedy na hranici, kde svislý seznam přestává stačit.
 5. **Vlna B**, nové vstupní prvky.
 6. **Vlna C**, další zakázky do dílny, hlavně slovní úlohy.
 7. **Čtvrtý a pátý ročník.**

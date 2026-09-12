@@ -231,6 +231,20 @@ const X_BUCKETS = [
 ];
 const beyondKeys = ids => ids.map(b => "xm" + b).concat(ids.map(b => "xd" + b));
 
+/* Rounding. The seventh part rounds to tens while everything still
+   lives under a hundred, and the eighth part comes back to it with
+   three digit numbers and adds rounding to hundreds, so the buckets go
+   in that order and a child meets two digit numbers first.
+   A number that is already round is left out. Rounding fifty to tens is
+   a true but empty question, and a race full of them would teach the
+   child that the answer is usually the number itself. */
+const O_BUCKETS = [
+  {id:"1", to:10,  lo:10,  hi:99,  ask:"roundAsk10"},   // 47 to tens
+  {id:"2", to:10,  lo:100, hi:999, ask:"roundAsk10"},   // 347 to tens
+  {id:"3", to:100, lo:100, hi:999, ask:"roundAsk100"}   // 347 to hundreds
+];
+const roundKeys = ids => ids.map(b => "o" + b);
+
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
   {id:"c1", mins:[0]},                            // whole hours
@@ -265,6 +279,7 @@ const TRACKS = [
   {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city"},
   {id:"d1",   op:"div",                                   env:"space"},
   {id:"beyond",op:"beyond",                               env:"savanna"},
+  {id:"round", op:"round",                                env:"cave"},
   {id:"a20",  op:"as20",                                  env:"beach"},
   {id:"a100", op:"as100",                                 env:"ocean"},
   {id:"a1000",op:"as1000",                                env:"volcano"},
@@ -315,6 +330,7 @@ function poolKeys(spec){
   // book, so unlike the hundred a chapter may ask for only one of them
   if(spec.multBeyond) out.push(...spec.multBeyond.map(b => "xm" + b));
   if(spec.divBeyond)  out.push(...spec.divBeyond.map(b => "xd" + b));
+  if(spec.round) out.push(...spec.round);
   if(spec.clock) out.push(...spec.clock);
   return [...new Set(out)];
 }
@@ -355,7 +371,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckx";
+const FAMILY_HEADS = "pnckxo";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -397,6 +413,7 @@ function trackKeys(p, tr){
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
   if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
+  if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
   if(tr.op === "clock") return clockKeys();
   return [];
 }
@@ -419,6 +436,9 @@ function as1000Stage(p){ return stageIndex(p, i => as1000Keys([K_BUCKETS[i].id])
 // how far past the times table the child has got; multiplying and
 // dividing one bucket are the same step, so they rise and fall together
 function beyondStage(p){ return stageIndex(p, i => beyondKeys([X_BUCKETS[i].id]), X_BUCKETS.length); }
+// how far the rounding has got: tens under a hundred, then tens of a
+// three digit number, then hundreds
+function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
 /* What a track would actually serve right now. A staged track holds
    back the levels the child has not reached yet, and the championship
    has to respect that, otherwise it hands out material that the track
@@ -432,6 +452,7 @@ function reachedKeys(p, tr){
   if(tr.op === "clock") return C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id);
   if(tr.op === "as1000") return as1000Keys(K_BUCKETS.slice(0, as1000Stage(p) + 1).map(b => b.id));
   if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
+  if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
   return trackKeys(p, tr);
 }
 function trackProgress(p, tr){
@@ -498,6 +519,10 @@ function unlockState(p, tr){
     // splitting 12 × 3 into 30 + 6 only works once the table underneath
     // is there, and the track teaches dividing as well as multiplying
     case "beyond": return (m("d1") >= .6 || many("d1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_d1"))};
+    // rounding needs place value rather than fluent arithmetic, so it
+    // opens earlier than the thousand does, and its own first bucket
+    // keeps the child on two digit numbers until they are solid
+    case "round": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     case "a100": return (m("a20") >= .6 || many("a20")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a20"))};
     case "a1000": return (m("a100") >= .6 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     case "mix":  return (unlockState(p, trackById("t5")).open)
@@ -548,6 +573,7 @@ function rawItem(key){
   if(head === "p" || head === "n") return hundredItem(key);
   if(head === "k") return thousandItem(key);
   if(head === "x") return beyondItem(key);
+  if(head === "o") return roundItem(key);
   if(head === "c") return clockItem(key);
   return {key, text:"1 + 1", answer:2, kind:"add"};
 }
@@ -630,6 +656,24 @@ function beyondItem(key){
   }
   if(plus) return {key, text: x + " × " + m, answer: x * m, kind:"multx"};
   return {key, text:(x * m) + " : " + m, answer: x, kind:"divx"};
+}
+
+/* Rounding is the first question that is not an equation. The line
+   reads "347 ≐ ?" rather than "347 = ?", and the sign is a translated
+   string because Czech schools write the dotted one and English and
+   German ones the wavy one; the child has to recognise the same sign it
+   met in class. What to round to is said in words above the keypad,
+   which is what `ask` is for.
+   Nine hundred and ninety nine rounds to a thousand, so the answer can
+   be one digit longer than the question. */
+function roundItem(key){
+  const b = O_BUCKETS.find(x => x.id === key.slice(1)) || O_BUCKETS[0];
+  let n = ri(b.lo, b.hi);
+  if(n % b.to === 0) n += ri(1, b.to - 1);        // an already round number is no question
+  return {
+    key, kind:"round", text: String(n), rel:"relRound", ask: b.ask, maxLen: 4,
+    answer: Math.round(n / b.to) * b.to
+  };
 }
 
 /* The answer is the time as a digital watch shows it, typed on the same
@@ -793,6 +837,10 @@ function buildRun(p, tr){
     const xi = beyondStage(p);
     const review = beyondKeys(X_BUCKETS.slice(0, xi).map(b => b.id));
     keys = focusAndReview(p, beyondKeys([X_BUCKETS[xi].id]), review, n, 2);
+  } else if(tr.op === "round"){
+    const oi = roundStage(p);
+    const review = roundKeys(O_BUCKETS.slice(0, oi).map(b => b.id));
+    keys = focusAndReview(p, roundKeys([O_BUCKETS[oi].id]), review, n, 2);
   } else if(tr.op === "clock"){
     const ci = clockStage(p);
     keys = focusAndReview(p, [C_BUCKETS[ci].id], C_BUCKETS.slice(0, ci).map(b => b.id), n, 1);
@@ -948,6 +996,7 @@ function thresholds(p, item){
   // allowance of all; without this the child would score slow answers
   // for doing exactly what the book teaches
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "round" ? 2.0
                : item.kind === "clock" ? 2.4
                : (item.kind === "add1000" || item.kind === "sub1000") ? 2.2
                : (item.kind === "add100" || item.kind === "sub100") ? 1.9 : 1;
@@ -1195,7 +1244,9 @@ const ENVS = {
   volcano:{hill1:"#c9584a", hill2:"#8f2f24", dec:"#5e1b13", dec2:"#3d0f0a"},
   // olive and gold, so it reads as neither the green meadow and forest
   // nor the orange canyon nor the pale sand of the beach
-  savanna:{hill1:"#cbb457", hill2:"#a08a34", dec:"#6e5c1c", dec2:"#4d4012"}
+  savanna:{hill1:"#cbb457", hill2:"#a08a34", dec:"#6e5c1c", dec2:"#4d4012"},
+  // brown stone, the one colour family nothing else uses
+  cave:{   hill1:"#9c7b5e", hill2:"#6f543c", dec:"#4a3626", dec2:"#32241a"}
 };
 /* =================================================================
    5. RACE CIRCUIT
@@ -1550,10 +1601,15 @@ const TARGET = 100;
 /* A question is either a line of arithmetic or a picture to read. The
    equals sign belongs only to the first kind, so the whole question row
    is rebuilt between questions rather than patched. */
+/* What stands between the question and the answer box. Almost always an
+   equals sign, but a rounded number is only approximately the answer
+   and the sign for that differs by country, so a family may name a
+   translated one instead. */
+function relOf(item){ return item && item.rel ? t(item.rel) : "="; }
 function questionHTML(item){
   if(!item) return `<span id="qtext"></span><span class="answerbox" id="abox">?</span>`;
   if(item.svg) return `<span id="qtext" class="qsvg">${item.svg}</span><span class="answerbox" id="abox">?</span>`;
-  return `<span id="qtext">${item.text}</span><span>=</span><span class="answerbox" id="abox">?</span>`;
+  return `<span id="qtext">${item.text}</span><span>${relOf(item)}</span><span class="answerbox" id="abox">?</span>`;
 }
 /* The answering surface belongs to the question, not to the screen, so
    a race may mix families that are answered differently. Only the
@@ -1780,7 +1836,7 @@ function showCombo(n){
    number the keypad turned it into. */
 function rightAnswerText(item){
   if(item.kind === "clock") return t("clockIs", item.disp);
-  return item.text + " = " + item.answer;
+  return item.text + " " + relOf(item) + " " + item.answer;
 }
 /* The two mistakes a child actually makes on a dial are reading the hour
    hand one hour ahead once it has passed the half, and reading the hands
@@ -2330,6 +2386,7 @@ const H_EX = {h1:"34+5", h2:"37+6", h3:"30+40", h4:"23+41", h5:"25+47"};
 const K_EX = {b1:"300+200", b2:"342+5", b3:"347+6", b4:"320+40", b5:"342+25", b6:"372+45"};
 const C_EX = {c1:"7:00", c2:"7:30", c3:"7:15", c4:"7:20", c5:"7:23", c6:"19:45"};
 const X_EX = {"1":"12×3", "2":"17×5", "3":"34×6", "4":"213×3"};
+const O_EX = {"1":"47→50", "2":"347→350", "3":"347→300"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
 const divEx = ex => { const [a,b] = ex.split("×").map(Number); return (a*b) + ":" + b; };
 const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
@@ -2363,6 +2420,8 @@ function heatSpecs(p){
     bucketTiles(H_EX, id => "p" + id, id => "n" + id)));
   push("a1000", heatStrip(t("trk_a1000"), 6,
     bucketTiles(K_EX, id => "kp" + id, id => "kn" + id)));
+  push("round", heatStrip(t("trk_round"), 3, O_BUCKETS.map(b =>
+    ({label: O_EX[b.id], keys:["o" + b.id], tip: O_EX[b.id]}))));
   push("clock", heatStrip(t("trk_clock"), 6, C_BUCKETS.map(b =>
     ({label: C_EX[b.id], keys:[b.id], tip: C_EX[b.id]}))));
   push(null, heatStrip(t("shopTitle"), 3, JOBS.reduce((acc, j) => acc.concat(

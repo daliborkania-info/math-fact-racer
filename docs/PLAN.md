@@ -5,7 +5,8 @@ Sepsáno 12. září 2026. Pořadí je převzaté z `ROADMAP.md`, oddíl 5. Tenh
 se musí dopsat do testů a na co se dá naběhnout.
 
 Každý krok je velikostí zhruba jedna session. Kroky 1 a 2 nic nepřestavují,
-krok 3 a 4 přestavují mapu a je záměr udělat je, dokud je tratí třináct.
+krok 3 a 4 přestavují mapu. Záměr byl udělat je, dokud je tratí málo; po vlně A
+jich je patnáct, takže krok 4 je spíš dřív než později.
 
 Kontrolní seznam pro každou novou rodinu příkladů je na konci
 `PROJECT-STATE.md`, oddíl 14. Tenhle plán ho nenahrazuje, jen říká, v jakém
@@ -67,7 +68,10 @@ novost; viz `ROADMAP.md`, oddíl 3.
    hlavička `x`, trať `beyond`, čtyři kbelíky podle toho, co se rozkládá, a
    dělení jako totéž sezení čtené pozpátku. Kbelíky se číslují, ne písmenkují;
    proč, je v `PROJECT-STATE.md`, oddíl 5.
-2. `rounding_10` + `rounding_100`, kapitoly 7, 26
+2. `rounding_10` + `rounding_100`, kapitoly 7, 26. **HOTOVO, září 2026**,
+   hlavička `o`, trať `round`, tři kbelíky: desítky do sta, desítky do tisíce,
+   stovky. Přineslo to `rel` na položce, tedy první otázku, která není rovnice;
+   viz `PROJECT-STATE.md`, oddíl 7.
 3. `chain_3`, kapitola 11
 4. `order_of_ops`, kapitoly 13, 30
 5. `mult_div_10_100` + `mult_round`, kapitola 28
@@ -82,7 +86,7 @@ mátlo. Návrh k potvrzení:
 | rodina | hlavička | klíče |
 | --- | --- | --- |
 | `mult_beyond` + `div_beyond` | `x` | hotovo, `xm1` až `xm4` a `xd1` až `xd4` |
-| `rounding_10` + `rounding_100` | `o` | `o1` desítky, `o2` stovky |
+| `rounding_10` + `rounding_100` | `o` | hotovo, `o1` až `o3` |
 | `chain_3` | `q` | `q1` až `q3` podle oboru |
 | `order_of_ops` | `z` | `z1` bez závorek, `z2` se závorkami |
 | `mult_div_10_100` + `mult_round` | `g` | `gm1`, `gd1` |

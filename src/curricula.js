@@ -28,6 +28,8 @@
  *   divBeyond  [bucket ids]       and the same examples read backwards.
  *                                 The two are separate fields because the
  *                                 book teaches them as separate chapters
+ *   round [bucket ids]            o1..o3, rounding: tens under a hundred,
+ *                                 tens of a three digit number, hundreds
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
  *   shop  [job ids]               workshop jobs, for material that is
@@ -42,6 +44,7 @@ const ALL_H = ["h1","h2","h3","h4","h5"];
 const ALL_C = ["c1","c2","c3","c4","c5","c6"];
 const ALL_K = ["b1","b2","b3","b4","b5","b6"];
 const ALL_X = ["1","2","3","4"];
+const ALL_O = ["o1","o2","o3"];
 
 const CURRICULA = [
   {
@@ -137,7 +140,8 @@ const CURRICULA = [
       {n:4,  name:"Hodiny a určování času",               src:"7. díl, s. 10–11", pool:{clock:ALL_C}},
       {n:5,  name:"Zkouška správnosti",                   src:"7. díl, s. 12–13", pool:null},
       {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:null},
-      {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:null},
+      // the seventh part is still under a hundred, so only two digit numbers
+      {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:{round:["o1"]}},
       {n:8,  name:"Dvojciferná bez přechodu",             src:"7. díl, s. 16–19", pool:{as100:["h1","h4"]}},
       {n:9,  name:"Sčítání do celých desítek",            src:"7. díl, s. 20–23", pool:{as100:["h2","h3"]}},
       {n:10, name:"S přechodem přes základ 10",           src:"7. díl, s. 24–27", pool:{as100:["h2","h5"]}},
@@ -159,7 +163,7 @@ const CURRICULA = [
       // the book walks these twenty pages through all six steps in order
       {n:24, name:"Přičítání a odčítání do tisíce",       src:"8. díl, s. 8–27",  pool:{as1000:ALL_K}},
       {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29", pool:{as1000:ALL_K, as100:ALL_H}},
-      {n:26, name:"Zaokrouhlování na desítky a stovky",   src:"8. díl, s. 30",    pool:null},
+      {n:26, name:"Zaokrouhlování na desítky a stovky",   src:"8. díl, s. 30",    pool:{round:ALL_O}},
       {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35", pool:null},
       {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39", pool:null},
       {n:29, name:"Převody jednotek",                     src:"8. díl, s. 38–41", pool:null},

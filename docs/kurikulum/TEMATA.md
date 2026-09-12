@@ -45,8 +45,8 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `missing_operand` | chybějící sčítanec, menšenec, činitel nebo dělenec | `pad` | podle nosného tématu | nové |
 | `times_more_less` | o kolik více či méně, kolikrát více či méně | `pad` | podle nosného tématu | nové |
 | `inverse_check` | zkouška správnosti jako obrácená operace | `pad` | podle nosného tématu | nové |
-| `rounding_10` | zaokrouhlování na desítky | `pad` | 0 až 1000 | nové |
-| `rounding_100` | zaokrouhlování na stovky | `pad` | 0 až 1000 | nové |
+| `rounding_10` | zaokrouhlování na desítky, dvojciferná i trojciferná | `pad` | 0 až 1000 | hotovo |
+| `rounding_100` | zaokrouhlování na stovky | `pad` | 0 až 1000 | hotovo |
 | `chain_3` | řetězec tří čísel, sčítání a odčítání | `pad` | 0 až 100 | nové |
 | `order_of_ops` | pořadí operací bez závorek a se závorkami | `pad` | 0 až 1000 | nové |
 | `mult_beyond` | násobení mimo rozsah malé násobilky, 12 × 3, čtyři kbelíky podle toho, co se rozkládá | `pad` | do 1000 | hotovo |

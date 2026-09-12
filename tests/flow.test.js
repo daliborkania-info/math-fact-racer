@@ -36,7 +36,7 @@ click(q('[data-act="newplayer"]'));
 ok('pri zakladani se avatar nevybira', qa('[data-pick]').length===0);
 d.querySelector('#nm').value='Kuba'; click(q('[data-go]'));
 ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
-ok('mapa ma 13 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===13,
+ok('mapa ma 14 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===14,
    new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size+' okruhu');
 ok('trat hodin je na mape a odemcena od zacatku', /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
 
@@ -117,11 +117,13 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===17, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===15, zamcene().length+' zamcenych z 33');
 ok('deleni se zbytkem a zlomky jsou mezi zamcenymi', zamcene().includes(27) && zamcene().includes(32));
 // nasobeni a deleni mimo malou nasobilku uz umime, takze jeho tri kapitoly zamcene byt nesmi
 ok('mimo rozsah male nasobilky se da vybrat',
    !zamcene().includes(14) && !zamcene().includes(16) && !zamcene().includes(31));
+// zaokrouhlovani taky umime, tedy kapitoly 7 a 26
+ok('zaokrouhlovani se da vybrat', !zamcene().includes(7) && !zamcene().includes(26));
 // obor do tisice uz umime, takze jeho tri kapitoly zamcene byt nesmi
 ok('obor do tisice se da vybrat', !zamcene().includes(23) && !zamcene().includes(24) && !zamcene().includes(25));
 ok('kapitola s hodinami uz zamcena neni', !zamcene().includes(4));

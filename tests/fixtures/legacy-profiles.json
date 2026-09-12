@@ -2,7 +2,13 @@
  "_comment": [
   "Zamrazene profily tak, jak je ukladaly starsi verze hry. Slouzi",
   "k tomu, aby zadna dalsi verze nepripravila dite na cizim telefonu",
-  "o postup. Nikdy je needituj, jen pridavej dalsi.",
+  "o postup. db nikdy needituj, to je zamrazeny obsah localStorage;",
+  "jen pridavej dalsi pripady.",
+  "expectChapter se posunout smi a bude se posouvat: kazdy novy",
+  "generator udela nejakou kapitolu hratelnou, takze se srovnani",
+  "zastavi driv. Dite tim pristup ziskava, neztraci, coz je ta strana",
+  "pravidla, ktera je v poradku. Cislo se opravi, kontrola se nikdy",
+  "nevyskrtne.",
   "Kazdy pripad: id, popis, db (presny obsah localStorage) a ocekavani.",
   "expectOpen  = trati, ktere musi zustat otevrene",
   "expectClosed = trati, ktere musi zustat zamcene",
@@ -473,7 +479,7 @@
   },
   {
    "id": "v3-pred-nasobenim-mimo-nasobilku",
-   "note": "zari 2026, profil z verze s dilnou, ale jeste bez rodiny za nasobilkou. Hlida dve veci: nova trat se starsimu profilu sama neotevre, kdyz si ji nezaslouzil, a kapitola 27 porad generator nema, takze se smi srovnat jen dozadu na 25",
+   "note": "zari 2026, profil z verze s dilnou, ale jeste bez rodiny za nasobilkou. Hlida dve veci: nova trat se starsimu profilu sama neotevre, kdyz si ji nezaslouzil, a kapitola 27 porad generator nema, takze se smi srovnat jen dozadu, nikdy dopredu",
    "expectOpen": [
     "t1",
     "t2",
@@ -486,7 +492,7 @@
     "d1",
     "a1000"
    ],
-   "expectChapter": 25,
+   "expectChapter": 26,
    "db": {
     "current": "pold6",
     "sound": true,

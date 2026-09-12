@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -25,6 +25,7 @@ const RANGE={
   n:[0,99],        // minus do sta
   k:[0,1000],      // plus a minus do tisice, vcetne kulateho tisice
   x:[11,999],      // za nasobilkou, soucin i vracene cislo
+  o:[10,1000],     // zaokrouhleni, nejmensi desitka az kulaty tisic
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -34,6 +35,7 @@ A.ADD.forEach(f=>{keys.push(A.ak(f.a,f.b)); keys.push(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{keys.push('p'+b.id); keys.push('n'+b.id);});
 A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -45,11 +47,14 @@ for(const k of keys) for(let i=0;i<40;i++){
   }
   // zadani, ktere je aritmeticky radek, se overi spoctenim; obrazkova
   // otazka zadny takovy radek nema a overuje se jen pres check
-  if(/^[\d\s+\-×:]+$/.test(it.text)){
+  if(/[+\-×:]/.test(it.text)){
     const val=eval(it.text.replace(/×/g,'*').replace(/:/g,'/'));
     if(val!==it.answer){say(k,'zadani nesedi s odpovedi: '+it.text+' je '+val+', ma byt '+it.answer);continue;}
-  } else if(!it.svg){
-    say(k,'otazka neni ani vypocet, ani obrazek');continue;
+  } else if(!it.svg && !it.ask){
+    // otazka musi byt sama o sobe srozumitelna: bud je to vypocet, nebo
+    // obrazek, nebo je slovy receno, co se ma udelat. Holy pocet bez
+    // zadani by dite jen koukalo na cislo a hadalo.
+    say(k,'otazka neni ani vypocet, ani obrazek, ani otazka slovy');continue;
   }
   // kazda otazka musi uznat svou odpoved a neuznat sousedni
   if(!it.check(String(it.answer))){say(k,'otazka neuznala vlastni odpoved '+it.answer);continue;}
@@ -128,6 +133,7 @@ A.ADD.forEach(f=>{VALID.add(A.ak(f.a,f.b)); VALID.add(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{VALID.add('p'+b.id); VALID.add('n'+b.id);});
 A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -385,6 +391,52 @@ if(A.unlockState(xg,A.trackById('beyond')).open){xStBad++;console.log('  !!  za 
 A.trackKeys(xg,A.trackById('d1')).forEach(k=>xg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
 if(!A.unlockState(xg,A.trackById('beyond')).open){xStBad++;console.log('  !!  zvladnute deleni neotevrelo trat za nasobilkou');}
 console.log('chyb ve stupnich za nasobilkou:',xStBad);
+
+// 7g. zaokrouhlovani: pravidlo, kbelik a to, ze se nezaokrouhluje kulate cislo
+let oBad=0, oN=0;
+const osay=m=>{oBad++; if(oBad<8) console.log('  !!  '+m);};
+for(const b of A.O_BUCKETS){
+  for(let i=0;i<300;i++){
+    const it=A.itemFromKey('o'+b.id); oN++;
+    const n=Number(it.text);
+    if(!Number.isInteger(n)){osay('zadanim neni cele cislo: '+it.text);break;}
+    if(n<b.lo||n>b.hi){osay('cislo mimo kbelik: '+n+' neni v '+b.lo+' az '+b.hi);break;}
+    if(n%b.to===0){osay('zaokrouhluje se uz kulate cislo: '+n+' na '+b.to);break;}
+    // ceske pravidlo: petka nahoru
+    const want=Math.round(n/b.to)*b.to;
+    if(it.answer!==want){osay('spatne zaokrouhleno: '+n+' na '+b.to+' je '+want+', vraceno '+it.answer);break;}
+    if(String(it.answer).length>it.maxLen){osay('odpoved se nevejde: '+it.answer);break;}
+    if(!it.ask){osay('u zaokrouhlovani chybi, na co se ma zaokrouhlit');break;}
+    if(it.rel!=='relRound'){osay('zaokrouhleni se tvari jako presna rovnost');break;}
+  }
+}
+// hranicni pripady musi jit nahoru, at uz jsou v nahodnem vzorku, nebo ne
+for(const [n,to,want] of [[45,10,50],[44,10,40],[350,100,400],[349,100,300],[995,10,1000],[950,100,1000]]){
+  if(Math.round(n/to)*to!==want){oBad++;console.log('  !!  pravidlo petky nahoru nesedi u '+n);}
+}
+console.log('zkontrolovano zaokrouhlovani:',oN,'| chyb:',oBad);
+
+// 7h. zaokrouhlovani se stupnuje a otevira se drive nez tisic
+let oStBad=0;
+const to1=A.newProfile('O1'); A.DB.profiles=[to1]; A.DB.current=to1.id;
+if(A.roundStage(to1)!==0){oStBad++;console.log('  !!  zacatecnik nezacina desitkami do sta');}
+const oRun0=A.buildRun(to1,A.trackById('round'));
+for(const it of oRun0) if(it.key!=='o1'){oStBad++;console.log('  !!  zacatecnik dostal trojciferne',it.text);break;}
+if(new Set(oRun0.map(x=>x.text)).size<8){oStBad++;console.log('  !!  cisla se malo stridaji',new Set(oRun0.map(x=>x.text)).size);}
+A.roundKeys(['1']).forEach(k=>to1.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.roundStage(to1)!==1){oStBad++;console.log('  !!  po zvladnuti desitek do sta se neposunul');}
+const oRun1=A.buildRun(to1,A.trackById('round'));
+const oFocus=oRun1.filter(it=>it.key==='o2').length;
+if(oFocus<oRun1.length*0.5){oStBad++;console.log('  !!  druhy kbelik nenese zavod',oFocus+'/'+oRun1.length);}
+if(oFocus===oRun1.length){oStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+const og=A.newProfile('O2'); A.DB.profiles=[og]; A.DB.current=og.id;
+if(A.unlockState(og,A.trackById('round')).open){oStBad++;console.log('  !!  zaokrouhlovani je otevrene hned od zacatku');}
+// stovka presne na pul cesty: pul klicu na urovni 1, pul na 2, tedy
+// zvladnuti 0,5. Tim se ukaze, ze zaokrouhlovani ma nizsi prah nez tisic
+A.trackKeys(og,A.trackById('a100')).forEach((k,i)=>og.facts[k]={lv:i%2?2:1,reps:9,ok:7,bad:2,best:4000,seen:Date.now()});
+if(!A.unlockState(og,A.trackById('round')).open){oStBad++;console.log('  !!  rozjeta stovka neotevrela zaokrouhlovani');}
+if(A.unlockState(og,A.trackById('a1000')).open){oStBad++;console.log('  !!  zaokrouhlovani se ma otevirat driv nez tisic, ne spolu s nim');}
+console.log('chyb ve stupnich zaokrouhlovani:',oStBad);
 
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;

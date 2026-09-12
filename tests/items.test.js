@@ -75,7 +75,16 @@ for(const k of A.clockKeys()) for(let i=0;i<80;i++){
   const ang=g=>{const a=(Math.atan2(+g[3]-46,-(+g[4]-54))*180/Math.PI+360)%360; return a;};
   const near=(a,b)=>Math.min(Math.abs(a-b),360-Math.abs(a-b))<1.5;
   if(!near(ang(hands[0]),((h%12)*30+m*0.5)%360)){clkBad++;if(clkBad<5)console.log('mala rucicka jinde',k,it.disp);continue;}
-  if(!near(ang(hands[1]),m*6)){clkBad++;if(clkBad<5)console.log('velka rucicka jinde',k,it.disp);}
+  if(!near(ang(hands[1]),m*6)){clkBad++;if(clkBad<5)console.log('velka rucicka jinde',k,it.disp);continue;}
+  // cela hodina se smi napsat i bez nul, tedy sedmou hodinu staci jako 7
+  if(m===0){
+    if(!it.check(String(h))){clkBad++;if(clkBad<5)console.log('  !!  cela hodina neuznala kratky zapis',it.disp,'vs '+h);continue;}
+    if(it.check(String(h+1))){clkBad++;if(clkBad<5)console.log('  !!  cela hodina uznala i sousedni hodinu',it.disp,'vs '+(h+1));continue;}
+  } else {
+    // cas s minutami naopak samotnou hodinu uznat nesmi
+    if(it.check(String(h))){clkBad++;if(clkBad<5)console.log('  !!  cas s minutami uznal holou hodinu',it.disp);continue;}
+  }
+  if(!it.check(String(it.answer))){clkBad++;if(clkBad<5)console.log('  !!  cifernik neuznal vlastni cas',it.disp);}
 }
 console.log('zkontrolovano ciferniku:',clkN,'| chyb:',clkBad);
 

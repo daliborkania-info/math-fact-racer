@@ -535,15 +535,29 @@ function thousandItem(key){
    keypad as everything else: 7:45 is keyed 745 and 19:45 is keyed 1945,
    so hour times a hundred plus minutes is a single whole number and
    nothing about scoring, records or the Leitner box has to change. */
+/* A whole hour needs no minutes. A child who has just learned to read
+   seven o'clock should be able to say so by keying 7, not by keying two
+   zeros it has no reason to think about, so one or two digits are read
+   as an hour and three or four as an hour and minutes, which is how a
+   display is read anyway. Nothing is made ambiguous by this: midnight
+   never comes up, so a lone 19 can only mean seven in the evening. */
+function clockTyped(typed){
+  const s = String(typed);
+  const n = parseInt(s, 10);
+  if(isNaN(n)) return NaN;
+  return s.length <= 2 ? n * 100 : n;
+}
 function clockItem(key){
   const b = C_BUCKETS.find(x => x.id === key) || C_BUCKETS[0];
   const m = b.mins ? b.mins[ri(0, b.mins.length - 1)] : ri(1, 59);
   const face = b.pm ? ri(1, 11) : ri(1, 12);      // midnight and noon stay out of the 24 hour bucket
   const h = b.pm ? face + 12 : face;
+  const answer = h * 100 + m;
   return {
     key, kind:"clock", text:"", night: !!b.pm,
     svg: clockSVG(face, m, !!b.pm),
-    answer: h * 100 + m,
+    answer,
+    check: typed => clockTyped(typed) === answer,
     disp: h + ":" + (m < 10 ? "0" : "") + m,
     maxLen: 4,
     ask: b.pm ? "clockAskPm" : "clockAsk"
@@ -1492,8 +1506,10 @@ function rightAnswerText(item){
 /* The two mistakes a child actually makes on a dial are reading the hour
    hand one hour ahead once it has passed the half, and reading the hands
    the wrong way round. Naming the mistake beats repeating the answer. */
-function missHint(item, val){
-  if(item.kind === "clock" && !isNaN(val)){
+function missHint(item, typed){
+  if(item.kind === "clock"){
+    const val = clockTyped(typed);
+    if(isNaN(val)) return t("wrongHint");
     const gh = Math.floor(val / 100), gm = val % 100, h = Math.floor(item.answer / 100), m = item.answer % 100;
     if(gm === m && (gh - h === 1 || h - gh === 1)) return t("clockMissHour");
     if(gh === m && gm === h) return t("clockMissSwap");
@@ -1504,7 +1520,6 @@ function missHint(item, val){
 function submit(){
   const p = P(), item = RUN.items[RUN.idx];
   const ms = Date.now() - RUN.t0;
-  const val = parseInt(RUN.typed, 10);
   const correct = item.check(RUN.typed);
   const box = document.getElementById("abox"), hint = document.getElementById("hint");
   const car = document.getElementById("mycar");
@@ -1547,7 +1562,7 @@ function submit(){
     box.className = "answerbox bad";
     flash("brake");
     sfx.bad(); buzz([18, 60, 18]);
-    hint.innerHTML = `<b>${rightAnswerText(item)}</b><br>${missHint(item, val)}`;
+    hint.innerHTML = `<b>${rightAnswerText(item)}</b><br>${missHint(item, RUN.typed)}`;
     RUN.wrongKeys.push(item);
     // the question returns as an extra one, nothing is dropped from the queue
     const tries = (item.tries || 0) + 1;

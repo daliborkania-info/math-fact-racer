@@ -140,9 +140,13 @@ ok('cas o hodinu vedle ma vlastni hlasku', /Malá ručička/.test(d.getElementBy
    d.getElementById('hint').textContent.slice(0,70));
 await wait(1700);
 let cn=1;
-while(inRace() && cn<40){ type(ev('RUN.items[RUN.idx].answer')); cn++; await wait(640); }
+// zbytek zavodu se odpovida zkracene: celou hodinu smi dite napsat jako
+// jedno cislo, tedy sedmou hodinu jako 7, ne jako 700
+while(inRace() && cn<40){ const a=ev('RUN.items[RUN.idx].answer'); type(a%100===0?a/100:a); cn++; await wait(640); }
 await wait(1500);
 ok('zavod s hodinami dojel do cile', cn>10, cn+' otazek');
+ok('cele hodiny se daly napsat bez nul', (DBg().profiles[0].facts.c1||{}).ok>5,
+   'c1 ok '+((DBg().profiles[0].facts.c1||{}).ok));
 ok('chybny cas se na vysledcich ukaze jako cas, ne jako cislo',
    /Hodiny ukazují \d/.test(txt()) && !/ = \d+00/.test(txt()), txt().slice(-70));
 ok('hodiny se zapsaly do krabicky', DBg().profiles[0].facts.c1 && DBg().profiles[0].facts.c1.reps>5,

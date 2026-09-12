@@ -201,8 +201,12 @@ odpolední zápis po dvanácté. Kbelíky jsou exkluzivní, aktuální nese sedm
 procent závodu a hrubší se vracejí jako opakování. Aktuální kbelík hledá
 `clockStage()`. Odpověď se píše jako na displeji, tedy 7:45 se ťuká 745 a 19:45
 se ťuká 1945, uvnitř je to hodina krát sto plus minuty, tedy jedno celé číslo.
-Jestli se myslí dopoledne nebo večer, říká slunce nebo měsíc vedle ciferníku,
-takže jedna otázka má pořád jednu odpověď.
+**Celá hodina se smí napsat i bez nul**, tedy sedmá hodina jako 7: jedna nebo
+dvě číslice se čtou jako hodina, tři nebo čtyři jako hodina a minuty, viz
+`clockTyped()`. Nejednoznačné to není, protože se nikdy negeneruje půlnoc,
+takže samotná 19 může znamenat jen sedm večer. Jestli se myslí dopoledne nebo
+večer, říká slunce nebo měsíc vedle ciferníku, takže jedna otázka má pořád
+jednu odpověď.
 
 **Kroky do tisíce.** Trať do tisíce je stavěná stejně jako dvacítka a hodiny,
 tedy šest stupňů, aktuální nese sedmdesát procent závodu a dřívější se vracejí
@@ -393,6 +397,11 @@ s vodorovným posuvem.
 
 Bílý text na světlém podkladu na úvodní obrazovce. Světlý oblouk přes spodek
 fialové hlavičky se překrýval s podtitulkem, nahrazeno zaoblením hlavičky.
+
+Celá hodina se musela ťukat i s nulami. Ciferník ukazoval sedmou hodinu
+a hra chtěla 700, protože odpověď se porovnávala jako holé číslo. Dítě, které
+se právě naučilo číst celé hodiny, nemá důvod přemýšlet o dvou nulách. Teď se
+jedna nebo dvě číslice čtou jako hodina.
 
 Volba kapitoly bez generátoru nedělala nic. Šla vybrat, poznámka "zatím neumíme"
 se v nabídce usekla a rodič si nastavil kapitolu, se kterou se nestalo nic.

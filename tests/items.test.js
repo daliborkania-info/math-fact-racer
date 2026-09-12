@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -24,6 +24,7 @@ const RANGE={
   p:[1,100],       // plus do sta
   n:[0,99],        // minus do sta
   k:[0,1000],      // plus a minus do tisice, vcetne kulateho tisice
+  x:[11,999],      // za nasobilkou, soucin i vracene cislo
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -32,6 +33,7 @@ A.MULT.forEach(f=>{keys.push(A.mk(f.a,f.b)); if(f.a>1) keys.push(A.dk(f.a,f.b));
 A.ADD.forEach(f=>{keys.push(A.ak(f.a,f.b)); keys.push(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{keys.push('p'+b.id); keys.push('n'+b.id);});
 A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -125,6 +127,7 @@ A.MULT.forEach(f=>{VALID.add(A.mk(f.a,f.b)); if(f.a>1) VALID.add(A.dk(f.a,f.b));
 A.ADD.forEach(f=>{VALID.add(A.ak(f.a,f.b)); VALID.add(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{VALID.add('p'+b.id); VALID.add('n'+b.id);});
 A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -336,6 +339,52 @@ if(A.unlockState(kg,A.trackById('a1000')).open){kStBad++;console.log('  !!  tisi
 A.trackKeys(kg,A.trackById('a100')).forEach(k=>kg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
 if(!A.unlockState(kg,A.trackById('a1000')).open){kStBad++;console.log('  !!  zvladnuta stovka neotevrela tisic');}
 console.log('chyb ve stupnich do tisice:',kStBad);
+
+// 7e. za nasobilkou: kazdy kbelik dela to, co slibuje
+let xBad=0, xN=0;
+const xsay=m=>{xBad++; if(xBad<8) console.log('  !!  '+m);};
+for(const b of A.X_BUCKETS){
+  for(let i=0;i<300;i++){
+    const mi=A.itemFromKey('xm'+b.id), di=A.itemFromKey('xd'+b.id); xN+=2;
+    const mm=mi.text.match(/^(\d+) × (\d+)$/);
+    if(!mm){xsay('nasobeni nema tvar cislo krat cislo: '+mi.text);break;}
+    const x=+mm[1], mul=+mm[2];
+    if(mul<2||mul>9){xsay('nasobi se necim, co neni jednociferne: '+mi.text);break;}
+    const carries=(x%10)*mul>=10;
+    if(b.id==='1'&&(x>99||carries||x*mul>99)){xsay('kbelik 1 ma byt dvojciferny bez prechodu do sta: '+mi.text);break;}
+    if(b.id==='2'&&(x>99||!carries||x*mul>99)){xsay('kbelik 2 ma prechazet a zustat do sta: '+mi.text);break;}
+    if(b.id==='3'&&(x>99||x*mul<=100)){xsay('kbelik 3 ma byt dvojciferny a prelezt stovku: '+mi.text);break;}
+    if(b.id==='4'&&(x<100||carries||Math.floor(x/100)*mul>9||Math.floor(x/10)%10*mul>9)){
+      xsay('kbelik 4 ma byt trojciferny bez prechodu: '+mi.text);break;}
+    if(x*mul>999){xsay('soucin prelezl tisic: '+mi.text);break;}
+    // deleni je totez sezeni ctene pozpatku, tedy deli se jednocifernym
+    const dm=di.text.match(/^(\d+) : (\d+)$/);
+    if(!dm){xsay('deleni nema tvar cislo deleno cislo: '+di.text);break;}
+    if(+dm[2]<2||+dm[2]>9){xsay('deli se necim, co neni jednociferne: '+di.text);break;}
+    if(+dm[1]%+dm[2]!==0){xsay('deleni nevychazi beze zbytku: '+di.text);break;}
+  }
+}
+console.log('zkontrolovano za nasobilkou:',xN,'| chyb:',xBad);
+
+// 7f. za nasobilkou se stupnuje a otevira se az po deleni
+let xStBad=0;
+const tx=A.newProfile('X1'); A.DB.profiles=[tx]; A.DB.current=tx.id;
+if(A.beyondStage(tx)!==0){xStBad++;console.log('  !!  zacatecnik nezacina nejlehcim kbelikem');}
+const xRun0=A.buildRun(tx,A.trackById('beyond'));
+for(const it of xRun0) if(it.key.slice(2)!=='1'){xStBad++;console.log('  !!  zacatecnik dostal tezsi kbelik',it.text);break;}
+if(!xRun0.some(it=>it.key[1]==='m')||!xRun0.some(it=>it.key[1]==='d')){
+  xStBad++;console.log('  !!  kbelik netrenuje oba smery naraz');}
+A.beyondKeys(['1']).forEach(k=>tx.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.beyondStage(tx)!==1){xStBad++;console.log('  !!  po zvladnuti prvniho kbeliku se neposunul');}
+const xRun1=A.buildRun(tx,A.trackById('beyond'));
+const xFocus=xRun1.filter(it=>it.key.slice(2)==='2').length;
+if(xFocus<xRun1.length*0.5){xStBad++;console.log('  !!  druhy kbelik nenese zavod',xFocus+'/'+xRun1.length);}
+if(xFocus===xRun1.length){xStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+const xg=A.newProfile('X2'); A.DB.profiles=[xg]; A.DB.current=xg.id;
+if(A.unlockState(xg,A.trackById('beyond')).open){xStBad++;console.log('  !!  za nasobilkou je otevrene hned od zacatku');}
+A.trackKeys(xg,A.trackById('d1')).forEach(k=>xg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(!A.unlockState(xg,A.trackById('beyond')).open){xStBad++;console.log('  !!  zvladnute deleni neotevrelo trat za nasobilkou');}
+console.log('chyb ve stupnich za nasobilkou:',xStBad);
 
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;

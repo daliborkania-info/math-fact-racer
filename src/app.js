@@ -207,6 +207,30 @@ const as1000Keys = ids => ids.map(b => "kp" + b).concat(ids.map(b => "kn" + b));
    The last bucket is the afternoon reading, which is where a quarter to
    eight becomes 19:45. The sun or moon drawn beside the dial says which
    half of the day is meant, so one dial still has one answer. */
+/* Past the times table. The seventh part spends four pages on
+   multiplying a two digit number by a one digit one and four more on
+   reading it backwards as division, and the eighth part takes the same
+   two skills into the thousand. The child is taught to split the number
+   apart, 12 × 3 as 30 + 6, so the buckets go by how much splitting the
+   example costs: first the ones where every part stays a single digit,
+   then the ones where the units carry, then past a hundred, and last
+   three digits.
+   Division is the same pair read backwards, as within a hundred and
+   within a thousand, so one bucket trains both directions. It is always
+   the one digit factor that divides, 36 : 3 rather than 36 : 12, which
+   is what the book asks and keeps the answer the number that was split.
+   Bucket ids are plain numbers here. The clock spells its whole key and
+   the hundred and the thousand prefix a letter; a number avoids picking
+   yet another letter out of an alphabet that the coming families still
+   have to share. */
+const X_BUCKETS = [
+  {id:"1", label:"two digit by one digit, nothing carries"},
+  {id:"2", label:"two digit by one digit, the units carry"},
+  {id:"3", label:"two digit by one digit, past a hundred"},
+  {id:"4", label:"three digit by one digit, nothing carries"}
+];
+const beyondKeys = ids => ids.map(b => "xm" + b).concat(ids.map(b => "xd" + b));
+
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
   {id:"c1", mins:[0]},                            // whole hours
@@ -240,6 +264,7 @@ const TRACKS = [
   {id:"t4",   op:"mult",  tables:[8,9],                   env:"peaks"},
   {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city"},
   {id:"d1",   op:"div",                                   env:"space"},
+  {id:"beyond",op:"beyond",                               env:"savanna"},
   {id:"a20",  op:"as20",                                  env:"beach"},
   {id:"a100", op:"as100",                                 env:"ocean"},
   {id:"a1000",op:"as1000",                                env:"volcano"},
@@ -286,6 +311,10 @@ function poolKeys(spec){
     out.push(...spec.as100.map(b => "n" + b));
   }
   if(spec.as1000) out.push(...as1000Keys(spec.as1000));
+  // past the tables the two directions are separate chapters in the
+  // book, so unlike the hundred a chapter may ask for only one of them
+  if(spec.multBeyond) out.push(...spec.multBeyond.map(b => "xm" + b));
+  if(spec.divBeyond)  out.push(...spec.divBeyond.map(b => "xd" + b));
   if(spec.clock) out.push(...spec.clock);
   return [...new Set(out)];
 }
@@ -326,7 +355,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnck";
+const FAMILY_HEADS = "pnckx";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -367,6 +396,7 @@ function trackKeys(p, tr){
   if(tr.op === "as20") return ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
   if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
+  if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
   if(tr.op === "clock") return clockKeys();
   return [];
 }
@@ -386,6 +416,9 @@ function clockStage(p){ return stageIndex(p, i => [C_BUCKETS[i].id], C_BUCKETS.l
 // which step into the thousand is being taken; plus and minus of one
 // bucket are the same step, so they rise and fall together
 function as1000Stage(p){ return stageIndex(p, i => as1000Keys([K_BUCKETS[i].id]), K_BUCKETS.length); }
+// how far past the times table the child has got; multiplying and
+// dividing one bucket are the same step, so they rise and fall together
+function beyondStage(p){ return stageIndex(p, i => beyondKeys([X_BUCKETS[i].id]), X_BUCKETS.length); }
 /* What a track would actually serve right now. A staged track holds
    back the levels the child has not reached yet, and the championship
    has to respect that, otherwise it hands out material that the track
@@ -398,6 +431,7 @@ function reachedKeys(p, tr){
   }
   if(tr.op === "clock") return C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id);
   if(tr.op === "as1000") return as1000Keys(K_BUCKETS.slice(0, as1000Stage(p) + 1).map(b => b.id));
+  if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
   return trackKeys(p, tr);
 }
 function trackProgress(p, tr){
@@ -461,6 +495,9 @@ function unlockState(p, tr){
     case "t5": return (m("t4") >= .65 || many("t4")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t4"))};
     case "d1": return mastery(p, MULT.map(f => mk(f.a,f.b))) >= .55
                  ? {open:true} : {open:false, why: t("lockHalfTable")};
+    // splitting 12 × 3 into 30 + 6 only works once the table underneath
+    // is there, and the track teaches dividing as well as multiplying
+    case "beyond": return (m("d1") >= .6 || many("d1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_d1"))};
     case "a100": return (m("a20") >= .6 || many("a20")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a20"))};
     case "a1000": return (m("a100") >= .6 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     case "mix":  return (unlockState(p, trackById("t5")).open)
@@ -510,6 +547,7 @@ function rawItem(key){
   }
   if(head === "p" || head === "n") return hundredItem(key);
   if(head === "k") return thousandItem(key);
+  if(head === "x") return beyondItem(key);
   if(head === "c") return clockItem(key);
   return {key, text:"1 + 1", answer:2, kind:"add"};
 }
@@ -556,6 +594,42 @@ function thousandItem(key){
   }
   if(plus)  return {key, text: x + " + " + y, answer: x+y, kind:"add1000", maxLen:4};
   return {key, text:(x+y) + " - " + y, answer: x, kind:"sub1000", maxLen:4};
+}
+
+/* Past the times table. The pair is built so the bucket is true by
+   construction: the ranges below are worked out from the multiplier so
+   that nothing ever has to be trimmed afterwards, because a quiet
+   correction would hand the child an easier example than the bucket
+   promised and nothing would say so. Every product stays under a
+   thousand, so the answer still fits the three digits the keypad
+   offers by default. */
+function beyondItem(key){
+  const plus = key[1] === "m";        // m multiplies, d reads it backwards
+  const b = key.slice(2);
+  let x, m;
+  if(b === "1"){                      // 12 × 3, every part stays single digit
+    m = ri(2,4);
+    const cap = Math.floor(9 / m);
+    x = ri(1, cap) * 10 + ri(1, cap);
+  } else if(b === "2"){               // 17 × 5, the units make a ten
+    m = ri(2,7);
+    const loU = Math.ceil(10 / m);
+    const maxT = Math.floor((99 - loU * m) / (10 * m));
+    const tens = ri(1, Math.max(1, maxT));
+    const hiU = Math.min(9, Math.floor((99 - tens * 10 * m) / m));
+    x = tens * 10 + ri(loU, hiU);
+  } else if(b === "3"){               // 34 × 6, the hundred is passed
+    m = ri(3,9);
+    x = ri(Math.max(11, Math.floor(100 / m) + 1), Math.min(99, Math.floor(999 / m)));
+  } else {                            // 213 × 3, three digits and nothing carries
+    m = ri(2,4);
+    const cap = Math.floor(9 / m);
+    let te = ri(0, cap), u = ri(0, cap);
+    if(te + u === 0) u = 1;           // a round hundred is a different lesson
+    x = ri(1, cap) * 100 + te * 10 + u;
+  }
+  if(plus) return {key, text: x + " × " + m, answer: x * m, kind:"multx"};
+  return {key, text:(x * m) + " : " + m, answer: x, kind:"divx"};
 }
 
 /* The answer is the time as a digital watch shows it, typed on the same
@@ -715,6 +789,10 @@ function buildRun(p, tr){
     const ki = as1000Stage(p);
     const review = as1000Keys(K_BUCKETS.slice(0, ki).map(b => b.id));
     keys = focusAndReview(p, as1000Keys([K_BUCKETS[ki].id]), review, n, 2);
+  } else if(tr.op === "beyond"){
+    const xi = beyondStage(p);
+    const review = beyondKeys(X_BUCKETS.slice(0, xi).map(b => b.id));
+    keys = focusAndReview(p, beyondKeys([X_BUCKETS[xi].id]), review, n, 2);
   } else if(tr.op === "clock"){
     const ci = clockStage(p);
     keys = focusAndReview(p, [C_BUCKETS[ci].id], C_BUCKETS.slice(0, ci).map(b => b.id), n, 1);
@@ -865,7 +943,12 @@ function thresholds(p, item){
   const s = SPEED[p.speedMode || "normal"];
   // reading a dial takes longer than recalling a fact, and the four
   // digits of a time take longer to key in than one or two
-  const slower = item.kind === "clock" ? 2.4
+  // splitting a number apart and multiplying both halves is more work
+  // than carrying once in a sum, so past the tables gets the longest
+  // allowance of all; without this the child would score slow answers
+  // for doing exactly what the book teaches
+  const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "clock" ? 2.4
                : (item.kind === "add1000" || item.kind === "sub1000") ? 2.2
                : (item.kind === "add100" || item.kind === "sub100") ? 1.9 : 1;
   return { fast: s.fast * slower, super: s.super * slower };
@@ -1109,7 +1192,10 @@ const ENVS = {
   clocktown:{hill1:"#f6c9d8", hill2:"#d992ad", dec:"#a85f81", dec2:"#7c4460"},
   // deliberately darker and redder than the canyon, which is the only
   // other warm environment and would otherwise look like the same place
-  volcano:{hill1:"#c9584a", hill2:"#8f2f24", dec:"#5e1b13", dec2:"#3d0f0a"}
+  volcano:{hill1:"#c9584a", hill2:"#8f2f24", dec:"#5e1b13", dec2:"#3d0f0a"},
+  // olive and gold, so it reads as neither the green meadow and forest
+  // nor the orange canyon nor the pale sand of the beach
+  savanna:{hill1:"#cbb457", hill2:"#a08a34", dec:"#6e5c1c", dec2:"#4d4012"}
 };
 /* =================================================================
    5. RACE CIRCUIT
@@ -2243,7 +2329,9 @@ const E_EX = ["3+4", "13+4", "9+5", "8+6", "7+5", "6+5"];
 const H_EX = {h1:"34+5", h2:"37+6", h3:"30+40", h4:"23+41", h5:"25+47"};
 const K_EX = {b1:"300+200", b2:"342+5", b3:"347+6", b4:"320+40", b5:"342+25", b6:"372+45"};
 const C_EX = {c1:"7:00", c2:"7:30", c3:"7:15", c4:"7:20", c5:"7:23", c6:"19:45"};
+const X_EX = {"1":"12×3", "2":"17×5", "3":"34×6", "4":"213×3"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
+const divEx = ex => { const [a,b] = ex.split("×").map(Number); return (a*b) + ":" + b; };
 const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
   .map(id => ({label: ex[id], keys:[plusKey(id)], tip: ex[id]}))
   .concat(Object.keys(ex).map(id =>
@@ -2263,6 +2351,12 @@ function heatSpecs(p){
     (a,b) => a <= b ? mk(a,b) : mk(b,a), (a,b) => a + " × " + b + " = " + (a*b)));
   push("d1", heatGrid(t("trk_d1"), HEAT_9,
     (a,b) => a <= b ? dk(a,b) : dk(b,a), (a,b) => (a*b) + " : " + a + " = " + b));
+  // the blocks come in the order the tracks sit on the map, so the
+  // multiplying stays together and a parent reads the two in one glance
+  push("beyond", heatStrip(t("trk_beyond"), 4, X_BUCKETS.map(b =>
+    ({label: X_EX[b.id], keys:["xm" + b.id], tip: X_EX[b.id]}))
+    .concat(X_BUCKETS.map(b =>
+    ({label: divEx(X_EX[b.id]), keys:["xd" + b.id], tip: divEx(X_EX[b.id])})))));
   push("a20", heatStrip(t("trk_a20"), 6, E_STAGES.map((st, i) =>
     ({label: E_EX[i], keys: stageKeys(i), tip: E_EX[i] + " / " + minusEx(E_EX[i])}))));
   push("a100", heatStrip(t("trk_a100"), 5,

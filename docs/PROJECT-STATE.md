@@ -1,13 +1,18 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po rodičovské heatmapě nad všemi rodinami
+Poslední aktualizace: 12. září 2026, po rodině za malou násobilkou
 
-**Kde se přestalo a kudy dál:** `add_sub_1000` je hotový a s ním trať `a1000`.
-Hotová je i **dílna**, druhý režim bez stopek a bez bodů za rychlost, zatím
-s jednou zakázkou, penězi. Hotový je **krok 1 z `docs/PLAN.md`**, tedy
-rodičovská heatmapa nad všemi rodinami a vážený souhrn. Na řadě je **krok 2**,
-tedy vlna generátorů na klávesnici, první je `mult_beyond` a `div_beyond`.
-Hotový prompt je na konci, v oddílu 14.
+**Kde se přestalo a kudy dál:** hotová je **dílna**, druhý režim bez stopek
+a bez bodů za rychlost, zatím s jednou zakázkou, penězi. Hotový je **krok 1
+z `docs/PLAN.md`**, tedy rodičovská heatmapa nad všemi rodinami a vážený
+souhrn, a **první položka kroku 2**, tedy `mult_beyond` a `div_beyond`
+a s nimi trať `beyond`. Na řadě je **druhá položka kroku 2**, tedy
+`rounding_10` a `rounding_100`, kapitoly 7 a 26 třetího ročníku.
+
+**Jedna věc mimo pořadí stojí za zvážení.** Tratí je čtrnáct a krok 4 je má
+přeskládat do světa, dokud je jich málo. Další rodina bude patnáctá, což je
+hranice, u které se v oddílu 12b říkalo, že mapa přestává stačit. Hotový
+prompt na obojí je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -289,7 +294,7 @@ se do průměrné doby odpovědi.
 
 ## 5. Trati
 
-Třináct tratí, každá má vlastní generovaný okruh a prostředí.
+Čtrnáct tratí, každá má vlastní generovaný okruh a prostředí.
 
 | id | obsah |
 | --- | --- |
@@ -299,6 +304,7 @@ Třináct tratí, každá má vlastní generovaný okruh a prostředí.
 | t4 | násobilka 8, 9 |
 | t5 | celá malá násobilka |
 | d1 | dělení |
+| beyond | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
 | a20 | sčítání a odčítání do 20, šest stupňů podle přechodu přes desítku |
 | a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
 | a1000 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
@@ -313,7 +319,8 @@ V rodičovské sekci nemá přepínač odemknutí, řídí ji volba kapitoly.
 
 Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
 `s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky, `kp{bucket}`
-a `kn{bucket}` do tisíce, `c1` až `c6` hodiny. Kanonicky vždy `a <= b`,
+a `kn{bucket}` do tisíce, `xm{bucket}` a `xd{bucket}` za násobilkou,
+`c1` až `c6` hodiny. Kanonicky vždy `a <= b`,
 komutativita se sbaluje. U dvacítky smí být
 druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
 nepotřebují na obor do dvaceti bez přechodu jedinou výjimku.
@@ -326,7 +333,14 @@ přidá písmeno do `FAMILY_HEADS`, nic víc.
 
 Rodina do tisíce nese znaménko uvnitř klíče, tedy jedna hlavička `k` místo
 dvojice písmen jako u stovky. Bylo to vědomé šetření: míst v abecedě je
-šestadvacet a plánovaných generátorů kolem dvaceti.
+šestadvacet a plánovaných generátorů kolem dvaceti. Rodina za násobilkou
+to dělá stejně, `x` plus `m` nebo `d`.
+
+**Kbelíky za násobilkou se číslují, ne písmenkují.** Hodiny mají rovnou celý
+klíč `c1`, stovka a tisícovka lepí písmeno, `"p" + "h1"`. Za násobilkou je
+vnitřní id prostě `"1"` až `"4"` a klíč je `"xm" + "1"`. Je to třetí konvence
+a je schválně: každé další vnitřní písmeno ubírá z abecedy místo budoucím
+hlavičkám rodin, a těch je v plánu ještě kolem deseti.
 
 ---
 
@@ -592,11 +606,14 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 71 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 74 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
-`as100`, `as1000` a `clock`, a `poolKeys()` to překládá na klíče příkladů. Nikdy do kurikula
+`as100`, `as1000`, `multBeyond`, `divBeyond` a `clock`, a `poolKeys()` to
+překládá na klíče příkladů. Násobení a dělení za násobilkou jsou dvě pole,
+a ne jedno jako u stovky, protože je učebnice učí jako dvě samostatné
+kapitoly a kapitola 14 má umět chtít jen násobení. Nikdy do kurikula
 nepiš klíče přímo. `poolSize()` počítá kbelík do sta za čtyři, ne za jeden,
 protože jeden kbelíkový klíč generuje celou rodinu příkladů; bez toho by
 kapitola s jediným kbelíkem vypadala jako prázdná.
@@ -627,12 +644,11 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání počítání do tisíce a dílny je 71 hratelných
-kapitol z 95, po ročnících 15/18, 43/44 a 13/33.
+dojmu. Stav po přidání rodiny za násobilkou je 74 hratelných
+kapitol z 95, po ročnících 15/18, 43/44 a 16/33.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
-| `mult_beyond` + `div_beyond` | `pad` | 3 | g3: 14, 16, 31 |
 | `unit_convert` + `time_convert` | `pad` | 2 | g3: 18, 29 |
 | `rounding_10` + `rounding_100` | `pad` | 2 | g3: 7, 26 |
 | `order_of_ops` | `pad` | 2 | g3: 13, 30 |
@@ -648,10 +664,12 @@ kapitol z 95, po ročnících 15/18, 43/44 a 13/33.
 | `count_objects` | dílna | 3 | g1: 1, 2, 3 |
 
 `finance_money` byl v téhle tabulce poslední a je hotový, viz oddíl 4b.
+`mult_beyond` s `div_beyond` byl první a je taky hotový, viz oddíl 5, trať
+`beyond`; odemkl kapitoly 14, 16 a 31.
 
-**Hlavní zjištění.** Dvanáct z dvaceti zbylých zamčených kapitol třetí třídy
+**Hlavní zjištění.** Devět ze sedmnácti zbylých zamčených kapitol třetí třídy
 nepotřebuje na vstupu vůbec nic nového, stačí generátory na `pad`. Třetí třída
-tím jde z 13/33 na 25/33, aniž by se sáhlo na klávesnici.
+tím jde z 16/33 na 25/33, aniž by se sáhlo na klávesnici.
 
 **`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
@@ -673,7 +691,9 @@ přidat nesmí. Vzniklo to z rešerše, u každého zjištění je odkaz na stud
 
 Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`. `add_sub_1000`
 je z toho hotový, byla to páteř osmého dílu a architektonicky
-jen další sada kbelíků vedle `add_sub_100`. Dál `mult_beyond` a `div_beyond`,
+jen další sada kbelíků vedle `add_sub_100`. Hotové je i `mult_beyond`
+a `div_beyond`, což byla první položka vlny A a prošla kontrolním seznamem
+z oddílu 14 beze zbytku. Dál
 `rounding_10` a `rounding_100`, `chain_3`, `order_of_ops`, `mult_div_10_100`
 a `mult_round`, `unit_convert` a `time_convert`, nakonec `missing_operand`
 a `inverse_check`, protože to nejsou samostatné rodiny, ale modifikátory
@@ -690,8 +710,9 @@ třetí ročník plný.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
 to dál. Mapa tím naroste a bude ji potřeba přeskládat do skupin, jakmile tratí
-bude patnáct a víc. Po přidání tisícovky je jich třináct, takže tohle přijde
-na řadu zhruba za dvě další rodiny.
+bude patnáct a víc. Po přidání rodiny za násobilkou je jich čtrnáct, takže
+tohle přijde na řadu hned po příští rodině. Krok 4 z `docs/PLAN.md` má mapu
+přestavět; stojí za to ho udělat dřív, než tratí přibude víc.
 
 ## 12c. Co stojí v cestě
 
@@ -770,6 +791,7 @@ jeden řádek do `heatSpecs()` a je vidět.
 Hlavička klíče je jedno písmeno a `key.slice(1)` to předpokládá na čtyřech
 místech. Obsazené je `m` násobení, `d` dělení, `a` sčítání do 20, `s` odčítání
 do 20, `p` a `n` kbelíky do sta, `k` celý obor do tisíce včetně znaménka,
+`x` násobení a dělení za násobilkou včetně znaménka,
 `c` hodiny. Rezervované je `r` pro dělení se
 zbytkem. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká slepením
 `"p" + "h1"`; jako hlavička rodiny by se to pralo. Stejně tak `b` je vnitřní id
@@ -919,11 +941,16 @@ promptu vyměnit poslední odstavec.
 > kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
 > něco navržené tak, jak je; jsou tam odkazy na studie.
 >
-> Dneska chci první položku kroku 2 z plánu, tedy generátory `mult_beyond`
-> a `div_beyond`, násobení a dělení za hranicí malé násobilky. Hlavička klíče
-> `x`, znaménko uvnitř klíče jako u tisícovky. Odemkne to kapitoly 14, 16 a 31
-> třetího ročníku. Kontrolní seznam pro novou rodinu je v `PROJECT-STATE.md`,
-> oddíl 14, a nezapomeň na násobitel v `thresholds()` a na blok v `heatSpecs()`.
+> Dneska chci druhou položku kroku 2 z plánu, tedy generátory `rounding_10`
+> a `rounding_100`, zaokrouhlování na desítky a na stovky. Odemkne to kapitoly
+> 7 a 26 třetího ročníku. Hlavička klíče `o` podle návrhu v plánu, kbelíky
+> `o1` desítky a `o2` stovky. Kontrolní seznam pro novou rodinu je
+> v `PROJECT-STATE.md`, oddíl 14, a nezapomeň na násobitel v `thresholds()`
+> a na blok v `heatSpecs()`.
+>
+> Pokud bys to viděl jinak: tratí je po rodině za násobilkou čtrnáct a krok 4
+> z plánu je má přeskládat do světa, dokud je jich málo. Řekni, jestli má smysl
+> udělat radši ten, než mapa naroste na patnáct.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
 > build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové

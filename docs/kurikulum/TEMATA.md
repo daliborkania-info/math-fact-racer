@@ -49,8 +49,8 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `rounding_100` | zaokrouhlování na stovky | `pad` | 0 až 1000 | nové |
 | `chain_3` | řetězec tří čísel, sčítání a odčítání | `pad` | 0 až 100 | nové |
 | `order_of_ops` | pořadí operací bez závorek a se závorkami | `pad` | 0 až 1000 | nové |
-| `mult_beyond` | násobení mimo rozsah malé násobilky, 12 × 3 | `pad` | do 200 | nové |
-| `div_beyond` | dělení mimo rozsah malé násobilky, 56 : 4 | `pad` | do 200 | nové |
+| `mult_beyond` | násobení mimo rozsah malé násobilky, 12 × 3, čtyři kbelíky podle toho, co se rozkládá | `pad` | do 1000 | hotovo |
+| `div_beyond` | dělení mimo rozsah malé násobilky, 56 : 4, totéž sezení pozpátku | `pad` | do 1000 | hotovo |
 | `div_remainder` | dělení se zbytkem | `pad2` | dělitel 2 až 10 | **pilot** |
 | `div_remainder_inv` | doplnění dělence ze zadaného podílu a zbytku | `pad` | dělitel 2 až 10 | nové |
 | `mult_div_10_100` | násobení a dělení deseti a stem | `pad` | do 1000 | nové |

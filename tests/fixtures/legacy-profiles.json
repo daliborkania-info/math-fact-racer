@@ -317,12 +317,12 @@
   },
   {
    "id": "v1-kapitola-bez-generatoru",
-   "note": "ulozena kapitola, kterou hra neumi; smi se srovnat jen dozadu, nikdy dopredu",
+   "note": "ulozena kapitola 16, ktera tehdy nemela generator. Zari 2026 ho dostala, tedy nasobeni a deleni mimo malou nasobilku, takze uz se srovnavat nema a profil na ni zustane. Zamrazeny profil zustava nedotceny, meni se jen ocekavani, protoze dite tim pristup ziskalo, neztratilo. Srovnani dozadu hlida pripad v1-kapitola-porad-bez-generatoru",
    "expectOpen": [
     "t1",
     "a20"
    ],
-   "expectChapter": 12,
+   "expectChapter": 16,
    "db": {
     "current": "pold4",
     "sound": true,
@@ -467,6 +467,167 @@
       "msSum": 41000,
       "msN": 20,
       "created": 1756000000000
+     }
+    ]
+   }
+  },
+  {
+   "id": "v3-pred-nasobenim-mimo-nasobilku",
+   "note": "zari 2026, profil z verze s dilnou, ale jeste bez rodiny za nasobilkou. Hlida dve veci: nova trat se starsimu profilu sama neotevre, kdyz si ji nezaslouzil, a kapitola 27 porad generator nema, takze se smi srovnat jen dozadu na 25",
+   "expectOpen": [
+    "t1",
+    "t2",
+    "a20",
+    "a100",
+    "clock"
+   ],
+   "expectClosed": [
+    "beyond",
+    "d1",
+    "a1000"
+   ],
+   "expectChapter": 25,
+   "db": {
+    "current": "pold6",
+    "sound": true,
+    "lang": "cs",
+    "pin": "abc123",
+    "profiles": [
+     {
+      "id": "pold6",
+      "name": "Vojta",
+      "lang": "cs",
+      "facts": {
+       "m3x4": {
+        "lv": 3,
+        "reps": 6,
+        "ok": 5,
+        "bad": 1,
+        "best": 2400,
+        "seen": 1757000000000
+       },
+       "m5x6": {
+        "lv": 3,
+        "reps": 6,
+        "ok": 5,
+        "bad": 1,
+        "best": 2400,
+        "seen": 1757000000000
+       },
+       "m2x7": {
+        "lv": 3,
+        "reps": 6,
+        "ok": 5,
+        "bad": 1,
+        "best": 2400,
+        "seen": 1757000000000
+       },
+       "ph1": {
+        "lv": 4,
+        "reps": 8,
+        "ok": 7,
+        "bad": 1,
+        "best": 4200,
+        "seen": 1757000000000
+       },
+       "nh1": {
+        "lv": 4,
+        "reps": 8,
+        "ok": 7,
+        "bad": 1,
+        "best": 4200,
+        "seen": 1757000000000
+       },
+       "ph4": {
+        "lv": 4,
+        "reps": 8,
+        "ok": 7,
+        "bad": 1,
+        "best": 4200,
+        "seen": 1757000000000
+       },
+       "c1": {
+        "lv": 2,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 6000,
+        "seen": 1757000000000
+       },
+       "wm1": {
+        "lv": 3,
+        "reps": 5,
+        "ok": 4,
+        "bad": 1,
+        "best": null,
+        "seen": 1757000000000
+       }
+      },
+      "best": {
+       "t1": {
+        "dist": 1,
+        "hist": 112,
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 2,
+       "a100": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "ri_bugina"
+      ],
+      "runner": "ri_bugina",
+      "xp": {
+       "pet_kiki": 40
+      },
+      "coins": 63,
+      "parts": 18,
+      "paints": [
+       "pa_neon"
+      ],
+      "paint": {
+       "ri_bugina": "pa_neon"
+      },
+      "jobRuns": {
+       "money": 2
+      },
+      "trackRuns": {
+       "t1": 4,
+       "t2": 1,
+       "a20": 3,
+       "a100": 2,
+       "clock": 1
+      },
+      "opened": {
+       "t1": true,
+       "t2": true,
+       "a20": true,
+       "a100": true,
+       "clock": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 15,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-3",
+      "chapter": 27,
+      "chapterMode": "soft",
+      "streak": 2,
+      "lastDay": null,
+      "bestStreak": 4,
+      "runs": 11,
+      "totalOk": 180,
+      "totalAns": 205,
+      "msSum": 520000,
+      "msN": 198,
+      "created": 1757100000000
      }
     ]
    }

@@ -63,7 +63,10 @@ novost; viz `ROADMAP.md`, oddíl 3.
 
 **Pořadí uvnitř vlny** podle `PROJECT-STATE.md`, oddíl 12b:
 
-1. `mult_beyond` + `div_beyond`, kapitoly 14, 16, 31
+1. `mult_beyond` + `div_beyond`, kapitoly 14, 16, 31. **HOTOVO, září 2026**,
+   hlavička `x`, trať `beyond`, čtyři kbelíky podle toho, co se rozkládá, a
+   dělení jako totéž sezení čtené pozpátku. Kbelíky se číslují, ne písmenkují;
+   proč, je v `PROJECT-STATE.md`, oddíl 5.
 2. `rounding_10` + `rounding_100`, kapitoly 7, 26
 3. `chain_3`, kapitola 11
 4. `order_of_ops`, kapitoly 13, 30
@@ -78,7 +81,7 @@ mátlo. Návrh k potvrzení:
 
 | rodina | hlavička | klíče |
 | --- | --- | --- |
-| `mult_beyond` + `div_beyond` | `x` | `xm1`, `xd1`, znaménko uvnitř jako u tisícovky |
+| `mult_beyond` + `div_beyond` | `x` | hotovo, `xm1` až `xm4` a `xd1` až `xd4` |
 | `rounding_10` + `rounding_100` | `o` | `o1` desítky, `o2` stovky |
 | `chain_3` | `q` | `q1` až `q3` podle oboru |
 | `order_of_ops` | `z` | `z1` bez závorek, `z2` se závorkami |
@@ -183,13 +186,15 @@ počítá velikost sbírky jako `trackKeys(p, tr).length` a dílna žádná tra�
 takže `stars` musí umět i klíče, které pod žádnou trať nespadají; jinak se na
 dílnu zapomene přesně tak, jako se na ni zapomnělo v rodičovské heatmapě.
 
-**Co za posledním nátěrem.** Nátěry stojí dohromady 390 součástek a plná
-zakázka dá patnáct, takže po zhruba šestadvaceti zakázkách je obchod prázdný
-a součástky přestanou k něčemu být. Roadmapa chce dosažitelné dno, to tohle
-splňuje, ale neříká, co je za ním. Rozhodnout se to má tady, ne až to dítě
-najde. Nejlevnější slušná odpověď je nechat součástky dál přibývat a ukázat
-je jako celkový počet, ne jako peněženku, ke které nic nepatří. Tohle je jediný
-bod celého kroku, který **potřebuje rozhodnutí uživatele**, ne jen napsání.
+**Co za posledním nátěrem, rozhodnuto.** Nátěry stojí dohromady 390 součástek
+a plná zakázka dá patnáct, takže po zhruba šestadvaceti zakázkách je obchod
+prázdný a součástky by přestaly k něčemu být. Roadmapa chce dosažitelné dno,
+to tohle splňuje, ale neříká, co je za ním. Rozhodnutí: **součástky dál
+přibývají a ukazují se jako celkový počet odvedené práce, ne jako peněženka,
+ke které nic nepatří.** Prakticky to znamená, že jakmile jsou všechny nátěry
+koupené, štítek u čísla přestane být "k utracení" a stane se z něj "hotovo
+celkem"; žádné nové zboží se kvůli tomu nevymýšlí a žádný cíl se nedoplňuje.
+Nová zakázka z kroku 6 přidá učivo, ne další věc na kupování.
 
 **Zásahy.** `viewJob()` nad `#counter`, `revealSVG()` vedle `coinSVG()`,
 `JOB.ok` už se počítá, takže nic nového do stavu zakázky nepřibývá. Do sbírky

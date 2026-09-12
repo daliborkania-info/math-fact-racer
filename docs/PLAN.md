@@ -213,8 +213,9 @@ a po dokončení zakázky je odkrytý celý. Do `items.test.js` kontrola, že se
 
 ## Krok 4. Mapa jako svět a volba světa
 
-**Proč teď.** Tratí je třináct a s každou rodinou z vlny A přibude další.
-Přestavba se má dělat, dokud je malá.
+**Proč teď.** Tratí je patnáct a s každou další rodinou z vlny A přibude jedna.
+Patnáct je hranice, u které podle `PROJECT-STATE.md`, oddíl 12b, svislý seznam
+přestává stačit, takže tenhle krok už není odkládání zadarmo.
 
 ### 4a. Volba světa
 

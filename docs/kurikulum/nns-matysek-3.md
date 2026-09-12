@@ -86,10 +86,15 @@ třída je v první polovině roku, je hra použitelná hned.
 Z osmého dílu jsou hotové kapitoly 23, 24 a 25, tedy páteř celého oboru do
 tisíce. Odemkl je generátor `add_sub_1000` a jezdí se na vlastní trati `a1000`,
 která má šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku.
-Celkem je to třináct kapitol z třiatřiceti.
 
-Zbytek osmého dílu, tedy kapitoly 21, 22 a 26 až 32, zamčený zůstává. Nejvíc
-z něj odemkne dvojice `mult_beyond` a `div_beyond`.
+V září 2026 přibyly dvě rodiny z vlny A. `mult_beyond` s `div_beyond` otevřely
+kapitoly 14, 16 a 31 a jezdí se na trati `beyond`, `rounding_10`
+s `rounding_100` otevřely kapitoly 7 a 26 a jezdí se na trati `round`.
+Celkem je to osmnáct kapitol z třiatřiceti.
+
+Zamčené zůstávají kapitoly 5, 6, 11, 13, 15, 17, 18, 19, 21, 22, 27, 28, 29, 30
+a 32. Sedm z nich nepotřebuje na vstupu nic nového, stačí další generátory
+na číselnou klávesnici; pořadí je v `PROJECT-STATE.md`, oddíl 12b.
 
 ## Pilot
 

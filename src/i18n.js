@@ -129,6 +129,14 @@ cs: {
   again: "Ještě jednou",
   backToMap: "Zpátky na mapu",
 
+  /* sbirka nalezu */
+  tokens: "Poklady",
+  tokensNote: "Na každé trati se sbírá něco jiného. Jeden kousek se rozsvítí ve chvíli, kdy ti jeden příklad začne jít zpaměti. Rozsvícený kousek už nikdy nezhasne, ani když příklad zase zapomeneš.",
+  tokHave: "{0} z {1}",
+  tokNew: "nově {0}",
+  tokNewPlain: "Do sbírky přibylo: {0}",
+  tokFirst: "Zatím tu nic nesvítí. Kousek se rozsvítí, až ti jeden příklad půjde rovnou zpaměti.",
+
   /* collection */
   collectionNote: "Klepni na závodníka a vyrazí s tebou na dráhu. Zvířátka navíc rostou podle toho, kolik příkladů s nimi zvládneš.",
   machines: "Stroje",
@@ -364,6 +372,13 @@ en: {
   again: "Race again",
   backToMap: "Back to the map",
 
+  tokens: "Treasures",
+  tokensNote: "Every track has something different to find. One piece lights up the moment a sum starts coming to you from memory. A lit piece never goes dark again, not even if you forget the sum.",
+  tokHave: "{0} of {1}",
+  tokNew: "{0} new",
+  tokNewPlain: "New in your treasures: {0}",
+  tokFirst: "Nothing is lit here yet. A piece lights up once a sum comes to you straight from memory.",
+
   collectionNote: "Tap a racer and it comes with you to the track. Animals also grow the more sums you solve with them.",
   machines: "Machines",
   animals: "Animals",
@@ -595,6 +610,13 @@ de: {
   reviewNext: "Die nehmen wir uns noch mal vor",
   again: "Noch eine Runde",
   backToMap: "Zurück zur Karte",
+
+  tokens: "Schätze",
+  tokensNote: "Auf jeder Strecke gibt es etwas anderes zu finden. Ein Stück leuchtet auf, sobald dir eine Aufgabe aus dem Kopf gelingt. Ein leuchtendes Stück geht nie wieder aus, auch wenn du die Aufgabe wieder vergisst.",
+  tokHave: "{0} von {1}",
+  tokNew: "{0} neu",
+  tokNewPlain: "Neu in den Schätzen: {0}",
+  tokFirst: "Hier leuchtet noch nichts. Ein Stück leuchtet auf, sobald dir eine Aufgabe direkt aus dem Kopf gelingt.",
 
   collectionNote: "Tipp einen Renner an und er fährt mit dir los. Tiere wachsen außerdem, je mehr Aufgaben ihr zusammen schafft.",
   machines: "Fahrzeuge",

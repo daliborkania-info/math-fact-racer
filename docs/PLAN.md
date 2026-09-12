@@ -109,7 +109,23 @@ samé pomalé odpovědi. Odpověď nad 999 potřebuje `maxLen: 4` přímo na pol
 
 ---
 
-## Krok 3. Sbírky vázané na Leitnerovu krabičku
+## Krok 3. Sbírky vázané na Leitnerovu krabičku. HOTOVO, září 2026
+
+Postavené přesně podle zadání níž, které zůstává jako záznam, proč to tak je.
+Co z toho vzniklo: `p.stars`, `seedStars()` v `load()` i v importu, `tokenSVG()`
+se sedmi tvary podle prostředí trati, obrazovka **Poklady** dostupná z mapy,
+řádek sbírky na výsledkové obrazovce a na výsledku zakázky, a v dílně kruhové
+okno nad pultem, které se odkrývá po výsečích. Podrobnosti v `PROJECT-STATE.md`,
+oddíly 4b a 6.
+
+Dvě věci se proti zadání upřesnily. Sbírka trati se ukazuje jen tehdy, když je
+trať otevřená nebo už v ní něco svítí; zamčená a nedotčená sbírka by byla stěna
+šedivých míst, stejně jako u heatmapy. A celá sbírka je jedna kresba místo
+jednoho prvku na místo, protože do dvacítky jich padne sto dvaaosmdesát.
+
+**Jedna věc z 3b zůstala neudělaná schválně:** štítek u součástek, až budou
+všechny nátěry koupené. Rozhodnutí platí, jak je popsané níž, ale je to změna
+textu v dílně, ne sbírka, a nikoho netlačí, dokud někdo neutratí 390 součástek.
 
 **Proč před mapou.** Sbírka určuje, co mapa ukazuje, takže se dělá dřív, jinak
 se mapa předělává dvakrát.

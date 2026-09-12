@@ -90,6 +90,19 @@ for(const c of FX.cases){
   const navic=(c.expectClosed||[]).filter(id=>opened.includes(id));
   ok('co bylo zamcene, zustalo zamcene', navic.length===0, navic.length?'otevrelo se '+navic.join(','):'ok');
 
+  // sbirka: starsimu profilu se misto ve sbirce dopocita z krabicky, tedy
+  // z toho, co prokazatelne umi ted. Rozsvitit se smi jen to, co je na
+  // urovni ctyri a vys, jinak by sbirka prestala byt obrazkem uciva.
+  if(c.expectStars){
+    const st=after.profiles[0].stars||{};
+    const chybi=c.expectStars.filter(k=>!st[k]);
+    ok('hvezdy se dopocitaly z krabicky', chybi.length===0,
+       chybi.length?'nerozsvitilo se '+chybi.join(','):'rozsviceno '+Object.keys(st).length);
+    const navic=(c.expectNoStars||[]).filter(k=>st[k]);
+    ok('pod urovni ctyri se nerozsvitilo nic', navic.length===0,
+       navic.length?'rozsvitilo se '+navic.join(','):'ok');
+  }
+
   if(c.expectChapter!==null){
     const ch=after.profiles[0].chapter;
     ok('kapitola se srovnala jen dozadu', ch===c.expectChapter,

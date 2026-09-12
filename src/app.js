@@ -69,6 +69,7 @@ function load(){
     if(p.curriculum) normalizeChapter(p);
     seedOpened(p);
     seedShop(p);
+    seedStars(p);
   }
 }
 /* The workshop, added later. An older profile has none of this and must
@@ -78,6 +79,15 @@ function seedShop(p){
   p.paints  = p.paints  || [];     // paint ids bought with parts
   p.paint   = p.paint   || {};     // machine id -> paint id currently on it
   p.jobRuns = p.jobRuns || {};     // workshop job id -> pieces of work finished
+}
+/* The collection, added later. A place lights up when a fact reaches
+   level four and never goes dark again, so it cannot be derived from
+   the box: a fact that was forgotten is back at level one while its
+   place has to stay lit. An older profile has no record of what it once
+   knew, so the best it can be given is what it knows right now. */
+function seedStars(p){
+  p.stars = p.stars || {};
+  for(const k of Object.keys(p.facts || {})) if(p.facts[k].lv >= STAR_LV) p.stars[k] = true;
 }
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
@@ -90,6 +100,7 @@ function newProfile(name){
     name: name,
     lang: DB.lang || FALLBACK_LANG,
     facts: {},          // fact key -> {lv, reps, ok, bad, best, seen}
+    stars: {},          // fact key -> true once it has ever reached level 4
     best: {},           // track id -> best run {dist, hist, n0}
     done: {},           // track id -> best medal 0..3
     owned: STARTERS.slice(),
@@ -985,6 +996,63 @@ function coinSVG(v){
   </svg>`;
 }
 
+/* The round window above the counter. Behind it stands the child's own
+   racer, and one wedge of the cover comes off for every task solved, so
+   by the end of the piece of work the picture is whole.
+   What is uncovered is something the child already owns, so there is
+   nothing here to win or lose and nothing new is being bought with
+   performance; it is feedback in the shape of a picture, not a prize.
+   Wedges rather than a fade, because the child should be able to count
+   how many are left. A corrected task uncovers one as well, otherwise
+   the window would quietly turn into a meter of getting things right
+   first time, which is exactly what the workshop is here to avoid.
+   The inner drawing arrives as a finished <svg>, which is given a box to
+   sit in; a nested svg scales itself to that box. */
+function wedgePath(cx, cy, r, a0, a1){
+  const pt = a => {
+    const q = (a - 0.25) * Math.PI * 2;
+    return (cx + Math.cos(q) * r).toFixed(2) + " " + (cy + Math.sin(q) * r).toFixed(2);
+  };
+  return `M ${cx} ${cy} L ${pt(a0)} A ${r} ${r} 0 ${(a1 - a0) > .5 ? 1 : 0} 1 ${pt(a1)} Z`;
+}
+function revealSVG(inner, done, total){
+  const R = 46, n = Math.max(1, total), got = Math.max(0, Math.min(n, done));
+  const pic = String(inner).replace(/^<svg /, '<svg x="11" y="11" width="78" height="78" preserveAspectRatio="xMidYMid meet" ');
+  let cover = "";
+  for(let i = got; i < n; i++){
+    cover += `<path d="${wedgePath(50, 50, R, i / n, (i + 1) / n)}" fill="#f2e3ca" stroke="#dcc5a0" stroke-width="1"/>`;
+  }
+  // the drawing is square and the window is round, so the corners have to
+  // be cut off; without the clip a wide machine would stick out past the
+  // rim, where no wedge can ever cover it
+  return `<svg class="reveal" viewBox="0 0 100 100" role="img" aria-hidden="true">
+    <defs><clipPath id="revcut"><circle cx="50" cy="50" r="${R}"/></clipPath></defs>
+    <circle cx="50" cy="50" r="${R}" fill="#fffaf0"/>
+    <g clip-path="url(#revcut)">${pic}</g>${cover}
+    <circle cx="50" cy="50" r="${R}" fill="none" stroke="#dcc5a0" stroke-width="3"/>
+  </svg>`;
+}
+
+/* --- the collection ---
+   One place in a collection fills the moment one fact reaches level four
+   in the box. It is therefore not a reward beside the learning but a
+   picture of it: it cannot be collected by going round the outside, and
+   it makes the Leitner box, which the child has no other way of seeing,
+   visible.
+   A lit place never goes dark. When a fact is forgotten and its level
+   falls back, the place stays: a collection that emptied itself would
+   punish the child for exactly the thing the whole game is built on,
+   which is forgetting and coming back to it. That is why this is a field
+   of its own and not something computed from `facts`. */
+const STAR_LV = 4;
+const starred = (p, key) => !!(p.stars || {})[key];
+function lightStar(p, key){ (p.stars || (p.stars = {}))[key] = true; }
+function starCount(p, keys){
+  let n = 0;
+  for(const k of keys) if(starred(p, k)) n++;
+  return n;
+}
+
 /* --- record one answer into the Leitner box --- */
 const SPEED = { slow:{fast:5200, super:3000}, normal:{fast:3800, super:2100}, fast:{fast:2800, super:1500} };
 function thresholds(p, item){
@@ -1014,15 +1082,22 @@ function record(p, item, correct, ms){
   if(timed){ p.msSum += Math.min(ms, 20000); p.msN++; }
   if(correct){
     f.ok++; p.totalOk++;
-    if(!timed){ f.lv = Math.min(5, f.lv + 1); return; }
-    if(f.best === null || ms < f.best) f.best = ms;
-    const th = thresholds(p, item);
-    if(ms <= th.fast) f.lv = Math.min(5, f.lv + 1);
-    else if(f.lv < 3)  f.lv = f.lv + 1;
+    if(!timed){
+      f.lv = Math.min(5, f.lv + 1);
+    } else {
+      if(f.best === null || ms < f.best) f.best = ms;
+      const th = thresholds(p, item);
+      if(ms <= th.fast) f.lv = Math.min(5, f.lv + 1);
+      else if(f.lv < 3)  f.lv = f.lv + 1;
+    }
   } else {
     f.bad++;
     f.lv = f.lv >= 3 ? 1 : Math.max(0, f.lv - 1);
   }
+  // one place in the collection per fact that has reached level four; the
+  // check sits after both branches so there is one place that can light
+  // one, and none at all that can put one out
+  if(f.lv >= STAR_LV) lightStar(p, item.key);
 }
 
 /* =================================================================
@@ -1248,6 +1323,117 @@ const ENVS = {
   // brown stone, the one colour family nothing else uses
   cave:{   hill1:"#9c7b5e", hill2:"#6f543c", dec:"#4a3626", dec2:"#32241a"}
 };
+
+/* --- what a collection is made of ---
+   The thing collected takes its shape from the place it is found in, so
+   a collection looks like the track it belongs to: flowers in a meadow,
+   stones in a cave, stars in space. Drawn from parameters like every
+   other sprite here, in a 24 by 24 box. */
+const TOKEN_KIND = {
+  meadow:"flower", forest:"leaf",  canyon:"stone",  peaks:"crystal", city:"star",
+  space:"star",    beach:"shell",  ocean:"shell",   night:"star",    storm:"star",
+  school:"star",   clocktown:"flower", volcano:"drop", savanna:"leaf", cave:"stone"
+};
+function tokenShape(kind, filled, c){
+  const f = filled ? c.c1 : "#e6ebf6";
+  const s = filled ? c.c2 : "#ccd6e8";
+  const w = `fill="${f}" stroke="${s}" stroke-width="1.3" stroke-linejoin="round"`;
+  if(kind === "flower"){
+    return `<g ${w}><circle cx="12" cy="5.9" r="4"/><circle cx="18.1" cy="12" r="4"/>`
+         + `<circle cx="12" cy="18.1" r="4"/><circle cx="5.9" cy="12" r="4"/></g>`
+         + `<circle cx="12" cy="12" r="3" fill="${s}"/>`;
+  }
+  if(kind === "leaf"){
+    return `<path d="M20 4 C 20 15, 13 21, 4 20 C 4 9, 11 3, 20 4 Z" ${w}/>`
+         + `<path d="M17 7 L7 17" stroke="${s}" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;
+  }
+  if(kind === "stone"){
+    return `<path d="M4.5 14 L8 5.5 L17 4 L21 11 L16.5 20 L7 19.5 Z" ${w}/>`;
+  }
+  if(kind === "crystal"){
+    return `<path d="M12 2 L19 9 L14 22 L10 22 L5 9 Z" ${w}/>`
+         + `<path d="M5 9 L19 9" stroke="${s}" stroke-width="1.1" fill="none"/>`;
+  }
+  if(kind === "shell"){
+    return `<path d="M12 21 C 3 17, 2 8, 12 3 C 22 8, 21 17, 12 21 Z" ${w}/>`
+         + `<path d="M12 4 L12 20 M7.5 6 L9.5 20 M16.5 6 L14.5 20" stroke="${s}" stroke-width="1" fill="none"/>`;
+  }
+  if(kind === "drop"){
+    return `<path d="M12 2 C 17 9, 20 12, 20 15.2 A 8 8 0 0 1 4 15.2 C 4 12, 7 9, 12 2 Z" ${w}/>`;
+  }
+  if(kind === "cog"){
+    // the workshop is no landscape, so it gets the one shape that belongs
+    // to none of them and is already its own sign everywhere else
+    let teeth = "";
+    for(let i = 0; i < 6; i++){
+      teeth += `<rect x="10.4" y="1.2" width="3.2" height="5" rx="1.2" transform="rotate(${i * 60} 12 12)"/>`;
+    }
+    return `<g ${w}>${teeth}<circle cx="12" cy="12" r="7"/></g>`
+         + `<circle cx="12" cy="12" r="2.7" fill="${s}"/>`;
+  }
+  return `<path d="M12 2 l3 6.4 7 1 -5 4.9 1.2 7 -6.2 -3.3 -6.2 3.3 1.2 -7 -5 -4.9 7 -1 Z" ${w}/>`;
+}
+function tokenSVG(kind, filled, c){
+  return `<svg class="tok" viewBox="0 0 24 24" aria-hidden="true">${tokenShape(kind, filled, c)}</svg>`;
+}
+/* A collection can hold nearly two hundred places, so a whole one is
+   drawn as a single picture rather than one element per place; the page
+   then carries a dozen nodes instead of four hundred. The places keep
+   the order of the keys, so a given fact always sits in the same spot. */
+function tokenGridSVG(p, spec){
+  const n = spec.keys.length;
+  const cols = n <= 12 ? 6 : n <= 60 ? 10 : 14;
+  const rows = Math.ceil(n / cols);
+  const step = 28;
+  let g = "";
+  for(let i = 0; i < n; i++){
+    const x = (i % cols) * step + 2, y = Math.floor(i / cols) * step + 2;
+    g += `<g transform="translate(${x} ${y})">${tokenShape(spec.kind, starred(p, spec.keys[i]), spec)}</g>`;
+  }
+  return `<svg class="toks" viewBox="0 0 ${cols * step} ${rows * step}" aria-hidden="true">${g}</svg>`;
+}
+/* How big a track's collection is and what it looks like. The size is
+   simply how much material the track holds, so a times table has some
+   forty places and a bucket track a dozen; different places hold
+   different amounts and that is the point of them. */
+function trackSpec(p, tr){
+  if(tr.op === "mix" || tr.op === "weak") return null;   // no material of their own
+  if(tr.op === "school") return null;                    // borrowed pool, would count twice
+  const keys = trackKeys(p, tr);
+  if(!keys.length) return null;
+  const e = ENVS[tr.env] || ENVS.meadow;
+  return {title: trackName(p, tr), keys, kind: TOKEN_KIND[tr.env] || "star", c1: e.hill1, c2: e.dec};
+}
+/* The workshop keeps a collection too, and it is not a track, so it says
+   here what its places are rather than being sized from trackKeys(); it
+   is exactly the spot where the workshop was forgotten once before, in
+   the parent heat map. */
+function shopSpec(){
+  return {
+    title: t("shopTitle"), kind: "cog", c1: "#f0c063", c2: "#b5822c",
+    keys: JOBS.reduce((acc, j) => acc.concat(j.keys), [])
+  };
+}
+/* Which collections are worth showing: everything the child can reach,
+   plus anything already started behind a closed door, so nothing that
+   has been earned can disappear from view. */
+function collectionSpecs(p){
+  const out = [];
+  for(const tr of TRACKS){
+    const spec = trackSpec(p, tr);
+    if(!spec) continue;
+    if(unlockState(p, tr).open || starCount(p, spec.keys)) out.push(spec);
+  }
+  out.push(shopSpec());
+  return out;
+}
+/* The number on the map, counted over the collections the child can
+   actually open, so it matches what the screen behind the button shows. */
+function starsAll(p){
+  let n = 0;
+  for(const spec of collectionSpecs(p)) n += starCount(p, spec.keys);
+  return n;
+}
 /* =================================================================
    5. RACE CIRCUIT
    Each track is a closed curve made of cubic Bezier segments, grown
@@ -1481,6 +1667,7 @@ function render(){
     view.name === "game"       ? viewGame(p) :
     view.name === "result"     ? viewResult(p) :
     view.name === "collection" ? viewCollection(p) :
+    view.name === "tokens"     ? viewTokens(p) :
     view.name === "shop"       ? viewShop(p) :
     view.name === "job"        ? viewJob(p) :
     view.name === "jobdone"    ? viewJobDone(p) :
@@ -1566,6 +1753,7 @@ function viewMap(p){
         <span class="chip warm"><span class="em">&#129689;</span> ${p.coins}</span>
         <span class="chip cool"><span class="em">&#9881;</span> ${p.parts}</span>
         <span class="chip fire"><span class="em">&#128293;</span> ${p.streak} ${p.streak === 1 ? t("day") : t("days")}</span>
+        <button class="chip" data-act="tokens"><span class="em">&#10024;</span> ${starsAll(p)}</button>
         <button class="chip" data-act="collection" style="margin-left:auto"><span class="em">&#127873;</span> ${t("collection")}</button>
       </div>
       <div class="tracks">${cards}
@@ -1590,7 +1778,7 @@ function startRun(p, trackId){
   RUN = {
     t: tr, items: buildRun(p, tr), n0: n, idx: 0, answered: 0, prog: 0, dist: 0, hist: [],
     typed: "", state: "ask", t0: 0, wrongKeys: [],
-    okCount: 0, marks: [], coins: 0, retries: 0,
+    okCount: 0, marks: [], coins: 0, retries: 0, newStars: 0,
     // the score is normalised to a 100 point scale whatever the race length
     mult: 20 / n
   };
@@ -1868,7 +2056,12 @@ function submit(){
   RUN.state = "feedback";
 
   const isRetry = !!item.retry;
+  // whether this answer filled a place in the collection is asked here
+  // rather than inside record(), which must stay the one place that
+  // writes the box and nothing else
+  const hadStar = starred(p, item.key);
   if(!isRetry) record(p, item, correct, ms);
+  if(!hadStar && starred(p, item.key)) RUN.newStars++;
 
   let gain;
   if(correct){
@@ -2008,6 +2201,15 @@ function viewResult(p){
         : `<div class="muted" style="margin-top:12px">${t("recordStands", Math.round(RUN.prevBest))}</div>`)
     : "";
 
+  // the championship and the trouble spots have no collection of their
+  // own and the school track borrows one, so those races say only how
+  // many places lit up; the facts themselves sit in the collections they
+  // belong to and are counted there
+  const spec = trackSpec(p, RUN.t);
+  const tokHtml = spec
+    ? tokenCardHTML(p, spec, RUN.newStars)
+    : (RUN.newStars ? `<div class="muted" style="margin-top:12px">${t("tokNewPlain", RUN.newStars)}</div>` : "");
+
   const evoHtml = RUN.evolved ? `
     <div class="newthing">
       <span class="pic">${itemSVG(p, p.runner)}</span>
@@ -2029,6 +2231,7 @@ function viewResult(p){
         ${RUN.newDay && p.streak > 1 ? `<div class="chip fire" style="display:inline-flex">&#128293; ${t("streakBonus", p.streak)}</div>` : ""}
         ${ghostHtml}
         ${evoHtml}
+        ${tokHtml}
         ${weakHtml}
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
           <button class="btn mint wide" data-act="again">${t("again")}</button>
@@ -2047,7 +2250,8 @@ function mountResult(){ document.onkeydown = null; stopAnim(); }
 let JOB = null;
 function startJob(p, jobId){
   const job = jobById(jobId);
-  JOB = {job, items: buildJob(p, job), idx:0, picked:[], state:"ask", ok:0, parts:0, retries:0, missed:[]};
+  JOB = {job, items: buildJob(p, job), idx:0, picked:[], state:"ask", ok:0, parts:0,
+         retries:0, missed:[], newStars:0};
   go("job");
 }
 function jobAskText(item){ return t.apply(null, [item.ask].concat(item.askArgs || [])); }
@@ -2098,6 +2302,7 @@ function viewJob(p){
     <div class="pips dark" style="padding:0 18px 6px">${pips}</div>
     <div class="scr-scroll">
       <div class="jobask" id="jobask">${jobAskText(item)}</div>
+      <div class="revealbox" id="reveal">${revealHTML(p)}</div>
       <div class="counter" id="counter">${counterHTML()}</div>
       <div class="jobhint" id="jobhint">${t("jobTapCoins")}</div>
       <div class="tray">${MONEY.map(v =>
@@ -2107,6 +2312,18 @@ function viewJob(p){
       </div>
     </div>
   </div>`;
+}
+/* The window is divided by how long the piece of work is, not by how
+   many tasks are currently in the queue: a mistake adds a task, and a
+   window that re-divided itself would shrink a wedge that is already
+   off. Nothing here can ever take a wedge back. */
+function revealHTML(p){
+  const total = JOB.job.n;
+  return revealSVG(itemSVG(p, p.runner), Math.min(JOB.ok, total), total);
+}
+function paintReveal(){
+  const el = document.getElementById("reveal");
+  if(el) el.innerHTML = revealHTML(P());
 }
 /* What lies on the counter. Tapping a coin there takes it back, so the
    child can undo without starting over. */
@@ -2141,13 +2358,18 @@ function jobCheck(){
   const isRetry = !!item.retry;
   JOB.state = "done-step";
   JOB.marks = JOB.marks || [];
+  const hadStar = starred(p, item.key);
   if(!isRetry) record(p, item, correct, null);
+  if(!hadStar && starred(p, item.key)) JOB.newStars++;
 
   const hint = document.getElementById("jobhint");
   if(correct){
     JOB.ok++;
     JOB.marks[JOB.idx] = isRetry ? 2 : 1;
     JOB.parts += isRetry ? 1 : 2;
+    // the wedge comes off straight away, not on the next task: the child
+    // solved it now and should see it now
+    paintReveal();
     sfx.great(); buzz(18);
     hint.innerHTML = `<b>${t(isRetry ? "jobRetryOk" : "jobOk")}</b>`;
   } else {
@@ -2202,6 +2424,7 @@ function viewJobDone(p){
           <div class="stat"><div class="v">${JOB.ok}/${JOB.items.length}</div><div class="l">${t("statSolved")}</div></div>
           <div class="stat"><div class="v">${p.parts}</div><div class="l">${t("statPartsAll")}</div></div>
         </div>
+        ${tokenCardHTML(p, shopSpec(), JOB.newStars)}
         ${miss.length ? `<div class="h2" style="margin-bottom:6px">${t("jobReviewNext")}</div>
           <div class="factchips">${miss.map(i =>
             `<span class="factchip">${jobAskText(i)}</span>`).join("")}</div>` : ""}
@@ -2212,6 +2435,41 @@ function viewJobDone(p){
         </div>
       </div>
     </div>
+  </div>`;
+}
+
+/* ---------- the collection of found things ----------
+   Deliberately a screen of its own rather than a number somewhere: the
+   point of it is to be looked at. It says what fills a place, because a
+   collection nobody understands is just decoration, and it never shows
+   a place that cannot be filled. */
+function viewTokens(p){
+  const blocks = collectionSpecs(p).map(spec => `
+    <div class="h3">${esc(spec.title)} <span class="tokn">${t("tokHave", starCount(p, spec.keys), spec.keys.length)}</span></div>
+    <div class="tokwrap">${tokenGridSVG(p, spec)}</div>`).join("");
+  return `<div class="scr">
+    <div class="topbar">
+      <button class="iconbtn" data-act="map" aria-label="${t("back")}">&#8592;</button>
+      <h1>${t("tokens")}</h1>
+      <span class="chip"><span class="em">&#10024;</span> ${starsAll(p)}</span>
+    </div>
+    <div class="scr-scroll pad">
+      <div class="muted" style="margin:10px 0 12px">${t("tokensNote")}</div>
+      ${blocks}
+      <div style="height:20px"></div>
+    </div>
+  </div>`;
+}
+/* One collection on the result screen, so the child sees what the race
+   just did to it without going looking for it. */
+function tokenCardHTML(p, spec, gained){
+  if(!spec) return "";
+  const have = starCount(p, spec.keys);
+  return `<div class="tokcard">
+    <div class="h3">${esc(spec.title)} <span class="tokn">${t("tokHave", have, spec.keys.length)}</span>${
+      gained ? `<span class="toknew">${t("tokNew", gained)}</span>` : ""}</div>
+    <div class="tokwrap">${tokenGridSVG(p, spec)}</div>
+    ${have ? "" : `<div class="muted" style="margin-top:6px">${t("tokFirst")}</div>`}
   </div>`;
 }
 
@@ -2635,6 +2893,7 @@ document.addEventListener("click", e => {
   if(act === "map"){ go("map"); return; }
   if(act === "sound"){ DB.sound = !DB.sound; save(); if(DB.sound) sfx.ok(); render(); return; }
   if(act === "collection"){ go("collection"); return; }
+  if(act === "tokens"){ go("tokens"); return; }
   // parts are only good for paint, so spending them opens the garage at
   // the paints and stays there while the child tries colours on
   if(act === "paintshop"){ go("collection", {focus:"paintsec"}); return; }
@@ -2770,6 +3029,7 @@ document.addEventListener("click", e => {
       normalizeChapter(DB.profiles[i]);
       seedOpened(DB.profiles[i]);
       seedShop(DB.profiles[i]);
+      seedStars(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>

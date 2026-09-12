@@ -15,7 +15,10 @@
   "expectChapter = kapitola, na ktere profil skonci (null = neresi se)",
   "_fillFacts = test dogeneruje prilis velkou sadu prikladu, aby",
   "             fixture nemusela mit sto deset radku; hodnoty jsou",
-  "             popsane v migration.test.js"
+  "             popsane v migration.test.js",
+  "expectStars = klice, kterym se pri nacteni musi dopocitat misto ve",
+  "              sbirce; expectNoStars naopak ty, ktere se rozsvitit",
+  "              nesmi, protoze v krabicce nedosahly urovne ctyri"
  ],
  "cases": [
   {
@@ -634,6 +637,197 @@
       "msSum": 520000,
       "msN": 198,
       "created": 1757100000000
+     }
+    ]
+   }
+  },
+  {
+   "id": "v4-pred-sbirkou",
+   "note": "zari 2026, profil z verze se vsemi dnesnimi rodinami, ale jeste bez sbirky: nezna stars. Hvezdy se mu musi dopocitat z krabicky, tedy za kazdy priklad na urovni ctyri a vys, vcetne klice dilny, ktery pod zadnou trat nespada",
+   "expectOpen": [
+    "t1",
+    "t2",
+    "t3",
+    "a20",
+    "a100",
+    "a1000",
+    "round",
+    "clock"
+   ],
+   "expectClosed": [
+    "t4",
+    "t5",
+    "d1",
+    "beyond",
+    "mix",
+    "weak"
+   ],
+   "expectChapter": 26,
+   "expectStars": [
+    "m6x7",
+    "m3x8",
+    "ph2",
+    "kpb1",
+    "wm2"
+   ],
+   "expectNoStars": [
+    "m2x9",
+    "nh2",
+    "c2"
+   ],
+   "db": {
+    "current": "pold7",
+    "sound": true,
+    "lang": "cs",
+    "pin": "abc123",
+    "profiles": [
+     {
+      "id": "pold7",
+      "name": "Klara",
+      "lang": "cs",
+      "facts": {
+       "m6x7": {
+        "lv": 5,
+        "reps": 12,
+        "ok": 11,
+        "bad": 1,
+        "best": 1900,
+        "seen": 1757000000000
+       },
+       "m3x8": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 2300,
+        "seen": 1757000000000
+       },
+       "m2x9": {
+        "lv": 3,
+        "reps": 7,
+        "ok": 5,
+        "bad": 2,
+        "best": 3100,
+        "seen": 1757000000000
+       },
+       "ph2": {
+        "lv": 4,
+        "reps": 10,
+        "ok": 9,
+        "bad": 1,
+        "best": 4400,
+        "seen": 1757000000000
+       },
+       "nh2": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 3,
+        "bad": 2,
+        "best": 5200,
+        "seen": 1757000000000
+       },
+       "kpb1": {
+        "lv": 5,
+        "reps": 11,
+        "ok": 10,
+        "bad": 1,
+        "best": 5000,
+        "seen": 1757000000000
+       },
+       "c2": {
+        "lv": 2,
+        "reps": 6,
+        "ok": 4,
+        "bad": 2,
+        "best": 7000,
+        "seen": 1757000000000
+       },
+       "wm2": {
+        "lv": 4,
+        "reps": 8,
+        "ok": 7,
+        "bad": 1,
+        "best": null,
+        "seen": 1757000000000
+       }
+      },
+      "best": {
+       "t1": {
+        "dist": 121,
+        "hist": [],
+        "n0": 20
+       },
+       "a100": {
+        "dist": 98,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 3,
+       "t2": 1,
+       "a100": 2
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "pet_duha"
+      ],
+      "runner": "pet_duha",
+      "xp": {
+       "pet_duha": 96
+      },
+      "coins": 148,
+      "parts": 24,
+      "paints": [
+       "pa_sun"
+      ],
+      "paint": {
+       "ri_auto": "pa_sun"
+      },
+      "jobRuns": {
+       "money": 3
+      },
+      "trackRuns": {
+       "t1": 6,
+       "t2": 2,
+       "t3": 1,
+       "a20": 5,
+       "a100": 4,
+       "a1000": 1,
+       "round": 1,
+       "clock": 2
+      },
+      "opened": {
+       "t1": true,
+       "t2": true,
+       "t3": true,
+       "a20": true,
+       "a100": true,
+       "a1000": true,
+       "round": true,
+       "clock": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-3",
+      "chapter": 26,
+      "chapterMode": "soft",
+      "streak": 3,
+      "lastDay": null,
+      "bestStreak": 7,
+      "runs": 22,
+      "totalOk": 361,
+      "totalAns": 410,
+      "msSum": 1090000,
+      "msN": 396,
+      "created": 1757200000000
      }
     ]
    }

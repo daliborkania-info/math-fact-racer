@@ -74,6 +74,10 @@ ok('tecky v zavodni liste rostou do sirky',
 n=0; while(inRace()&&n<60){ type(answer()); n++; await wait(640); }
 await wait(1500);
 ok('novy rekord ohlasen', /Překonal jsi svůj rekord/.test(txt()));
+// sbirka trati patri na vysledkovou obrazovku, jinak o ni dite nevi
+ok('vysledek ukazuje sbirku trati', qa('.tokcard .toks').length===1);
+ok('sbirka trati je velka jako trat',
+   ev('trackSpec(P(), trackById("t1")).keys.length === trackKeys(P(), trackById("t1")).length'));
 
 console.log('--- sbirka ---');
 click(q('[data-act="map"]')); click(q('[data-act="collection"]'));
@@ -216,27 +220,55 @@ const pay=()=>{
   const sol=jev('JSON.stringify(JOB.items[JOB.idx].solution)');
   for(const c of JSON.parse(sol)) click(qa('[data-coin]').find(b=>+b.dataset.coin===c));
 };
+// kruh nad pultem: tolik dilu, kolik ma zakazka uloh, a odkryva se po
+// jednom za vyresenou ulohu. Zakryte vysece se poznaji podle barvy,
+// protoze obrazek zavodnika pod nimi ma svoje vlastni cesty.
+const kryto=()=>qa('#reveal path').filter(x=>x.getAttribute('fill')==='#f2e3ca').length;
+ok('kruh nad pultem ma tolik dilu, kolik ma zakazka uloh', kryto()===6, kryto()+' zakrytych');
+ok('kruh ukazuje vlastniho zavodnika ditete', q('#reveal svg svg')!==null);
 pay();
 ok('pult ukazuje, co na nem lezi', qa('#counter [data-drop]').length>0, qa('#counter [data-drop]').length+' minci');
 const firstCount=qa('#counter [data-drop]').length;
 click(q('#counter [data-drop]'));
 ok('minci z pultu jde vzit zpatky', qa('#counter [data-drop]').length===firstCount-1);
 pay();                                       // doplnit zpet, muze prihodit i vic
-let jn=0;
+let jn=0; const odkryto=[];
 while(jev('view.name')==='job' && jn<20){
   // pult srovnat na presne reseni a odevzdat
   while(qa('#counter [data-drop]').length) click(q('#counter [data-drop]'));
   pay();
   click(q('[data-act="jobcheck"]'));          // vyhodnotit
+  odkryto.push(6-kryto());                    // jeste na te same uloze
   if(jev('view.name')==='job') click(q('[data-act="jobcheck"]'));   // dalsi uloha
   jn++;
 }
 ok('zakazka dosla do konce', jev('view.name')==='jobdone', 'obrazovka '+jev('view.name'));
+ok('kruh se odkryva po jednom dilu za vyresenou ulohu a na konci je cely',
+   odkryto.join(',')==='1,2,3,4,5,6', odkryto.join(','));
+ok('sbirka dilny je na vysledku zakazky', qa('.tokcard .toks').length===1);
 ok('soucastky pribyly', DBg().profiles[0].parts>partsBefore,
    partsBefore+' -> '+DBg().profiles[0].parts);
 ok('dilna se zapsala do krabicky', !!DBg().profiles[0].facts.wm1);
 ok('dilna nezkreslila prumerny cas', DBg().profiles[0].msN>0 &&
    DBg().profiles[0].msN < DBg().profiles[0].totalAns, 'merenych '+DBg().profiles[0].msN+' z '+DBg().profiles[0].totalAns);
+// opravena uloha musi kruh odkryt taky, jinak by z nej bylo meridlo
+// bezchybnosti a dilna by zacala hodnotit vykon
+click(q('[data-act="jobagain"]'));
+let jn2=0, chybnuto=false;
+while(jev('view.name')==='job' && jn2<20){
+  while(qa('#counter [data-drop]').length) click(q('#counter [data-drop]'));
+  pay();
+  // prvni uloha schvalne o jednu korunu vedle, aby se vratila jako oprava
+  if(!chybnuto){ chybnuto=true; click(qa('[data-coin]').find(b=>+b.dataset.coin===1)); }
+  click(q('[data-act="jobcheck"]'));
+  if(jev('view.name')==='job') click(q('[data-act="jobcheck"]'));
+  jn2++;
+}
+ok('chyba zakazku prodlouzila o opravu', jev('JOB.retries')===1 && jev('JOB.items.length')===7,
+   jev('JOB.items.length')+' uloh, oprav '+jev('JOB.retries'));
+ok('opravena uloha odkryla dil taky, kruh je i po chybe cely',
+   jev('JOB.ok')===6 && jev('JOB.marks.filter(m=>m===2).length')===1, 'vyreseno '+jev('JOB.ok')+' z 6');
+
 // soucastky jsou jen na natery, takze utrata za ne ma skocit rovnou na ne
 click(q('[data-act="paintshop"]'));
 ok('utrata soucastek otevre garaz rovnou u nateru',
@@ -264,6 +296,26 @@ ok('dlazdice hodin uz neco ukazuje',
    ev('heatCell(P(), ["c1"]).has && heatCell(P(), ["c1"]).n===1'));
 ok('krok do dvaceti je dlazdice pres celou skupinu', ev('heatCell(P(), stageKeys(0)).n>10'),
    ev('heatCell(P(), stageKeys(0)).n')+' prikladu v prvnim kroku');
+
+console.log('--- sbirka nalezu ---');
+ev('go("map")');
+ok('sbirka je dostupna z mapy', qa('[data-act="tokens"]').length===1);
+click(q('[data-act="tokens"]'));
+ok('sbirka ma vlastni obrazovku', /Poklady/.test(txt()) && qa('.tokwrap .toks').length>1,
+   qa('.tokwrap .toks').length+' sbirek');
+ok('dilna ma sbirku, i kdyz zadna trat neni',
+   ev('collectionSpecs(P()).some(s=>s.keys.indexOf("wm1")>=0)'));
+ok('sbirka dilny neni velka podle trati, ale podle kroku zakazek',
+   ev('shopSpec().keys.length')===3, ev('shopSpec().keys.length')+' mist');
+ok('ve sbirce uz neco sviti', ev('starsAll(P())')>0, ev('starsAll(P())')+' rozsvicenych');
+// rozsvicene misto nezhasne, i kdyz uroven prikladu spadne
+const zkus=ev(`(function(){
+  const p=P(), k=Object.keys(p.stars)[0];
+  p.facts[k].lv=0;
+  record(p, {key:k, kind:"mult"}, false, 9000);
+  return p.stars[k] === true;
+})()`);
+ok('rozsvicene misto nezhasne ani po chybe a poklesu urovne', zkus===true);
 
 console.log('--- natery ---');
 const withParts=DBg(); withParts.profiles[0].parts=200;

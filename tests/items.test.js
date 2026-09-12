@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -518,6 +518,84 @@ if(tp.msN!==0){jbBad++;console.log('  !!  dilna zapocitala cas do prumeru');}
 if(tp.totalAns!==1||tp.totalOk!==1){jbBad++;console.log('  !!  dilna se nezapocitala do uspesnosti');}
 if(tp.facts.wm1.lv!==1){jbBad++;console.log('  !!  spravna odpoved v dilne neposunula uroven',tp.facts.wm1.lv);}
 console.log('chyb v zakazkach dilny:',jbBad);
+
+// 12. sbirka vazana na Leitnerovu krabicku
+//
+// Misto ve sbirce se rozsvecuje na urovni ctyri a uz nikdy nezhasne.
+// Zhasinajici sbirka by trestala presne za to, na cem cela hra stoji,
+// tedy ze se zapomina a opakuje, takze to nejde dopocitat z krabicky
+// a je na to vlastni pole v profilu. Tenhle okruh hlida obe strany
+// pravidla, a k tomu, ze se na dilnu nezapomnelo.
+let stBad2=0;
+const sp=A.newProfile('SB'); A.DB.profiles=[sp]; A.DB.current=sp.id;
+const rychle=(key,kind)=>A.record(sp,{key,kind:kind||'mult'},true,300);
+const kl=A.mk(7,8);
+for(let i=0;i<3;i++) rychle(kl);
+if(sp.facts[kl].lv!==3){stBad2++;console.log('  !!  tri rychle odpovedi nedaly uroven 3',sp.facts[kl].lv);}
+if(A.starred(sp,kl)){stBad2++;console.log('  !!  hvezda se rozsvitila uz pod urovni ctyri');}
+rychle(kl);
+if(sp.facts[kl].lv!==A.STAR_LV){stBad2++;console.log('  !!  ctvrta rychla odpoved nedala uroven ctyri',sp.facts[kl].lv);}
+if(!A.starred(sp,kl)){stBad2++;console.log('  !!  uroven ctyri hvezdu nerozsvitila');}
+// uroven spadne, hvezda zustava
+A.record(sp,{key:kl,kind:'mult'},false,3000);
+if(sp.facts[kl].lv>=A.STAR_LV){stBad2++;console.log('  !!  chyba nesrazila uroven',sp.facts[kl].lv);}
+if(!A.starred(sp,kl)){stBad2++;console.log('  !!  hvezda zhasla, kdyz uroven spadla');}
+// dilna plati bez mereni casu a hvezdu rozsvitit musi taky
+for(let i=0;i<4;i++) A.record(sp,{key:'wm1',kind:'money'},true,null);
+if(!A.starred(sp,'wm1')){stBad2++;console.log('  !!  klic dilny hvezdu nerozsvitil');}
+// velikost sbirky trati je pocet jejich prikladu; dilna zadna trat neni,
+// takze si velikost rekne sama
+for(const tr of A.TRACKS){
+  const spec=A.trackSpec(sp,tr);
+  if(tr.op==='mix'||tr.op==='weak'||tr.op==='school'){
+    if(spec){stBad2++;console.log('  !!  trat bez vlastniho uciva ma sbirku',tr.id);}
+    continue;
+  }
+  if(!spec){stBad2++;console.log('  !!  trat nema sbirku',tr.id);continue;}
+  if(spec.keys.length!==A.trackKeys(sp,tr).length){stBad2++;console.log('  !!  sbirka neni velka jako trat',tr.id);}
+}
+if(!A.collectionSpecs(sp).some(s=>s.keys.indexOf('wm1')>=0)){
+  stBad2++;console.log('  !!  dilna ve sbirce chybi');
+}
+if(A.starCount(sp,[kl,'wm1',A.mk(2,3)])!==2){stBad2++;console.log('  !!  spatne se pocitaji rozsvicena mista');}
+if(A.starsAll(sp)<2){stBad2++;console.log('  !!  celkovy pocet na mape nesedi',A.starsAll(sp));}
+// starsi profil bez pole se dopocita z krabicky, tedy z toho, co umi ted
+const sd=A.newProfile('SD');
+sd.facts={m2x3:{lv:5,reps:9,ok:9,bad:0,best:900,seen:1},m4x5:{lv:4,reps:8,ok:7,bad:1,best:900,seen:1},
+          m6x7:{lv:3,reps:6,ok:5,bad:1,best:2600,seen:1},wm3:{lv:4,reps:7,ok:6,bad:1,best:null,seen:1}};
+delete sd.stars;
+A.seedStars(sd);
+if(!sd.stars.m2x3||!sd.stars.m4x5||!sd.stars.wm3){stBad2++;console.log('  !!  seedStars nedopocital hvezdy z krabicky');}
+if(sd.stars.m6x7){stBad2++;console.log('  !!  seedStars rozsvitil i priklad pod urovni ctyri');}
+// kresba: mrizka ma tolik mist, kolik ma sbirka klicu
+const spT1=A.trackSpec(sd,A.trackById('t1'));
+const grid=A.tokenGridSVG(sd,spT1);
+const mist=(grid.match(/<g transform=/g)||[]).length;
+if(mist!==spT1.keys.length){stBad2++;console.log('  !!  mrizka nema tolik mist, kolik ma sbirka',mist,'vs',spT1.keys.length);}
+if(/NaN|undefined/.test(grid)){stBad2++;console.log('  !!  vadne SVG sbirky');}
+for(const kind of ['flower','leaf','stone','crystal','shell','drop','cog','star'])
+  for(const f of [true,false]){
+    const v=A.tokenSVG(kind,f,{c1:'#123456',c2:'#654321'});
+    if(/NaN|undefined/.test(v)){stBad2++;console.log('  !!  vadny tvar sbirky',kind);}
+  }
+console.log('chyb ve sbirce:',stBad2);
+
+// 12b. kruh nad pultem v dilne
+//
+// Odkryty dil se uvnitr zakazky uz nezakryje, ani po chybe, a opravena
+// uloha odkryva taky, jinak by se z kruhu stalo meridlo bezchybnosti
+// a dilna by zacala hodnotit vykon.
+let rvBad=0;
+const cover=v=>(v.match(/ d="M 50 50 /g)||[]).length;
+const pic=A.rideSVG(A.RIDES[0]);
+for(let done=0;done<=6;done++){
+  const v=A.revealSVG(pic,done,6);
+  if(cover(v)!==6-done){rvBad++;console.log('  !!  spatny pocet zakrytych vysecí',done,cover(v));}
+  if(/NaN|undefined/.test(v)){rvBad++;console.log('  !!  vadne SVG kruhu',done);}
+}
+if(cover(A.revealSVG(pic,9,6))!==0){rvBad++;console.log('  !!  vic vyresenych nez dilu kruh rozbilo');}
+if(cover(A.revealSVG(pic,-1,6))!==6){rvBad++;console.log('  !!  zaporny pocet kruh rozbil');}
+console.log('chyb v kruhu dilny:',rvBad);
 
 // 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
 let trBad=0;

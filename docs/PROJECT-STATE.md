@@ -1,17 +1,20 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po zaokrouhlování
+Poslední aktualizace: 12. září 2026, po sbírkách
 
 **Kde se přestalo a kudy dál:** hotová je **dílna**, druhý režim bez stopek
 a bez bodů za rychlost, zatím s jednou zakázkou, penězi. Hotový je **krok 1
 z `docs/PLAN.md`**, tedy rodičovská heatmapa nad všemi rodinami a vážený
-souhrn, a **první dvě položky kroku 2**, tedy `mult_beyond` s `div_beyond`
-a trať `beyond`, a `rounding_10` s `rounding_100` a trať `round`.
-Na řadě je **třetí položka kroku 2**, tedy `chain_3`, kapitola 11.
+souhrn, **první dvě položky kroku 2**, tedy `mult_beyond` s `div_beyond`
+a trať `beyond`, a `rounding_10` s `rounding_100` a trať `round`, a celý
+**krok 3**, tedy sbírky vázané na Leitnerovu krabičku, obě části.
+Na řadě je **krok 4, mapa jako svět**, a vedle něj kdykoli **třetí položka
+kroku 2**, tedy `chain_3`, kapitola 11.
 
 **Mapa je na hranici.** Tratí je patnáct a v oddílu 12b se říkalo, že u téhle
 hranice svislý seznam přestává stačit. Krok 4 z `docs/PLAN.md` mapu přestavuje
-a čím dřív, tím líp. Hotový prompt na obojí je na konci, v oddílu 14.
+a čím dřív, tím líp; krok 3, který mu musel předcházet, je od teď z cesty.
+Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -118,7 +121,11 @@ libovolný starší profil a nesmí po ní zmizet ani zmenšit se nic z tohohle:
 
 - příklad v krabičce, jeho úroveň, počty pokusů, úspěchů, chyb a nejlepší čas
 - rekord trati, nejlepší medaile, počet dojetých závodů
-- mince, koupení závodníci, jejich zkušenosti, dny v řadě a celkové součty
+- mince, součástky, koupení závodníci, nátěry, jejich zkušenosti, dny v řadě
+  a celkové součty
+- **rozsvícené místo ve sbírce.** Rozsvítí se, když se příklad dostane na
+  úroveň 4, a nezhasne nikdy, ani když dítě příklad zapomene a úroveň spadne.
+  Je to pole `stars`, ne pohled do krabičky, právě proto; viz oddíl 6.
 - jméno, jazyk, kód rodiče a volba učebnice
 - **přístup, který dítě už mělo.** Odemčená trať se sama nezavře, vybraná
   kapitola se sama nepřepne dopředu.
@@ -278,13 +285,28 @@ vybratelnou, aniž by vyrobila trať. Proto se rozdělilo `isPlayable()`, tedy j
 vybrat, od `schoolReady()`, tedy dělá trať na mapě. Zakázka, která je zrovna
 v kapitole, to říká štítkem na kartě.
 
-**Dílna je zatím tichá a zčásti je to záměr.** Nemá sbírku, prostředí ani nic,
-co by při práci rostlo. Součástky mají podle roadmapy, oddíl 4, správný tvar
-odměny, tedy klíč k obsahu místo platu za výkon, ale mlčení není totéž co klid.
-Doplní to krok 3b v `docs/PLAN.md`: kruh nad pultem, který za každou vyřešenou
-úlohu odkryje díl obrázku vlastního závodníka, a trvalá sbírka nad klíči dílny.
-Jedna věc tam čeká na rozhodnutí, totiž co se součástkami, až budou všechny
-nátěry koupené.
+**Kruhové okno nad pultem.** Od září 2026 stojí nad pultem kruh, v něm obrázek
+vlastního závodníka dítěte včetně nátěru, a po každé vyřešené úloze z něj odpadne
+jedna výseč; na konci zakázky je obrázek celý. `revealSVG(inner, done, total)`,
+výseče a ne prolínání, aby šlo spočítat, kolik zbývá. Odkrývá se něco, co dítě
+už vlastní, takže se nedá nic vyhrát ani prohrát a nekupuje se nic za výkon.
+**Opravená úloha odkrývá taky**, jinak by z kruhu bylo měřidlo bezchybnosti
+a dílna by začala hodnotit výkon. Ubrat výseč neumí nic. Kruh se dělí délkou
+zakázky, tedy `job.n`, ne počtem úloh ve frontě: chyba frontu prodlouží a kruh,
+který by se přepočítal, by zmenšil už odkrytý díl.
+
+**Dílna má vlastní sbírku.** Platí pro ni pravidlo z oddílu 6 beze změny: klíč
+dílny, který se v krabičce dostane na úroveň 4, rozsvítí místo ve sbírce. Sbírka
+dílny je dneska třímístná, `wm1` až `wm3`, a s každou další zakázkou povyroste.
+Velikost si říká `shopSpec()` sama, protože dílna žádná trať není a `trackKeys()`
+by ji minulo, přesně jako ji jednou minula rodičovská heatmapa.
+
+**Součástky jsou pořád jediná měna dílny** a mají podle roadmapy, oddíl 4,
+správný tvar, tedy klíč k obsahu místo platu za výkon. Co s nimi, až budou
+všechny nátěry koupené, je rozhodnuté v `docs/PLAN.md`, krok 3b, ale zatím
+neudělané: číslo se má tehdy přestat tvářit jako peněženka a začít říkat, kolik
+práce je hotové celkem. Do doby, než někdo utratí 390 součástek, to nikoho
+netlačí.
 
 **Klíče dílny začínají na `w`.** Ukládají se do stejné Leitnerovy krabičky jako
 příklady, ale žádný pool závodu je vyrobit neumí a trať "co ti nejde" je
@@ -354,6 +376,7 @@ DB = { profiles: [...], current: "id", sound: true, lang: "cs", pin: "hash" }
 profil = {
   id, name, lang,
   facts: { "m7x8": {lv, reps, ok, bad, best, seen} },
+  stars: { "m7x8": true },               // misto ve sbirce, jednou a navzdy
   best:  { "t1": {dist, hist, n0} },     // rekordy tratí
   done:  { "t1": 3 },                    // nejlepší medaile
   trackRuns: { "t1": 8 },
@@ -377,8 +400,23 @@ jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 
 Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
 pokud je nemá, `normalizeChapter()` srovná kapitolu, `seedOpened()` doplní
-seznam otevřených tratí a `seedShop()` prázdnou dílnu. Nové migrace patří do `load()`, a pokud se týkají
+seznam otevřených tratí, `seedShop()` prázdnou dílnu a `seedStars()` sbírku.
+Nové migrace patří do `load()`, a pokud se týkají
 profilu jako celku, taky do větve `import`.
+
+**Sbírka je vlastní pole, ne pohled do krabičky.** Místo se rozsvítí ve chvíli,
+kdy se příklad dostane na úroveň 4, a **už nikdy nezhasne**. Kdyby se počítalo
+z `facts`, zhaslo by při každém zapomenutí, a zhasínající sbírka trestá přesně
+za to, na čem celá hra stojí. Rozsvěcuje to jediné místo, konec `record()`;
+zhasnout to neumí nikde nic. Starší profil se seeduje z toho, co umí teď, tedy
+za každý klíč s `lv >= 4`; co uměl dřív, o tom záznam neexistuje.
+
+**Velikost sbírky je `trackKeys(p, tr).length`**, takže násobilková trať má
+kolem čtyřiceti míst a kbelíková dvanáct. **Dílna žádná trať není**, takže si
+velikost říká `shopSpec()` sama; je to přesně to místo, kde se na dílnu jednou
+už zapomnělo, v rodičovské heatmapě. Tratě `mix`, `weak` a `school` sbírku
+nemají, první dvě nemají vlastní učivo a třetí si pool půjčuje, takže by
+počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`.
 
 ---
 
@@ -403,13 +441,22 @@ profilu jako celku, taky do větve `import`.
    `itemFromKey` nikdo nesmí předpokládat, že odpověď je číslo.
    **Vzorec sedmdesát ku třiceti je na jednom místě**, `focusAndReview()`,
    a stupňování taky, `stageIndex()`. Nová rodina je volá, nepíše znovu.
-4. Sbírka a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
+4. Závodníci a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
+   Tady je i sbírka nálezů: `tokenShape()` se sedmi tvary, `tokenSVG()` pro jedno
+   místo a `tokenGridSVG()` pro celou sbírku. **Celá sbírka je jedna kresba**,
+   ne jeden prvek na místo; dvacítka jich má sto dvaaosmdesát a přes všechny
+   tratě jich je přes čtyři sta, což by byla zbytečná hromada uzlů. Tvar se
+   řídí prostředím trati přes `TOKEN_KIND`, barva je z `ENVS`.
 5. Závodní okruh. Uzavřená Bézierova křivka z osazeného generátoru, geometrie se
    počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `circuit(id)`,
    `atU(c, u)`, `circuitSVG`, `circuitThumb`.
 6. Zvuk. Syntetizované tóny, žádné soubory.
-7. Obrazovky. `viewPlayers`, `viewMap`, `viewGame`, `viewResult`, `viewCollection`,
-   `viewSetPin`, `viewGate`, `viewParent`.
+7. Obrazovky. `viewPlayers`, `viewMap`, `viewGame`, `viewResult`, `viewTokens`,
+   `viewCollection`, `viewShop`, `viewJob`, `viewJobDone`, `viewSetPin`,
+   `viewGate`, `viewParent`. Pozor na dvě slova, která znějí stejně:
+   `viewCollection` je **garáž**, tedy stroje, zvířata a nátěry, a jmenuje se
+   v rozhraní Sbírka; `viewTokens` je **sbírka nálezů** vázaná na krabičku
+   a jmenuje se Poklady.
 8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem, plus
    druhý na `change` kvůli rozbalovacím nabídkám, které klik nevyvolávají.
 
@@ -500,10 +547,15 @@ trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech
 stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
 do tisíce, u kterých ověřuje i to, že každý kbelík dělá to, co slibuje, a dílnu,
 tedy že hltavé drobné jsou opravdu nejmenší, že úloha uzná své vlastní řešení
-a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas.
+a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas. K tomu
+sbírku, tedy že se místo rozsvítí až na úrovni 4, že po poklesu úrovně nezhasne,
+že ho rozsvítí i klíč dílny, že je sbírka trati velká jako trať a že `seedStars()`
+dopočítá starší profil; a kruh v dílně, tedy počet zakrytých výsečí.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
-profil v krabičce, a že souhrn nahoře není jen z násobilky.
+profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
+zakázku v dílně a hlídá, že se kruh odkrývá po jednom dílu za vyřešenou úlohu,
+že opravená úloha odkrývá taky a že je na konci kruh celý i po chybě.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
 `tests/fixtures/legacy-profiles.json` a jen se přidávají, nikdy neupravují.
@@ -922,7 +974,9 @@ Tohle projela tisícovka a sedělo to do puntíku. V `src/app.js`: písmeno hlav
 klíče do `FAMILY_HEADS`, definice kbelíků nebo stupňů, generátor, větev
 v `rawItem()`, `poolKeys()`, `trackKeys()`, `reachedKeys()` pokud má stupně,
 vlastní `*Stage()` přes `stageIndex()`, větev v `buildRun()` přes
-`focusAndReview()`, záznam v `TRACKS` a `ENVS`, větev v `unlockState()`,
+`focusAndReview()`, záznam v `TRACKS` a `ENVS`, tvar sbírky v `TOKEN_KIND`
+(bez něj spadne na hvězdu a všechny nové tratě vypadají stejně),
+větev v `unlockState()`,
 násobitel v `thresholds()` a `maxLen` na položce, pokud odpověď přeleze tři
 číslice, a blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí. Dál kapitoly
 v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech třech jazycích
@@ -940,18 +994,16 @@ Použij tenhle, pokud se pokračuje tam, kde se přestalo. Další kroky mají
 v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
 s dnešním úkolem.
 
-**Kde přesně stojíme.** Krok 1 je hotový. Z kroku 2, vlny A, jsou hotové dvě
-položky ze sedmi. Na řadě jsou dvě možnosti a pořadí mezi nimi není libovolné:
+**Kde přesně stojíme.** Kroky 1 a 3 jsou hotové. Z kroku 2, vlny A, jsou hotové
+dvě položky ze sedmi. Na řadě jsou dvě možnosti a tentokrát je pořadí mezi nimi
+volné, protože to, co muselo být první, už stojí:
 
-- **Krok 3, sbírky.** Přijde před krokem 4, protože sbírka určuje, co mapa
-  ukazuje, jinak se mapa předělává dvakrát. Je v něm i dílna, tedy odkrývaný
-  kruh nad pultem, na kterém jsme se domluvili.
+- **Krok 4, mapa jako svět a volba světa.** Tratí je patnáct, což je hranice,
+  u které svislý seznam přestává stačit, takže odkládat ho dál už něco stojí.
+  Sbírka z kroku 3 existuje, takže mapa už ví, co má ukazovat, a předělá se
+  jednou.
 - **Zbytek vlny A**, tedy `chain_3` a dál. Nic neblokuje a nic nepřestavuje,
   takže se dá vložit kdykoli mezi ostatní kroky.
-
-Krok 4, mapa jako svět, je až za krokem 3. Tratí je patnáct, což je hranice,
-u které svislý seznam přestává stačit, takže odkládat oba kroky dál už něco
-stojí.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
@@ -961,16 +1013,16 @@ stojí.
 > kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
 > něco navržené tak, jak je; jsou tam odkazy na studie.
 >
-> Dneska chci krok 3 z plánu, tedy sbírky vázané na Leitnerovu krabičku, obě
-> části. Nejdřív 3a, tedy `p.stars`, místo se rozsvítí při přechodu na úroveň 4
-> a nikdy nezhasne, a k tomu `seedStars()` v `load()` i v importu. Pak 3b, tedy
-> dílna: kruh nad pultem s obrázkem vlastního závodníka, který se odkrývá po
-> výsečích za každou vyřešenou úlohu, a trvalá sbírka nad klíči dílny. Pozor,
-> 3a počítá velikost sbírky podle tratí a dílna žádná trať není.
+> Dneska chci krok 4 z plánu, tedy mapu jako svět a volbu světa, obě části.
+> Nejdřív 4a, tedy `p.world` a `envOf(p, tr)` místo tří míst, která dneska čtou
+> `tr.env` natvrdo, a překlady přes `w_<svet>_<klic>` s návratem na holý klíč.
+> Pak 4b, tedy rozmístění tratí v prostoru místo svislého seznamu. Pozor,
+> klepnutí na trať na ni musí skočit rovnou, přelet je ozdoba, kterou jde
+> přeskočit, dílna zůstává vlastní místo mimo řadu tratí a sbírka z kroku 3 se
+> na trati i na dílně ukazuje.
 >
 > Tohle sahá na datový model, takže do `tests/fixtures/legacy-profiles.json`
-> patří další zamrazený profil, bez `stars`, kterému se hvězdy musí dopočítat
-> z krabičky.
+> patří další zamrazený profil, bez `world`.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
 > build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové

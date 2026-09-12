@@ -934,11 +934,24 @@ množiny `VALID` a vlastní okruh, který ověří, že každý kbelík dělá t
 slibuje. V `tests/flow.test.js` sedí natvrdo počet okruhů na mapě a počet
 zamčených kapitol, obojí je potřeba posunout.
 
-### Prompt pro nejbližší krok, tedy vlnu generátorů na klávesnici
+### Prompt pro nejbližší krok
 
-Použij tenhle, pokud se pokračuje tam, kde se přestalo. Je to krok 2
-z `docs/PLAN.md`; další kroky mají v tom souboru vlastní zadání a stačí v tomhle
-promptu vyměnit poslední odstavec.
+Použij tenhle, pokud se pokračuje tam, kde se přestalo. Další kroky mají
+v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
+s dnešním úkolem.
+
+**Kde přesně stojíme.** Krok 1 je hotový. Z kroku 2, vlny A, jsou hotové dvě
+položky ze sedmi. Na řadě jsou dvě možnosti a pořadí mezi nimi není libovolné:
+
+- **Krok 3, sbírky.** Přijde před krokem 4, protože sbírka určuje, co mapa
+  ukazuje, jinak se mapa předělává dvakrát. Je v něm i dílna, tedy odkrývaný
+  kruh nad pultem, na kterém jsme se domluvili.
+- **Zbytek vlny A**, tedy `chain_3` a dál. Nic neblokuje a nic nepřestavuje,
+  takže se dá vložit kdykoli mezi ostatní kroky.
+
+Krok 4, mapa jako svět, je až za krokem 3. Tratí je patnáct, což je hranice,
+u které svislý seznam přestává stačit, takže odkládat oba kroky dál už něco
+stojí.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
@@ -948,15 +961,16 @@ promptu vyměnit poslední odstavec.
 > kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
 > něco navržené tak, jak je; jsou tam odkazy na studie.
 >
-> Dneska chci krok 4 z plánu, tedy mapu jako svět a volbu světa. Tratí je
-> patnáct, což je hranice, u které svislý seznam podle oddílu 12b přestává
-> stačit, a čím víc rodin přibude, tím dražší ta přestavba bude. Pravidlo,
-> které se nesmí porušit, je v plánu: klepnutí na trať na ni skočí rovnou,
-> přelet je ozdoba.
+> Dneska chci krok 3 z plánu, tedy sbírky vázané na Leitnerovu krabičku, obě
+> části. Nejdřív 3a, tedy `p.stars`, místo se rozsvítí při přechodu na úroveň 4
+> a nikdy nezhasne, a k tomu `seedStars()` v `load()` i v importu. Pak 3b, tedy
+> dílna: kruh nad pultem s obrázkem vlastního závodníka, který se odkrývá po
+> výsečích za každou vyřešenou úlohu, a trvalá sbírka nad klíči dílny. Pozor,
+> 3a počítá velikost sbírky podle tratí a dílna žádná trať není.
 >
-> Pokud bys radši pokračoval v učivu, další na řadě je `chain_3`, kapitola 11
-> třetího ročníku, řetězec tří čísel. Kontrolní seznam pro novou rodinu je
-> v `PROJECT-STATE.md`, oddíl 14.
+> Tohle sahá na datový model, takže do `tests/fixtures/legacy-profiles.json`
+> patří další zamrazený profil, bez `stars`, kterému se hvězdy musí dopočítat
+> z krabičky.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
 > build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové

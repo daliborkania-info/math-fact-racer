@@ -172,6 +172,57 @@ click(q('[data-act="setpin"]'));
 d.getElementById('pin1').value='5678'; click(q('[data-act="savepin"]'));
 ok('kod zmenen', DBg().pin!==undefined && /Pro rodiče/.test(txt()));
 
+console.log('--- dilna ---');
+click(q('[data-act="map"]'));
+ok('dilna je na mape', qa('[data-act="shop"]').length===1 && /Dílna/.test(txt()));
+click(q('[data-act="shop"]'));
+ok('dilna nabizi zakazku', qa('[data-act="jobstart"]').length===1 && /Peníze/.test(txt()));
+const partsBefore=DBg().profiles[0].parts;
+click(q('[data-act="jobstart"]'));
+ok('zakazka ma sest uloh', qa('.pip').length===6, qa('.pip').length+' uloh');
+ok('v dilne nejsou stopky ani body', !/bodů|body/.test(txt()) && qa('.rail,.stage').length===0);
+ok('mince jsou k dispozici', qa('[data-coin]').length===6);
+// vyresit celou zakazku: mince se klepou, dokud se nesejde castka
+const jev=s=>dom.window.eval(s);
+const pay=()=>{
+  const sol=jev('JSON.stringify(JOB.items[JOB.idx].solution)');
+  for(const c of JSON.parse(sol)) click(qa('[data-coin]').find(b=>+b.dataset.coin===c));
+};
+pay();
+ok('pult ukazuje, co na nem lezi', qa('#counter [data-drop]').length>0, qa('#counter [data-drop]').length+' minci');
+const firstCount=qa('#counter [data-drop]').length;
+click(q('#counter [data-drop]'));
+ok('minci z pultu jde vzit zpatky', qa('#counter [data-drop]').length===firstCount-1);
+pay();                                       // doplnit zpet, muze prihodit i vic
+let jn=0;
+while(jev('view.name')==='job' && jn<20){
+  // pult srovnat na presne reseni a odevzdat
+  while(qa('#counter [data-drop]').length) click(q('#counter [data-drop]'));
+  pay();
+  click(q('[data-act="jobcheck"]'));          // vyhodnotit
+  if(jev('view.name')==='job') click(q('[data-act="jobcheck"]'));   // dalsi uloha
+  jn++;
+}
+ok('zakazka dosla do konce', jev('view.name')==='jobdone', 'obrazovka '+jev('view.name'));
+ok('soucastky pribyly', DBg().profiles[0].parts>partsBefore,
+   partsBefore+' -> '+DBg().profiles[0].parts);
+ok('dilna se zapsala do krabicky', !!DBg().profiles[0].facts.wm1);
+ok('dilna nezkreslila prumerny cas', DBg().profiles[0].msN>0 &&
+   DBg().profiles[0].msN < DBg().profiles[0].totalAns, 'merenych '+DBg().profiles[0].msN+' z '+DBg().profiles[0].totalAns);
+
+console.log('--- natery ---');
+const withParts=DBg(); withParts.profiles[0].parts=200;
+w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(withParts));
+jev('load(); go("collection")');
+ok('natery jsou v garazi', /Nátěry/.test(txt()) && qa('[data-act="buypaint"]').length===8);
+click(qa('[data-act="buypaint"]')[0]);
+click(q('[data-yes]'));
+ok('nater koupen a nasazen', DBg().profiles[0].paints.length===1 &&
+   Object.keys(DBg().profiles[0].paint).length===1, JSON.stringify(DBg().profiles[0].paint));
+ok('nater stal soucastky, ne mince', DBg().profiles[0].parts===170, DBg().profiles[0].parts+' soucastek');
+click(qa('[data-act="usepaint"]')[0]);
+ok('nater jde zase sundat', Object.keys(DBg().profiles[0].paint).length===0);
+
 console.log('--- druhy hrac ---');
 click(q('[data-act="map"]')); click(q('[data-act="players"]'));
 click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Anička'; click(q('[data-go]'));

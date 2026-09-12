@@ -68,7 +68,16 @@ function load(){
     if(p.curriculum && !curriculumById(p.curriculum)){ p.curriculum = null; p.chapter = null; }
     if(p.curriculum) normalizeChapter(p);
     seedOpened(p);
+    seedShop(p);
   }
+}
+/* The workshop, added later. An older profile has none of this and must
+   simply start with an empty toolbox; nothing it already owns is touched. */
+function seedShop(p){
+  if(typeof p.parts !== "number") p.parts = 0;
+  p.paints  = p.paints  || [];     // paint ids bought with parts
+  p.paint   = p.paint   || {};     // machine id -> paint id currently on it
+  p.jobRuns = p.jobRuns || {};     // workshop job id -> pieces of work finished
 }
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
@@ -87,6 +96,10 @@ function newProfile(name){
     runner: STARTERS[0],
     xp: {},             // collectible id -> experience
     coins: 0,
+    parts: 0,           // workshop currency, cannot be earned by racing
+    paints: [],         // paint ids bought with parts
+    paint: {},          // machine id -> paint id currently on it
+    jobRuns: {},        // workshop job id -> pieces of work finished
     trackRuns: {},      // track id -> races completed
     opened: {},         // track id -> true once it has ever been unlocked
     force: {},          // parent override: track id -> true/false
@@ -279,11 +292,19 @@ function poolKeys(spec){
 /* A chapter is offered only when the game can actually generate it.
    Chapters whose topic has no generator yet stay visible in the list so
    the parent sees the whole book, but they cannot be picked, because a
-   setting that quietly does nothing reads as broken. */
-function playableChapters(cur){
-  return cur ? cur.chapters.filter(ch => poolSize(poolKeys(ch.pool)) >= 4) : [];
+   setting that quietly does nothing reads as broken.
+   Being playable and driving a track are two different things: a chapter
+   whose material belongs in the workshop, money being the first of them,
+   can be picked and does something, but it has no race to put on the map. */
+function chapterJobs(ch){
+  return ((ch && ch.pool && ch.pool.shop) || []).filter(id => JOBS.some(j => j.id === id));
 }
-function isPlayable(ch){ return !!ch && poolSize(poolKeys(ch.pool)) >= 4; }
+function isPlayable(ch){
+  return !!ch && (poolSize(poolKeys(ch.pool)) >= 4 || chapterJobs(ch).length > 0);
+}
+function playableChapters(cur){
+  return cur ? cur.chapters.filter(isPlayable) : [];
+}
 /* Pull a stored chapter back onto a playable one. Runs on load and after
    an import, so a profile saved before a generator was removed, or edited
    by hand, can never point at a chapter that produces nothing. */
@@ -312,7 +333,13 @@ function poolSize(keys){
   for(const k of keys) n += isFamilyKey(k) ? 4 : 1;
   return n;
 }
-function schoolReady(p){ return isPlayable(chapterOf(p)); }
+/* The school track appears only when the chapter can fill a race. A
+   workshop-only chapter is a perfectly good setting, it just points at
+   the workshop rather than at the map. */
+function schoolReady(p){ return poolSize(schoolPool(p)) >= 4; }
+/* Which workshop jobs the class is on right now, so the workshop can say
+   so on the card rather than leaving the parent to guess. */
+function chapterJobIds(p){ return chapterJobs(chapterOf(p)); }
 function visibleTracks(p){
   const rest = TRACKS.filter(tr => tr.op !== "school");
   return schoolReady(p) ? [trackById("school")].concat(rest) : rest;
@@ -699,7 +726,8 @@ function buildRun(p, tr){
     }
     keys = sampleKeys(p, [...new Set(all)], n, 3);
   } else { // weak
-    const seen = Object.keys(p.facts).filter(k => p.facts[k].reps > 0);
+    // workshop tasks live in the same box but are not race questions
+    const seen = Object.keys(p.facts).filter(k => p.facts[k].reps > 0 && !isJobKey(k));
     seen.sort((x,y) => (p.facts[x].lv - p.facts[y].lv) || (p.facts[y].bad - p.facts[x].bad));
     const worst = seen.slice(0, Math.max(8, Math.round(seen.length * .35)));
     keys = sampleKeys(p, worst.length ? worst : seen, n, 0);
@@ -721,6 +749,116 @@ function buildRun(p, tr){
   return out;
 }
 
+/* =================================================================
+   3b. WORKSHOP
+   The second mode, and the reason it exists: some of what a child has
+   to learn is not a fact to be recalled but a small piece of reasoning.
+   Paying twelve crowns has several right answers and the work is in
+   thinking one of them through. A race would put a clock on that and
+   hand out points for speed, which teaches a child to guess.
+
+   So the workshop measures nothing. No timer, no points, no medal, no
+   ghost. It pays in parts, a currency the race cannot earn, and parts
+   buy paint in the garage. A piece of work is six tasks long, because
+   each one takes as long as several race questions.
+
+   Keys start with `w`, so they live in the same Leitner box as facts
+   without ever being mistaken for one: no track pool can produce them
+   and the trouble-spots track filters them out.
+   ================================================================= */
+const isJobKey = k => k[0] === "w";
+
+/* 1, 2, 5, 10, 20 and 50 are the coins in a Czech pocket, and the same
+   six values are euro cents and British pence, so one set of artwork
+   serves all three interface languages and only the unit changes. */
+const MONEY = [1, 2, 5, 10, 20, 50];
+/* Fewest coins for an amount. Greedy is provably optimal for this set,
+   which is why the "pay it with as few coins as you can" task has one
+   right number of coins to compare against. */
+function fewestCoins(amount){
+  const out = [];
+  let left = amount;
+  for(let i = MONEY.length - 1; i >= 0; i--){
+    while(left >= MONEY[i]){ out.push(MONEY[i]); left -= MONEY[i]; }
+  }
+  return out;
+}
+const sum = a => a.reduce((s, x) => s + x, 0);
+
+const JOBS = [
+  {id:"money", keys:["wm1","wm2","wm3"], n:6}
+];
+const jobById = id => JOBS.find(j => j.id === id) || JOBS[0];
+function jobStage(p, job){ return stageIndex(p, i => [job.keys[i]], job.keys.length); }
+
+/* One money task. `check` takes the coins the child put on the counter,
+   not a typed string, which is exactly why the answer had to stop being
+   assumed to be a number. */
+function moneyItem(key){
+  if(key === "wm2"){
+    const amount = ri(3, 99);
+    const best = fewestCoins(amount);
+    return {
+      key, kind:"money", input:"coins", amount,
+      ask: "jobPayFew", askArgs: [amount],
+      solution: best,
+      // the amount has to match and it has to be done in as few coins as
+      // possible; getting the amount right the long way is a near miss,
+      // not a win, because the whole task is the thinking about change
+      check: picked => sum(picked) === amount && picked.length === best.length,
+      near:  picked => sum(picked) === amount
+    };
+  }
+  if(key === "wm3"){
+    const price = ri(11, 88);
+    // the next round note up, and strictly up: handing over exactly the
+    // price would make the answer an empty counter, which is no task
+    const paid  = price < 20 ? 20 : price < 50 ? 50 : 100;
+    const back  = paid - price;
+    return {
+      key, kind:"money", input:"coins", amount: back,
+      ask: "jobChange", askArgs: [price, paid],
+      solution: fewestCoins(back),
+      check: picked => sum(picked) === back
+    };
+  }
+  const amount = ri(3, 40);
+  return {
+    key, kind:"money", input:"coins", amount,
+    ask: "jobPayExact", askArgs: [amount],
+    solution: fewestCoins(amount),
+    check: picked => sum(picked) === amount
+  };
+}
+function jobItemFromKey(key){ return moneyItem(key); }
+/* Six tasks, the current step carrying most of them and the earlier
+   steps coming back as review. Same shape as every track, so the
+   workshop inherits spaced repetition rather than inventing its own. */
+function buildJob(p, job){
+  const si = jobStage(p, job);
+  const review = job.keys.slice(0, si);
+  const keys = focusAndReview(p, [job.keys[si]], review, job.n, 1);
+  return keys.map(jobItemFromKey);
+}
+
+/* A coin, drawn from its value like everything else here. The low three
+   are silver and the high three brass, which is what a Czech pocket
+   looks like and gives the child a shape to sort by before reading. */
+function coinSVG(v){
+  const big = v >= 10;
+  const r = v >= 50 ? 30 : v >= 20 ? 28 : v >= 10 ? 26 : v >= 5 ? 25 : v >= 2 ? 23 : 21;
+  const face = big ? "#f0c063" : "#d7deea";
+  const edge = big ? "#b5822c" : "#9aa7bd";
+  const ink  = big ? "#6b4a12" : "#33405c";
+  return `<svg class="coin" viewBox="0 0 64 64" role="img" aria-hidden="true">
+    <circle cx="32" cy="32" r="${r}" fill="${edge}"/>
+    <circle cx="32" cy="32" r="${r - 3.2}" fill="${face}"/>
+    <circle cx="32" cy="32" r="${r - 6.5}" fill="none" stroke="${edge}" stroke-width="1.4" opacity=".55"/>
+    <text x="32" y="${32 + r * 0.34}" text-anchor="middle" font-family="Baloo 2, system-ui, sans-serif"
+      font-size="${r * 0.95}" font-weight="800" fill="${ink}">${v}</text>
+  </svg>`;
+}
+
 /* --- record one answer into the Leitner box --- */
 const SPEED = { slow:{fast:5200, super:3000}, normal:{fast:3800, super:2100}, fast:{fast:2800, super:1500} };
 function thresholds(p, item){
@@ -732,12 +870,19 @@ function thresholds(p, item){
                : (item.kind === "add100" || item.kind === "sub100") ? 1.9 : 1;
   return { fast: s.fast * slower, super: s.super * slower };
 }
+/* `ms` is null for workshop tasks, which are not timed at all. Such an
+   answer counts towards accuracy and moves the Leitner level, but never
+   touches the average answer time, because a piece of reasoning and a
+   recalled fact are not the same measurement. */
 function record(p, item, correct, ms){
   const f = p.facts[item.key] || (p.facts[item.key] = {lv:0, reps:0, ok:0, bad:0, best:null, seen:0});
+  const timed = ms !== null && ms !== undefined;
   f.reps++; f.seen = Date.now();
-  p.totalAns++; p.msSum += Math.min(ms, 20000); p.msN++;
+  p.totalAns++;
+  if(timed){ p.msSum += Math.min(ms, 20000); p.msN++; }
   if(correct){
     f.ok++; p.totalOk++;
+    if(!timed){ f.lv = Math.min(5, f.lv + 1); return; }
     if(f.best === null || ms < f.best) f.best = ms;
     const th = thresholds(p, item);
     if(ms <= th.fast) f.lv = Math.min(5, f.lv + 1);
@@ -777,6 +922,31 @@ const RIDES = [
   {id:"ri_mech",    kind:"mech",   c1:"#5b6b8c", c2:"#ff6b6b", cost:60},
   {id:"ri_bugina",   kind:"buggy",  c1:"#2f3b57", c2:"#a4e768", cost:80}
 ];
+/* Paints are what parts are for. They are bought with workshop currency
+   only, so they cannot be raced for, and they change nothing but the
+   colour of a machine: the rival is still your own best lap, and a
+   repaint must not be able to make it easier to beat. */
+const PAINTS = [
+  {id:"pa_neon",   c1:"#3dffa0", c2:"#0f6b3a", cost:30},
+  {id:"pa_cherry", c1:"#ff4d6d", c2:"#8c1230", cost:30},
+  // deep blue on purpose: the starter car is already a light blue, and
+  // a paint that costs forty parts has to look like something happened
+  {id:"pa_ocean",  c1:"#1f6fd0", c2:"#0b3d73", cost:40},
+  {id:"pa_sun",    c1:"#ffc93c", c2:"#a86a00", cost:40},
+  {id:"pa_grape",  c1:"#a06bff", c2:"#4b2a9c", cost:55},
+  {id:"pa_steel",  c1:"#c7d2e5", c2:"#4a5a80", cost:55},
+  {id:"pa_lava",   c1:"#ff7a3d", c2:"#7a2a10", cost:70},
+  {id:"pa_frost",  c1:"#d9f4ff", c2:"#3f7fa8", cost:70}
+];
+const paintById = id => PAINTS.find(x => x.id === id) || null;
+/* Paint goes on the machine currently chosen. If the child is riding an
+   animal there is nothing to paint, so it lands on the starter car and
+   is waiting there next time a machine is picked. */
+function wearPaint(p, paintId){
+  const base = itemById(p.runner).kind ? p.runner : "ri_auto";
+  if(paintId) p.paint[base] = paintId; else delete p.paint[base];
+}
+
 /* The starter six are free and picked before each race, the rest cost coins. */
 const STARTERS = ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha"];
 const ALL_ITEMS = PETS.concat(RIDES);
@@ -918,7 +1088,9 @@ function rideSVG(it){
 }
 function itemSVG(p, id){
   const it = itemById(id);
-  return it.kind ? rideSVG(it) : petSVG(it, stageOf(p, id));
+  if(!it.kind) return petSVG(it, stageOf(p, id));
+  const pa = paintById((p.paint || {})[id]);
+  return rideSVG(pa ? Object.assign({}, it, {c1: pa.c1, c2: pa.c2}) : it);
 }
 
 /* --- track environments --- */
@@ -1172,6 +1344,9 @@ function render(){
     view.name === "game"       ? viewGame(p) :
     view.name === "result"     ? viewResult(p) :
     view.name === "collection" ? viewCollection(p) :
+    view.name === "shop"       ? viewShop(p) :
+    view.name === "job"        ? viewJob(p) :
+    view.name === "jobdone"    ? viewJobDone(p) :
     view.name === "gate"       ? viewGate() :
     view.name === "parent"     ? viewParent(p) : viewPlayers();
   app.innerHTML = html;
@@ -1244,10 +1419,20 @@ function viewMap(p){
     <div class="scr-scroll">
       <div class="hud">
         <span class="chip warm"><span class="em">&#129689;</span> ${p.coins}</span>
+        <span class="chip cool"><span class="em">&#9881;</span> ${p.parts}</span>
         <span class="chip fire"><span class="em">&#128293;</span> ${p.streak} ${p.streak === 1 ? t("day") : t("days")}</span>
         <button class="chip" data-act="collection" style="margin-left:auto"><span class="em">&#127873;</span> ${t("collection")}</button>
       </div>
-      <div class="tracks">${cards}</div>
+      <div class="tracks">${cards}
+        <button class="track shopcard" data-act="shop">
+          <span class="thumb shopthumb">&#128736;</span>
+          <span class="body">
+            <span class="nm">${t("shopTitle")}</span>
+            <span class="sub">${t("shopSub")}</span>
+          </span>
+          <span class="medal">&#9881; ${p.parts}</span>
+        </button>
+      </div>
     </div>
   </div>`;
 }
@@ -1705,6 +1890,181 @@ function viewResult(p){
 }
 function mountResult(){ document.onkeydown = null; stopAnim(); }
 
+/* ---------- workshop ----------
+   Deliberately quiet next to the race screen: no stage, no car, no
+   counter running. What moves is only what the child puts on the
+   counter. */
+let JOB = null;
+function startJob(p, jobId){
+  const job = jobById(jobId);
+  JOB = {job, items: buildJob(p, job), idx:0, picked:[], state:"ask", ok:0, parts:0, retries:0, missed:[]};
+  go("job");
+}
+function jobAskText(item){ return t.apply(null, [item.ask].concat(item.askArgs || [])); }
+function moneyStr(v){ return v + " " + t("moneyUnit"); }
+
+function viewShop(p){
+  const atSchool = chapterJobIds(p);
+  const cards = JOBS.map(job => {
+    const si = jobStage(p, job);
+    const done = (p.jobRuns || {})[job.id] || 0;
+    const now = atSchool.includes(job.id);
+    return `<button class="job${now ? " now" : ""}" data-act="jobstart" data-id="${job.id}">
+      <span class="jobpic">&#128176;</span>
+      <span class="body">
+        <span class="nm">${t("job_" + job.id)}</span>
+        <span class="sub">${t("job_" + job.id + "s")}</span>
+        <span class="sub">${t("jobStep", si + 1, job.keys.length)}${done ? t("jobDoneCount", done) : ""}</span>
+        ${now ? `<span class="atschool">${t("jobAtSchool")}</span>` : ""}
+      </span>
+    </button>`;
+  }).join("");
+  return `<div class="scr">
+    <div class="topbar">
+      <button class="iconbtn" data-act="map" aria-label="${t("back")}">&#8592;</button>
+      <h1>${t("shopTitle")}</h1>
+      <span class="chip cool"><span class="em">&#9881;</span> ${p.parts}</span>
+    </div>
+    <div class="scr-scroll">
+      <div class="pad muted" style="margin:12px 0 2px">${t("shopIntro")}</div>
+      <div class="jobs">${cards}</div>
+      <div class="pad muted" style="margin-top:14px">${t("shopPartsNote")}</div>
+    </div>
+  </div>`;
+}
+
+function viewJob(p){
+  const item = JOB.items[JOB.idx];
+  const pips = JOB.items.map((_, i) => {
+    const m = JOB.marks && JOB.marks[i];
+    return `<span class="pip ${m === 1 || m === 2 ? "ok" : m === 0 ? "bad" : i === JOB.idx ? "now" : ""}"></span>`;
+  }).join("");
+  return `<div class="scr shop">
+    <div class="topbar">
+      <button class="iconbtn" data-act="jobquit" aria-label="${t("back")}">&#10005;</button>
+      <h1>${t("job_" + JOB.job.id)}</h1>
+      <span class="chip cool"><span class="em">&#9881;</span> ${p.parts + JOB.parts}</span>
+    </div>
+    <div class="pips dark" style="padding:0 18px 6px">${pips}</div>
+    <div class="scr-scroll">
+      <div class="jobask" id="jobask">${jobAskText(item)}</div>
+      <div class="counter" id="counter">${counterHTML()}</div>
+      <div class="jobhint" id="jobhint">${t("jobTapCoins")}</div>
+      <div class="tray">${MONEY.map(v =>
+        `<button class="traycoin" data-coin="${v}" aria-label="${moneyStr(v)}">${coinSVG(v)}</button>`).join("")}</div>
+      <div class="pad" style="padding-bottom:calc(18px + var(--safe-b))">
+        <button class="btn mint wide" data-act="jobcheck" id="jobok">${t("jobReady")}</button>
+      </div>
+    </div>
+  </div>`;
+}
+/* What lies on the counter. Tapping a coin there takes it back, so the
+   child can undo without starting over. */
+function counterHTML(){
+  if(!JOB.picked.length) return `<span class="counter-empty">${t("jobEmpty")}</span>`;
+  return JOB.picked.map((v, i) => `<button class="putcoin" data-drop="${i}">${coinSVG(v)}</button>`).join("")
+    + `<span class="counter-sum">${moneyStr(sum(JOB.picked))}</span>`;
+}
+function paintCounter(){
+  const c = document.getElementById("counter");
+  if(c) c.innerHTML = counterHTML();
+}
+function jobTap(v){
+  if(!JOB || JOB.state !== "ask" || JOB.picked.length >= 12) return;
+  JOB.picked.push(v); sfx.coin(); paintCounter();
+}
+function jobDrop(i){
+  if(!JOB || JOB.state !== "ask") return;
+  JOB.picked.splice(i, 1); paintCounter();
+}
+/* Coins laid out the way the game would do it, shown after a miss so
+   the child sees one right answer rather than being told to try again. */
+function solutionHTML(item){
+  return item.solution.map(v => `<span class="putcoin small">${coinSVG(v)}</span>`).join("");
+}
+function jobCheck(){
+  if(!JOB || JOB.state !== "ask") return;
+  const p = P(), item = JOB.items[JOB.idx];
+  if(!JOB.picked.length) return;
+  const correct = item.check(JOB.picked);
+  const near = !correct && item.near && item.near(JOB.picked);
+  const isRetry = !!item.retry;
+  JOB.state = "done-step";
+  JOB.marks = JOB.marks || [];
+  if(!isRetry) record(p, item, correct, null);
+
+  const hint = document.getElementById("jobhint");
+  if(correct){
+    JOB.ok++;
+    JOB.marks[JOB.idx] = isRetry ? 2 : 1;
+    JOB.parts += isRetry ? 1 : 2;
+    sfx.great(); buzz(18);
+    hint.innerHTML = `<b>${t(isRetry ? "jobRetryOk" : "jobOk")}</b>`;
+  } else {
+    JOB.marks[JOB.idx] = 0;
+    JOB.missed.push(item);
+    sfx.bad(); buzz([18, 60, 18]);
+    if(near){ JOB.parts += 1; }
+    hint.innerHTML = `<b>${t(near ? "jobTooMany" : "jobMiss", item.solution.length)}</b>`
+      + `<div class="solrow">${solutionHTML(item)}</div>`;
+    const tries = (item.tries || 0) + 1;
+    if(tries <= 1 && JOB.items.length < JOB.job.n + 3){
+      JOB.items.push(Object.assign({}, item, {retry:true, tries}));
+      JOB.retries++;
+    }
+  }
+  const ok = document.getElementById("jobok");
+  if(ok) ok.textContent = t("jobNext");
+  // the dot for this task turns over straight away, so the answer is
+  // marked before the next one is even shown
+  const dots = document.querySelectorAll(".pips .pip");
+  if(dots[JOB.idx]) dots[JOB.idx].className = "pip " + (JOB.marks[JOB.idx] ? "ok" : "bad");
+}
+function jobNext(){
+  JOB.idx++;
+  JOB.picked = [];
+  if(JOB.idx >= JOB.items.length){ finishJob(); return; }
+  JOB.state = "ask";
+  go("job");
+}
+function finishJob(){
+  const p = P();
+  // finishing the piece of work is worth something on its own, so a
+  // child who found it hard still leaves with more than nothing
+  JOB.parts += 3;
+  p.parts += JOB.parts;
+  p.jobRuns[JOB.job.id] = (p.jobRuns[JOB.job.id] || 0) + 1;
+  touchStreak(p);
+  save();
+  sfx.win();
+  go("jobdone");
+}
+function viewJobDone(p){
+  const miss = [...new Map(JOB.missed.map(i => [i.key + "|" + i.amount, i])).values()].slice(0, 3);
+  return `<div class="scr">
+    <div class="scr-scroll">
+      <div class="result">
+        <div class="medal">&#9881;</div>
+        <h2>${t("jobFinished")}</h2>
+        <div class="muted">${t("jobFinishedSub")}</div>
+        <div class="statrow">
+          <div class="stat"><div class="v">+${JOB.parts}</div><div class="l">${t("statParts")}</div></div>
+          <div class="stat"><div class="v">${JOB.ok}/${JOB.items.length}</div><div class="l">${t("statSolved")}</div></div>
+          <div class="stat"><div class="v">${p.parts}</div><div class="l">${t("statPartsAll")}</div></div>
+        </div>
+        ${miss.length ? `<div class="h2" style="margin-bottom:6px">${t("jobReviewNext")}</div>
+          <div class="factchips">${miss.map(i =>
+            `<span class="factchip">${jobAskText(i)}</span>`).join("")}</div>` : ""}
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
+          <button class="btn mint wide" data-act="jobagain">${t("jobAgain")}</button>
+          <button class="btn ghost wide" data-act="shop">${t("jobBackToShop")}</button>
+          <button class="btn ghost wide" data-act="collection">${t("jobSpendParts")}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 /* ---------- garage / collection ---------- */
 function viewCollection(p){
   const cell = it => {
@@ -1740,8 +2100,34 @@ function viewCollection(p){
       <div class="grid">${RIDES.map(cell).join("")}</div>
       <div class="h2 pad" style="margin-bottom:8px">${t("animals")}</div>
       <div class="grid">${PETS.map(cell).join("")}</div>
+      <div class="h2 pad" style="margin-bottom:8px">${t("paints")}</div>
+      <div class="pad muted" style="margin-bottom:10px">${t("paintsNote")}</div>
+      <div class="grid">${paintCells(p)}</div>
+      <div style="height:20px"></div>
     </div>
   </div>`;
+}
+/* Paint is shown on a machine rather than as a swatch, because a colour
+   chip tells a child nothing about what the car will look like. The
+   machine shown is the one currently chosen, so the preview is of their
+   own racer; an animal has nothing to paint, so the plain car stands in. */
+function paintCells(p){
+  const base = itemById(p.runner).kind ? itemById(p.runner) : RIDES.find(r => r.id === "ri_auto");
+  const worn = (p.paint || {})[base.id] || "";
+  const cell = (id, svg, label, cost, on) => `
+    <button class="item ${on ? "sel" : ""}" data-act="${cost === null ? "usepaint" : "buypaint"}" data-id="${id}">
+      <span class="pic">${svg}</span>
+      <span class="nm">${label}</span>
+    </button>`;
+  const none = cell("", rideSVG(base), t("paintNone"), null, !worn);
+  const rest = PAINTS.map(pa => {
+    const svg = rideSVG(Object.assign({}, base, {c1: pa.c1, c2: pa.c2}));
+    const owned = (p.paints || []).includes(pa.id);
+    return owned
+      ? cell(pa.id, svg, t(pa.id), null, worn === pa.id)
+      : cell(pa.id, svg, "&#9881; " + pa.cost, pa.cost, false);
+  }).join("");
+  return none + rest;
 }
 
 /* ---------- parent code ---------- */
@@ -1953,6 +2339,12 @@ function ask(title, text, okLabel, cb){
 document.addEventListener("click", e => {
   const kb = e.target.closest("[data-k]");
   if(kb){ tap(kb.dataset.k); return; }
+  // the workshop answers by handling coins, so it has its own two
+  // attributes rather than borrowing the keypad's
+  const cn = e.target.closest("[data-coin]");
+  if(cn){ jobTap(+cn.dataset.coin); return; }
+  const dp = e.target.closest("[data-drop]");
+  if(dp){ jobDrop(+dp.dataset.drop); return; }
   const el = e.target.closest("[data-act]");
   if(!el) return;
   const act = el.dataset.act, id = el.dataset.id, p = P();
@@ -1988,6 +2380,19 @@ document.addEventListener("click", e => {
   if(act === "map"){ go("map"); return; }
   if(act === "sound"){ DB.sound = !DB.sound; save(); if(DB.sound) sfx.ok(); render(); return; }
   if(act === "collection"){ go("collection"); return; }
+
+  if(act === "shop"){ go("shop"); return; }
+  if(act === "jobstart"){ startJob(p, id); return; }
+  if(act === "jobcheck"){ JOB && JOB.state === "done-step" ? jobNext() : jobCheck(); return; }
+  if(act === "jobagain"){ startJob(p, JOB.job.id); return; }
+  if(act === "jobquit"){
+    // leaving early keeps what was already earned: the workshop never
+    // punishes stopping, the same way a race always finishes
+    ask(t("jobQuitTitle"), t("jobQuitText"), t("jobQuitYes"), () => {
+      p.parts += JOB.parts; save(); go("shop");
+    });
+    return;
+  }
 
   if(act === "play"){
     const owned = ALL_ITEMS.filter(it => p.owned.includes(it.id));
@@ -2043,6 +2448,21 @@ document.addEventListener("click", e => {
     return;
   }
 
+  if(act === "buypaint"){
+    const pa = paintById(id);
+    if(p.parts < pa.cost){
+      sheet(`<h3>${t("notEnoughPartsTitle")}</h3><div class="muted">${t("notEnoughPartsText", pa.cost - p.parts)}</div>
+        <button class="btn wide" style="margin-top:16px" data-act="closesheet">${t("okBtn")}</button>`);
+      return;
+    }
+    ask(t("buyPaintTitle", t(pa.id)), t("buyPaintText", pa.cost, p.parts), t("buyYes"), () => {
+      p.parts -= pa.cost; p.paints.push(pa.id);
+      wearPaint(p, pa.id); save(); sfx.coin(); render();
+    });
+    return;
+  }
+  if(act === "usepaint"){ wearPaint(p, id); save(); render(); return; }
+
   if(act === "gate"){ DB.pin ? go("gate") : go("setpin"); return; }
   if(act === "gatego"){
     const v = (document.getElementById("gatein").value || "").trim();
@@ -2088,6 +2508,7 @@ document.addEventListener("click", e => {
       if(DB.profiles[i].curriculum && !curriculumById(DB.profiles[i].curriculum)) DB.profiles[i].curriculum = null;
       normalizeChapter(DB.profiles[i]);
       seedOpened(DB.profiles[i]);
+      seedShop(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>

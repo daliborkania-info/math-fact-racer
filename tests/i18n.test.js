@@ -15,7 +15,7 @@ const app=fs.readFileSync(path.join(ROOT, 'src', 'app.js'),'utf8');
 const used=new Set([...app.matchAll(/\bt\("([a-zA-Z0-9_]+)"/g)].map(m=>m[1]));
 // klice skladane za behu, napriklad t("trk_" + tr.id), se v kodu objevi
 // jen jako prefix a ve slovniku samy o sobe nejsou
-const dyn=['trk_','res','legend'];
+const dyn=['trk_','res','legend','job_'];
 const missing=[...used].filter(k=>I18N.en[k]===undefined && !dyn.includes(k));
 console.log('\npouzitych klicu v kodu:', used.size, '| bez prekladu:', missing.length?missing.join(', '):'zadny');
 

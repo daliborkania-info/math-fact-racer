@@ -1,11 +1,12 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po generátoru sčítání a odčítání
-do tisíce
+Poslední aktualizace: 12. září 2026, po generátoru do tisíce a po
+postavení dílny
 
-**Kde se přestalo a kudy dál:** `add_sub_1000` je hotový, trať `a1000` je
-na mapě a kapitoly 23, 24 a 25 třetího ročníku jsou odemčené. Na řadě je
-dvojice `mult_beyond` a `div_beyond`. Hotový prompt je na konci, v oddílu 14.
+**Kde se přestalo a kudy dál:** `add_sub_1000` je hotový a s ním trať `a1000`.
+Hotová je i **dílna**, druhý režim bez stopek a bez bodů za rychlost, zatím
+s jednou zakázkou, penězi. Na řadě je dvojice `mult_beyond` a `div_beyond`.
+Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -72,7 +73,12 @@ Tyhle věci se nemění bez výslovného pokynu uživatele. Každá je odpověd�
 konkrétní zjištění z výzkumu, podrobné zdůvodnění včetně odkazů je v `README.cs.md`.
 
 Odpověď se píše na číselné klávesnici, nikdy se nevybírá z možností. Vybavení
-z paměti staví paměťovou stopu, poznávání ne.
+z paměti staví paměťovou stopu, poznávání ne. **Tohle platí pro závod.**
+V dílně se odpovídá manipulací, tedy skládáním mincí na pult, což poznávání
+z nabídky není: dítě musí vědět, co poskládat, a možností je víc.
+
+**Dílna neměří čas a nedává body za rychlost. Nikdy.** Je to celý důvod, proč
+existuje vedle závodu. Cokoli, co by do dílny propašovalo stopky, ji ruší.
 
 Čas se měří, ale nikde neběží odpočet ani stopky. Rychlost přidává body, nikdy
 neubírá a nikde není vidět jako tlak.
@@ -226,6 +232,50 @@ déle než vybavit si spoj.
 
 ---
 
+## 4b. Dílna
+
+Druhý režim, postavený v září 2026. Vzniknul proto, že část učiva není fakt
+k vybavení, ale malá úvaha, a na úvahu se nesmí pouštět stopky.
+
+**Co tam je.** Karta na mapě pod tratěmi, výrazně jiná než okruhy, teplé barvy
+a ikona nářadí. Uvnitř seznam zakázek, zatím jedna, peníze.
+
+**Zakázka** je šest úloh. Aktuální krok nese většinu, dřívější se vracejí jako
+opakování, tedy stejný tvar jako u stupňovaných tratí, `focusAndReview()` sdílí
+se závodem. Zakázka se nedá prohrát ani nedojet.
+
+**Peníze mají tři kroky.** `wm1` zaplať přesně, `wm2` zaplať co nejmenším počtem
+mincí, `wm3` kolik se vrátí. Mince jsou 1, 2, 5, 10, 20 a 50, což jsou zároveň
+české koruny, eurocenty i britské pence, takže jedna sada kreseb stačí na
+všechny tři jazyky a mění se jen jednotka.
+
+**Nejmenší počet mincí musí mít jednu správnou hodnotu**, jinak by úloha `wm2`
+neměla co porovnávat. Hltavý postup je pro tuhle soustavu prokazatelně optimální
+a `items.test.js` to ověřuje proti dynamickému programování do dvou set.
+
+**Odpovídá se skládáním mincí na pult.** Klepnutí na minci v zásobníku ji přidá,
+klepnutí na minci na pultu ji vezme zpátky. Vstupní prvek se jmenuje `coins`
+a žije celý uvnitř dílny, nesahá na `tap()` ani na klávesnici závodu.
+
+**Platí se v součástkách.** Dva za vyřešenou úlohu, jeden za opravenou nebo za
+`wm2` se správnou částkou ale zbytečně mnoha mincemi, tři za dokončenou zakázku.
+Plná zakázka dá patnáct. Za součástky se v garáži kupují **nátěry**, tedy barevné
+varianty strojů. Nátěr nemá na jízdu žádný vliv, jen na vzhled; soupeřem je
+vlastní nejlepší jízda, takže cokoli, co by jízdu zrychlilo, by rozbilo srovnání.
+Součástky se nedají vyjezdit a mince se nedají vydělat v dílně, obojí schválně.
+
+**Odchod z dílny nic nebere.** Součástky vydělané do té chvíle zůstávají.
+
+**Kapitola smí být jen pro dílnu.** `pool: {shop:["money"]}` dělá kapitolu
+vybratelnou, aniž by vyrobila trať. Proto se rozdělilo `isPlayable()`, tedy jde
+vybrat, od `schoolReady()`, tedy dělá trať na mapě. Zakázka, která je zrovna
+v kapitole, to říká štítkem na kartě.
+
+**Klíče dílny začínají na `w`.** Ukládají se do stejné Leitnerovy krabičky jako
+příklady, ale žádný pool závodu je vyrobit neumí a trať "co ti nejde" je
+vyfiltruje. `record()` s `ms = null` posune úroveň bez měření času a nezapočítá
+se do průměrné doby odpovědi.
+
 ## 5. Trati
 
 Třináct tratí, každá má vlastní generovaný okruh a prostředí.
@@ -284,7 +334,12 @@ profil = {
   trackRuns: { "t1": 8 },
   opened: { "t1": true },                // trati, ktere uz jednou byly otevrene
   owned: [...], runner: "ri_auto", xp: { "pet_kiki": 120 },
-  coins, force: {}, autoUnlock, qCount, speedMode,
+  coins,
+  parts: 0,                              // mena dilny, zavodem se nevydela
+  paints: ["pa_neon"],                   // koupene natery
+  paint: { "ri_auto": "pa_neon" },       // ktery nater je na kterem stroji
+  jobRuns: { "money": 3 },               // hotove zakazky
+  force: {}, autoUnlock, qCount, speedMode,
   curriculum: null,                      // id z CURRICULA, null = adaptivní režim
   chapter: null,                         // číslo kapitoly uvnitř toho kurikula
   chapterMode: "soft",                   // soft | hard
@@ -296,8 +351,8 @@ PIN je uložený jen jako hash funkcí `hashPin`. Není to skutečné zabezpeče
 jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 
 Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
-pokud je nemá, `normalizeChapter()` srovná kapitolu a `seedOpened()` doplní
-seznam otevřených tratí. Nové migrace patří do `load()`, a pokud se týkají
+pokud je nemá, `normalizeChapter()` srovná kapitolu, `seedOpened()` doplní
+seznam otevřených tratí a `seedShop()` prázdnou dílnu. Nové migrace patří do `load()`, a pokud se týkají
 profilu jako celku, taky do větve `import`.
 
 ---
@@ -311,6 +366,9 @@ profilu jako celku, taky do větve `import`.
    `DB.lang`, nebo dětský `profil.lang`. Rodičovské obrazovky jsou vyjmenované
    v `PARENT_VIEWS`.
 2. Úložiště. `load`, `save`, `P()`, `newProfile`, `touchStreak`.
+3b. Dílna. Zakázky, peníze, kresba mincí. Sdílí se závodem `focusAndReview()`,
+   `stageIndex()` a Leitnerovu krabičku, všechno ostatní má vlastní, včetně
+   stavu `JOB` a obrazovek, aby se do závodu nemohla propsat.
 3. Příklady. Generování, klíče, stupně `E_STAGES`, tratě, kurikulum, výběr do
    závodu, zápis odpovědi do krabičky.
    **Otázka si o sobě řekne všechno sama.** `itemFromKey()` obalí generátor
@@ -360,11 +418,13 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá třináct okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá šestnáct okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
-stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin a kroky
-do tisíce, u kterých ověřuje i to, že každý kbelík dělá to, co slibuje.
+stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
+do tisíce, u kterých ověřuje i to, že každý kbelík dělá to, co slibuje, a dílnu,
+tedy že hltavé drobné jsou opravdu nejmenší, že úloha uzná své vlastní řešení
+a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
@@ -465,7 +525,7 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 70 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 71 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
@@ -475,7 +535,7 @@ protože jeden kbelíkový klíč generuje celou rodinu příkladů; bez toho by
 kapitola s jediným kbelíkem vypadala jako prázdná.
 
 **Kapitola bez generátoru je nevybratelná.** Rozhoduje `isPlayable(ch)`, tedy
-`poolSize` aspoň čtyři. `playableChapters(cur)` vrací, co jde vybrat, a volba
+`poolSize` aspoň čtyři, nebo aspoň jedna zakázka dílny. `playableChapters(cur)` vrací, co jde vybrat, a volba
 učebnice skáče na první z nich, ne na první kapitolu v knize.
 `normalizeChapter(p)` srovná uložený profil na nejbližší dřívější hratelnou
 kapitolu, nikdy dopředu, a volá se v `load()` i po importu zálohy. V seznamu
@@ -486,8 +546,8 @@ neumí; nehratelné položky jsou `disabled`.
 do něj jen to, co se má zautomatizovat a kde je jedna krátká odpověď. Slovní
 úlohy, geometrie, písemné algoritmy a čtení z tabulek potřebují druhý režim bez
 stopek a bez bodů za rychlost, protože odměňovat rychlost u úlohy, kde je hlavní
-práce pečlivé čtení, učí dítě hádat. Pracovně se pro ten druhý režim uvažovalo
-o názvu servis nebo dílna. Zatím neexistuje.
+práce pečlivé čtení, učí dítě hádat. Ten druhý režim se jmenuje **dílna**
+a od září 2026 existuje, viz oddíl 4b.
 
 **Autorská práva.** Z učebnice se přebírá výhradně struktura, tedy jaká témata,
 v jakém pořadí, v jakém rozsahu a jakým typem úlohy. Zadání ani obrázky se
@@ -500,8 +560,8 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání počítání do tisíce je 70 hratelných
-kapitol z 95, po ročnících 15/18, 42/44 a 13/33.
+dojmu. Stav po přidání počítání do tisíce a dílny je 71 hratelných
+kapitol z 95, po ročnících 15/18, 43/44 a 13/33.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
@@ -519,7 +579,8 @@ kapitol z 95, po ročnících 15/18, 42/44 a 13/33.
 | `fraction_read` | `frac`, dílna | 2 | g3: 19, 32 |
 | `written_mult` | `col`, dílna | 1 | g3: 15 |
 | `count_objects` | dílna | 3 | g1: 1, 2, 3 |
-| `finance_money` | dílna | 1 | g2: 3 |
+
+`finance_money` byl v téhle tabulce poslední a je hotový, viz oddíl 4b.
 
 **Hlavní zjištění.** Dvanáct z dvaceti zbylých zamčených kapitol třetí třídy
 nepotřebuje na vstupu vůbec nic nového, stačí generátory na `pad`. Třetí třída
@@ -529,8 +590,9 @@ tím jde z 13/33 na 25/33, aniž by se sáhlo na klávesnici.
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
 teď přes `as100`. Je to prohloubení, ne odemčení, a navíc potřebuje dílnu.
 
-**Zbytek prvního ročníku už chybí jen dílna.** Kapitoly 1 až 3 jsou počítání
-předmětů na obrázku, nic pro závod.
+**Zbytek prvního ročníku čeká na `count_objects`.** Kapitoly 1 až 3 jsou
+počítání předmětů na obrázku, nic pro závod. Dílna, do které patří, už stojí,
+takže zbývá jen ten generátor a kresba počítaných věcí.
 
 ## 12b. Další krok
 
@@ -544,7 +606,12 @@ existujících, a to je jiný typ zásahu do `itemFromKey`.
 
 Teprve pak nové vstupní prvky: `pad2` a `div_remainder`, `pad3` a `place_value`,
 `pick` a dvojice `parity` s `digit_count`, úplně nakonec `cmp` a porovnávání.
-Dílna až po tom všem.
+
+**Dílna měla být až po tom všem, ale předběhla**, protože se ukázalo, že čtyři
+kapitoly nečekají na nic jiného a že bez ní nejde říct, kam patří slovní úlohy.
+Stojí, takže další témata dílny jsou od téhle chvíle jen další zakázka:
+`count_objects` pro první ročník a `word_problem` pro slovní úlohy, kterých je
+třetí ročník plný.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
 to dál. Mapa tím naroste a bude ji potřeba přeskládat do skupin, jakmile tratí

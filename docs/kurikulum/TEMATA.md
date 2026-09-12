@@ -11,8 +11,8 @@ trenažér plynulosti, měří čas a odměňuje rychlost.
 
 Do **dílny** patří všechno, kde je hlavní prací pečlivé čtení, rozvaha nebo více
 kroků. Dílna neměří čas a nedává body za rychlost, protože odměňovat rychlost
-u úlohy, kde se má přemýšlet, učí dítě hádat. Dílna zatím neexistuje, je to
-druhý režim k dostavění.
+u úlohy, kde se má přemýšlet, učí dítě hádat. Dílna od září 2026 existuje
+a platí se v ní součástkami; podrobnosti v docs/PROJECT-STATE.md, oddíl 4b.
 
 Zařazení není o obtížnosti. Dělení se zbytkem je těžké a patří do závodu, protože
 je to jedna vybavovaná dvojice čísel. Volba správné jednotky je snadná a patří
@@ -23,6 +23,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | kód | prvek | stav |
 | --- | --- | --- |
 | `pad` | číselná klávesnice, jedna odpověď | hotovo |
+| `coins` | mince se skládají na pult, odpověď je hrst mincí | hotovo, jen v dílně |
 | `pad2` | dvě políčka vedle sebe, podíl a zbytek | k dodělání |
 | `pad3` | tři políčka, stovky a desítky a jednotky | k dodělání |
 | `cmp` | tři velká tlačítka `<` `=` `>` | k dodělání |
@@ -102,7 +103,7 @@ kterékoli z nich napíše generátor, je potřeba se podívat na pár stran.
 | `average` | aritmetický průměr | `pad` | závod |
 | `estimate` | odhad výsledku | `pick` | dílna |
 | `chart_read` | čtení z diagramů a grafů | `pad` | dílna |
-| `finance_money` | finanční gramotnost, peníze, měny, hospodaření | ? | dílna |
+| `finance_money` | placení, drobné a vracení | `coins`, dílna | hotovo |
 
 ## Poznámky ke generátorům
 

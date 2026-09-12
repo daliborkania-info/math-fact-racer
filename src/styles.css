@@ -359,7 +359,66 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
 .pickitem.sel .nm{color:var(--grape-dark)}
 .pickscroll{max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}
 
+/* ---------- workshop ----------
+   The race screen is dark, loud and moving. This one is deliberately
+   none of those: warm paper, nothing animated, nothing counting down.
+   The child should be able to tell which mode they are in from across
+   the room. */
+.chip.cool{background:#eef0ff;border-color:#c9cfff;color:#3b3a8f}
+.track.shopcard{background:linear-gradient(160deg,#fff6e6,#ffe9c9);border-color:#f0cf95}
+.shopthumb{display:grid;place-items:center;font-size:38px;background:#ffdfa8 !important}
+.track.shopcard .medal{font-size:14px;font-weight:800;color:#8a5a00;top:12px}
+
+.shop{background:#fdf7ee}
+.jobs{display:flex;flex-direction:column;gap:12px;padding:8px 18px 0}
+.job{
+  display:flex;gap:14px;align-items:center;text-align:left;background:var(--paper);
+  border:2px solid var(--line);border-radius:var(--r-l);padding:12px;box-shadow:var(--shadow);
+}
+.job:active{transform:translateY(2px)}
+.job .jobpic{width:62px;height:62px;flex:none;border-radius:18px;background:#fff1d6;display:grid;place-items:center;font-size:32px}
+.job .nm{font-family:var(--font-display);font-size:18px;line-height:1.15;display:block}
+.job .sub{font-size:12.5px;color:var(--ink-soft);font-weight:700;display:block}
+.pips.dark .pip{background:var(--shell-2);box-shadow:inset 0 0 0 1.5px var(--line)}
+.pips.dark .pip.now{background:var(--grape);transform:scale(1.3);box-shadow:none}
+.job.now{border-color:var(--mint);box-shadow:0 0 0 3px rgba(18,179,106,.14),var(--shadow)}
+.atschool{display:inline-block;margin-top:5px;font-size:11px;font-weight:800;letter-spacing:.3px;
+  text-transform:uppercase;color:var(--mint-dark);background:#dff7ea;border-radius:999px;padding:3px 9px}
+
+.jobask{
+  font-family:var(--font-display);font-size:clamp(19px,5.4vw,24px);line-height:1.3;
+  text-wrap:balance;text-align:center;padding:16px 18px 10px;
+}
+/* The counter: what the child has put down so far. It grows downwards
+   rather than scrolling sideways, so nothing already laid out can slip
+   out of sight while more is being added. */
+.counter{
+  margin:0 18px;min-height:86px;border-radius:var(--r-l);background:var(--paper);
+  border:3px dashed var(--line);padding:10px;display:flex;flex-wrap:wrap;gap:6px;
+  align-items:center;justify-content:center;
+}
+.counter-empty{color:var(--ink-faint);font-size:13.5px;font-weight:700}
+.counter-sum{
+  margin-left:6px;font-family:var(--font-display);font-size:22px;font-variant-numeric:tabular-nums;
+  background:var(--grape-soft);color:var(--grape-dark);border-radius:999px;padding:4px 14px;
+}
+.putcoin{width:44px;height:44px;display:block}
+.putcoin.small{width:36px;height:36px;display:inline-block}
+.putcoin .coin,.traycoin .coin{width:100%;height:100%;display:block}
+.jobhint{min-height:46px;text-align:center;font-size:13.5px;color:var(--ink-soft);
+  line-height:1.4;font-weight:700;padding:10px 18px 0}
+.jobhint b{font-family:var(--font-display);font-size:17px;color:var(--ink)}
+.solrow{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.tray{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:7px;padding:12px 14px 14px;
+}
+.traycoin{height:clamp(52px,9vh,62px);border-radius:var(--r-m);background:var(--paper);
+  box-shadow:0 4px 0 var(--line);display:grid;place-items:center;padding:5px}
+.traycoin:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+
 @media (max-height:660px){
+  .counter{min-height:72px}
+  .putcoin{width:38px;height:38px}
   .stage{height:148px}
   .runner,.ghost{width:54px;height:54px;bottom:30px}
   .question{font-size:clamp(32px,10vw,44px)}

@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -65,17 +65,17 @@ for(const k of A.clockKeys()) for(let i=0;i<80;i++){
   const it=A.itemFromKey(k); clkN++;
   const h=Math.floor(it.answer/100), m=it.answer%100;
   const okRange = h>=1 && h<=23 && m>=0 && m<=59 && it.disp===h+':'+(m<10?'0':'')+m;
-  if(!okRange){clkBad++;if(clkBad<5)console.log('CHYBA casu',k,it.answer,it.disp);continue;}
+  if(!okRange){clkBad++;if(clkBad<5)console.log('  !!  chyba casu',k,it.answer,it.disp);continue;}
   const noon=!!(A.C_BUCKETS.find(b=>b.id===k)||{}).pm;
-  if(noon!==(h>12)){clkBad++;if(clkBad<5)console.log('spatna pulka dne',k,it.disp);continue;}
-  if(noon!==!!it.night){clkBad++;if(clkBad<5)console.log('mesic nesouhlasi s casem',k,it.disp);continue;}
+  if(noon!==(h>12)){clkBad++;if(clkBad<5)console.log('  !!  spatna pulka dne',k,it.disp);continue;}
+  if(noon!==!!it.night){clkBad++;if(clkBad<5)console.log('  !!  mesic nesouhlasi s casem',k,it.disp);continue;}
   // rucicky na ciferniku musi ukazovat presne to, co je spravna odpoved
   const hands=[...it.svg.matchAll(HAND)];
-  if(hands.length!==2){clkBad++;if(clkBad<5)console.log('cifernik nema dve rucicky',k,hands.length);continue;}
+  if(hands.length!==2){clkBad++;if(clkBad<5)console.log('  !!  cifernik nema dve rucicky',k,hands.length);continue;}
   const ang=g=>{const a=(Math.atan2(+g[3]-46,-(+g[4]-54))*180/Math.PI+360)%360; return a;};
   const near=(a,b)=>Math.min(Math.abs(a-b),360-Math.abs(a-b))<1.5;
-  if(!near(ang(hands[0]),((h%12)*30+m*0.5)%360)){clkBad++;if(clkBad<5)console.log('mala rucicka jinde',k,it.disp);continue;}
-  if(!near(ang(hands[1]),m*6)){clkBad++;if(clkBad<5)console.log('velka rucicka jinde',k,it.disp);continue;}
+  if(!near(ang(hands[0]),((h%12)*30+m*0.5)%360)){clkBad++;if(clkBad<5)console.log('  !!  mala rucicka jinde',k,it.disp);continue;}
+  if(!near(ang(hands[1]),m*6)){clkBad++;if(clkBad<5)console.log('  !!  velka rucicka jinde',k,it.disp);continue;}
   // cela hodina se smi napsat i bez nul, tedy sedmou hodinu staci jako 7
   if(m===0){
     if(!it.check(String(h))){clkBad++;if(clkBad<5)console.log('  !!  cela hodina neuznala kratky zapis',it.disp,'vs '+h);continue;}
@@ -114,9 +114,9 @@ console.log('sampionat respektuje stupne:',mixBad?'ne':'ano');
 
 // 3. platnost SVG (parovani tagu a NaN)
 let svgBad=0;
-A.PETS.forEach(x=>[1,2,3].forEach(s=>{const v=A.petSVG(x,s); if(/NaN|undefined/.test(v)){svgBad++;console.log('SVG problem',x.id,s);}}));
-A.RIDES.forEach(x=>{const v=A.rideSVG(x); if(/NaN|undefined/.test(v)){svgBad++;console.log('SVG problem',x.id);}});
-Object.keys(A.ENVS).forEach(e=>{const v=A.circuitSVG(e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('ENV problem',e);}});
+A.PETS.forEach(x=>[1,2,3].forEach(s=>{const v=A.petSVG(x,s); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id,s);}}));
+A.RIDES.forEach(x=>{const v=A.rideSVG(x); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id);}});
+Object.keys(A.ENVS).forEach(e=>{const v=A.circuitSVG(e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  ENV problem',e);}});
 console.log('vadnych SVG:',svgBad);
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
@@ -132,14 +132,18 @@ for(const c of A.CURRICULA){
   const seen=new Set();
   for(const ch of c.chapters){
     chapters++;
-    if(seen.has(ch.n)){curBad++;console.log('duplicitni cislo kapitoly',c.id,ch.n);}
+    if(seen.has(ch.n)){curBad++;console.log('  !!  duplicitni cislo kapitoly',c.id,ch.n);}
     seen.add(ch.n);
-    if(!ch.name||!ch.src){curBad++;console.log('kapitola bez nazvu nebo zdroje',c.id,ch.n);}
+    if(!ch.name||!ch.src){curBad++;console.log('  !!  kapitola bez nazvu nebo zdroje',c.id,ch.n);}
     const keys=A.poolKeys(ch.pool);
-    if(!ch.pool){ if(keys.length){curBad++;console.log('prazdny pool neco vratil',c.id,ch.n);} continue; }
-    if(!keys.length){curBad++;console.log('pool bez klicu',c.id,ch.n);continue;}
-    for(const k of keys) if(!VALID.has(k)){curBad++;console.log('neznamy klic',c.id,ch.n,k);break;}
-    if(A.poolSize(keys)>=4) playable++; else tiny++;
+    const jobs=A.chapterJobs(ch);
+    if(!ch.pool){ if(keys.length){curBad++;console.log('  !!  prazdny pool neco vratil',c.id,ch.n);} continue; }
+    // kapitola smi mit misto prikladu do zavodu zakazku v dilne, ale
+    // nesmi mit ani jedno; prazdny pool je vzdycky chyba zapisu
+    if(!keys.length && !jobs.length){curBad++;console.log('  !!  pool bez klicu i bez zakazky',c.id,ch.n);continue;}
+    if((ch.pool.shop||[]).length!==jobs.length){curBad++;console.log('  !!  kapitola odkazuje na neznamou zakazku',c.id,ch.n,(ch.pool.shop||[]).join(','));continue;}
+    for(const k of keys) if(!VALID.has(k)){curBad++;console.log('  !!  neznamy klic',c.id,ch.n,k);break;}
+    if(A.poolSize(keys)>=4||jobs.length) playable++; else tiny++;
   }
 }
 console.log('kurikul:',A.CURRICULA.length,'| kapitol:',chapters,'| hratelnych:',playable,'| prilis malych:',tiny,'| chyb:',curBad);
@@ -151,25 +155,25 @@ for(const c of A.CURRICULA){
     const q=A.newProfile('K'); q.curriculum=c.id; q.chapter=ch.n;
     A.DB.profiles=[q]; A.DB.current=q.id;
     if(!A.schoolReady(q)) continue;
-    if(!A.visibleTracks(q).some(t=>t.id==='school')){runBad++;console.log('trat skoly chybi na mape',c.id,ch.n);}
+    if(!A.visibleTracks(q).some(t=>t.id==='school')){runBad++;console.log('  !!  trat skoly chybi na mape',c.id,ch.n);}
     const pool=new Set(A.schoolPool(q));
     // tvrdy rezim nesmi pustit nic mimo kapitolu
     q.chapterMode='hard';
     const hard=A.buildRun(q,A.trackById('school'));
-    if(hard.length!==20){runBad++;console.log('spatna delka zavodu',c.id,ch.n,hard.length);}
-    for(const it of hard) if(!pool.has(it.key)){runBad++;console.log('tvrdy rezim pustil cizi priklad',c.id,ch.n,it.key);break;}
+    if(hard.length!==20){runBad++;console.log('  !!  spatna delka zavodu',c.id,ch.n,hard.length);}
+    for(const it of hard) if(!pool.has(it.key)){runBad++;console.log('  !!  tvrdy rezim pustil cizi priklad',c.id,ch.n,it.key);break;}
     // volny rezim musi mit vetsinu z kapitoly
     q.chapterMode='soft';
     const soft=A.buildRun(q,A.trackById('school'));
     const inCh=soft.filter(it=>pool.has(it.key)).length;
-    if(inCh < soft.length*0.6){runBad++;console.log('volny rezim ma malo z kapitoly',c.id,ch.n,inCh+'/'+soft.length);}
+    if(inCh < soft.length*0.6){runBad++;console.log('  !!  volny rezim ma malo z kapitoly',c.id,ch.n,inCh+'/'+soft.length);}
   }
 }
 // bez zvolene ucebnice se trat skoly na mape neobjevi a hra nespadne
 const q0=A.newProfile('N'); A.DB.profiles=[q0]; A.DB.current=q0.id;
-if(A.schoolReady(q0)){runBad++;console.log('trat skoly se objevila bez ucebnice');}
-if(A.visibleTracks(q0).some(t=>t.id==='school')){runBad++;console.log('trat skoly je na mape bez ucebnice');}
-if(A.buildRun(q0,A.trackById('school')).length!==20){runBad++;console.log('nouzovy zavod nema 20 otazek');}
+if(A.schoolReady(q0)){runBad++;console.log('  !!  trat skoly se objevila bez ucebnice');}
+if(A.visibleTracks(q0).some(t=>t.id==='school')){runBad++;console.log('  !!  trat skoly je na mape bez ucebnice');}
+if(A.buildRun(q0,A.trackById('school')).length!==20){runBad++;console.log('  !!  nouzovy zavod nema 20 otazek');}
 console.log('chyb v zavodech podle kapitoly:',runBad);
 
 // 6. stupne prechodu pres desitku pokryji cely obor a radi se od lehciho
@@ -179,53 +183,53 @@ A.ADD.forEach(f=>{all20.add(A.ak(f.a,f.b)); all20.add(A.sk(f.a,f.b));});
 const covered=new Set(); let overlap=0;
 A.E_STAGES.forEach((st,i)=>{
   const ks=A.stageKeys(i);
-  if(!ks.length){stBad++;console.log('prazdny stupen',st.id);}
+  if(!ks.length){stBad++;console.log('  !!  prazdny stupen',st.id);}
   for(const k of ks){ if(covered.has(k)) overlap++; covered.add(k); }
 });
-if(overlap){stBad++;console.log('stupne se prekryvaji o',overlap,'klicu');}
-if(covered.size!==all20.size){stBad++;console.log('stupne nepokryly cely obor',covered.size,'z',all20.size);}
+if(overlap){stBad++;console.log('  !!  stupne se prekryvaji o',overlap,'klicu');}
+if(covered.size!==all20.size){stBad++;console.log('  !!  stupne nepokryly cely obor',covered.size,'z',all20.size);}
 // zacatecnik dostane jen prechod bez desitky
 const beg=A.newProfile('Z'); A.DB.profiles=[beg]; A.DB.current=beg.id;
-if(A.as20Stage(beg)!==0){stBad++;console.log('zacatecnik nezacina prvnim stupnem');}
+if(A.as20Stage(beg)!==0){stBad++;console.log('  !!  zacatecnik nezacina prvnim stupnem');}
 const first=new Set(A.stageKeys(0));
 const run0=A.buildRun(beg,A.trackById('a20'));
-for(const it of run0) if(!first.has(it.key)){stBad++;console.log('zacatecnik dostal prechod pres desitku',it.text);break;}
+for(const it of run0) if(!first.has(it.key)){stBad++;console.log('  !!  zacatecnik dostal prechod pres desitku',it.text);break;}
 // po zvladnuti prvniho stupne se posune dal a starsi se vraci jako opakovani
 A.stageKeys(0).forEach(k=>beg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
-if(A.as20Stage(beg)!==1){stBad++;console.log('po zvladnuti prvniho stupne se neposunul');}
+if(A.as20Stage(beg)!==1){stBad++;console.log('  !!  po zvladnuti prvniho stupne se neposunul');}
 const run1=A.buildRun(beg,A.trackById('a20'));
 const inFocus=run1.filter(it=>new Set(A.stageKeys(1)).has(it.key)).length;
-if(inFocus<run1.length*0.5){stBad++;console.log('druhy stupen nenese zavod',inFocus+'/'+run1.length);}
-if(inFocus===run1.length){stBad++;console.log('chybi opakovani drivejsiho uciva');}
+if(inFocus<run1.length*0.5){stBad++;console.log('  !!  druhy stupen nenese zavod',inFocus+'/'+run1.length);}
+if(inFocus===run1.length){stBad++;console.log('  !!  chybi opakovani drivejsiho uciva');}
 console.log('chyb ve stupnich do dvaceti:',stBad);
 
 // 7. neumime-li kapitolu, nesmi jit vybrat, a ulozeny profil se srovna
 let selBad=0, offered=0, blocked=0;
 for(const c of A.CURRICULA){
   const ok=A.playableChapters(c);
-  if(!ok.length){selBad++;console.log('kurikulum bez jedine hratelne kapitoly',c.id);continue;}
+  if(!ok.length){selBad++;console.log('  !!  kurikulum bez jedine hratelne kapitoly',c.id);continue;}
   for(const ch of c.chapters){
     if(A.isPlayable(ch)) offered++; else blocked++;
   }
   // volba ucebnice musi skocit na prvni hratelnou kapitolu, ne na prvni v knize
   const q=A.newProfile('S'); q.curriculum=c.id; q.chapter=ok[0].n;
   A.DB.profiles=[q]; A.DB.current=q.id;
-  if(!A.schoolReady(q)){selBad++;console.log('prvni hratelna kapitola nedela trat',c.id,ok[0].n);}
+  if(!A.schoolReady(q)){selBad++;console.log('  !!  prvni hratelna kapitola nedela trat',c.id,ok[0].n);}
   // profil ulozeny na nehratelne kapitole se srovna dozadu, nikdy dopredu
   for(const ch of c.chapters){
     if(A.isPlayable(ch)) continue;
     const r=A.newProfile('R'); r.curriculum=c.id; r.chapter=ch.n;
     A.normalizeChapter(r);
     const got=c.chapters.find(x=>x.n===r.chapter);
-    if(!A.isPlayable(got)){selBad++;console.log('srovnani skoncilo na nehratelne kapitole',c.id,ch.n,'->',r.chapter);continue;}
+    if(!A.isPlayable(got)){selBad++;console.log('  !!  srovnani skoncilo na nehratelne kapitole',c.id,ch.n,'->',r.chapter);continue;}
     const earlier=ok.filter(x=>x.n<ch.n);
     const cekano=earlier.length?earlier[earlier.length-1].n:ok[0].n;
-    if(r.chapter!==cekano){selBad++;console.log('spatne srovnani',c.id,ch.n,'->',r.chapter,'cekano',cekano);}
+    if(r.chapter!==cekano){selBad++;console.log('  !!  spatne srovnani',c.id,ch.n,'->',r.chapter,'cekano',cekano);}
   }
 }
 // bez kurikula se kapitola vynuluje
 const rn=A.newProfile('X'); rn.curriculum='neexistuje'; rn.chapter=5; A.normalizeChapter(rn);
-if(rn.chapter!==null){selBad++;console.log('kapitola prezila zruseni ucebnice');}
+if(rn.chapter!==null){selBad++;console.log('  !!  kapitola prezila zruseni ucebnice');}
 console.log('nabizenych kapitol:',offered,'| zamcenych:',blocked,'| chyb:',selBad);
 
 // 8. obor do dvaceti bez prechodu, tedy prvni rocnik
@@ -336,17 +340,94 @@ console.log('chyb ve stupnich do tisice:',kStBad);
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;
 const zeg=A.newProfile('H'); A.DB.profiles=[zeg]; A.DB.current=zeg.id;
-if(A.clockStage(zeg)!==0){clStBad++;console.log('zacatecnik nezacina celymi hodinami');}
+if(A.clockStage(zeg)!==0){clStBad++;console.log('  !!  zacatecnik nezacina celymi hodinami');}
 const clRun0=A.buildRun(zeg,A.trackById('clock'));
-if(clRun0.length!==20){clStBad++;console.log('spatna delka zavodu s hodinami',clRun0.length);}
-for(const it of clRun0) if(it.key!=='c1'){clStBad++;console.log('zacatecnik dostal jemnejsi cas',it.disp);break;}
-if(new Set(clRun0.map(x=>x.disp)).size<6){clStBad++;console.log('cele hodiny se malo stridaji',new Set(clRun0.map(x=>x.disp)).size);}
+if(clRun0.length!==20){clStBad++;console.log('  !!  spatna delka zavodu s hodinami',clRun0.length);}
+for(const it of clRun0) if(it.key!=='c1'){clStBad++;console.log('  !!  zacatecnik dostal jemnejsi cas',it.disp);break;}
+if(new Set(clRun0.map(x=>x.disp)).size<6){clStBad++;console.log('  !!  cele hodiny se malo stridaji',new Set(clRun0.map(x=>x.disp)).size);}
 zeg.facts.c1={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()};
-if(A.clockStage(zeg)!==1){clStBad++;console.log('po zvladnuti celych hodin se neposunul');}
+if(A.clockStage(zeg)!==1){clStBad++;console.log('  !!  po zvladnuti celych hodin se neposunul');}
 const clRun1=A.buildRun(zeg,A.trackById('clock'));
 const clFocus=clRun1.filter(x=>x.key==='c2').length;
-if(clFocus<clRun1.length*0.5){clStBad++;console.log('druhy stupen nenese zavod',clFocus+'/'+clRun1.length);}
-if(clFocus===clRun1.length){clStBad++;console.log('chybi opakovani celych hodin');}
+if(clFocus<clRun1.length*0.5){clStBad++;console.log('  !!  druhy stupen nenese zavod',clFocus+'/'+clRun1.length);}
+if(clFocus===clRun1.length){clStBad++;console.log('  !!  chybi opakovani celych hodin');}
 // odpoledni cas se objevi az v poslednim kbelicku
-for(const it of clRun1) if(it.night){clStBad++;console.log('vecerni cas prisel prilis brzo',it.disp);break;}
+for(const it of clRun1) if(it.night){clStBad++;console.log('  !!  vecerni cas prisel prilis brzo',it.disp);break;}
 console.log('chyb ve stupnich hodin:',clStBad);
+
+// 11. dilna
+//
+// Dilna nemeri cas a plati v soucastkach, takze se tu neoveruje nic
+// o rychlosti. Overuje se, ze uloha ma reseni, ze sve vlastni reseni
+// uzna, a ze klice dilny nemohou spadnout do zavodu.
+let shBad=0, shN=0;
+// nejmensi pocet minci se overi proti dynamickemu programovani, protoze
+// hltavy postup je optimalni jen u nekterych soustav a tahle uloha na tom
+// stoji: "zaplat co nejmene mincemi" musi mit jedno spravne cislo
+const dp=[0]; for(let a=1;a<=200;a++){ let b=Infinity; for(const c of A.MONEY) if(a>=c) b=Math.min(b,dp[a-c]+1); dp[a]=b; }
+for(let a=1;a<=200;a++){
+  const g=A.fewestCoins(a);
+  if(g.reduce((s,x)=>s+x,0)!==a){shBad++;if(shBad<6)console.log('  !!  drobne nedavaji castku',a);continue;}
+  if(g.length!==dp[a]){shBad++;if(shBad<6)console.log('  !!  hltavy postup neni nejmensi',a,g.length,'vs',dp[a]);}
+}
+const job=A.JOBS[0];
+for(const k of job.keys) for(let i=0;i<60;i++){
+  const it=A.jobItemFromKey(k); shN++;
+  if(it.input!=='coins'){shBad++;if(shBad<6)console.log('  !!  uloha dilny neni na mince',k,it.input);continue;}
+  if(!it.solution.length){shBad++;if(shBad<6)console.log('  !!  uloha nema reseni',k);continue;}
+  if(it.solution.some(c=>!A.MONEY.includes(c))){shBad++;if(shBad<6)console.log('  !!  reseni pouzilo neexistujici minci',k,it.solution.join('+'));continue;}
+  if(!it.check(it.solution)){shBad++;if(shBad<6)console.log('  !!  uloha neuznala vlastni reseni',k,it.solution.join('+'));continue;}
+  // prihodit minci navic nesmi projit ani u jedne z uloh
+  if(it.check(it.solution.concat([1]))){shBad++;if(shBad<6)console.log('  !!  uloha uznala i minci navic',k);continue;}
+  if(it.amount<1){shBad++;if(shBad<6)console.log('  !!  castka je nula nebo zaporna',k,it.amount);}
+}
+// "co nejmene minci" musi rozliseni castky a poctu minci opravdu delat
+const few=A.jobItemFromKey('wm2');
+const longWay=[]; for(let i=0;i<few.amount;i++) longWay.push(1);
+if(few.check(longWay)){shBad++;console.log('  !!  nejmensi pocet minci prosel i po jedne korune');}
+if(!few.near(longWay)){shBad++;console.log('  !!  spravna castka po jedne se nepozna jako tesny miss');}
+// vraceni: castka k vraceni je rozdil, ne cena
+const chg=A.jobItemFromKey('wm3');
+if(!chg.check(A.fewestCoins(chg.amount))){shBad++;console.log('  !!  vraceni neuznalo rozdil');}
+console.log('zkontrolovano uloh dilny:',shN,'| chyb:',shBad);
+
+// 11b. zakazka, stupne a oddeleni od zavodu
+let jbBad=0;
+const jp=A.newProfile('D'); A.DB.profiles=[jp]; A.DB.current=jp.id;
+if(jp.parts!==0){jbBad++;console.log('  !!  novy profil nezacina na nule soucastek');}
+if(A.jobStage(jp,job)!==0){jbBad++;console.log('  !!  zacatecnik nezacina prvnim krokem');}
+const run=A.buildJob(jp,job);
+if(run.length!==job.n){jbBad++;console.log('  !!  spatna delka zakazky',run.length);}
+for(const it of run) if(it.key!==job.keys[0]){jbBad++;console.log('  !!  zacatecnik dostal tezsi krok',it.key);break;}
+// po zvladnuti prvniho kroku se posune a prvni se vraci jako opakovani
+jp.facts[job.keys[0]]={lv:5,reps:9,ok:9,bad:0,best:null,seen:Date.now()};
+if(A.jobStage(jp,job)!==1){jbBad++;console.log('  !!  po zvladnuti prvniho kroku se neposunul');}
+const run2=A.buildJob(jp,job);
+const foc=run2.filter(it=>it.key===job.keys[1]).length;
+if(foc<run2.length*0.5){jbBad++;console.log('  !!  druhy krok nenese zakazku',foc+'/'+run2.length);}
+if(foc===run2.length){jbBad++;console.log('  !!  chybi opakovani prvniho kroku');}
+// uloha dilny se nesmi objevit v zavode, ani na trati "co ti nejde"
+if(!job.keys.every(A.isJobKey)){jbBad++;console.log('  !!  klic dilny nema svou hlavicku');}
+for(const tr of A.TRACKS) for(const it of A.buildRun(jp,tr))
+  if(A.isJobKey(it.key)){jbBad++;console.log('  !!  uloha dilny se dostala do zavodu na trati',tr.id);break;}
+// cas se v dilne nemeri, takze nesmi zkreslit prumernou dobu odpovedi
+const tp=A.newProfile('C'); A.DB.profiles=[tp]; A.DB.current=tp.id;
+A.record(tp,{key:'wm1',kind:'money'},true,null);
+if(tp.msN!==0){jbBad++;console.log('  !!  dilna zapocitala cas do prumeru');}
+if(tp.totalAns!==1||tp.totalOk!==1){jbBad++;console.log('  !!  dilna se nezapocitala do uspesnosti');}
+if(tp.facts.wm1.lv!==1){jbBad++;console.log('  !!  spravna odpoved v dilne neposunula uroven',tp.facts.wm1.lv);}
+console.log('chyb v zakazkach dilny:',jbBad);
+
+// 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
+let trBad=0;
+for(const l of ['cs','en','de']){
+  for(const j of A.JOBS) for(const k of ['job_'+j.id, 'job_'+j.id+'s'])
+    if(!A.I18N[l][k]){trBad++;console.log('  !!  chybi preklad',l,k);}
+  for(const pa of A.PAINTS) if(!A.I18N[l][pa.id]){trBad++;console.log('  !!  chybi jmeno nateru',l,pa.id);}
+}
+// nater nesmi menit nic krome barev, takze nema zadnou dalsi vlastnost
+for(const pa of A.PAINTS){
+  const extra=Object.keys(pa).filter(k=>!['id','c1','c2','cost'].includes(k));
+  if(extra.length){trBad++;console.log('  !!  nater ma vlastnost navic',pa.id,extra.join(','));}
+}
+console.log('chyb v prekladech dilny:',trBad);

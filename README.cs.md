@@ -25,11 +25,13 @@ Procvičování malé násobilky pro děti zhruba od sedmi do deseti let, hrané
 | Šampionát | všechno odemčené dohromady |
 | Co ti nejde | jen příklady, které dítě opakovaně mine |
 
+Vedle tratí je na mapě **dílna**. Tam se nezávodí: neběží čas a za rychlost nejsou body, protože do dílny patří učivo, kde je hlavní prací rozvaha, ne vybavení z paměti. První zakázka jsou peníze, tedy placení, drobné a vracení, a odpovídá se skládáním mincí na pult. Za hotovou práci jsou součástky, za které se v garáži kupují nátěry strojů. Součástky se nedají vyjezdit a na jízdu nemají žádný vliv.
+
 Trati se odemykají podle toho, jak dítě zvládá tu předchozí. Rodič může kterékoli odemknutí přebít ručně.
 
 ### Nebo podle toho, kde je zrovna třída
 
-V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady pětadevadesát kapitol, z nichž hra umí procvičit sedmdesát. Zbylé jsou v seznamu vidět, ale nejdou vybrat, aby bylo poznat, kde třída je.
+V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady pětadevadesát kapitol, z nichž hra umí procvičit jedenasedmdesát. Zbylé jsou v seznamu vidět, ale nejdou vybrat, aby bylo poznat, kde třída je.
 
 Nastavuje se zvlášť pro každého hráče, takže sourozenci mohou mít různé učebnice. Volně znamená, že zhruba sedmdesát procent příkladů je z nastavené kapitoly a zbytek se vrací z dřívějšího učiva, aby se neztratilo. Výchozí stav je bez učebnice, kdy si hra vybírá učivo sama podle toho, co dítěti nejde.
 

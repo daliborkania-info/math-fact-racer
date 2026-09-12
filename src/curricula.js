@@ -26,6 +26,10 @@
  *                                 from whole hundreds to crossing one
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
+ *   shop  [job ids]               workshop jobs, for material that is
+ *                                 reasoning rather than recall. A chapter
+ *                                 with only these is pickable but puts no
+ *                                 track on the map.
  *
  * Source of the sequences: docs/kurikulum/. Structure only, no content.
  * ------------------------------------------------------------------ */
@@ -70,7 +74,9 @@ const CURRICULA = [
     chapters: [
       {n:1,  name:"Opakování do dvaceti bez přechodu", src:"4. díl, s. 2–5",   pool:{as20:{carry:"no"}}},
       {n:2,  name:"Určování času a osová souměrnost",  src:"4. díl, s. 6–9",   pool:{clock:["c1","c2"]}},
-      {n:3,  name:"Finanční gramotnost, mince a směňování", src:"4. díl, s. 10–11", pool:null},
+      // workshop material: pickable and it does something, but it has no
+      // race of its own, so no track appears on the map for it
+      {n:3,  name:"Finanční gramotnost, mince a směňování", src:"4. díl, s. 10–11", pool:{shop:["money"]}},
       {n:4,  name:"Sčítání 9 +, odčítání 11 −",        src:"4. díl, s. 12–25", pool:{as20:{carry:"yes", addend:[9]}}},
       {n:5,  name:"Sčítání 8 +, odčítání 12 −",        src:"4. díl, s. 26–37", pool:{as20:{carry:"yes", addend:[8,9]}}},
       {n:6,  name:"Sčítání 7 +, odčítání 13 −",        src:"4. díl, s. 38–47", pool:{as20:{carry:"yes", addend:[7,8,9]}}},

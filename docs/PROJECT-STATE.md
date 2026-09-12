@@ -267,17 +267,37 @@ nahráním `dist/artifact.html`.
 
 ## 11. Další krok, rozšíření o učivo třetí třídy
 
-Uživatel chce naskenovat učebnici matematiky pro třetí třídu a rozšířit hru
-o další látku. Postup byl dohodnutý takto.
+**Fáze jedna je hotová.** Mapa učiva existuje a leží v `docs/kurikulum/`.
+Vznikla z pracovních sešitů Matýskova matematika 7. a 8. díl, které jsou
+dostupné ve čtečce ucebnice.online přes odkazy `qr.nns.cz`, jež poslal uživatel.
+Čte se to tak, že přečteš `docs/kurikulum/README.md`, pak katalog a pak mapu.
 
-**Fáze jedna.** Uživatel pošle jednu kapitolu jako pilot, ideálně tu, kterou
-třída zrovna probírá. Z fotek vznikne mapa učiva, tedy tabulka s tématem, typem
-úlohy, formátem odpovědi, číselným rozsahem, typickými chybami a poznámkou, jestli
-to patří do závodu nebo do druhého režimu.
+Model je dvouvrstvý, a to je nejdůležitější rozhodnutí téhle fáze.
+`docs/kurikulum/TEMATA.md` je katalog témat, tedy co hra umí vygenerovat, jeden
+generátor plus jeden vstupní prvek plus zařazení do závodu nebo do dílny.
+`docs/kurikulum/nns-matysek-3.md` je mapa jedné konkrétní učebnice, tedy
+uspořádaný seznam kapitol odkazující na `id` z katalogu. Další učebnice znamená
+napsat další mapu, ne další generátory. Mapa nesmí zavést téma, které není
+v katalogu.
 
-**Fáze dvě.** Nad tou tabulkou se dohodne mechanika u každého tématu.
+**Volba učebnice patří profilu**, ne aplikaci. Rodič ji v rodičovské sekci
+nastaví zvlášť pro každé dítě, protože sourozenci mohou mít různé učebnice.
+Do profilu přibude `curriculum`, `chapter` a `chapterMode`. Výchozí je
+`curriculum: null`, tedy dnešní adaptivní režim. Měkký režim kapitoly serveruje
+zhruba sedmdesát procent z aktuální kapitoly a zbytek podle Leitnerovy krabičky,
+tvrdý bere jen aktuální kapitolu, měkký je výchozí, protože jinak se rozpadne
+rozložené opakování.
 
-**Fáze tři.** Teprve pak se píší generátory a obrazovky, po tématech.
+**Katalog učebnic na ucebnice.online je za registrací.** Přes odkazy `qr.nns.cz`
+jde otevřít konkrétní sešit bez přihlášení, celý katalog sta a více titulů ale
+vyžaduje účet a třicetidenní zkušební přístup. Účet zakládat nebudu, další
+učebnice tedy chodí tak, že uživatel pošle odkaz.
+
+**Fáze dvě, teď.** Nad katalogem dohodnout mechaniku u každého nového tématu,
+hlavně vstupní prvky `pad2`, `cmp`, `pick` a `clock`.
+
+**Fáze tři.** Teprve pak generátory a obrazovky, po tématech. Pilot je dělení
+se zbytkem, kapitola 27 mapy, tedy strany 30 až 35 osmého dílu.
 
 **Rozhodnutí, která už padla.**
 
@@ -290,7 +310,11 @@ převážně to učivo.
 
 Jako pilot se doporučilo dělení se zbytkem. Je to jádrová látka třetí třídy,
 vyžaduje jeden nový vstupní prvek, tedy druhé políčko na zbytek, a přitom se
-celé odehraje uvnitř existujícího závodu.
+celé odehraje uvnitř existujícího závodu. Osmý díl mu věnuje tři dvoustrany,
+nejvíc ze všech témat obou dílů, a staví ho v pořadí číselná osa s násobky,
+výpočet podílu a zbytku, obrácená úloha na dělence, slovní úloha se zbytkem.
+Dělitele bere po dvojicích 2 a 3, 4 a 5, 6 a 7, 8 a 9, pak 10 a smíšené
+opakování, což je hotová osnova pro pět tratí.
 
 **Zásadní hranice návrhu.** Závod je trenažér plynulosti, ne přemýšlení. Patří
 do něj jen to, co se má zautomatizovat a kde je jedna číselná odpověď. Slovní

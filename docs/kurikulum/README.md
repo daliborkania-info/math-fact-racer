@@ -29,18 +29,23 @@ nového, nesahá se do kódu vůbec.
 | soubor | obsah | spolehlivost |
 | --- | --- | --- |
 | [TEMATA.md](TEMATA.md) | katalog témat, společný pro všechny mapy | |
-| [nns-matysek-1.md](nns-matysek-1.md) | Matýskova matematika, 1. ročník | z obsahu |
-| [nns-matysek-2.md](nns-matysek-2.md) | Matýskova matematika, 2. ročník | z obsahu |
-| [nns-matysek-3.md](nns-matysek-3.md) | Matýskova matematika, 3. ročník | **z prolistovaných stránek** |
+| [nns-matysek-1.md](nns-matysek-1.md) | Matýskova matematika, 1. ročník | jen z obsahu |
+| [nns-matysek-2.md](nns-matysek-2.md) | Matýskova matematika, 2. ročník | **ověřeno ze stránek** |
+| [nns-matysek-3.md](nns-matysek-3.md) | Matýskova matematika, 3. ročník | **ověřeno ze stránek** |
 | [nns-matysek-4.md](nns-matysek-4.md) | Matýskova matematika, 4. ročník | z obsahu, část neověřená |
 | [nns-matysek-5.md](nns-matysek-5.md) | Matýskova matematika, 5. ročník | z obsahu, část neověřená |
 
-Třetí ročník je jediný postavený na skutečně prohlédnutých stránkách obou
-pracovních sešitů. Katalog témat vznikl z něj, a proto je v prvních třech
-ročnících spolehlivý: celá řada používá dokola stejný slovník asi osmi formátů
-zadání. Ve čtvrtém a pátém ročníku přibývají písemné algoritmy, zlomky, rovnice
-a desetinná čísla, kde z názvu kapitoly formát odpovědi poznat nejde. Ta témata
-jsou v mapách značená `?` a v katalogu vedená jako neověřená.
+Druhý a třetí ročník stojí na skutečně prohlédnutých stránkách, druhý na
+učebnicích, třetí na pracovních sešitech. Katalog témat vznikl z nich, a proto
+je v prvních třech ročnících spolehlivý: celá řada používá dokola stejný slovník
+asi osmi formátů zadání. Ve čtvrtém a pátém ročníku přibývají písemné algoritmy,
+zlomky, rovnice a desetinná čísla, kde z názvu kapitoly formát odpovědi poznat
+nejde. Ta témata jsou v mapách značená `?` a v katalogu vedená jako neověřená.
+
+Čtečka na `mediacreator.cz` je pro tohle mnohem lepší zdroj než skeny obsahů:
+u každé dvoustrany vypisuje názvy interaktivních cvičení, takže je z ní vidět
+typ úlohy, ne jen název kapitoly. Odkaz má tvar
+`mediacreator.cz/mc/index.php?opentitle=<titul>/<titul>.mc&pageord=1`.
 
 ## Jak se to promítne do profilu
 

@@ -129,6 +129,15 @@ u dlouho neviděných a u těch, kde je víc chyb než úspěchů. Neviděné ma
 3,2 a je jich na závod omezený počet. U násobilkových tratí je zhruba sedmdesát
 procent otázek z ohniska trati a třicet z dřívějších.
 
+**Stupně přechodu přes desítku.** Trať do dvaceti není jeden pytel příkladů,
+má pět stupňů podle toho, jak těžký je most přes desítku: bez přechodu a s
+desítkou jako sčítancem, pak přechod přes devítku, přes osmičku, přes sedmičku
+a nakonec zbytek. Příklad patří do stupně svého většího sčítance. Pořadí je
+převzaté ze čtvrtého dílu Matýskovy matematiky, který každému věnuje celou
+kapitolu, a platí i bez zvolené učebnice. Závod nese aktuální stupeň ze sedmdesáti
+procent, zbytek je opakování už zvládnutých stupňů, tedy stejný tvar jako
+u násobilkových tratí. Díky tomu začátečník potká jen součty do deseti.
+
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
 je zhruba polovina toho. U počítání do sta se prahy násobí 1,9.
 

@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,visibleTracks,chapterOf,trackById};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,visibleTracks,chapterOf,trackById};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -91,3 +91,30 @@ if(A.schoolReady(q0)){runBad++;console.log('trat skoly se objevila bez ucebnice'
 if(A.visibleTracks(q0).some(t=>t.id==='school')){runBad++;console.log('trat skoly je na mape bez ucebnice');}
 if(A.buildRun(q0,A.trackById('school')).length!==20){runBad++;console.log('nouzovy zavod nema 20 otazek');}
 console.log('chyb v zavodech podle kapitoly:',runBad);
+
+// 6. stupne prechodu pres desitku pokryji cely obor a radi se od lehciho
+let stBad=0;
+const all20=new Set();
+A.ADD.forEach(f=>{all20.add(A.ak(f.a,f.b)); all20.add(A.sk(f.a,f.b));});
+const covered=new Set(); let overlap=0;
+A.E_STAGES.forEach((st,i)=>{
+  const ks=A.stageKeys(i);
+  if(!ks.length){stBad++;console.log('prazdny stupen',st.id);}
+  for(const k of ks){ if(covered.has(k)) overlap++; covered.add(k); }
+});
+if(overlap){stBad++;console.log('stupne se prekryvaji o',overlap,'klicu');}
+if(covered.size!==all20.size){stBad++;console.log('stupne nepokryly cely obor',covered.size,'z',all20.size);}
+// zacatecnik dostane jen prechod bez desitky
+const beg=A.newProfile('Z'); A.DB.profiles=[beg]; A.DB.current=beg.id;
+if(A.as20Stage(beg)!==0){stBad++;console.log('zacatecnik nezacina prvnim stupnem');}
+const first=new Set(A.stageKeys(0));
+const run0=A.buildRun(beg,A.trackById('a20'));
+for(const it of run0) if(!first.has(it.key)){stBad++;console.log('zacatecnik dostal prechod pres desitku',it.text);break;}
+// po zvladnuti prvniho stupne se posune dal a starsi se vraci jako opakovani
+A.stageKeys(0).forEach(k=>beg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
+if(A.as20Stage(beg)!==1){stBad++;console.log('po zvladnuti prvniho stupne se neposunul');}
+const run1=A.buildRun(beg,A.trackById('a20'));
+const inFocus=run1.filter(it=>new Set(A.stageKeys(1)).has(it.key)).length;
+if(inFocus<run1.length*0.5){stBad++;console.log('druhy stupen nenese zavod',inFocus+'/'+run1.length);}
+if(inFocus===run1.length){stBad++;console.log('chybi opakovani drivejsiho uciva');}
+console.log('chyb ve stupnich do dvaceti:',stBad);

@@ -1193,6 +1193,23 @@ for(let a=1; a<=10; a++) for(let b=a; b<=10; b++) MULT.push({a,b});   // 55 fact
 const ADD = [];
 for(let a=1; a<=10; a++) for(let b=a; b<=10; b++) ADD.push({a,b});    // sums within 20
 
+/* Crossing the ten is not one skill but five, and they are not equally
+   hard. Making ten from a nine is the easiest bridge and gets taught
+   first, then eight, then seven, then the rest. The order is lifted from
+   Matyskova matematika part four, which devotes a whole chapter to each,
+   and it applies whether or not a curriculum is selected: a child new to
+   the track meets sums below ten before anything crosses it.
+   A fact belongs to the stage of its larger addend, which is the chapter
+   where the book first teaches it. */
+const E_STAGES = [
+  // adding to a whole ten never needs regrouping, so it belongs with the easy ones
+  {id:"e1", has:(a,b) => a + b <= 10 || Math.max(a,b) === 10},
+  {id:"e2", has:(a,b) => a + b > 10 && Math.max(a,b) === 9},
+  {id:"e3", has:(a,b) => a + b > 10 && Math.max(a,b) === 8},
+  {id:"e4", has:(a,b) => a + b > 10 && Math.max(a,b) === 7},
+  {id:"e5", has:(a,b) => a + b > 10 && Math.max(a,b) <= 6}
+];
+
 const H_BUCKETS = [
   {id:"h1", label:"two digit plus one digit, no carry"},
   {id:"h2", label:"one digit crossing the ten"},
@@ -1208,6 +1225,12 @@ const sk  = (a,b) => "s" + a + "p" + b;
 
 function multFactsFor(tables){
   return MULT.filter(f => tables.includes(f.a) || tables.includes(f.b));
+}
+function stageKeys(i){
+  const st = E_STAGES[i];
+  const out = [];
+  for(const f of ADD) if(st.has(f.a, f.b)) out.push(ak(f.a,f.b), sk(f.a,f.b));
+  return out;
 }
 
 const TRACKS = [
@@ -1299,6 +1322,15 @@ function trackKeys(p, tr){
   if(tr.op === "as20") return ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
   return [];
+}
+/* Which bridge the child is currently building. The first stage that is
+   not yet at the unlock threshold, so mastered stages drop back to being
+   review rather than filling the race. */
+function as20Stage(p){
+  for(let i = 0; i < E_STAGES.length; i++){
+    if(mastery(p, stageKeys(i)) < .7) return i;
+  }
+  return E_STAGES.length - 1;
 }
 function trackProgress(p, tr){
   if(tr.op === "mix" || tr.op === "weak") return 0;
@@ -1445,8 +1477,14 @@ function buildRun(p, tr){
     const all = MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
     keys = sampleKeys(p, all, n, 5);
   } else if(tr.op === "as20"){
-    const all = ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
-    keys = sampleKeys(p, all, n, 5);
+    // same shape as the multiplication tracks: the current bridge carries
+    // the race, everything already crossed comes back as review
+    const si = as20Stage(p);
+    const focus = stageKeys(si);
+    const review = [];
+    for(let i = 0; i < si; i++) review.push(...stageKeys(i));
+    const nf = review.length ? Math.round(n * .7) : n;
+    keys = sampleKeys(p, focus, nf, 5).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
   } else if(tr.op === "as100"){
     const all = H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
     keys = sampleKeys(p, all, n, 10);

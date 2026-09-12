@@ -66,6 +66,10 @@ console.log('--- rekord a souper ---');
 click(q('[data-act="map"]')); click(q('[data-act="play"]')); click(q('[data-go]'));
 await wait(300);
 ok('souper se zobrazuje', d.getElementById('rivalcar').style.display!=='none');
+// v zavodni liste tecky naopak rostou, aby vyplnily sirku mezi krizkem a poctem
+ok('tecky v zavodni liste rostou do sirky',
+   ev('getComputedStyle(document.querySelector(".gamebar .pips")).flexGrow')==='1',
+   'flex-grow '+ev('getComputedStyle(document.querySelector(".gamebar .pips")).flexGrow'));
 n=0; while(inRace()&&n<60){ type(answer()); n++; await wait(640); }
 await wait(1500);
 ok('novy rekord ohlasen', /Překonal jsi svůj rekord/.test(txt()));
@@ -191,6 +195,13 @@ ok('dilna nabizi zakazku', qa('[data-act="jobstart"]').length===1 && /Peníze/.t
 const partsBefore=DBg().profiles[0].parts;
 click(q('[data-act="jobstart"]'));
 ok('zakazka ma sest uloh', qa('.pip').length===6, qa('.pip').length+' uloh');
+// obrazovka dilny je sloupec, takze rostouci rada tecek by spolkla celou
+// vysku a nad mincemi by zustal prazdny pas
+ok('tecky v dilne nerostou do vysky',
+   ev('getComputedStyle(document.querySelector(".pips")).flexGrow')==='0',
+   'flex-grow '+ev('getComputedStyle(document.querySelector(".pips")).flexGrow'));
+ok('otazka a pult jsou nad mincemi videt',
+   q('#jobask').textContent.length>5 && q('#counter')!==null, q('#jobask').textContent);
 ok('v dilne nejsou stopky ani body', !/bodů|body/.test(txt()) && qa('.rail,.stage').length===0);
 ok('mince jsou k dispozici', qa('[data-coin]').length===6);
 // vyresit celou zakazku: mince se klepou, dokud se nesejde castka
@@ -220,6 +231,13 @@ ok('soucastky pribyly', DBg().profiles[0].parts>partsBefore,
 ok('dilna se zapsala do krabicky', !!DBg().profiles[0].facts.wm1);
 ok('dilna nezkreslila prumerny cas', DBg().profiles[0].msN>0 &&
    DBg().profiles[0].msN < DBg().profiles[0].totalAns, 'merenych '+DBg().profiles[0].msN+' z '+DBg().profiles[0].totalAns);
+// soucastky jsou jen na natery, takze utrata za ne ma skocit rovnou na ne
+click(q('[data-act="paintshop"]'));
+ok('utrata soucastek otevre garaz rovnou u nateru',
+   ev('view.name')==='collection' && ev('view.focus')==='paintsec' && q('#paintsec')!==null,
+   ev('view.name')+' / '+ev('view.focus'));
+ok('vyber stroje uz zpatky k naterum neskace',
+   (click(qa('[data-act="use"]')[0]), ev('view.focus')===undefined));
 
 console.log('--- heatmapa nad vsemi rodinami ---');
 ev('go("map")'); click(q('[data-act="gate"]'));

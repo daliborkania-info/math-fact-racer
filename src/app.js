@@ -1352,6 +1352,14 @@ function render(){
   app.innerHTML = html;
   if(view.name === "game") mountGame();
   if(view.name === "result") mountResult();
+  // A screen may be entered at a particular section rather than at the
+  // top: coming out of the workshop with parts to spend, the garage
+  // should already be showing the paints instead of asking the child to
+  // scroll past every machine and animal to find them.
+  if(view.focus){
+    const el = document.getElementById(view.focus);
+    if(el && el.scrollIntoView) el.scrollIntoView({block:"start"});
+  }
 }
 
 /* ---------- player picker ---------- */
@@ -2058,7 +2066,7 @@ function viewJobDone(p){
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
           <button class="btn mint wide" data-act="jobagain">${t("jobAgain")}</button>
           <button class="btn ghost wide" data-act="shop">${t("jobBackToShop")}</button>
-          <button class="btn ghost wide" data-act="collection">${t("jobSpendParts")}</button>
+          <button class="btn ghost wide" data-act="paintshop">${t("jobSpendParts")}</button>
         </div>
       </div>
     </div>
@@ -2100,7 +2108,7 @@ function viewCollection(p){
       <div class="grid">${RIDES.map(cell).join("")}</div>
       <div class="h2 pad" style="margin-bottom:8px">${t("animals")}</div>
       <div class="grid">${PETS.map(cell).join("")}</div>
-      <div class="h2 pad" style="margin-bottom:8px">${t("paints")}</div>
+      <div class="h2 pad" id="paintsec" style="margin-bottom:8px">${t("paints")}</div>
       <div class="pad muted" style="margin-bottom:10px">${t("paintsNote")}</div>
       <div class="grid">${paintCells(p)}</div>
       <div style="height:20px"></div>
@@ -2474,6 +2482,9 @@ document.addEventListener("click", e => {
   if(act === "map"){ go("map"); return; }
   if(act === "sound"){ DB.sound = !DB.sound; save(); if(DB.sound) sfx.ok(); render(); return; }
   if(act === "collection"){ go("collection"); return; }
+  // parts are only good for paint, so spending them opens the garage at
+  // the paints and stays there while the child tries colours on
+  if(act === "paintshop"){ go("collection", {focus:"paintsec"}); return; }
 
   if(act === "shop"){ go("shop"); return; }
   if(act === "jobstart"){ startJob(p, id); return; }
@@ -2528,8 +2539,11 @@ document.addEventListener("click", e => {
     return;
   }
 
-  if(act === "use"){ p.runner = id; save(); render(); return; }
+  // picking a machine or an animal means the child has scrolled away
+  // from the paints, so the screen must stop jumping back down to them
+  if(act === "use"){ delete view.focus; p.runner = id; save(); render(); return; }
   if(act === "buy"){
+    delete view.focus;
     const it = itemById(id);
     if(p.coins < it.cost){
       sheet(`<h3>${t("notEnoughTitle")}</h3><div class="muted">${t("notEnoughText", it.cost - p.coins)}</div>

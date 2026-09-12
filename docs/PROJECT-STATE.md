@@ -391,6 +391,11 @@ profilu jako celku, taky do větve `import`.
 8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem, plus
    druhý na `change` kvůli rozbalovacím nabídkám, které klik nevyvolávají.
 
+**Obrazovka se smí otevřít u konkrétní sekce.** `go(name, {focus:"id"})` po
+vykreslení posune sekci s tím `id` do zorného pole. Používá to dílna, když
+posílá dítě utratit součástky za nátěry. `scrollIntoView` v jsdomu není, takže
+volání je pojištěné podmínkou, jinak by spadly testy.
+
 **Pozor na čtyři pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
 způsobilo chybu. Rozbalovací nabídka potřebuje `change`, ne `click`, takže
@@ -505,6 +510,17 @@ Celá hodina se musela ťukat i s nulami. Ciferník ukazoval sedmou hodinu
 a hra chtěla 700, protože odpověď se porovnávala jako holé číslo. Dítě, které
 se právě naučilo číst celé hodiny, nemá důvod přemýšlet o dvou nulách. Teď se
 jedna nebo dvě číslice čtou jako hodina.
+
+V dílně byl nad mincemi prázdný pás přes půl obrazovky. Řada teček měla
+`flex:1`, což je správně v závodní liště, protože ta je řádek a růst tam znamená
+zabrat šířku mezi křížkem a počtem otázek. Obrazovka dílny je ale sloupec, takže
+tentýž růst spolkl celou výšku a otázku s pultem stlačil dolů k mincím. Růst
+teď patří liště, `.gamebar .pips`, ne samotným tečkám.
+
+Tlačítko "utrať součástky" po dokončené zakázce otevřelo garáž nahoře u strojů
+a nátěry byly až úplně dole, takže je dítě muselo hledat rolováním. Obrazovka
+teď umí `view.focus` a otevře se rovnou u nátěrů; výběr stroje nebo zvířete
+focus zruší, aby to zpátky dolů neskákalo.
 
 Volba kapitoly bez generátoru nedělala nic. Šla vybrat, poznámka "zatím neumíme"
 se v nabídce usekla a rodič si nastavil kapitolu, se kterou se nestalo nic.

@@ -195,7 +195,14 @@ input{font-family:inherit}
   padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;
 }
 .gamebar .quit{width:34px;height:34px;border-radius:11px;background:rgba(9,16,34,.55);backdrop-filter:blur(4px);display:grid;place-items:center;font-size:15px;color:#fff}
-.pips{display:flex;gap:2px;flex:1;justify-content:center;flex-wrap:nowrap;overflow:hidden}
+/* The row of dots, one per question. It only grows inside the race bar,
+   which is a flex row and where growing means taking the width between
+   the quit button and the counter. The workshop puts the same row on a
+   screen that is a flex column, and there growing meant swallowing the
+   whole height and leaving an empty band above the coins, so the growth
+   belongs to the bar, not to the dots. */
+.pips{display:flex;gap:2px;justify-content:center;flex-wrap:nowrap;overflow:hidden}
+.gamebar .pips{flex:1}
 .pip{width:7px;height:7px;flex:none;border-radius:99px;background:rgba(255,255,255,.22);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
 .pip.ok{background:#34e39b;box-shadow:none}
 .pip.bad{background:#ff6f95;box-shadow:none}

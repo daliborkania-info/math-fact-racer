@@ -42,6 +42,7 @@ src/i18n.js               všechny texty rozhraní, cs / en / de, 185 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
+tests/fixtures/           zamrazené profily starších verzí, jen se přidávají
 docs/PROJECT-STATE.md     tenhle soubor
 docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
 docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
@@ -91,6 +92,32 @@ odmítnuty a nahrazeny vlastními kreslenými tvory.
 **Co hra neumí, to nenabízí.** Žádné nastavení nesmí jít zvolit, pokud se pak
 tiše nic nestane. Platí to i na budoucí obrazovky, nejen na volbu kapitoly, kde
 to vzniklo.
+
+**Žádná změna nesmí připravit existující profil o to, co už má.** Hra běží na
+cizích telefonech, ke kterým se nedostanu, nová verze se do nich dostane sama
+při dalším načtení a zálohu si nikdo nedělá. Nová verze proto musí umět načíst
+libovolný starší profil a nesmí po ní zmizet ani zmenšit se nic z tohohle:
+
+- příklad v krabičce, jeho úroveň, počty pokusů, úspěchů, chyb a nejlepší čas
+- rekord trati, nejlepší medaile, počet dojetých závodů
+- mince, koupení závodníci, jejich zkušenosti, dny v řadě a celkové součty
+- jméno, jazyk, kód rodiče a volba učebnice
+- **přístup, který dítě už mělo.** Odemčená trať se sama nezavře, vybraná
+  kapitola se sama nepřepne dopředu.
+
+Když nová verze přidá učivo do existující trati, klesne tím její zvládnutí,
+protože se zvětší jmenovatel. To smí snížit ukazatel na mapě, ale nesmí zavřít
+dveře. Pokud změna umí posunout nějakou hranici odemčení, migrace v `load()`
+musí starou hranici jednorázově dopočítat, ne doufat, že na ní nikdo nestál;
+viz `seedLegacyGates()`.
+
+Jediná povolená výjimka je `normalizeChapter()`, která smí posunout uloženou
+kapitolu na nejbližší dřívější hratelnou, protože kapitola bez generátoru
+neumí vyrobit závod. Nikdy dopředu.
+
+Hlídá to `tests/migration.test.js` nad zamrazenými profily ze starších verzí.
+Každá další verze, která sáhne na datový model, tam přidá další profil. Test
+nesmí nikdy začít procházet tak, že se z něj vyškrtne kontrola.
 
 ---
 
@@ -287,8 +314,9 @@ V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
 který skládá zdroje přímo, takže před během je nutné pustit `build.py`.
 
 Po každé změně mechaniky pusť `flow.test.js` a `items.test.js`, po každé změně
-textů `i18n.test.js` a `names.test.js`. Žádný test nevrací nenulový kód, kontroluje
-se výskyt `!!` ve výstupu:
+textů `i18n.test.js` a `names.test.js`, po každém doteku datového modelu
+`migration.test.js`. Žádný test nevrací nenulový kód, kontroluje se výskyt `!!`
+ve výstupu:
 
 ```bash
 python3 build.py
@@ -300,6 +328,9 @@ shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu 
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
 stupně přechodu přes desítku, pravidla výběru kapitoly a kbelíky hodin.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami.
+`migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
+pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
+`tests/fixtures/legacy-profiles.json` a jen se přidávají, nikdy neupravují.
 
 ---
 
@@ -562,7 +593,8 @@ správy.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně se pouští
 > `python3 build.py` a pak testy z `tests/`, u kterých se hlídá výskyt `!!`
-> ve výstupu. Nové chování patří do testů, ne jen do kódu.
+> ve výstupu. Nové chování patří do testů, ne jen do kódu. Žádná změna nesmí
+> připravit existující profil o postup, hlídá to `tests/migration.test.js`.
 >
 > Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
 > principy z oddílu 3 neměň bez mého pokynu. Push na GitHub dělám sám, z tvého

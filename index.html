@@ -1452,15 +1452,28 @@ function trackProgress(p, tr){
    to a track lowers its mastery figure, and a child who was racing
    somewhere yesterday must not find the door shut this morning. Only a
    parent can close a track.
-   Older profiles are seeded from where they have demonstrably been:
-   a finished race there, or a single fact of that track in the box. */
+   Older profiles are seeded from finished races, which is the only
+   unambiguous evidence. A fact in the box is not evidence, because the
+   key sets overlap: every multiplication fact belongs to the grand
+   circuit too, so one lap of the warm-up would have opened everything. */
 function seedOpened(p){
+  const firstTime = !p.opened;
   p.opened = p.opened || {};
-  for(const tr of TRACKS){
-    if(p.opened[tr.id]) continue;
-    const raced = ((p.trackRuns || {})[tr.id] || 0) > 0;
-    if(raced || trackKeys(p, tr).some(k => (p.facts[k] || {}).reps > 0)) p.opened[tr.id] = true;
-  }
+  for(const tr of TRACKS) if(((p.trackRuns || {})[tr.id] || 0) > 0) p.opened[tr.id] = true;
+  if(firstTime) seedLegacyGates(p);
+}
+/* One time migration, September 2026. The twenty track grew by the teen
+   facts, which lowers its mastery figure and would have shut the
+   hundred track for a child who had already earned it but never raced
+   there. Whenever a change lowers a gate, the migration has to reproduce
+   the old gate rather than hope nobody was standing on it, so the figure
+   is recomputed once against the fact set as it stood before: the sums
+   with both addends under eleven.
+   Safe to delete once no device can still be running the older build. */
+function seedLegacyGates(p){
+  const before = ADD.filter(f => f.b <= 10);
+  const was20 = before.map(f => ak(f.a,f.b)).concat(before.map(f => sk(f.a,f.b)));
+  if(mastery(p, was20) >= .6) p.opened.a100 = true;
 }
 /* Called on every render of the map, so the moment a track opens it is
    written down and stays written down. */

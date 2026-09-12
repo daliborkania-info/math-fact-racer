@@ -1,0 +1,201 @@
+{
+  "_comment": [
+    "Zamrazene profily tak, jak je ukladaly starsi verze hry. Slouzi",
+    "k tomu, aby zadna dalsi verze nepripravila dite na cizim telefonu",
+    "o postup. Nikdy je needituj, jen pridavej dalsi.",
+    "Kazdy pripad: id, popis, db (presny obsah localStorage) a ocekavani.",
+    "expectOpen  = trati, ktere musi zustat otevrene",
+    "expectClosed = trati, ktere musi zustat zamcene",
+    "expectChapter = kapitola, na ktere profil skonci (null = neresi se)",
+    "_fillFacts = test dogeneruje prilis velkou sadu prikladu, aby",
+    "             fixture nemusela mit sto deset radku; hodnoty jsou",
+    "             popsane v migration.test.js"
+  ],
+  "cases": [
+    {
+      "id": "v0-pred-ucebnicemi",
+      "note": "cerven 2026, profil jeste nezna curriculum, chapter ani opened",
+      "expectOpen": ["t1", "t2", "t3", "a20", "a100"],
+      "expectClosed": ["t4", "t5"],
+      "expectChapter": null,
+      "db": {
+        "current": "pold1",
+        "sound": true,
+        "lang": "cs",
+        "pin": "hyjbbf3",
+        "profiles": [
+          {
+            "id": "pold1",
+            "name": "Vojta",
+            "lang": "cs",
+            "facts": {
+              "m1x1": {"lv": 5, "reps": 12, "ok": 12, "bad": 0, "best": 1100, "seen": 1749000000000},
+              "m2x5": {"lv": 4, "reps": 9, "ok": 8, "bad": 1, "best": 1400, "seen": 1749000000000},
+              "m3x4": {"lv": 3, "reps": 7, "ok": 5, "bad": 2, "best": 2600, "seen": 1749000000000},
+              "m6x7": {"lv": 1, "reps": 4, "ok": 1, "bad": 3, "best": 4900, "seen": 1749000000000},
+              "d2x5": {"lv": 2, "reps": 5, "ok": 4, "bad": 1, "best": 3100, "seen": 1749000000000},
+              "a3p4": {"lv": 5, "reps": 11, "ok": 11, "bad": 0, "best": 900, "seen": 1749000000000},
+              "s3p4": {"lv": 4, "reps": 8, "ok": 7, "bad": 1, "best": 1600, "seen": 1749000000000},
+              "ph1": {"lv": 3, "reps": 14, "ok": 11, "bad": 3, "best": 4200, "seen": 1749000000000},
+              "nh3": {"lv": 2, "reps": 6, "ok": 4, "bad": 2, "best": 5200, "seen": 1749000000000}
+            },
+            "best": {"t1": {"dist": 121.4, "hist": [6.5, 12.4], "n0": 20}},
+            "done": {"t1": 3, "t2": 2, "a20": 1},
+            "owned": ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha", "pet_zub"],
+            "runner": "pet_zub",
+            "xp": {"pet_kiki": 240, "pet_zub": 35},
+            "coins": 173,
+            "trackRuns": {"t1": 14, "t2": 6, "t3": 2, "a20": 9, "a100": 3},
+            "force": {"t4": false},
+            "autoUnlock": true,
+            "qCount": 15,
+            "speedMode": "slow",
+            "streak": 4,
+            "lastDay": "2026-6-4",
+            "bestStreak": 11,
+            "runs": 34,
+            "totalOk": 512,
+            "totalAns": 588,
+            "msSum": 1204000,
+            "msN": 588,
+            "created": 1746000000000
+          }
+        ]
+      }
+    },
+    {
+      "id": "v1-pred-hodinami",
+      "note": "zari 2026, uz zna ucebnici, jeste nezna hodiny ani opened; kapitola 2 druhe tridy tehdy nesla vybrat",
+      "expectOpen": ["t1", "a20"],
+      "expectChapter": 2,
+      "db": {
+        "current": "pold2",
+        "sound": false,
+        "lang": "cs",
+        "pin": "abc123",
+        "profiles": [
+          {
+            "id": "pold2",
+            "name": "Ema",
+            "lang": "de",
+            "facts": {
+              "a2p9": {"lv": 3, "reps": 6, "ok": 5, "bad": 1, "best": 2200, "seen": 1757000000000},
+              "s2p9": {"lv": 2, "reps": 4, "ok": 3, "bad": 1, "best": 3300, "seen": 1757000000000},
+              "a1p1": {"lv": 5, "reps": 10, "ok": 10, "bad": 0, "best": 800, "seen": 1757000000000}
+            },
+            "best": {"a20": {"dist": 98.2, "hist": [5.3], "n0": 10}},
+            "done": {"a20": 1},
+            "owned": ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha"],
+            "runner": "ri_raketa",
+            "xp": {},
+            "coins": 22,
+            "trackRuns": {"a20": 2},
+            "force": {},
+            "autoUnlock": true,
+            "qCount": 10,
+            "speedMode": "normal",
+            "curriculum": "nns-matysek-2",
+            "chapter": 2,
+            "chapterMode": "hard",
+            "streak": 1,
+            "lastDay": "2026-9-11",
+            "bestStreak": 3,
+            "runs": 2,
+            "totalOk": 18,
+            "totalAns": 20,
+            "msSum": 41000,
+            "msN": 20,
+            "created": 1756000000000
+          }
+        ]
+      }
+    },
+    {
+      "id": "v1-dvacitka-tesne-nad-hranici",
+      "note": "zvladl dvacitku podle starych pravidel a stovku ma odemcenou, ale jeste na ni nezavodil; po pridani desitkovych spoju mu nesmi zmizet",
+      "expectOpen": ["a20", "a100"],
+      "expectChapter": null,
+      "db": {
+        "current": "pold3",
+        "sound": true,
+        "lang": "cs",
+        "pin": "abc123",
+        "profiles": [
+          {
+            "id": "pold3",
+            "name": "Tobiáš",
+            "lang": "cs",
+            "facts": {},
+            "best": {},
+            "done": {"a20": 2},
+            "owned": ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha"],
+            "runner": "ri_auto",
+            "xp": {},
+            "coins": 64,
+            "trackRuns": {"a20": 7},
+            "force": {},
+            "autoUnlock": true,
+            "qCount": 20,
+            "speedMode": "normal",
+            "curriculum": null,
+            "chapter": null,
+            "chapterMode": "soft",
+            "streak": 2,
+            "lastDay": "2026-9-10",
+            "bestStreak": 5,
+            "runs": 7,
+            "totalOk": 128,
+            "totalAns": 140,
+            "msSum": 300000,
+            "msN": 140,
+            "created": 1755000000000,
+            "_fillFacts": "a20-stare-klice-na-uroven-2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "v1-kapitola-bez-generatoru",
+      "note": "ulozena kapitola, kterou hra neumi; smi se srovnat jen dozadu, nikdy dopredu",
+      "expectOpen": ["t1", "a20"],
+      "expectChapter": 12,
+      "db": {
+        "current": "pold4",
+        "sound": true,
+        "lang": "en",
+        "pin": "abc123",
+        "profiles": [
+          {
+            "id": "pold4",
+            "name": "Mia",
+            "lang": "en",
+            "facts": {"m5x5": {"lv": 2, "reps": 3, "ok": 2, "bad": 1, "best": 3000, "seen": 1757000000000}},
+            "best": {},
+            "done": {},
+            "owned": ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha"],
+            "runner": "ri_auto",
+            "xp": {},
+            "coins": 5,
+            "trackRuns": {},
+            "force": {},
+            "autoUnlock": true,
+            "qCount": 20,
+            "speedMode": "fast",
+            "curriculum": "nns-matysek-3",
+            "chapter": 16,
+            "chapterMode": "soft",
+            "streak": 0,
+            "lastDay": null,
+            "bestStreak": 0,
+            "runs": 1,
+            "totalOk": 15,
+            "totalAns": 20,
+            "msSum": 50000,
+            "msN": 20,
+            "created": 1757100000000
+          }
+        ]
+      }
+    }
+  ]
+}

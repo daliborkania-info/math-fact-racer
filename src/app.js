@@ -60,6 +60,16 @@ function load(){
     for(const s of STARTERS) if(!p.owned.includes(s)) p.owned.push(s);
     if(!p.runner || !p.owned.includes(p.runner)) p.runner = STARTERS[0];
     p.lang = p.lang || DB.lang;
+    // curriculum choice, added later: older profiles stay adaptive
+    if(p.curriculum === undefined) p.curriculum = null;
+    if(p.chapter === undefined) p.chapter = null;
+    p.chapterMode = p.chapterMode || "soft";
+    // a curriculum that no longer exists must not strand the profile
+    if(p.curriculum && !curriculumById(p.curriculum)){ p.curriculum = null; p.chapter = null; }
+    if(p.curriculum && !chapterOf(p)){
+      const cur = curriculumById(p.curriculum);
+      p.chapter = cur.chapters.length ? cur.chapters[0].n : null;
+    }
   }
 }
 function save(){
@@ -84,6 +94,9 @@ function newProfile(name){
     autoUnlock: true,
     qCount: 20,
     speedMode: "normal",// slow | normal | fast (fast answer threshold)
+    curriculum: null,   // curriculum id, or null for the adaptive default
+    chapter: null,      // chapter number inside that curriculum
+    chapterMode: "soft",// soft keeps spaced review, hard drills the chapter only
     streak: 0, lastDay: null, bestStreak: 0,
     runs: 0, totalOk: 0, totalAns: 0, msSum: 0, msN: 0,
     created: Date.now()
@@ -141,9 +154,67 @@ const TRACKS = [
   {id:"a20",  op:"as20",                                  env:"beach"},
   {id:"a100", op:"as100",                                 env:"ocean"},
   {id:"mix",  op:"mix",                                   env:"night"},
-  {id:"weak", op:"weak",                                  env:"storm"}
+  {id:"weak", op:"weak",                                  env:"storm"},
+  {id:"school", op:"school",                              env:"school"}
 ];
 const trackById = id => TRACKS.find(x => x.id === id);
+
+/* --- curriculum: the sequence layer, see src/curricula.js ---
+   A chapter names a pool of fact keys. Everything else about the race
+   stays exactly the same, so a chapter can never change the mechanics,
+   only which facts come up. */
+function curriculumById(id){ return CURRICULA.find(c => c.id === id) || null; }
+function chapterOf(p){
+  const c = curriculumById(p && p.curriculum);
+  if(!c) return null;
+  return c.chapters.find(ch => ch.n === p.chapter) || null;
+}
+function as20Keys(spec){
+  const out = [];
+  for(const f of ADD){
+    const sum = f.a + f.b;
+    if(spec.maxSum && sum > spec.maxSum) continue;
+    if(spec.carry === "yes" && sum <= 10) continue;
+    if(spec.carry === "no"  && sum > 10) continue;
+    if(spec.addend && !spec.addend.includes(f.a) && !spec.addend.includes(f.b)) continue;
+    out.push(ak(f.a,f.b), sk(f.a,f.b));
+  }
+  return out;
+}
+function poolKeys(spec){
+  if(!spec) return [];
+  const out = [];
+  if(spec.mult) out.push(...multFactsFor(spec.mult).map(f => mk(f.a,f.b)));
+  if(spec.div)  out.push(...MULT.filter(f => f.a > 1 && (spec.div.includes(f.a) || spec.div.includes(f.b)))
+                              .map(f => dk(f.a,f.b)));
+  if(spec.as20) out.push(...as20Keys(spec.as20));
+  if(spec.as100){
+    out.push(...spec.as100.map(b => "p" + b));
+    out.push(...spec.as100.map(b => "n" + b));
+  }
+  return [...new Set(out)];
+}
+function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) : []; }
+/* How much variety a pool can actually produce. A bucket key inside 100
+   is a whole family of sums rather than a single fact, so it counts for
+   more than one. A chapter drives its own track only when it can fill a
+   race with enough variety; otherwise it stays selectable but shows no
+   track on the map. */
+function poolSize(keys){
+  let n = 0;
+  for(const k of keys) n += (k[0] === "p" || k[0] === "n") ? 4 : 1;
+  return n;
+}
+function schoolReady(p){ return poolSize(schoolPool(p)) >= 4; }
+function visibleTracks(p){
+  const rest = TRACKS.filter(tr => tr.op !== "school");
+  return schoolReady(p) ? [trackById("school")].concat(rest) : rest;
+}
+function trackName(p, tr){ return t("trk_" + tr.id); }
+function trackSub(p, tr){
+  if(tr.op === "school"){ const ch = chapterOf(p); return ch ? esc(ch.name) : t("trk_schools"); }
+  return t("trk_" + tr.id + "s");
+}
 
 function fact(p, key){ return p.facts[key] || {lv:0, reps:0, ok:0, bad:0, best:null, seen:0}; }
 /* Track mastery: every fact contributes in proportion to its level and
@@ -156,6 +227,7 @@ function mastery(p, keys){
   return s / (3 * keys.length);
 }
 function trackKeys(p, tr){
+  if(tr.op === "school") return schoolPool(p);
   if(tr.op === "mult") return multFactsFor(tr.tables).map(f => mk(f.a,f.b));
   if(tr.op === "div")  return MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
   if(tr.op === "as20") return ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
@@ -175,7 +247,7 @@ function unlockState(p, tr){
   // safety valve: after ten races the next track opens regardless, so nobody gets stuck
   const many = id => ((p.trackRuns || {})[id] || 0) >= 10;
   switch(tr.id){
-    case "t1": case "a20": return {open:true};
+    case "t1": case "a20": case "school": return {open:true};
     case "t2": return (m("t1") >= .7 || many("t1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t1"))};
     case "t3": return (m("t2") >= .7 || many("t2")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t2"))};
     case "t4": return (m("t3") >= .7 || many("t3")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t3"))};
@@ -275,7 +347,25 @@ function sampleKeys(p, pool, n, maxNew){
 function buildRun(p, tr){
   const n = p.qCount || 20;
   let keys;
-  if(tr.op === "mult"){
+  if(tr.op === "school"){
+    // The chapter sets the focus. In the soft mode the rest of the race
+    // still comes from earlier chapters through the Leitner box, because
+    // dropping spaced review would break the strongest part of the design.
+    const focus = schoolPool(p);
+    const cur = curriculumById(p.curriculum);
+    if((p.chapterMode || "soft") === "hard" || !cur){
+      keys = sampleKeys(p, focus, n, 6);
+    } else {
+      const earlier = [];
+      for(const ch of cur.chapters){
+        if(ch.n >= p.chapter) break;
+        earlier.push(...poolKeys(ch.pool));
+      }
+      const review = [...new Set(earlier)].filter(k => !focus.includes(k));
+      const nf = review.length ? Math.round(n * .7) : n;
+      keys = sampleKeys(p, focus, nf, 6).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
+    }
+  } else if(tr.op === "mult"){
     const focus = multFactsFor(tr.tables).map(f => mk(f.a,f.b));
     const earlier = [];
     for(const prev of TRACKS){
@@ -523,7 +613,8 @@ const ENVS = {
   beach:{ hill1:"#ffe0a3", hill2:"#f2c274", dec:"#3fa8b8", dec2:"#d49a44"},
   ocean:{ hill1:"#3f9fc4", hill2:"#256d8c", dec:"#19566f", dec2:"#0f3f52"},
   night:{ hill1:"#33406e", hill2:"#1e2848", dec:"#3d4b7d", dec2:"#2a3560"},
-  storm:{ hill1:"#5c6790", hill2:"#3d456b", dec:"#313a5f", dec2:"#222a49"}
+  storm:{ hill1:"#5c6790", hill2:"#3d456b", dec:"#313a5f", dec2:"#222a49"},
+  school:{hill1:"#7fd4c2", hill2:"#46a894", dec:"#2d7f6d", dec2:"#1d5c4e"}
 };
 /* =================================================================
    5. RACE CIRCUIT
@@ -795,7 +886,7 @@ function viewPlayers(){
 /* ---------- track map ---------- */
 function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] || ""; }
 function viewMap(p){
-  const cards = TRACKS.map(tr => {
+  const cards = visibleTracks(p).map(tr => {
     const u = unlockState(p, tr);
     const pr = Math.round(trackProgress(p, tr) * 100);
     const med = p.done[tr.id] || 0;
@@ -803,16 +894,16 @@ function viewMap(p){
       return `<div class="track locked">
         <span class="thumb">${circuitThumb(tr.env, tr.id, 0)}</span>
         <span class="body">
-          <span class="nm">${t("trk_" + tr.id)}</span>
-          <span class="sub">${t("trk_" + tr.id + "s")}</span>
+          <span class="nm">${trackName(p, tr)}</span>
+          <span class="sub">${trackSub(p, tr)}</span>
           <span class="lockmsg">&#128274; ${u.why}</span>
         </span></div>`;
     }
     return `<button class="track" data-act="play" data-id="${tr.id}">
       <span class="thumb">${circuitThumb(tr.env, tr.id, trackProgress(p, tr))}</span>
       <span class="body">
-        <span class="nm">${t("trk_" + tr.id)}</span>
-        <span class="sub">${t("trk_" + tr.id + "s")}</span>
+        <span class="nm">${trackName(p, tr)}</span>
+        <span class="sub">${trackSub(p, tr)}</span>
         ${(tr.op === "mix" || tr.op === "weak") ? "" : `<span class="bar"><i style="width:${pr}%"></i></span>`}
       </span>
       <span class="medal">${medalEmoji(med)}</span>
@@ -1344,7 +1435,7 @@ function viewParent(p){
   const accAll = p.totalAns ? Math.round(p.totalOk / p.totalAns * 100) : 0;
   const mAll = Math.round(mastery(p, MULT.map(f => mk(f.a,f.b))) * 100);
 
-  const toggles = TRACKS.map(tr => {
+  const toggles = TRACKS.filter(tr => tr.op !== "school").map(tr => {
     const st = p.force[tr.id];
     const auto = unlockState(Object.assign({}, p, {force:{}}), tr);
     const on = st === true || (st === undefined && auto.open);
@@ -1379,6 +1470,31 @@ function viewParent(p){
         <div class="muted" style="margin-top:10px">
           ${t("heatNote", num(SPEED[p.speedMode || "normal"].fast / 1000, 1))}
         </div>
+      </div>
+
+      <div class="h2">${t("secCurriculum")}</div>
+      <div class="card">
+        <div class="muted" style="margin-bottom:8px">${t("curriculumLabel")}</div>
+        <select class="field" data-act="curriculumsel">
+          <option value="">${t("curriculumNone")}</option>
+          ${CURRICULA.map(c => `<option value="${c.id}" ${p.curriculum === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}
+        </select>
+        ${curriculumById(p.curriculum) ? `
+          <div class="muted" style="margin:16px 0 8px">${t("chapterLabel")}</div>
+          <select class="field" data-act="chaptersel">
+            ${curriculumById(p.curriculum).chapters.map(ch =>
+              `<option value="${ch.n}" ${p.chapter === ch.n ? "selected" : ""}>${ch.n}. ${esc(ch.name)}${ch.pool ? "" : t("chapterNotYet")}</option>`).join("")}
+          </select>
+          <div class="muted" style="margin:6px 0 0;font-size:12px">${esc((chapterOf(p) || {}).src || "")}</div>
+          <div class="muted" style="margin:16px 0 8px">${t("chapterModeLabel")}</div>
+          <div class="seg">
+            ${[["soft", t("chapterSoft")], ["hard", t("chapterHard")]].map(([k,l]) =>
+              `<button class="${(p.chapterMode || "soft") === k ? "on" : ""}" data-act="chaptermode" data-cm="${k}">${l}</button>`).join("")}
+          </div>
+          <div class="muted" style="margin-top:10px">
+            ${schoolReady(p) ? t("chapterOnMap") : t("chapterNoTrack")}
+          </div>` : ""}
+        <div class="muted" style="margin-top:14px">${t("curriculumNote")}</div>
       </div>
 
       <div class="h2">${t("secUnlocked")}</div>
@@ -1502,8 +1618,8 @@ document.addEventListener("click", e => {
       <button class="pickitem ${p.runner === it.id ? "sel" : ""}" data-pick="${it.id}">
         <span class="pic">${itemSVG(p, it.id)}</span>
         <span class="nm">${nameOf(it)}</span></button>`).join("");
-    const d = sheet(`<h3>${t("trk_" + id)}</h3>
-      <div class="muted" style="margin-top:2px">${t("trk_" + id + "s")}</div>
+    const d = sheet(`<h3>${trackName(p, trackById(id))}</h3>
+      <div class="muted" style="margin-top:2px">${trackSub(p, trackById(id))}</div>
       <div class="tiny" style="margin:16px 0 8px">${t("whichRacer")}</div>
       <div class="pickgrid pickscroll">${cells}</div>
       <button class="btn mint wide" data-go style="margin-top:18px">${t("letsGo")}</button>
@@ -1574,6 +1690,7 @@ document.addEventListener("click", e => {
   if(act === "childlang"){
     p.lang = el.dataset.lang; save(); render(); return;
   }
+  if(act === "chaptermode"){ p.chapterMode = el.dataset.cm; save(); render(); return; }
   if(act === "autounlock"){ p.autoUnlock = !p.autoUnlock; save(); render(); return; }
   if(act === "force"){
     const auto = unlockState(Object.assign({}, p, {force:{}}), trackById(id)).open;
@@ -1606,6 +1723,27 @@ document.addEventListener("click", e => {
       const np = newProfile(nm); np.id = DB.current;
       DB.profiles[i] = np; save(); go("map");
     });
+    return;
+  }
+});
+
+/* Selects need their own listener, the delegated one above is click only. */
+document.addEventListener("change", e => {
+  const el = e.target.closest("[data-act]");
+  if(!el) return;
+  const p = P();
+  if(!p) return;
+  if(el.dataset.act === "curriculumsel"){
+    const id = el.value || null;
+    p.curriculum = id;
+    const cur = curriculumById(id);
+    p.chapter = cur && cur.chapters.length ? cur.chapters[0].n : null;
+    save(); render();
+    return;
+  }
+  if(el.dataset.act === "chaptersel"){
+    p.chapter = +el.value;
+    save(); render();
     return;
   }
 });

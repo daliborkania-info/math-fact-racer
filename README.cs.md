@@ -25,6 +25,14 @@ Procvičování malé násobilky pro děti zhruba od sedmi do deseti let, hrané
 
 Trati se odemykají podle toho, jak dítě zvládá tu předchozí. Rodič může kterékoli odemknutí přebít ručně.
 
+### Nebo podle toho, kde je zrovna třída
+
+V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady sedmdesát kapitol.
+
+Nastavuje se zvlášť pro každého hráče, takže sourozenci mohou mít různé učebnice. Volně znamená, že zhruba sedmdesát procent příkladů je z nastavené kapitoly a zbytek se vrací z dřívějšího učiva, aby se neztratilo. Výchozí stav je bez učebnice, kdy si hra vybírá učivo sama podle toho, co dítěti nejde.
+
+Z učebnic je převzatá jen struktura, tedy jaká témata, v jakém pořadí a v jakém rozsahu. Žádná zadání ani obrázky, příklady si hra generuje vlastní. Mapy učiva jsou v [docs/kurikulum/](docs/kurikulum/).
+
 ---
 
 ## Jak probíhá závod
@@ -127,6 +135,7 @@ Hratelná stránka je jeden soběstačný soubor. Negeneruje se ručně, ale ses
 src/index.template.html   kostra dokumentu se třemi značkami
 src/styles.css            všechny styly
 src/i18n.js               všechny texty rozhraní, cs / en / de
+src/curricula.js          kapitoly učebnic pro volbu podle školy
 src/app.js                engine, obrazovky, interakce
 build.py                  vloží zdroje do index.html
 index.html                sestavený, hratelný soubor

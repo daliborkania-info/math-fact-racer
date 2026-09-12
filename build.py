@@ -30,6 +30,7 @@ def build() -> str:
     for marker, source in (
         ("/*<<STYLES>>*/", read("styles.css")),
         ("/*<<I18N>>*/", read("i18n.js")),
+        ("/*<<CURRICULA>>*/", read("curricula.js")),
         ("/*<<APP>>*/", read("app.js")),
     ):
         if marker not in page:

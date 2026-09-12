@@ -85,6 +85,42 @@ ok('heatmapa 11x11 ve scrollovacim obalu', qa('.heatwrap .heat span').length===1
 click(qa('[data-act="qcount"]').find(b=>b.dataset.n==='10'));
 click(qa('[data-act="speed"]').find(b=>b.dataset.sp==='slow'));
 ok('nastaveni ulozeno', DBg().profiles[0].qCount===10 && DBg().profiles[0].speedMode==='slow');
+
+console.log('--- volba ucebnice ---');
+const sel=s=>{const el=q(s); return el;};
+ok('vychozi stav je bez ucebnice', DBg().profiles[0].curriculum===null);
+ok('nabidka ucebnic je v rodicovske sekci', sel('[data-act="curriculumsel"]')!==null);
+const cs=sel('[data-act="curriculumsel"]');
+cs.value='nns-matysek-3'; cs.dispatchEvent(new w.Event('change',{bubbles:true}));
+ok('ucebnice ulozena a kapitola prednastavena',
+   DBg().profiles[0].curriculum==='nns-matysek-3' && DBg().profiles[0].chapter===1,
+   'kapitola '+DBg().profiles[0].chapter);
+ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length===33,
+   qa('[data-act="chaptersel"] option').length+' kapitol');
+ok('nepodporovana kapitola je oznacena', /zatím neumíme/.test(txt()));
+const chs=sel('[data-act="chaptersel"]');
+chs.value='2'; chs.dispatchEvent(new w.Event('change',{bubbles:true}));
+ok('kapitola prepnuta', DBg().profiles[0].chapter===2);
+click(qa('[data-act="chaptermode"]').find(b=>b.dataset.cm==='hard'));
+ok('rezim kapitoly ulozen', DBg().profiles[0].chapterMode==='hard');
+click(q('[data-act="map"]'));
+ok('trat podle skoly je na mape', /Co máte ve škole/.test(txt()));
+ok('trat nese nazev kapitoly', /násobilka 1, 2, 3, 4, 10/.test(txt()));
+click(qa('[data-act="play"]').find(b=>b.dataset.id==='school')); click(q('[data-go]'));
+const tabs=[]; while(inRace() && tabs.length<40){ tabs.push(qtext()); type(answer()); await wait(640); }
+await wait(1500);
+ok('zavod podle kapitoly probehl a drzel se nasobilky z kapitoly',
+   tabs.length===10 && tabs.every(x=>/×|:/.test(x)), tabs.length+' otazek');
+click(q('[data-act="map"]')); click(q('[data-act="gate"]'));
+d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
+const cs2=sel('[data-act="curriculumsel"]');
+cs2.value=''; cs2.dispatchEvent(new w.Event('change',{bubbles:true}));
+ok('ucebnice se da zase vypnout', DBg().profiles[0].curriculum===null);
+click(q('[data-act="map"]'));
+ok('trat podle skoly zmizela z mapy', !/Co máte ve škole/.test(txt()));
+click(q('[data-act="gate"]'));
+d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
+
 click(q('[data-act="setpin"]'));
 d.getElementById('pin1').value='5678'; click(q('[data-act="savepin"]'));
 ok('kod zmenen', DBg().pin!==undefined && /Pro rodiče/.test(txt()));

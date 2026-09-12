@@ -16,6 +16,13 @@ v oboru do sta.
 Přebraná je jen struktura, tedy témata, jejich pořadí a číselné rozsahy.
 Odkazy na strany slouží jako kotva pro rodiče, který v sešitě listuje.
 
+Tahle mapa je jediná, která vznikla z prolistovaných stránek, ne jen z obsahu.
+Proto je z celého adresáře nejspolehlivější a proto z ní vychází i katalog témat.
+Strany odkazují na **pracovní sešity**. Obsah učebnice je členěný o něco jinak
+a přidává dvě věci, které se v sešitě jako samostatné téma neobjevují: písemné
+sčítání a odčítání, a finanční gramotnost s korunami a eury. Obojí je v mapě
+níž doplněné.
+
 ## Jak to číst
 
 Sloupec **témata** odkazuje na `id` z [TEMATA.md](TEMATA.md). Téma uvedené jako
@@ -26,6 +33,7 @@ Sloupec **témata** odkazuje na `id` z [TEMATA.md](TEMATA.md). Téma uvedené ja
 | # | kapitola | strany | témata |
 | --- | --- | --- | --- |
 | 1 | Opakování, sčítání a odčítání do 100 | 2 až 5 | `add_sub_100`, `missing_operand`, `word_problem` |
+| 1b | Písemné sčítání a odčítání, finanční gramotnost | uč. 10, 11 | `written_add_sub`, `finance_money` |
 | 2 | Opakování, násobilka 0, 1, 2, 3, 4, 10 | 6, 7 | `mult_table`, `div_table`, `missing_operand`, `times_more_less` |
 | 3 | Opakování, násobilka 5, 6, 7, 8, 9 | 8, 9 | `mult_table`, `div_table`, `missing_operand`, `times_more_less` |
 | 4 | Hodiny a určování času | 10, 11 | `clock_read`, `time_elapsed` |

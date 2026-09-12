@@ -38,6 +38,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | --- | --- | --- | --- | --- |
 | `mult_table` | malá násobilka do 10 × 10 | `pad` | 1 až 100 | hotovo |
 | `div_table` | dělení v oboru malé násobilky | `pad` | 1 až 100 | hotovo |
+| `add_sub_10` | sčítání a odčítání do 10 | `pad` | 0 až 10 | nové |
 | `add_sub_20` | sčítání a odčítání do 20 | `pad` | 0 až 20 | hotovo |
 | `add_sub_100` | sčítání a odčítání do 100, pět kbelíků obtížnosti | `pad` | 0 až 100 | hotovo |
 | `missing_operand` | chybějící sčítanec, menšenec, činitel nebo dělenec | `pad` | podle nosného tématu | nové |
@@ -77,6 +78,31 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `unit_pick` | která jednotka se hodí pro danou veličinu | `pick` | nové |
 | `fraction_read` | jaká část celku je vybarvená | `frac` | nové |
 | `fraction_compare` | porovnávání zlomků a částí celku | `cmp` | nové |
+| `count_objects` | spočítání předmětů na obrázku | `pad` | nové |
+
+## Témata vyšších ročníků, neověřená
+
+Tahle témata vyplynula z obsahů učebnic pro čtvrtý a pátý ročník. Vím, že
+existují a kde v pořadí leží, ale formát odpovědi a vstupní prvek jsou jen
+odhad, protože stránky jsem neviděl. V mapách jsou značená `?`. Než se na
+kterékoli z nich napíše generátor, je potřeba se podívat na pár stran.
+
+| id | téma | odhad vstupu | odhad režimu |
+| --- | --- | --- | --- |
+| `rounding_1000` | zaokrouhlování na tisíce a výš | `pad` | závod |
+| `add_sub_10000` | sčítání a odčítání ve větších oborech | `pad` | závod |
+| `written_div` | písemné dělení jednociferným i dvojciferným dělitelem | `col` | dílna |
+| `distribute` | roznásobení závorky | `pad` | závod |
+| `equation` | rovnice a nerovnice | `pad` | závod |
+| `roman_numerals` | římské číslice | `pick` nebo textové pole | závod |
+| `fraction_of` | výpočet části z celku | `pad` | závod |
+| `decimals` | desetinná čísla | `pad` | závod |
+| `percent` | procenta | `pad` | závod |
+| `negatives` | záporná čísla | `pad` | závod |
+| `average` | aritmetický průměr | `pad` | závod |
+| `estimate` | odhad výsledku | `pick` | dílna |
+| `chart_read` | čtení z diagramů a grafů | `pad` | dílna |
+| `finance_money` | finanční gramotnost, peníze, měny, hospodaření | ? | dílna |
 
 ## Poznámky ke generátorům
 

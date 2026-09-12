@@ -282,11 +282,31 @@ v katalogu.
 
 **Volba učebnice patří profilu**, ne aplikaci. Rodič ji v rodičovské sekci
 nastaví zvlášť pro každé dítě, protože sourozenci mohou mít různé učebnice.
-Do profilu přibude `curriculum`, `chapter` a `chapterMode`. Výchozí je
+Profil má `curriculum`, `chapter` a `chapterMode`. Výchozí je
 `curriculum: null`, tedy dnešní adaptivní režim. Měkký režim kapitoly serveruje
 zhruba sedmdesát procent z aktuální kapitoly a zbytek podle Leitnerovy krabičky,
 tvrdý bere jen aktuální kapitolu, měkký je výchozí, protože jinak se rozpadne
 rozložené opakování.
+
+**Tohle je hotové a v kódu.** Data leží v `src/curricula.js`, což je nový
+zdrojový soubor, který `build.py` vkládá mezi `i18n.js` a `app.js`. Jsou v něm
+tři kurikula pro první až třetí ročník, dohromady sedmdesát kapitol, z toho
+třicet osm s poolem, který hra umí zahrát. Kapitola bez poolu se dá vybrat, ale
+trať pro ni nevznikne, a v nabídce je označená jako "zatím neumíme". Čtvrtý
+a pátý ročník v aplikaci nejsou, protože by v nich bylo skoro všechno šedé,
+mapy k nim ale existují v `docs/kurikulum/`.
+
+Kapitola se do hry propisuje přes novou trať `school`, tedy "Co máte ve škole".
+Objeví se na mapě jen tehdy, když má vybraná kapitola dost zásoby, a nese název
+té kapitoly jako podtitulek. Bylo to zvolené proti variantě, kdy by kapitola
+překreslovala všechny existující tratě. Tohle je menší zásah, dítě tomu rozumí
+a ostatní tratě fungují beze změny.
+
+**Pozor na dvě věci v kódu.** Pool je popsaný deklarativně, tedy `mult`, `div`,
+`as20` a `as100`, a `poolKeys()` ho překládá na klíče příkladů. Nikdy do
+kurikula nepiš klíče přímo. A `poolSize()` počítá kbelík do sta za čtyři, ne za
+jeden, protože jeden kbelíkový klíč generuje celou rodinu příkladů. Bez toho by
+kapitola s jediným kbelíkem vypadala jako prázdná.
 
 **Katalog učebnic na ucebnice.online je za registrací.** Přes odkazy `qr.nns.cz`
 jde otevřít konkrétní sešit bez přihlášení, celý katalog sta a více titulů ale

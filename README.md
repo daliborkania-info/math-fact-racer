@@ -25,6 +25,14 @@ Times tables practice for children of roughly seven to ten, played as a lap arou
 
 Tracks unlock as the previous one is learned. A parent can override any of that.
 
+### Or follow whatever the class is doing
+
+The parent section can be pointed at a textbook and the chapter the class has reached. A track called **What school is doing** then appears on the map and practises exactly that material. Built in so far is Matýskova matematika for years one to three, seventy chapters in total, a Czech series.
+
+It is set per player, so siblings can follow different books. Loosely means about seventy percent of the questions come from the chosen chapter while the rest returns from earlier material so it is not lost. The default is no textbook at all, where the game picks the material itself from what the child finds hard.
+
+Only the structure is taken from a textbook: which topics, in what order, over what range. No prompts and no artwork, the questions are generated. The curriculum maps live in [docs/kurikulum/](docs/kurikulum/) and are written in Czech.
+
 ---
 
 ## How a race works
@@ -127,6 +135,7 @@ The playable page is a single self-contained file. It is generated, not edited b
 src/index.template.html   document skeleton with three markers
 src/styles.css            all styles
 src/i18n.js               every user facing string, cs / en / de
+src/curricula.js          textbook chapters for the follow-the-class mode
 src/app.js                engine, screens, interaction
 build.py                  inlines the sources into index.html
 index.html                the built, playable file

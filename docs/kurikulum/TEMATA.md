@@ -112,12 +112,22 @@ případy se zbytkem nula není potřeba, naopak patří dovnitř, protože rozl
 "beze zbytku" je součást dovednosti. Typická chyba je zbytek větší nebo rovný
 děliteli, na to má chybová hláška reagovat konkrétně.
 
-**`add_sub_20`, díra v rozsahu.** Klíč `a{a}p{b}` má oba sčítance do deseti,
-takže 12 + 3 se nedá zapsat vůbec, a kbelík `h1` do sta začíná na desítkách 2,
-takže to nepokryje ani on. Kapitoly 15 až 18 prvního ročníku, tedy obor do
-dvaceti bez přechodu, proto nejdou zapnout, i když generátor na první pohled
-existuje. Buď se rozšíří klíčový prostor `as20`, nebo přibude kbelík pro
-dvacítkový obor. Je to jediné místo v katalogu, kde chybí rozsah, ne generátor.
+**`add_sub_20`, obor do dvaceti bez přechodu, hotovo.** Klíč `a{a}p{b}` měl
+původně oba sčítance do deseti, takže 12 + 3 se nedalo zapsat vůbec, a celý
+třetí díl prvního ročníku byl kvůli tomu nehratelný. Teď je v oboru i devětatřicet
+spojů typu desítka a jednotky bez přechodu, uložených stejně jako všechny
+ostatní, tedy větší číslo druhé: 13 + 4 je `a4p13`. Generátor ani odčítání
+nepotřebovaly jedinou výjimku.
+
+Přechod přes desítku se od té chvíle pozná podle jednotek, ne podle součtu:
+`(a % 10) + (b % 10) > 10`. Díky tomu 13 + 4 i 10 + 7 správně spadnou na lehkou
+stranu a doplnění do celé desítky se za přechod nepočítá. Pole `carry` v mapě
+znamená přesně tohle, ne "součet nad deset", takže kapitola "Sčítání 9 +" už
+neobsahuje 10 + 7.
+
+Stupňů přechodu je proto šest, ne pět, a druhý v pořadí jsou právě desítkové
+spoje. Je to o rok dřív než mosty přes devítku, takže patří dopředu, ne na
+konec.
 
 **`add_sub_1000`.** Stejná architektura kbelíků jako `add_sub_100`, jen se
 štěpí podle toho, jestli se přechází přes stovku a jestli se přičítá

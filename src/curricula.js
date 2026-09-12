@@ -18,7 +18,8 @@
  *   mult  [tables]                multiplication facts touching those tables
  *   div   [tables]                division facts touching those tables
  *   as20  {maxSum, carry, addend} addition and subtraction within 20
- *                                 carry: "yes" crosses ten, "no" stays below
+ *                                 carry: "yes" crosses a ten, "no" never
+ *                                 does, which still allows 13 + 4
  *                                 addend: one of the two addends is in the list
  *   as100 [bucket ids]            h1..h5, the difficulty buckets within 100
  *   clock [bucket ids]            c1..c6, telling the time by precision,
@@ -51,10 +52,11 @@ const CURRICULA = [
       {n:12, name:"Číslo 9",                  src:"2. díl, s. 34–44", pool:{as20:{maxSum:9}}},
       {n:13, name:"Číslo 10",                 src:"2. díl, s. 45–55", pool:{as20:{maxSum:10}}},
       {n:14, name:"Opakování do deseti",      src:"2. díl, s. 56–60", pool:{as20:{maxSum:10}}},
-      {n:15, name:"Obor 0 až 15, část A",     src:"3. díl, s. 1–16",  pool:null},
-      {n:16, name:"Obor 0 až 15, část B",     src:"3. díl, s. 17–30", pool:null},
-      {n:17, name:"Obor 0 až 20, část C",     src:"3. díl, s. 31–44", pool:null},
-      {n:18, name:"Obor 0 až 20, část D",     src:"3. díl, s. 45–60", pool:null}
+      // the whole third part stays under the ten bridge, only the range grows
+      {n:15, name:"Obor 0 až 15, část A",     src:"3. díl, s. 1–16",  pool:{as20:{maxSum:15, carry:"no"}}},
+      {n:16, name:"Obor 0 až 15, část B",     src:"3. díl, s. 17–30", pool:{as20:{maxSum:15, carry:"no"}}},
+      {n:17, name:"Obor 0 až 20, část C",     src:"3. díl, s. 31–44", pool:{as20:{maxSum:20, carry:"no"}}},
+      {n:18, name:"Obor 0 až 20, část D",     src:"3. díl, s. 45–60", pool:{as20:{maxSum:20, carry:"no"}}}
     ]
   },
   {

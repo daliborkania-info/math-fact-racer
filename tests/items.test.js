@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,C_BUCKETS,clockKeys,clockStage,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,C_BUCKETS,clockKeys,clockStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -58,14 +58,16 @@ for(const t of A.TRACKS){
   if(dup){console.log('  !!  stejna otazka dvakrat za sebou na trati',t.id,dup+'x');}
   console.log(t.id.padEnd(6), 'otazek', it.length, '| ruznych', uniq, '| za sebou stejne', dup, '|', it.slice(0,4).map(x=>face(x)+(x.kind==='clock'?'':'='+x.answer)).join('  '));
 }
-// sampionat nesmi zacatecnikovi podstrcit jemnejsi cas, nez na jakem je
+// sampionat nesmi zacatecnikovi podstrcit stupen, na ktery jeste nedosel
 let mixBad=0;
 const mixp=A.newProfile('M'); A.DB.profiles=[mixp]; A.DB.current=mixp.id;
-Object.keys(mixp.force).length; mixp.autoUnlock=false;   // vsechno otevrene
-for(const it of A.buildRun(mixp,A.trackById('mix'))) if(it.kind==='clock'&&it.key!=='c1'){
-  mixBad++;console.log('  !!  sampionat dal zacatecnikovi',it.disp);break;
+mixp.autoUnlock=false;                                   // vsechno otevrene
+const first20=new Set(A.stageKeys(0));
+for(const it of A.buildRun(mixp,A.trackById('mix'))){
+  if(it.kind==='clock'&&it.key!=='c1'){mixBad++;console.log('  !!  sampionat dal zacatecnikovi cas',it.disp);break;}
+  if(/^[as]/.test(it.key)&&!first20.has(it.key)){mixBad++;console.log('  !!  sampionat dal zacatecnikovi',it.text);break;}
 }
-console.log('sampionat respektuje stupen hodin:',mixBad?'ne':'ano');
+console.log('sampionat respektuje stupne:',mixBad?'ne':'ano');
 
 // 3. platnost SVG (parovani tagu a NaN)
 let svgBad=0;
@@ -181,6 +183,56 @@ for(const c of A.CURRICULA){
 const rn=A.newProfile('X'); rn.curriculum='neexistuje'; rn.chapter=5; A.normalizeChapter(rn);
 if(rn.chapter!==null){selBad++;console.log('kapitola prezila zruseni ucebnice');}
 console.log('nabizenych kapitol:',offered,'| zamcenych:',blocked,'| chyb:',selBad);
+
+// 8. obor do dvaceti bez prechodu, tedy prvni rocnik
+let teenBad=0;
+const teens=A.ADD.filter(f=>f.b>10);
+if(teens.length!==36){teenBad++;console.log('  !!  spatny pocet desitkovych spoju',teens.length);}
+for(const f of teens) if(A.crossesTen(f.a,f.b)){teenBad++;console.log('  !!  desitkovy spoj prechazi desitku',f.a,'+',f.b);break;}
+// generator je musi umet vyrobit a odpoved musi sedet
+for(const f of teens.slice(0,8)) for(let i=0;i<20;i++){
+  for(const k of [A.ak(f.a,f.b), A.sk(f.a,f.b)]){
+    const it=A.itemFromKey(k);
+    const val=eval(it.text.replace(/×/g,'*'));
+    if(val!==it.answer||it.answer<0||it.answer>20){teenBad++;console.log('  !!  spatny spoj do dvaceti',k,it.text,it.answer);break;}
+  }
+}
+// stupne: prvni je do desiti, druhy jsou desitky, teprve pak mosty
+const st0=new Set(A.stageKeys(0)), st1=new Set(A.stageKeys(1));
+if(!st0.has(A.ak(3,4))||st0.has(A.ak(4,13))){teenBad++;console.log('  !!  prvni stupen neni obor do desiti');}
+if(!st1.has(A.ak(4,13))||st1.has(A.ak(8,5))){teenBad++;console.log('  !!  druhy stupen nejsou desitky bez prechodu');}
+if(A.E_STAGES.length!==6){teenBad++;console.log('  !!  stupnu neni sest',A.E_STAGES.length);}
+// kapitola prvniho rocniku musi dat desitkove spoje a zadny prechod
+const ch15=A.CURRICULA.find(c=>c.id==='nns-matysek-1').chapters.find(c=>c.n===15);
+const k15=A.poolKeys(ch15.pool);
+if(!k15.includes(A.ak(3,11))){teenBad++;console.log('  !!  obor do patnacti nema 11 + 3');}
+if(k15.includes(A.ak(7,8))){teenBad++;console.log('  !!  obor do patnacti pustil prechod pres desitku');}
+if(k15.some(k=>{const [x,y]=k.slice(1).split('p').map(Number); return x+y>15;})){teenBad++;console.log('  !!  obor do patnacti prelezl patnact');}
+// druha trida s prechodem naopak desitkove spoje brat nesmi
+const g2=A.CURRICULA.find(c=>c.id==='nns-matysek-2').chapters.find(c=>c.n===4);
+const k4=A.poolKeys(g2.pool);
+if(k4.some(k=>{const [x,y]=k.slice(1).split('p').map(Number); return !A.crossesTen(x,y);})){
+  teenBad++;console.log('  !!  kapitola s prechodem pustila neco bez prechodu');
+}
+console.log('chyb v oboru do dvaceti bez prechodu:',teenBad);
+
+// 9. jednou otevrena trat uz se nezavre
+let opBad=0;
+const op=A.newProfile('O');
+A.DB.profiles=[op]; A.DB.current=op.id;
+A.trackKeys(op,A.trackById('a20')).forEach(k=>op.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
+A.rememberUnlocks(op);
+if(!op.opened.a100){opBad++;console.log('  !!  zvladnuta dvacitka neotevrela stovku');}
+op.facts={};                                  // pribylo ucivo, zvladnuti spadlo na nulu
+if(!A.unlockState(op,A.trackById('a100')).open){opBad++;console.log('  !!  otevrena trat se zase zavrela');}
+op.force.a100=false;                          // rodic ji ale zavrit smi
+if(A.unlockState(op,A.trackById('a100')).open){opBad++;console.log('  !!  rodic nemuze zavrit trat');}
+// starsi profil bez zaznamu se seedne z toho, kde uz byl
+const old={...A.newProfile('S'), trackRuns:{a100:3}};
+delete old.opened;
+A.seedOpened(old);
+if(!old.opened.a100){opBad++;console.log('  !!  odjete zavody trat neotevrely');}
+console.log('chyb v pameti odemceni:',opBad);
 
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;

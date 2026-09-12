@@ -1,6 +1,6 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po přidání generátoru hodin
+Poslední aktualizace: 12. září 2026, po přidání hodin a opravě oboru do dvaceti
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -129,6 +129,14 @@ odpověď posune o jedna nahoru až na 5, správná pomalá posune nahoru jen do
 **Zvládnutí trati.** `součet(min(3, úroveň)) / (3 * počet příkladů)`. Roste od
 prvního závodu a přímo předpovídá odemknutí další trati.
 
+**Jednou otevřená trať se nezavře.** Profil má `opened`, kam se při každém
+vykreslení mapy zapíše každá trať, kterou automatika právě otevřela. Od té
+chvíle je otevřená napořád. Je to pojistka proti tomu, aby přidání učiva do
+trati snížilo zvládnutí a dítě druhý den našlo zamčené dveře; přesně to by se
+stalo, když k dvacítce přibyly desítkové spoje. Zavřít trať smí jen rodič.
+Starší profily se seedují z toho, kde dítě prokazatelně bylo, tedy z dojetých
+závodů a z příkladů dané trati v krabičce.
+
 **Odemykání.** Prahy zvládnutí: t2 od 0,7 na t1, t3 od 0,7 na t2, t4 od 0,7 na
 t3, t5 od 0,65 na t4, dělení od 0,55 celé násobilky, do stovky od 0,6 na do
 dvaceti. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
@@ -137,14 +145,18 @@ tak jako tak. Rodič může každou trať přebít ručně. Trať `school` je v�
 **Výběr příkladů.** Váha podle úrovně `[7, 8, 6.5, 3.4, 1.6, 0.8]`, zvýšená
 u dlouho neviděných a u těch, kde je víc chyb než úspěchů. Neviděné mají váhu
 3,2 a je jich na závod omezený počet. U násobilkových tratí je zhruba sedmdesát
-procent otázek z ohniska trati a třicet z dřívějších.
+procent otázek z ohniska trati a třicet z dřívějších. Šampionát bere jen to, co
+by daná trať právě teď sama nabídla, viz `reachedKeys()`; u stupňovaných tratí,
+tedy dvacítky a hodin, tím nemůže podstrčit stupeň, na který dítě ještě nedošlo.
 
 **Stupně přechodu přes desítku.** Trať do dvaceti není jeden pytel příkladů,
-má pět stupňů podle toho, jak těžký je most přes desítku: `e1` bez přechodu
-a s desítkou jako sčítancem, `e2` přechod přes devítku, `e3` přes osmičku,
-`e4` přes sedmičku, `e5` zbytek. Příklad patří do stupně svého většího
-sčítance. Pořadí je převzaté ze čtvrtého dílu Matýskovy matematiky, který
-každému věnuje celou kapitolu, a platí i bez zvolené učebnice. Závod nese
+má šest stupňů: `e1` obor do deseti a desítka jako sčítanec, `e2` desítkové
+spoje bez přechodu, tedy 13 + 4, `e3` přechod přes devítku, `e4` přes osmičku,
+`e5` přes sedmičku, `e6` zbytek. Přechod se pozná podle jednotek,
+`(a % 10) + (b % 10) > 10`, takže doplnění do celé desítky se za přechod
+nepočítá. Příklad patří do stupně svého většího sčítance. Pořadí mostů je převzaté ze čtvrtého dílu Matýskovy matematiky, který
+každému věnuje celou kapitolu, desítkové spoje jsou před nimi, protože je
+učebnice bere o rok dřív. Platí i bez zvolené učebnice. Závod nese
 aktuální stupeň ze sedmdesáti procent, zbytek je opakování už zvládnutých
 stupňů, tedy stejný tvar jako u násobilkových tratí. Díky tomu začátečník
 potká jen součty do deseti. Aktuální stupeň hledá `as20Stage()` jako první,
@@ -178,7 +190,7 @@ Dvanáct tratí, každá má vlastní generovaný okruh a prostředí.
 | t4 | násobilka 8, 9 |
 | t5 | celá malá násobilka |
 | d1 | dělení |
-| a20 | sčítání a odčítání do 20, pět stupňů přechodu přes desítku |
+| a20 | sčítání a odčítání do 20, šest stupňů podle přechodu přes desítku |
 | a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
 | clock | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
 | mix | vše odemčené dohromady |
@@ -191,7 +203,9 @@ V rodičovské sekci nemá přepínač odemknutí, řídí ji volba kapitoly.
 
 Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
 `s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky, `c1` až `c6`
-hodiny. Kanonicky vždy `a <= b`, komutativita se sbaluje.
+hodiny. Kanonicky vždy `a <= b`, komutativita se sbaluje. U dvacítky smí být
+druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
+nepotřebují na obor do dvaceti bez přechodu jedinou výjimku.
 
 Klíč začínající písmenem z `FAMILY_HEADS`, tedy `p`, `n` nebo `c`, není jeden
 příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`. Proto
@@ -214,6 +228,7 @@ profil = {
   best:  { "t1": {dist, hist, n0} },     // rekordy tratí
   done:  { "t1": 3 },                    // nejlepší medaile
   trackRuns: { "t1": 8 },
+  opened: { "t1": true },                // trati, ktere uz jednou byly otevrene
   owned: [...], runner: "ri_auto", xp: { "pet_kiki": 120 },
   coins, force: {}, autoUnlock, qCount, speedMode,
   curriculum: null,                      // id z CURRICULA, null = adaptivní režim
@@ -227,8 +242,9 @@ PIN je uložený jen jako hash funkcí `hashPin`. Není to skutečné zabezpeče
 jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 
 Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
-pokud je nemá, a `normalizeChapter()` srovná kapitolu. Nové migrace patří
-do `load()`, a pokud se týkají profilu jako celku, taky do větve `import`.
+pokud je nemá, `normalizeChapter()` srovná kapitolu a `seedOpened()` doplní
+seznam otevřených tratí. Nové migrace patří do `load()`, a pokud se týkají
+profilu jako celku, taky do větve `import`.
 
 ---
 
@@ -279,7 +295,7 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá devět okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá jedenáct okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
 stupně přechodu přes desítku, pravidla výběru kapitoly a kbelíky hodin.
@@ -375,7 +391,7 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 63 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 67 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
@@ -410,8 +426,8 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání hodin je 63 hratelných kapitol z 95, po ročnících
-11/18, 42/44 a 10/33.
+dojmu. Stav po přidání hodin a po opravě oboru do dvaceti je 67 hratelných
+kapitol z 95, po ročnících 15/18, 42/44 a 10/33.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
@@ -431,7 +447,6 @@ dojmu. Stav po přidání hodin je 63 hratelných kapitol z 95, po ročnících
 | `written_mult` | `col`, dílna | 1 | g3: 15 |
 | `count_objects` | dílna | 3 | g1: 1, 2, 3 |
 | `finance_money` | dílna | 1 | g2: 3 |
-| rozsah `as20` v teens | žádný nový | 4 | g1: 15 až 18 |
 
 **Hlavní zjištění.** Patnáct z třiadvaceti zamčených kapitol třetí třídy
 nepotřebuje na vstupu vůbec nic nového, stačí generátory na `pad`. Třetí třída
@@ -441,8 +456,8 @@ tím jde z 10/33 na 25/33, aniž by se sáhlo na klávesnici.
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
 teď přes `as100`. Je to prohloubení, ne odemčení, a navíc potřebuje dílnu.
 
-**Kapitoly 15 až 18 prvního ročníku nejsou o chybějícím generátoru**, ale o díře
-v klíčovém prostoru, viz poznámka u `add_sub_20` v katalogu.
+**Zbytek prvního ročníku už chybí jen dílna.** Kapitoly 1 až 3 jsou počítání
+předmětů na obrázku, nic pro závod.
 
 ## 12b. Další krok
 

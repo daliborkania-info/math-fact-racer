@@ -50,10 +50,10 @@ Mapa to proto kopíruje a kapitola je tu prakticky totéž co číselný rozsah.
 
 ## Poznámky
 
-Celý první ročník je bez přechodu přes desítku. Generátor `add_sub_20` na to
-musí umět omezení, tedy aby se z desítky nevystupovalo. Bez toho je celá tahle
-mapa k ničemu, protože příklad 8 + 5 v druhé kapitole prvního ročníku nemá co
-dělat.
+Celý první ročník je bez přechodu přes desítku a generátor `add_sub_20` to
+umí, `carry:"no"` znamená, že se z desítky nevystupuje. Kapitoly 15 až 18,
+tedy celý třetí díl, dlouho nešly zapnout, protože klíčový prostor neuměl
+zapsat 12 + 3; od té doby jsou hratelné všechny kapitoly od čtvrté výš.
 
 Hra je pro první ročník dost hraniční, protože dítě, které se teprve učí zapisovat
 číslice, nemá co dělat s klávesnicí ani s měřením času. Mapa má smysl hlavně jako

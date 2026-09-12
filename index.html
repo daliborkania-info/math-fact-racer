@@ -952,7 +952,8 @@ const LANGS = [["cs", "Čeština"], ["en", "English"], ["de", "Deutsch"]];
  *   mult  [tables]                multiplication facts touching those tables
  *   div   [tables]                division facts touching those tables
  *   as20  {maxSum, carry, addend} addition and subtraction within 20
- *                                 carry: "yes" crosses ten, "no" stays below
+ *                                 carry: "yes" crosses a ten, "no" never
+ *                                 does, which still allows 13 + 4
  *                                 addend: one of the two addends is in the list
  *   as100 [bucket ids]            h1..h5, the difficulty buckets within 100
  *   clock [bucket ids]            c1..c6, telling the time by precision,
@@ -985,10 +986,11 @@ const CURRICULA = [
       {n:12, name:"Číslo 9",                  src:"2. díl, s. 34–44", pool:{as20:{maxSum:9}}},
       {n:13, name:"Číslo 10",                 src:"2. díl, s. 45–55", pool:{as20:{maxSum:10}}},
       {n:14, name:"Opakování do deseti",      src:"2. díl, s. 56–60", pool:{as20:{maxSum:10}}},
-      {n:15, name:"Obor 0 až 15, část A",     src:"3. díl, s. 1–16",  pool:null},
-      {n:16, name:"Obor 0 až 15, část B",     src:"3. díl, s. 17–30", pool:null},
-      {n:17, name:"Obor 0 až 20, část C",     src:"3. díl, s. 31–44", pool:null},
-      {n:18, name:"Obor 0 až 20, část D",     src:"3. díl, s. 45–60", pool:null}
+      // the whole third part stays under the ten bridge, only the range grows
+      {n:15, name:"Obor 0 až 15, část A",     src:"3. díl, s. 1–16",  pool:{as20:{maxSum:15, carry:"no"}}},
+      {n:16, name:"Obor 0 až 15, část B",     src:"3. díl, s. 17–30", pool:{as20:{maxSum:15, carry:"no"}}},
+      {n:17, name:"Obor 0 až 20, část C",     src:"3. díl, s. 31–44", pool:{as20:{maxSum:20, carry:"no"}}},
+      {n:18, name:"Obor 0 až 20, část D",     src:"3. díl, s. 45–60", pool:{as20:{maxSum:20, carry:"no"}}}
     ]
   },
   {
@@ -1154,6 +1156,7 @@ function load(){
     // a curriculum that no longer exists must not strand the profile
     if(p.curriculum && !curriculumById(p.curriculum)){ p.curriculum = null; p.chapter = null; }
     if(p.curriculum) normalizeChapter(p);
+    seedOpened(p);
   }
 }
 function save(){
@@ -1174,6 +1177,7 @@ function newProfile(name){
     xp: {},             // collectible id -> experience
     coins: 0,
     trackRuns: {},      // track id -> races completed
+    opened: {},         // track id -> true once it has ever been unlocked
     force: {},          // parent override: track id -> true/false
     autoUnlock: true,
     qCount: 20,
@@ -1208,8 +1212,21 @@ function touchStreak(p){
 const MULT = [];
 for(let a=1; a<=10; a++) for(let b=a; b<=10; b++) MULT.push({a,b});   // 55 facts
 
+/* Addition within twenty is not only single digit plus single digit.
+   The whole of the first grade is spent on the teens without ever
+   crossing a ten, so 13 + 4 has to be a fact of its own; the old key
+   space could not even write it down. A teen fact is stored the same
+   way as any other, larger number second, so 13 + 4 is a4p13 and the
+   generator needs no special case at all. */
 const ADD = [];
 for(let a=1; a<=10; a++) for(let b=a; b<=10; b++) ADD.push({a,b});    // sums within 20
+for(let teen=11; teen<=19; teen++) for(let d=1; d<=9-(teen%10); d++) ADD.push({a:d, b:teen});
+
+/* Crossing a ten is what makes an addition hard, and it happens when
+   the units alone add up past ten. Written this way the rule holds for
+   6 + 7, for 13 + 4 and for 10 + 7 alike, and making a whole ten does
+   not count as crossing one. */
+const crossesTen = (a,b) => (a % 10) + (b % 10) > 10;
 
 /* Crossing the ten is not one skill but five, and they are not equally
    hard. Making ten from a nine is the easiest bridge and gets taught
@@ -1218,14 +1235,19 @@ for(let a=1; a<=10; a++) for(let b=a; b<=10; b++) ADD.push({a,b});    // sums wi
    and it applies whether or not a curriculum is selected: a child new to
    the track meets sums below ten before anything crosses it.
    A fact belongs to the stage of its larger addend, which is the chapter
-   where the book first teaches it. */
+   where the book first teaches it.
+   Ahead of all the bridges sits the whole of the first grade: the teens
+   with the ten parked in front and nothing crossing it. It is easier
+   than any bridge and the books teach it a year earlier, so it is the
+   second stage, not the last. */
 const E_STAGES = [
   // adding to a whole ten never needs regrouping, so it belongs with the easy ones
-  {id:"e1", has:(a,b) => a + b <= 10 || Math.max(a,b) === 10},
-  {id:"e2", has:(a,b) => a + b > 10 && Math.max(a,b) === 9},
-  {id:"e3", has:(a,b) => a + b > 10 && Math.max(a,b) === 8},
-  {id:"e4", has:(a,b) => a + b > 10 && Math.max(a,b) === 7},
-  {id:"e5", has:(a,b) => a + b > 10 && Math.max(a,b) <= 6}
+  {id:"e1", has:(a,b) => Math.max(a,b) <= 10 && !crossesTen(a,b)},
+  {id:"e2", has:(a,b) => Math.max(a,b) > 10  && !crossesTen(a,b)},
+  {id:"e3", has:(a,b) => crossesTen(a,b) && Math.max(a,b) === 9},
+  {id:"e4", has:(a,b) => crossesTen(a,b) && Math.max(a,b) === 8},
+  {id:"e5", has:(a,b) => crossesTen(a,b) && Math.max(a,b) === 7},
+  {id:"e6", has:(a,b) => crossesTen(a,b) && Math.max(a,b) <= 6}
 ];
 
 const H_BUCKETS = [
@@ -1301,8 +1323,10 @@ function as20Keys(spec){
   for(const f of ADD){
     const sum = f.a + f.b;
     if(spec.maxSum && sum > spec.maxSum) continue;
-    if(spec.carry === "yes" && sum <= 10) continue;
-    if(spec.carry === "no"  && sum > 10) continue;
+    // carry means crossing a ten, not merely landing above ten: 13 + 4
+    // and 10 + 7 both stay on the easy side of that line
+    if(spec.carry === "yes" && !crossesTen(f.a, f.b)) continue;
+    if(spec.carry === "no"  &&  crossesTen(f.a, f.b)) continue;
     if(spec.addend && !spec.addend.includes(f.a) && !spec.addend.includes(f.b)) continue;
     out.push(ak(f.a,f.b), sk(f.a,f.b));
   }
@@ -1406,14 +1430,53 @@ function clockStage(p){
   }
   return C_BUCKETS.length - 1;
 }
+/* What a track would actually serve right now. A staged track holds
+   back the levels the child has not reached yet, and the championship
+   has to respect that, otherwise it hands out material that the track
+   itself would refuse to. */
+function reachedKeys(p, tr){
+  if(tr.op === "as20"){
+    const out = [];
+    for(let i = 0; i <= as20Stage(p); i++) out.push(...stageKeys(i));
+    return out;
+  }
+  if(tr.op === "clock") return C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id);
+  return trackKeys(p, tr);
+}
 function trackProgress(p, tr){
   if(tr.op === "mix" || tr.op === "weak") return 0;
   return mastery(p, trackKeys(p, tr));
 }
 
+/* A track that has once been open never closes again. Adding material
+   to a track lowers its mastery figure, and a child who was racing
+   somewhere yesterday must not find the door shut this morning. Only a
+   parent can close a track.
+   Older profiles are seeded from where they have demonstrably been:
+   a finished race there, or a single fact of that track in the box. */
+function seedOpened(p){
+  p.opened = p.opened || {};
+  for(const tr of TRACKS){
+    if(p.opened[tr.id]) continue;
+    const raced = ((p.trackRuns || {})[tr.id] || 0) > 0;
+    if(raced || trackKeys(p, tr).some(k => (p.facts[k] || {}).reps > 0)) p.opened[tr.id] = true;
+  }
+}
+/* Called on every render of the map, so the moment a track opens it is
+   written down and stays written down. */
+function rememberUnlocks(p){
+  let added = false;
+  for(const tr of TRACKS){
+    if(p.opened[tr.id]) continue;
+    if(unlockState(p, tr).open){ p.opened[tr.id] = true; added = true; }
+  }
+  return added;
+}
+
 function unlockState(p, tr){
   if(p.force[tr.id] === true)  return {open:true};
   if(p.force[tr.id] === false) return {open:false, why: t("lockByParent")};
+  if((p.opened || {})[tr.id])  return {open:true};
   if(!p.autoUnlock)            return {open:true};
   const m = id => mastery(p, trackKeys(p, trackById(id)));
   // safety valve: after ten races the next track opens regardless, so nobody gets stuck
@@ -1631,11 +1694,7 @@ function buildRun(p, tr){
     const all = [];
     for(const other of TRACKS){
       if(other.op === "mix" || other.op === "weak") continue;
-      if(!unlockState(p, other).open) continue;
-      // the clock is staged, so the championship must not hand out a
-      // reading finer than the one currently being learned
-      if(other.op === "clock") all.push(...C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id));
-      else all.push(...trackKeys(p, other));
+      if(unlockState(p, other).open) all.push(...reachedKeys(p, other));
     }
     keys = sampleKeys(p, [...new Set(all)], n, 3);
   } else { // weak
@@ -2098,6 +2157,7 @@ function go(name, data){ view = Object.assign({name}, data || {}); render(); }
 function render(){
   const p = P();
   applyLang();
+  if(p && rememberUnlocks(p)) save();
   if(view.name !== "game") stopAnim();
   if(view.name === "setpin"){ app.innerHTML = viewSetPin(); return; }
   if(view.name !== "players" && !p){ view = {name:"players"}; }
@@ -3004,6 +3064,7 @@ document.addEventListener("click", e => {
       DB.profiles[i] = Object.assign(newProfile(obj.name || t("defaultName")), obj);
       if(DB.profiles[i].curriculum && !curriculumById(DB.profiles[i].curriculum)) DB.profiles[i].curriculum = null;
       normalizeChapter(DB.profiles[i]);
+      seedOpened(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>

@@ -141,6 +141,8 @@ let cn=1;
 while(inRace() && cn<40){ type(ev('RUN.items[RUN.idx].answer')); cn++; await wait(640); }
 await wait(1500);
 ok('zavod s hodinami dojel do cile', cn>10, cn+' otazek');
+ok('chybny cas se na vysledcich ukaze jako cas, ne jako cislo',
+   /Hodiny ukazují \d/.test(txt()) && !/ = \d+00/.test(txt()), txt().slice(-70));
 ok('hodiny se zapsaly do krabicky', DBg().profiles[0].facts.c1 && DBg().profiles[0].facts.c1.reps>5,
    'c1 reps '+((DBg().profiles[0].facts.c1||{}).reps));
 

@@ -508,7 +508,109 @@ Dílna až po tom všem.
 to dál. Mapa tím naroste a bude ji potřeba přeskládat do skupin, jakmile tratí
 bude patnáct a víc.
 
-**Pilot pro `pad2`: dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
+## 12c. Co stojí v cestě
+
+Soupis vznikl průchodem kódu, ne odhadem. Odkazuje na funkce, ne na řádky,
+protože ty se posouvají. Řazeno podle toho, co která skupina blokuje.
+
+**A. Rodiny na `pad`, tedy nejlevnější vlna.** Tyhle věci brání i tomu, co
+nepotřebuje nový vstupní prvek.
+
+`tap()` má výchozí `maxLen` tři znaky, takže odpověď nad 999 nejde zadat.
+Hodiny to obcházejí vlastním `maxLen: 4`. `add_sub_1000` s výsledkem 1000 na to
+narazí jako první, stejně tak zaokrouhlování na stovky a násobení stem.
+
+`items.test.js` v prvním okruhu vyhodnocuje `it.text` jako výraz a vyžaduje
+odpověď v rozsahu 0 až 100. Cokoli nad sto neprojde testem, i když to v kódu
+funguje. Buď se rozsah uvolní podle rodiny, nebo generátor dodá vlastní
+ověřovací funkci; druhé je lepší, protože `eval(text)` stejně neumí nic, co
+není aritmetický řádek.
+
+`thresholds()` je ruční výraz, kde má každá rodina svůj násobitel prahů,
+zatím 2,4 pro hodiny a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
+prahy pro jednociferné vybavování a děti budou mít samé pomalé odpovědi.
+
+`buildRun()` má čtyři skoro totožné větve tvaru "sedmdesát procent aktuální
+ohnisko, zbytek opakování", jen s jinými parametry. Pátá kopie by měla vzniknout
+až po vytažení `focusAndReview()`. Stejně tak `as20Stage()` a `clockStage()`
+jsou doslovná kopie téhož algoritmu s prahem 0,7; patří do jedné `stageOf()`.
+
+**B. Nové vstupní prvky, tedy `pad2`, `pad3`, `cmp`, `pick`.**
+
+Celá dráha odpovědi počítá s jedním celým číslem: `RUN.typed` je jeden řetězec,
+`#abox` je jeden prvek, `typedText()` vrací jeden řetězec a `submit()` porovnává
+`parseInt(RUN.typed) === item.answer`. Dvě políčka potřebují pojem aktivního
+políčka, mazání přes hranici a hlavně `item.check(vstup)` místo porovnání
+skalárů. U hodin šla použít finta hodina krát sto plus minuty, u dělení se
+zbytkem je křehká, protože nerozliší špatný zápis od špatného výsledku.
+
+Klávesnice je natvrdo v šabloně `viewGame()` a mezi otázkami se nepřekresluje,
+`submit()` mění jen `#qbox`, nápovědu, pipy a čítač. Tlačítka `<` `=` `>` navíc
+neprojdou přes `tap()`, který zná jen číslice, `del` a `ok`, a přes atribut
+`data-k`, který delegovaný posluchač zabírá dřív než `data-act`.
+
+**Rozhodnutí, které zatím nikde nepadlo: smí jeden závod míchat různé vstupní
+prvky?** Měkký režim kapitoly i šampionát míchají klíče z různých rodin úplně
+samy, takže jakmile bude existovat první rodina s jiným vstupem, může po sobě
+přijít otázka na klávesnici, otázka na dvě políčka a otázka na tlačítka. Buď se
+klávesnice bude překreslovat u každé otázky, nebo se rodiny s odlišným vstupem
+ze společných závodů vyloučí. Tohle musí být hotové před prvním `pad2`.
+
+`record()` bere správnost jako ano nebo ne. U dvou políček to znamená, že
+"podíl dobře, zbytek špatně" spadne do krabičky jako celá chyba. Změna by sáhla
+na datový model, takže rovnou na pravidlo z oddílu 3 a na migrační test.
+
+V CSS je políčko odpovědi široké nejmíň 104 pixelů a klávesnice má pevně tři
+sloupce. Dvě nebo tři políčka vedle sebe se do řádku nevejdou a tři velká
+tlačítka do třísloupcového gridu jen náhodou. Rozměry jsou navíc zopakované
+podruhé v media query pro nízké displeje.
+
+**C. Viditelnost pro rodiče.** Heatmapa v rodičovské sekci je doslova tabulka
+jedenáct krát jedenáct pro malou násobilku, klíče se skládají jen přes `mk()`.
+Sčítání, počítání do sta ani hodiny tam nejsou vidět, přestože se normálně
+ukládají. Horní souhrn zvládnutí počítá taky jen z násobilky, takže dítě, které
+dva měsíce jede sčítání do sta, uvidí nula procent. S každou další rodinou je
+ta obrazovka nepravdivější. Řešení je udělat z mřížky komponentu, kterou si
+každá rodina naplní vlastními popisky a klíči, a souhrn počítat jako vážený
+průměr přes otevřené tratě.
+
+**D. Pasti, na které se dá naběhnout.**
+
+CSS třída `.pad3` znamená klávesnici o třech sloupcích, ale `pad3` v katalogu
+témat znamená tři políčka na stovky, desítky a jednotky. Až vznikne to druhé,
+nikdo po půl roce nepozná, které je které. Přejmenovat třídu na `.keypad` je
+dnes jednořádková změna.
+
+Hlavička klíče je jedno písmeno a `key.slice(1)` to předpokládá na čtyřech
+místech. Obsazené je `m` násobení, `d` dělení, `a` sčítání do 20, `s` odčítání
+do 20, `p` a `n` kbelíky do sta, `c` hodiny. Rezervované je `r` pro dělení se
+zbytkem. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká slepením
+`"p" + "h1"`; jako hlavička rodiny by se to pralo. Míst je šestadvacet a
+plánovaných generátorů kolem dvaceti.
+
+Kbelíky mají dvě různé konvence: `c1` je rovnou celý klíč, `h1` se prefixuje.
+Nová kbelíková rodina si musí vědomě vybrat jednu.
+
+Tiché nouzové cesty schovávají chyby. Neznámý klíč vrátí z `itemFromKey()`
+příklad 1 + 1, prázdný pool spadne v `buildRun()` na malou násobilku a chybějící
+prostředí na louku. Při vývoji nové rodiny to vypadá, že to skoro funguje.
+
+**E. Co blokátor není, i když to tak vypadá.** Service worker má cache
+pojmenovanou `math-fact-racer-v1` a nemění se, ale načítá se ze sítě jako
+první a cache je jen záloha pro offline, takže aktualizace se k dětem dostane.
+`record()`, `mastery()`, `sampleKeys()`, `pickWeight()` a celá geometrie okruhu
+jsou nad klíčem skutečně obecné a nepotřebují sáhnout vůbec.
+
+**Doporučená příprava, než se sáhne na první nový vstupní prvek.** Přejmenovat
+`.pad3` na `.keypad`. Vytáhnout `focusAndReview()` a `stageOf()`. Zavést
+`item.check(vstup)` s výchozím porovnáním přes `parseInt`. Zavést `item.input`
+a překreslovat klávesnici spolu s otázkou, i když zatím existuje jen `pad`.
+Uvolnit `items.test.js` z rozsahu do sta. A rozhodnout tu otázku o míchání
+vstupních prvků v jednom závodě.
+
+## 12d. Pilot pro `pad2`
+
+**Dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
 osmého dílu. Je to jádrová látka třetí třídy, sešit jí věnuje tři dvoustrany,
 nejvíc ze všech témat obou dílů, a celá se odehraje uvnitř existujícího závodu.
 Potřebuje jediný nový vstupní prvek, druhé políčko na zbytek.
@@ -534,12 +636,6 @@ trať.
 produkt dělení, tedy poloviny u dvojky, třetiny u trojky, čtvrtiny u čtyřky.
 Až se bude psát `fraction_read`, má navázat na tohle, ne to stavět od nuly
 ve třetí třídě.
-
-**Co si vyžádá úpravu architektury.** Tabulka zvládnutých příkladů v rodičovské
-sekci přestane být mřížka deset krát deset a stane se z ní seznam témat s pruhy,
-ve kterém bude mřížka násobilky jednou položkou. Dělení se zbytkem potřebuje dvě
-vstupní políčka, porovnávání čísel tři velká tlačítka místo klávesnice, řazení
-čísel přetahování.
 
 ---
 

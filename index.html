@@ -2650,10 +2650,13 @@ function viewResult(p){
   const emojis = ["&#127937;", "&#129353;", "&#129352;", "&#129351;"];
   const acc = RUN.items.length ? Math.round(RUN.okCount / RUN.items.length * 100) : 0;
 
-  const weak = [...new Map(RUN.wrongKeys.map(i => [i.text, i])).values()].slice(0, 6);
+  // deduplicate on what the child actually saw, not on the printed sum:
+  // a question that is a picture has no text at all, and keying on that
+  // would collapse every missed clock into one chip
+  const weak = [...new Map(RUN.wrongKeys.map(i => [i.key + "|" + (i.disp || i.text), i])).values()].slice(0, 6);
   const weakHtml = weak.length ? `
     <div class="h2" style="margin-bottom:6px">${t("reviewNext")}</div>
-    <div class="factchips">${weak.map(i => `<span class="factchip">${i.text} = ${i.answer}</span>`).join("")}</div>` : "";
+    <div class="factchips">${weak.map(i => `<span class="factchip">${rightAnswerText(i)}</span>`).join("")}</div>` : "";
 
   const ghostHtml = RUN.prevBest !== null
     ? (RUN.beatGhost

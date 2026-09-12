@@ -22,6 +22,8 @@
  *                                 does, which still allows 13 + 4
  *                                 addend: one of the two addends is in the list
  *   as100 [bucket ids]            h1..h5, the difficulty buckets within 100
+ *   as1000 [bucket ids]           b1..b6, the steps into the thousand,
+ *                                 from whole hundreds to crossing one
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
  *
@@ -30,6 +32,7 @@
 const ALL_TABLES = [1,2,3,4,5,6,7,8,9,10];
 const ALL_H = ["h1","h2","h3","h4","h5"];
 const ALL_C = ["c1","c2","c3","c4","c5","c6"];
+const ALL_K = ["b1","b2","b3","b4","b5","b6"];
 
 const CURRICULA = [
   {
@@ -139,9 +142,10 @@ const CURRICULA = [
       {n:20, name:"Opakování celého pololetí",            src:"7. díl, s. 48–49", pool:{mult:ALL_TABLES, div:ALL_TABLES, as100:ALL_H}},
       {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:null},
       {n:22, name:"Porovnávání čísel do tisíce",          src:"8. díl, s. 4–5",   pool:null},
-      {n:23, name:"Sčítání a odčítání po stovkách",       src:"8. díl, s. 6–7",   pool:null},
-      {n:24, name:"Přičítání a odčítání do tisíce",       src:"8. díl, s. 8–27",  pool:null},
-      {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29", pool:null},
+      {n:23, name:"Sčítání a odčítání po stovkách",       src:"8. díl, s. 6–7",   pool:{as1000:["b1"]}},
+      // the book walks these twenty pages through all six steps in order
+      {n:24, name:"Přičítání a odčítání do tisíce",       src:"8. díl, s. 8–27",  pool:{as1000:ALL_K}},
+      {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29", pool:{as1000:ALL_K, as100:ALL_H}},
       {n:26, name:"Zaokrouhlování na desítky a stovky",   src:"8. díl, s. 30",    pool:null},
       {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35", pool:null},
       {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39", pool:null},
@@ -149,7 +153,7 @@ const CURRICULA = [
       {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:null},
       {n:31, name:"Mimo rozsah malé násobilky do tisíce", src:"8. díl, s. 42–47", pool:null},
       {n:32, name:"Zlomky a porovnávání zlomků",          src:"8. díl, s. 45–47", pool:null},
-      {n:33, name:"Závěrečné opakování",                  src:"8. díl, s. 48–49", pool:{mult:ALL_TABLES, div:ALL_TABLES, as100:ALL_H}}
+      {n:33, name:"Závěrečné opakování",                  src:"8. díl, s. 48–49", pool:{mult:ALL_TABLES, div:ALL_TABLES, as100:ALL_H, as1000:ALL_K}}
     ]
   }
 ];

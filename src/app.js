@@ -169,6 +169,23 @@ const H_BUCKETS = [
   {id:"h5", label:"two digit plus two digit with a carry"}
 ];
 
+/* Within a thousand the book splits the work twice over: by what is
+   being added, a single digit, whole tens, or a two digit number, and
+   by whether the hundred has to be crossed. That is six steps, and the
+   eighth part spends twenty pages walking through them in this order,
+   so the buckets are staged like the bridges over ten rather than drawn
+   from one bag: the child meets whole hundreds first and carrying into
+   the next hundred last. */
+const K_BUCKETS = [
+  {id:"b1", label:"whole hundreds"},
+  {id:"b2", label:"three digit plus one digit, no carry"},
+  {id:"b3", label:"three digit plus one digit crossing the ten"},
+  {id:"b4", label:"three digit plus whole tens"},
+  {id:"b5", label:"three digit plus two digit, within the hundred"},
+  {id:"b6", label:"three digit plus two digit crossing the hundred"}
+];
+const as1000Keys = ids => ids.map(b => "kp" + b).concat(ids.map(b => "kn" + b));
+
 /* Telling the time is not one skill either. The book adds precision one
    step at a time and returns to it every few chapters all through the
    second grade, so the buckets are exclusive: each one holds only the
@@ -212,6 +229,7 @@ const TRACKS = [
   {id:"d1",   op:"div",                                   env:"space"},
   {id:"a20",  op:"as20",                                  env:"beach"},
   {id:"a100", op:"as100",                                 env:"ocean"},
+  {id:"a1000",op:"as1000",                                env:"volcano"},
   {id:"clock",op:"clock",                                 env:"clocktown"},
   {id:"mix",  op:"mix",                                   env:"night"},
   {id:"weak", op:"weak",                                  env:"storm"},
@@ -254,6 +272,7 @@ function poolKeys(spec){
     out.push(...spec.as100.map(b => "p" + b));
     out.push(...spec.as100.map(b => "n" + b));
   }
+  if(spec.as1000) out.push(...as1000Keys(spec.as1000));
   if(spec.clock) out.push(...spec.clock);
   return [...new Set(out)];
 }
@@ -286,7 +305,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnc";
+const FAMILY_HEADS = "pnck";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -320,6 +339,7 @@ function trackKeys(p, tr){
   if(tr.op === "div")  return MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
   if(tr.op === "as20") return ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
+  if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
   if(tr.op === "clock") return clockKeys();
   return [];
 }
@@ -336,6 +356,9 @@ function stageIndex(p, keysAt, count){
 function as20Stage(p){ return stageIndex(p, stageKeys, E_STAGES.length); }
 // how finely the child can already read a dial
 function clockStage(p){ return stageIndex(p, i => [C_BUCKETS[i].id], C_BUCKETS.length); }
+// which step into the thousand is being taken; plus and minus of one
+// bucket are the same step, so they rise and fall together
+function as1000Stage(p){ return stageIndex(p, i => as1000Keys([K_BUCKETS[i].id]), K_BUCKETS.length); }
 /* What a track would actually serve right now. A staged track holds
    back the levels the child has not reached yet, and the championship
    has to respect that, otherwise it hands out material that the track
@@ -347,6 +370,7 @@ function reachedKeys(p, tr){
     return out;
   }
   if(tr.op === "clock") return C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id);
+  if(tr.op === "as1000") return as1000Keys(K_BUCKETS.slice(0, as1000Stage(p) + 1).map(b => b.id));
   return trackKeys(p, tr);
 }
 function trackProgress(p, tr){
@@ -411,6 +435,7 @@ function unlockState(p, tr){
     case "d1": return mastery(p, MULT.map(f => mk(f.a,f.b))) >= .55
                  ? {open:true} : {open:false, why: t("lockHalfTable")};
     case "a100": return (m("a20") >= .6 || many("a20")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a20"))};
+    case "a1000": return (m("a100") >= .6 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     case "mix":  return (unlockState(p, trackById("t5")).open)
                  ? {open:true} : {open:false, why: t("lockOpen", t("trk_t5"))};
     case "weak": return Object.keys(p.facts).length >= 15
@@ -457,6 +482,7 @@ function rawItem(key){
     return {key, text:(a+b) + " - " + sub, answer:(a+b)-sub, kind:"sub"};
   }
   if(head === "p" || head === "n") return hundredItem(key);
+  if(head === "k") return thousandItem(key);
   if(head === "c") return clockItem(key);
   return {key, text:"1 + 1", answer:2, kind:"add"};
 }
@@ -475,6 +501,34 @@ function hundredItem(key){
   if(x + y > 100){ y = Math.max(1, 100 - x); }
   if(plus)  return {key, text: x + " + " + y, answer: x+y, kind:"add100"};
   return {key, text:(x+y) + " - " + y, answer: x, kind:"sub100"};
+}
+
+/* Within a thousand. The two addends are built so that the bucket is
+   true by construction rather than by trimming an overflow afterwards:
+   a quiet correction would hand the child an easier sum than the bucket
+   promised and nothing would ever say so. The ranges below keep every
+   total at or under a thousand, and items.test.js checks that they do.
+   Subtraction is the same pair read backwards, exactly as within a
+   hundred, so one bucket trains both directions of the same step. */
+function thousandItem(key){
+  const plus = key[1] === "p";
+  const b = key.slice(2);
+  let x, y;
+  if(b === "b1"){                                   // 300 + 200, a round five hundred may land on a thousand
+    const h = ri(1,9); x = h * 100; y = ri(1, 10 - h) * 100;
+  } else if(b === "b2"){                            // 342 + 5
+    x = ri(1,9)*100 + ri(0,9)*10 + ri(1,4); y = ri(1, 9 - (x % 10));
+  } else if(b === "b3"){                            // 347 + 6, the ten is crossed, the hundred is not
+    x = ri(1,9)*100 + ri(0,8)*10 + ri(5,9); y = ri(10 - (x % 10), 9);
+  } else if(b === "b4"){                            // 320 + 40
+    const d = ri(1,4); x = ri(1,9)*100 + d*10 + ri(0,9); y = ri(1, 9 - d) * 10;
+  } else if(b === "b5"){                            // 342 + 25, stays inside the hundred
+    x = ri(1,9)*100 + ri(1,4)*10 + ri(1,4); y = ri(1,3)*10 + ri(1, 9 - (x % 10));
+  } else {                                          // 372 + 45, the hundred is crossed
+    const d = ri(5,8); x = ri(1,8)*100 + d*10 + ri(0,9); y = ri(10 - d, 9)*10 + ri(0,9);
+  }
+  if(plus)  return {key, text: x + " + " + y, answer: x+y, kind:"add1000", maxLen:4};
+  return {key, text:(x+y) + " - " + y, answer: x, kind:"sub1000", maxLen:4};
 }
 
 /* The answer is the time as a digital watch shows it, typed on the same
@@ -616,6 +670,10 @@ function buildRun(p, tr){
   } else if(tr.op === "as100"){
     const all = H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
     keys = sampleKeys(p, all, n, 10);
+  } else if(tr.op === "as1000"){
+    const ki = as1000Stage(p);
+    const review = as1000Keys(K_BUCKETS.slice(0, ki).map(b => b.id));
+    keys = focusAndReview(p, as1000Keys([K_BUCKETS[ki].id]), review, n, 2);
   } else if(tr.op === "clock"){
     const ci = clockStage(p);
     keys = focusAndReview(p, [C_BUCKETS[ci].id], C_BUCKETS.slice(0, ci).map(b => b.id), n, 1);
@@ -656,6 +714,7 @@ function thresholds(p, item){
   // reading a dial takes longer than recalling a fact, and the four
   // digits of a time take longer to key in than one or two
   const slower = item.kind === "clock" ? 2.4
+               : (item.kind === "add1000" || item.kind === "sub1000") ? 2.2
                : (item.kind === "add100" || item.kind === "sub100") ? 1.9 : 1;
   return { fast: s.fast * slower, super: s.super * slower };
 }
@@ -861,7 +920,10 @@ const ENVS = {
   night:{ hill1:"#33406e", hill2:"#1e2848", dec:"#3d4b7d", dec2:"#2a3560"},
   storm:{ hill1:"#5c6790", hill2:"#3d456b", dec:"#313a5f", dec2:"#222a49"},
   school:{hill1:"#7fd4c2", hill2:"#46a894", dec:"#2d7f6d", dec2:"#1d5c4e"},
-  clocktown:{hill1:"#f6c9d8", hill2:"#d992ad", dec:"#a85f81", dec2:"#7c4460"}
+  clocktown:{hill1:"#f6c9d8", hill2:"#d992ad", dec:"#a85f81", dec2:"#7c4460"},
+  // deliberately darker and redder than the canyon, which is the only
+  // other warm environment and would otherwise look like the same place
+  volcano:{hill1:"#c9584a", hill2:"#8f2f24", dec:"#5e1b13", dec2:"#3d0f0a"}
 };
 /* =================================================================
    5. RACE CIRCUIT

@@ -55,7 +55,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `mult_div_10_100` | násobení a dělení deseti a stem | `pad` | do 1000 | nové |
 | `mult_round` | násobení číslem končícím nulami a dělení takového čísla | `pad` | do 1000 | nové |
 | `place_value` | rozklad trojciferného čísla na stovky, desítky, jednotky | `pad3` | 100 až 999 | nové |
-| `add_sub_1000` | sčítání a odčítání do tisíce, kbelíky podle přechodu přes stovku | `pad` | 0 až 1000 | nové |
+| `add_sub_1000` | sčítání a odčítání do tisíce, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku | `pad` | 0 až 1000 | hotovo |
 | `time_elapsed` | kolik minut nebo hodin uplynulo | `pad` | do 24 h | nové |
 | `time_convert` | převody jednotek času | `pad` | dny, týdny, měsíce, roky | nové |
 | `unit_convert` | převody jednotek délky, hmotnosti a objemu | `pad` | celá čísla | nové |
@@ -129,10 +129,12 @@ Stupňů přechodu je proto šest, ne pět, a druhý v pořadí jsou právě des
 spoje. Je to o rok dřív než mosty přes devítku, takže patří dopředu, ne na
 konec.
 
-**`add_sub_1000`.** Stejná architektura kbelíků jako `add_sub_100`, jen se
-štěpí podle toho, jestli se přechází přes stovku a jestli se přičítá
+**`add_sub_1000`.** Hotové. Stejná architektura kbelíků jako `add_sub_100`, jen
+se štěpí podle toho, jestli se přechází přes stovku a jestli se přičítá
 jednociferné, dvojciferné, nebo celé stovky. Učebnice tomu věnuje devět
-dvoustran a rozlišuje šest případů, takže kbelíků bude víc než pět.
+dvoustran a rozlišuje šest případů, takže kbelíků je šest, ne pět, a na rozdíl
+od stovky jsou stupňované: aktuální nese sedmdesát procent závodu a dřívější
+se vracejí jako opakování, stejně jako u mostů přes desítku a u hodin.
 
 **`times_more_less`.** Pozor na rozdíl mezi "o kolik" a "kolikrát". Je to
 nejčastější zdroj chyb v celé třetí třídě a stojí za samostatné téma, i když

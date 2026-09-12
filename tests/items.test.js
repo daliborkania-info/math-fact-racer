@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,C_BUCKETS,clockKeys,clockStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -23,6 +23,7 @@ const RANGE={
   s:[0,19],        // odcitani do dvaceti
   p:[1,100],       // plus do sta
   n:[0,99],        // minus do sta
+  k:[0,1000],      // plus a minus do tisice, vcetne kulateho tisice
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -30,6 +31,7 @@ const keys=[];
 A.MULT.forEach(f=>{keys.push(A.mk(f.a,f.b)); if(f.a>1) keys.push(A.dk(f.a,f.b));});
 A.ADD.forEach(f=>{keys.push(A.ak(f.a,f.b)); keys.push(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{keys.push('p'+b.id); keys.push('n'+b.id);});
+A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -97,6 +99,7 @@ const first20=new Set(A.stageKeys(0));
 for(const it of A.buildRun(mixp,A.trackById('mix'))){
   if(it.kind==='clock'&&it.key!=='c1'){mixBad++;console.log('  !!  sampionat dal zacatecnikovi cas',it.disp);break;}
   if(/^[as]/.test(it.key)&&!first20.has(it.key)){mixBad++;console.log('  !!  sampionat dal zacatecnikovi',it.text);break;}
+  if(/^k/.test(it.key)&&it.key.slice(2)!=='b1'){mixBad++;console.log('  !!  sampionat dal zacatecnikovi krok do tisice',it.text);break;}
 }
 console.log('sampionat respektuje stupne:',mixBad?'ne':'ano');
 
@@ -112,6 +115,7 @@ const VALID=new Set();
 A.MULT.forEach(f=>{VALID.add(A.mk(f.a,f.b)); if(f.a>1) VALID.add(A.dk(f.a,f.b));});
 A.ADD.forEach(f=>{VALID.add(A.ak(f.a,f.b)); VALID.add(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{VALID.add('p'+b.id); VALID.add('n'+b.id);});
+A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -264,6 +268,61 @@ delete old.opened;
 A.seedOpened(old);
 if(!old.opened.a100){opBad++;console.log('  !!  odjete zavody trat neotevrely');}
 console.log('chyb v pameti odemceni:',opBad);
+
+// 7c. kroky do tisice: kazdy kbelik musi delat to, co slibuje
+//
+// Generator si kbelik hlida konstrukci, ne orezanim preteceni, takze
+// tenhle test je jediny, kdo tvrzeni o kbelicich overuje. Prechod pres
+// stovku se pozna na stovkove cislici souctu, presne jako u desitky.
+let kBad=0, kN=0;
+const parts=it=>{
+  const n=it.text.split(/[+-]/).map(s=>Number(s.trim()));
+  return it.kind==='add1000' ? {x:n[0], y:n[1]} : {x:n[0]-n[1], y:n[1]};
+};
+const RULE={
+  b1:(x,y)=>x%100===0 && y%100===0,
+  b2:(x,y)=>y<10 && (x%10)+y<10,
+  b3:(x,y)=>y<10 && (x%10)+y>=10 && Math.floor(x/100)===Math.floor((x+y)/100),
+  b4:(x,y)=>y%10===0 && y<100 && Math.floor(x/100)===Math.floor((x+y)/100),
+  b5:(x,y)=>y>=10 && y<100 && Math.floor(x/100)===Math.floor((x+y)/100),
+  b6:(x,y)=>y>=10 && y<100 && Math.floor(x/100)<Math.floor((x+y)/100)
+};
+for(const key of A.as1000Keys(A.K_BUCKETS.map(b=>b.id))) for(let i=0;i<60;i++){
+  const it=A.itemFromKey(key); kN++;
+  const b=key.slice(2), {x,y}=parts(it);
+  if(x<0||y<0||x+y>1000){kBad++;if(kBad<6)console.log('  !!  mimo obor do tisice',key,it.text);continue;}
+  if(x<100){kBad++;if(kBad<6)console.log('  !!  prvni cislo neni trojciferne',key,it.text);continue;}
+  if(!RULE[b](x,y)){kBad++;if(kBad<6)console.log('  !!  kbelik nedela, co slibuje',key,it.text);continue;}
+  if(it.maxLen!==4){kBad++;if(kBad<6)console.log('  !!  odpoved do tisice se nevejde do klavesnice',key,it.maxLen);continue;}
+  // odcitani je totez sezeni ctene pozpatku, takze vraci prvni scitanec
+  if(it.kind==='sub1000'&&it.answer!==x){kBad++;if(kBad<6)console.log('  !!  odcitani neni obracene scitani',key,it.text);}
+}
+// kulaty tisic musi jit doťukat a musi se nekdy trefit
+let hitK=0;
+for(let i=0;i<400;i++) if(A.itemFromKey('kpb1').answer===1000) hitK++;
+if(!hitK){kBad++;console.log('  !!  cely tisic nikdy nepadne');}
+console.log('zkontrolovano do tisice:',kN,'| chyb:',kBad);
+
+// 7d. kroky do tisice se stupnuji stejne jako prechod pres desitku
+let kStBad=0;
+const tz=A.newProfile('K1'); A.DB.profiles=[tz]; A.DB.current=tz.id;
+if(A.as1000Stage(tz)!==0){kStBad++;console.log('  !!  zacatecnik nezacina celymi stovkami');}
+const kRun0=A.buildRun(tz,A.trackById('a1000'));
+if(kRun0.length!==20){kStBad++;console.log('  !!  spatna delka zavodu do tisice',kRun0.length);}
+for(const it of kRun0) if(it.key.slice(2)!=='b1'){kStBad++;console.log('  !!  zacatecnik dostal tezsi krok',it.text);break;}
+if(new Set(kRun0.map(x=>x.text)).size<6){kStBad++;console.log('  !!  stovky se malo stridaji',new Set(kRun0.map(x=>x.text)).size);}
+A.as1000Keys(['b1']).forEach(k=>tz.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.as1000Stage(tz)!==1){kStBad++;console.log('  !!  po zvladnuti stovek se neposunul');}
+const kRun1=A.buildRun(tz,A.trackById('a1000'));
+const kFocus=kRun1.filter(x=>x.key.slice(2)==='b2').length;
+if(kFocus<kRun1.length*0.5){kStBad++;console.log('  !!  druhy krok nenese zavod',kFocus+'/'+kRun1.length);}
+if(kFocus===kRun1.length){kStBad++;console.log('  !!  chybi opakovani stovek');}
+// trat se otevira po stovce, ne driv
+const kg=A.newProfile('K2'); A.DB.profiles=[kg]; A.DB.current=kg.id;
+if(A.unlockState(kg,A.trackById('a1000')).open){kStBad++;console.log('  !!  tisic je otevreny hned od zacatku');}
+A.trackKeys(kg,A.trackById('a100')).forEach(k=>kg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(!A.unlockState(kg,A.trackById('a1000')).open){kStBad++;console.log('  !!  zvladnuta stovka neotevrela tisic');}
+console.log('chyb ve stupnich do tisice:',kStBad);
 
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;

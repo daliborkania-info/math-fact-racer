@@ -83,9 +83,13 @@ Kapitoly 1 až 3 a 8 až 10 jsou pokryté existujícími tratěmi `t1` až `t5`,
 kapitol z třiatřiceti, tedy zhruba polovina sedmého dílu. Pro dítě, jehož
 třída je v první polovině roku, je hra použitelná hned.
 
-Celý osmý díl, tedy kapitoly 21 až 32, je zatím zamčený. Nejvíc kapitol z něj
-odemkne `add_sub_1000`, který drží kapitoly 23, 24 a 25 a je architektonicky
-jen další sada kbelíků vedle `add_sub_100`.
+Z osmého dílu jsou hotové kapitoly 23, 24 a 25, tedy páteř celého oboru do
+tisíce. Odemkl je generátor `add_sub_1000` a jezdí se na vlastní trati `a1000`,
+která má šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku.
+Celkem je to třináct kapitol z třiatřiceti.
+
+Zbytek osmého dílu, tedy kapitoly 21, 22 a 26 až 32, zamčený zůstává. Nejvíc
+z něj odemkne dvojice `mult_beyond` a `div_beyond`.
 
 ## Pilot
 

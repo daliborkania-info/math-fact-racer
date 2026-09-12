@@ -20,6 +20,7 @@ Procvičování malé násobilky pro děti zhruba od sedmi do deseti let, hrané
 | Dělení | stejné příklady čtené pozpátku |
 | Do dvaceti | sčítání a odčítání do 20 |
 | Do stovky | sčítání a odčítání do 100 |
+| Do tisíce | sčítání a odčítání do 1000, od celých stovek po přechod přes stovku |
 | Hodiny | přečtení ciferníku, od celých hodin po odpolední čas |
 | Šampionát | všechno odemčené dohromady |
 | Co ti nejde | jen příklady, které dítě opakovaně mine |
@@ -28,7 +29,7 @@ Trati se odemykají podle toho, jak dítě zvládá tu předchozí. Rodič můž
 
 ### Nebo podle toho, kde je zrovna třída
 
-V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady pětadevadesát kapitol, z nichž hra umí procvičit sedmašedesát. Zbylé jsou v seznamu vidět, ale nejdou vybrat, aby bylo poznat, kde třída je.
+V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady pětadevadesát kapitol, z nichž hra umí procvičit sedmdesát. Zbylé jsou v seznamu vidět, ale nejdou vybrat, aby bylo poznat, kde třída je.
 
 Nastavuje se zvlášť pro každého hráče, takže sourozenci mohou mít různé učebnice. Volně znamená, že zhruba sedmdesát procent příkladů je z nastavené kapitoly a zbytek se vrací z dřívějšího učiva, aby se neztratilo. Výchozí stav je bez učebnice, kdy si hra vybírá učivo sama podle toho, co dítěti nejde.
 

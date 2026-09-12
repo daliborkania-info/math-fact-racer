@@ -1,10 +1,11 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po hodinách, opravě oboru do dvaceti
-a přípravě engine na další rodiny příkladů
+Poslední aktualizace: 12. září 2026, po generátoru sčítání a odčítání
+do tisíce
 
-**Kde se přestalo a kudy dál:** příprava popsaná v oddílu 12c je hotová, na
-řadě je generátor `add_sub_1000`. Hotový prompt je na konci, v oddílu 14.
+**Kde se přestalo a kudy dál:** `add_sub_1000` je hotový, trať `a1000` je
+na mapě a kapitoly 23, 24 a 25 třetího ročníku jsou odemčené. Na řadě je
+dvojice `mult_beyond` a `div_beyond`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -170,7 +171,7 @@ závodů a z příkladů dané trati v krabičce.
 
 **Odemykání.** Prahy zvládnutí: t2 od 0,7 na t1, t3 od 0,7 na t2, t4 od 0,7 na
 t3, t5 od 0,65 na t4, dělení od 0,55 celé násobilky, do stovky od 0,6 na do
-dvaceti. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
+dvaceti, do tisíce od 0,6 na do stovky. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
 tak jako tak. Rodič může každou trať přebít ručně. Trať `school` je vždy otevřená.
 
 **Výběr příkladů.** Váha podle úrovně `[7, 8, 6.5, 3.4, 1.6, 0.8]`, zvýšená
@@ -203,15 +204,27 @@ se ťuká 1945, uvnitř je to hodina krát sto plus minuty, tedy jedno celé č�
 Jestli se myslí dopoledne nebo večer, říká slunce nebo měsíc vedle ciferníku,
 takže jedna otázka má pořád jednu odpověď.
 
+**Kroky do tisíce.** Trať do tisíce je stavěná stejně jako dvacítka a hodiny,
+tedy šest stupňů, aktuální nese sedmdesát procent závodu a dřívější se vracejí
+jako opakování. Kbelíky jdou v pořadí, ve kterém je bere osmý díl: `b1` celé
+stovky, `b2` trojciferné plus jednociferné bez přechodu, `b3` totéž s přechodem
+přes desítku, `b4` celé desítky, `b5` dvojciferné uvnitř stovky, `b6`
+dvojciferné s přechodem přes stovku. Odčítání je totéž sezení čtené pozpátku,
+takže `kn*` vrací první sčítanec z `kp*` téhož kbelíku a jeden kbelík trénuje
+oba směry. Aktuální kbelík hledá `as1000Stage()`. Součet nikdy nepřeleze tisíc
+a generátor si to hlídá konstrukcí rozsahů, ne ořezáním přetečení; kdyby ořezával,
+podstrčil by dítěti lehčí příklad a nikde by to nebylo vidět.
+
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
-je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u hodin 2,4,
-protože přečíst ciferník a naťukat čtyři číslice trvá déle než vybavit si spoj.
+je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u počítání do
+tisíce 2,2, u hodin 2,4, protože přečíst ciferník a naťukat čtyři číslice trvá
+déle než vybavit si spoj.
 
 ---
 
 ## 5. Trati
 
-Dvanáct tratí, každá má vlastní generovaný okruh a prostředí.
+Třináct tratí, každá má vlastní generovaný okruh a prostředí.
 
 | id | obsah |
 | --- | --- |
@@ -223,6 +236,7 @@ Dvanáct tratí, každá má vlastní generovaný okruh a prostředí.
 | d1 | dělení |
 | a20 | sčítání a odčítání do 20, šest stupňů podle přechodu přes desítku |
 | a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
+| a1000 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
 | clock | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
 | mix | vše odemčené dohromady |
 | weak | jen příklady s nejnižší úrovní |
@@ -233,16 +247,21 @@ a kapitola, a jde vždy na první místo. Nese název kapitoly jako podtitulek.
 V rodičovské sekci nemá přepínač odemknutí, řídí ji volba kapitoly.
 
 Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
-`s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky, `c1` až `c6`
-hodiny. Kanonicky vždy `a <= b`, komutativita se sbaluje. U dvacítky smí být
+`s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky, `kp{bucket}`
+a `kn{bucket}` do tisíce, `c1` až `c6` hodiny. Kanonicky vždy `a <= b`,
+komutativita se sbaluje. U dvacítky smí být
 druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
 nepotřebují na obor do dvaceti bez přechodu jedinou výjimku.
 
-Klíč začínající písmenem z `FAMILY_HEADS`, tedy `p`, `n` nebo `c`, není jeden
-příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`. Proto
-se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegeneruje otázku,
-která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor přidá
-písmeno do `FAMILY_HEADS`, nic víc.
+Klíč začínající písmenem z `FAMILY_HEADS`, tedy `p`, `n`, `c` nebo `k`, není
+jeden příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`.
+Proto se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegeneruje
+otázku, která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor
+přidá písmeno do `FAMILY_HEADS`, nic víc.
+
+Rodina do tisíce nese znaménko uvnitř klíče, tedy jedna hlavička `k` místo
+dvojice písmen jako u stovky. Bylo to vědomé šetření: míst v abecedě je
+šestadvacet a plánovaných generátorů kolem dvaceti.
 
 ---
 
@@ -337,10 +356,11 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá jedenáct okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá třináct okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
-stupně přechodu přes desítku, pravidla výběru kapitoly a kbelíky hodin.
+stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin a kroky
+do tisíce, u kterých ověřuje i to, že každý kbelík dělá to, co slibuje.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
@@ -436,11 +456,11 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 67 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 70 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
-`as100` a `clock`, a `poolKeys()` to překládá na klíče příkladů. Nikdy do kurikula
+`as100`, `as1000` a `clock`, a `poolKeys()` to překládá na klíče příkladů. Nikdy do kurikula
 nepiš klíče přímo. `poolSize()` počítá kbelík do sta za čtyři, ne za jeden,
 protože jeden kbelíkový klíč generuje celou rodinu příkladů; bez toho by
 kapitola s jediným kbelíkem vypadala jako prázdná.
@@ -471,12 +491,11 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání hodin a po opravě oboru do dvaceti je 67 hratelných
-kapitol z 95, po ročnících 15/18, 42/44 a 10/33.
+dojmu. Stav po přidání počítání do tisíce je 70 hratelných
+kapitol z 95, po ročnících 15/18, 42/44 a 13/33.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
-| `add_sub_1000` | `pad` | 3 | g3: 23, 24, 25 |
 | `mult_beyond` + `div_beyond` | `pad` | 3 | g3: 14, 16, 31 |
 | `unit_convert` + `time_convert` | `pad` | 2 | g3: 18, 29 |
 | `rounding_10` + `rounding_100` | `pad` | 2 | g3: 7, 26 |
@@ -493,9 +512,9 @@ kapitol z 95, po ročnících 15/18, 42/44 a 10/33.
 | `count_objects` | dílna | 3 | g1: 1, 2, 3 |
 | `finance_money` | dílna | 1 | g2: 3 |
 
-**Hlavní zjištění.** Patnáct z třiadvaceti zamčených kapitol třetí třídy
+**Hlavní zjištění.** Dvanáct z dvaceti zbylých zamčených kapitol třetí třídy
 nepotřebuje na vstupu vůbec nic nového, stačí generátory na `pad`. Třetí třída
-tím jde z 10/33 na 25/33, aniž by se sáhlo na klávesnici.
+tím jde z 13/33 na 25/33, aniž by se sáhlo na klávesnici.
 
 **`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
@@ -506,9 +525,9 @@ předmětů na obrázku, nic pro závod.
 
 ## 12b. Další krok
 
-Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`, a uvnitř
-toho začít `add_sub_1000`, protože je to páteř osmého dílu a architektonicky
-jen další sada kbelíků vedle `add_sub_100`. Pak `mult_beyond` a `div_beyond`,
+Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`. `add_sub_1000`
+je z toho hotový, byla to páteř osmého dílu a architektonicky
+jen další sada kbelíků vedle `add_sub_100`. Dál `mult_beyond` a `div_beyond`,
 `rounding_10` a `rounding_100`, `chain_3`, `order_of_ops`, `mult_div_10_100`
 a `mult_round`, `unit_convert` a `time_convert`, nakonec `missing_operand`
 a `inverse_check`, protože to nejsou samostatné rodiny, ale modifikátory
@@ -520,7 +539,8 @@ Dílna až po tom všem.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
 to dál. Mapa tím naroste a bude ji potřeba přeskládat do skupin, jakmile tratí
-bude patnáct a víc.
+bude patnáct a víc. Po přidání tisícovky je jich třináct, takže tohle přijde
+na řadu zhruba za dvě další rodiny.
 
 ## 12c. Co stojí v cestě
 
@@ -535,10 +555,16 @@ změní vstupní prvek, a `items.test.js` už neuvažuje jeden strop sto pro cel
 hru, ale rozsah po rodinách plus kontrolu, že otázka uzná svou odpověď
 a neuzná sousední. Zbytek dole platí.
 
+**Ověřeno praxí.** `add_sub_1000` je první rodina, která tudy celá prošla,
+a cesta skutečně volná byla. Zabralo to jeden zásah do `app.js` v osmi místech
+ze seznamu v oddílu 14, tři řádky v `curricula.js`, tři řádky textů a dva nové
+okruhy v `items.test.js`. Nic z bodů A až D se neukázalo jako skrytý blokátor.
+
 **A. Rodiny na `pad`, tedy nejlevnější vlna.**
 
 `thresholds()` je ruční výraz, kde má každá rodina svůj násobitel prahů,
-zatím 2,4 pro hodiny a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
+zatím 2,4 pro hodiny, 2,2 pro počítání do tisíce a 1,9 pro počítání do sta.
+Kdo na to zapomene, dostane
 prahy pro jednociferné vybavování a děti budou mít samé pomalé odpovědi.
 Tohle je jediná věc, na kterou se v téhle vlně dá zapomenout tiše.
 
@@ -595,13 +621,16 @@ průměr přes otevřené tratě.
 
 Hlavička klíče je jedno písmeno a `key.slice(1)` to předpokládá na čtyřech
 místech. Obsazené je `m` násobení, `d` dělení, `a` sčítání do 20, `s` odčítání
-do 20, `p` a `n` kbelíky do sta, `c` hodiny. Rezervované je `r` pro dělení se
+do 20, `p` a `n` kbelíky do sta, `k` celý obor do tisíce včetně znaménka,
+`c` hodiny. Rezervované je `r` pro dělení se
 zbytkem. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká slepením
-`"p" + "h1"`; jako hlavička rodiny by se to pralo. Míst je šestadvacet a
-plánovaných generátorů kolem dvaceti.
+`"p" + "h1"`; jako hlavička rodiny by se to pralo. Stejně tak `b` je vnitřní id
+kbelíků do tisíce. Míst je šestadvacet a
+plánovaných generátorů kolem dvaceti, takže nová rodina se znaménkem ho má
+nést uvnitř klíče jako tisícovka, ne brát si dvě písmena jako stovka.
 
-Kbelíky mají dvě různé konvence: `c1` je rovnou celý klíč, `h1` se prefixuje.
-Nová kbelíková rodina si musí vědomě vybrat jednu.
+Kbelíky mají dvě různé konvence: `c1` je rovnou celý klíč, `h1` a `b1` se
+prefixují. Nová kbelíková rodina si musí vědomě vybrat jednu.
 
 Tiché nouzové cesty schovávají chyby. Neznámý klíč vrátí z `itemFromKey()`
 příklad 1 + 1, prázdný pool spadne v `buildRun()` na malou násobilku a chybějící
@@ -710,10 +739,26 @@ správy.
 > Dneska chci [doplň, například: napsat generátor dělení se zbytkem podle
 > oddílu 12 / projet další učebnici, odkaz posílám / opravit tohle a tamto].
 
-### Prompt pro nejbližší krok, tedy `add_sub_1000`
+### Kontrolní seznam pro každou novou rodinu
 
-Použij tenhle, pokud se pokračuje tam, kde se přestalo. Je záměrně konkrétní,
-protože příprava je hotová a zbývá jen práce.
+Tohle projela tisícovka a sedělo to do puntíku. V `src/app.js`: písmeno hlavičky
+klíče do `FAMILY_HEADS`, definice kbelíků nebo stupňů, generátor, větev
+v `rawItem()`, `poolKeys()`, `trackKeys()`, `reachedKeys()` pokud má stupně,
+vlastní `*Stage()` přes `stageIndex()`, větev v `buildRun()` přes
+`focusAndReview()`, záznam v `TRACKS` a `ENVS`, větev v `unlockState()`,
+násobitel v `thresholds()` a `maxLen` na položce, pokud odpověď přeleze tři
+číslice. Dál kapitoly v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s`
+ve všech třech jazycích v `src/i18n.js`.
+
+V `tests/items.test.js`: export nových symbolů v `module.exports` na konci
+skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do
+množiny `VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co
+slibuje. V `tests/flow.test.js` sedí natvrdo počet okruhů na mapě a počet
+zamčených kapitol, obojí je potřeba posunout.
+
+### Prompt pro nejbližší krok, tedy `mult_beyond` a `div_beyond`
+
+Použij tenhle, pokud se pokračuje tam, kde se přestalo.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
@@ -721,26 +766,20 @@ protože příprava je hotová a zbývá jen práce.
 > Přečti si celý `docs/PROJECT-STATE.md`, pak `docs/kurikulum/README.md`
 > a `docs/kurikulum/nns-matysek-3.md` kvůli učivu a `src/app.js` kvůli kódu.
 > Zvlášť si všimni oddílu 12c, tam je soupis toho, co v kódu překáží, a co už
-> je z něj hotové.
+> je z něj hotové, a konce oddílu 14, kde je kontrolní seznam pro novou rodinu.
 >
-> Dneska chci generátor `add_sub_1000`, tedy sčítání a odčítání do tisíce.
-> Odemkne kapitoly 23, 24 a 25 třetího ročníku a je to páteř celého osmého dílu.
-> Architektonicky je to stejná věc jako `add_sub_100`, jen kbelíků bude podle
-> mapy šest, ne pět, protože se štěpí podle toho, jestli se přechází přes stovku
-> a jestli se přičítá jednociferné, dvojciferné, nebo celé stovky. Vlastní trať,
-> vlastní prostředí, texty ve třech jazycích.
+> Dneska chci `mult_beyond` a `div_beyond`, tedy násobení a dělení mimo rozsah
+> malé násobilky. Odemknou kapitoly 14, 16 a 31 třetího ročníku. Jsou to dvě
+> rodiny, ale jedno téma a jedna trať, stejně jako plus a minus sdílejí trať
+> do tisíce; dělení je obrácené násobení téhož kbelíku. Stupně vem z mapy
+> třetího ročníku: sedmý díl je drží do sta, osmý je pouští do tisíce.
 >
-> Nezapomeň na to, co se dělá u každé nové rodiny: písmeno hlavičky klíče do
-> `FAMILY_HEADS`, větev v `rawItem()`, `poolKeys()`, `trackKeys()`, `buildRun()`
-> přes `focusAndReview()`, `reachedKeys()` pokud bude mít stupně, záznam
-> v `TRACKS` a `ENVS`, větev v `unlockState()`, násobitel v `thresholds()`,
-> `maxLen: 4` na položce a řádek do tabulky `RANGE` v `items.test.js`.
->
-> Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
-> build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové
-> chování patří do testů, ne jen do kódu. Žádná změna nesmí připravit existující
-> profil o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
-> model, přidej do `tests/fixtures/legacy-profiles.json` další zamrazený profil.
+> Zbytek postupu je v kontrolním seznamu na konci oddílu 14. Zdroje se editují
+> v `src/`, nikdy ne `index.html`. Po každé změně `python3 build.py` a pak testy
+> z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové chování patří do testů, ne
+> jen do kódu. Žádná změna nesmí připravit existující profil o postup, hlídá to
+> `tests/migration.test.js`, a pokud sáhneš na datový model, přidej do
+> `tests/fixtures/legacy-profiles.json` další zamrazený profil.
 >
 > Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
 > principy z oddílu 3 neměň bez mého pokynu. Push dělám sám, jen commituj

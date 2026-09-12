@@ -217,7 +217,23 @@ function poolKeys(spec){
   }
   return [...new Set(out)];
 }
-function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) : []; }
+/* The chapter the race actually runs on. A parent sets where the class
+   is, which is a fact about school, not a question about the game. Plenty
+   of those chapters are topics with no generator yet, and going silent
+   would make the setting look broken. So the race falls back to the most
+   recent earlier chapter it can play, which is material the child has
+   already met and which the Leitner box wants revisited anyway. */
+function effectiveChapter(p){
+  const cur = curriculumById(p && p.curriculum);
+  const sel = chapterOf(p);
+  if(!cur || !sel) return null;
+  const upto = cur.chapters.filter(ch => ch.n <= sel.n);
+  for(let i = upto.length - 1; i >= 0; i--){
+    if(poolSize(poolKeys(upto[i].pool)) >= 4) return upto[i];
+  }
+  return null;
+}
+function schoolPool(p){ const ch = effectiveChapter(p); return ch ? poolKeys(ch.pool) : []; }
 /* How much variety a pool can actually produce. A bucket key inside 100
    is a whole family of sums rather than a single fact, so it counts for
    more than one. A chapter drives its own track only when it can fill a
@@ -228,14 +244,14 @@ function poolSize(keys){
   for(const k of keys) n += (k[0] === "p" || k[0] === "n") ? 4 : 1;
   return n;
 }
-function schoolReady(p){ return poolSize(schoolPool(p)) >= 4; }
+function schoolReady(p){ return !!effectiveChapter(p); }
 function visibleTracks(p){
   const rest = TRACKS.filter(tr => tr.op !== "school");
   return schoolReady(p) ? [trackById("school")].concat(rest) : rest;
 }
 function trackName(p, tr){ return t("trk_" + tr.id); }
 function trackSub(p, tr){
-  if(tr.op === "school"){ const ch = chapterOf(p); return ch ? esc(ch.name) : t("trk_schools"); }
+  if(tr.op === "school"){ const ch = effectiveChapter(p); return ch ? esc(ch.name) : t("trk_schools"); }
   return t("trk_" + tr.id + "s");
 }
 
@@ -385,12 +401,13 @@ function buildRun(p, tr){
     // dropping spaced review would break the strongest part of the design.
     const focus = schoolPool(p);
     const cur = curriculumById(p.curriculum);
-    if((p.chapterMode || "soft") === "hard" || !cur){
+    const eff = effectiveChapter(p);
+    if((p.chapterMode || "soft") === "hard" || !cur || !eff){
       keys = sampleKeys(p, focus, n, 6);
     } else {
       const earlier = [];
       for(const ch of cur.chapters){
-        if(ch.n >= p.chapter) break;
+        if(ch.n >= eff.n) break;
         earlier.push(...poolKeys(ch.pool));
       }
       const review = [...new Set(earlier)].filter(k => !focus.includes(k));
@@ -1456,6 +1473,14 @@ function heatColor(lv, has){
   if(!has) return "#dfe6f7";
   return ["#f2557f", "#ff8a5c", "#ffb020", "#ffd93d", "#8bd94f", "#12b36a"][lv] || "#dfe6f7";
 }
+/* What the chosen chapter will actually do, said plainly. */
+function chapterStatus(p){
+  const sel = chapterOf(p), eff = effectiveChapter(p);
+  if(!sel) return "";
+  if(!eff) return t("chapterNoTrack");
+  if(eff.n === sel.n) return t("chapterOnMap");
+  return t("chapterFallback", eff.n + ". " + esc(eff.name));
+}
 function viewParent(p){
   let heat = `<span class="heat hdr"></span>`;
   for(let b = 1; b <= 10; b++) heat += `<span class="heat hdr">${b}</span>`;
@@ -1521,7 +1546,7 @@ function viewParent(p){
           <div class="muted" style="margin:16px 0 8px">${t("chapterLabel")}</div>
           <select class="field" data-act="chaptersel">
             ${curriculumById(p.curriculum).chapters.map(ch =>
-              `<option value="${ch.n}" ${p.chapter === ch.n ? "selected" : ""}>${ch.n}. ${esc(ch.name)}${ch.pool ? "" : t("chapterNotYet")}</option>`).join("")}
+              `<option value="${ch.n}" ${p.chapter === ch.n ? "selected" : ""}>${ch.n}. ${esc(ch.name)}</option>`).join("")}
           </select>
           <div class="muted" style="margin:6px 0 0;font-size:12px">${esc((chapterOf(p) || {}).src || "")}</div>
           <div class="muted" style="margin:16px 0 8px">${t("chapterModeLabel")}</div>
@@ -1529,9 +1554,7 @@ function viewParent(p){
             ${[["soft", t("chapterSoft")], ["hard", t("chapterHard")]].map(([k,l]) =>
               `<button class="${(p.chapterMode || "soft") === k ? "on" : ""}" data-act="chaptermode" data-cm="${k}">${l}</button>`).join("")}
           </div>
-          <div class="muted" style="margin-top:10px">
-            ${schoolReady(p) ? t("chapterOnMap") : t("chapterNoTrack")}
-          </div>` : ""}
+          <div class="muted" style="margin-top:10px">${chapterStatus(p)}</div>` : ""}
         <div class="muted" style="margin-top:14px">${t("curriculumNote")}</div>
       </div>
 

@@ -311,6 +311,16 @@ té kapitoly jako podtitulek. Bylo to zvolené proti variantě, kdy by kapitola
 překreslovala všechny existující tratě. Tohle je menší zásah, dítě tomu rozumí
 a ostatní tratě fungují beze změny.
 
+**Kapitola bez generátoru není slepá ulička.** Rodič nastavuje, kde je třída,
+což je fakt o škole, ne otázka na hru. Většina kapitol jsou ale zatím témata
+bez generátoru, a kdyby hra v takové chvíli mlčela, vypadalo by nastavení jako
+rozbité. Proto `effectiveChapter()` hledá nejbližší dřívější kapitolu, kterou
+hra zahrát umí, a trať jede podle ní. Je to učivo, které dítě už probralo,
+takže opakování dává smysl a Leitnerova krabička ho stejně chce vracet.
+Rodičovská sekce to napíše konkrétně, tedy podle které kapitoly se skutečně
+jede. Dopředu se nikdy neskáče, to by učilo neprobrané. Nikdy nepoužívej
+`chapterOf()` tam, kde jde o obsah závodu, to je jen vybraná kapitola.
+
 **Pozor na dvě věci v kódu.** Pool je popsaný deklarativně, tedy `mult`, `div`,
 `as20` a `as100`, a `poolKeys()` ho překládá na klíče příkladů. Nikdy do
 kurikula nepiš klíče přímo. A `poolSize()` počítá kbelík do sta za čtyři, ne za

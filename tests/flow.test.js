@@ -97,9 +97,18 @@ ok('ucebnice ulozena a kapitola prednastavena',
    'kapitola '+DBg().profiles[0].chapter);
 ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length===33,
    qa('[data-act="chaptersel"] option').length+' kapitol');
-ok('nepodporovana kapitola je oznacena', /zatím neumíme/.test(txt()));
+ok('u hratelne kapitoly se slibuje trat', /jede přesně podle téhle kapitoly/.test(txt()));
 const chs=sel('[data-act="chaptersel"]');
-chs.value='2'; chs.dispatchEvent(new w.Event('change',{bubbles:true}));
+chs.value='16'; chs.dispatchEvent(new w.Event('change',{bubbles:true}));
+ok('kapitola bez generatoru rekne, podle ceho trat pojede',
+   /zatím neumí generovat/.test(txt()) && /12\. Opakování do sta/.test(txt()));
+click(q('[data-act="map"]'));
+ok('trat je na mape i u kapitoly bez generatoru', /Co máte ve škole/.test(txt()));
+ok('trat nese nahradni kapitolu', /Opakování do sta/.test(txt()));
+click(q('[data-act="gate"]'));
+d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
+const chs2=sel('[data-act="chaptersel"]');
+chs2.value='2'; chs2.dispatchEvent(new w.Event('change',{bubbles:true}));
 ok('kapitola prepnuta', DBg().profiles[0].chapter===2);
 click(qa('[data-act="chaptermode"]').find(b=>b.dataset.cm==='hard'));
 ok('rezim kapitoly ulozen', DBg().profiles[0].chapterMode==='hard');

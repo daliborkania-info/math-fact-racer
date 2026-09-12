@@ -311,9 +311,11 @@ input{font-family:inherit}
 .gate{padding:26px 22px;text-align:center}
 .pinin{text-align:center;max-width:230px;margin:0 auto 12px;display:block;
   font-family:var(--font-display);font-size:22px;letter-spacing:6px}
+.h3{font-family:var(--font-display);font-size:13px;color:var(--ink-soft);margin:16px 0 6px}
+.h3:first-child{margin-top:0}
 .heatwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .heat{
-  display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:3px;
+  display:grid;grid-template-columns:repeat(var(--hc,11),minmax(0,1fr));gap:3px;
   font-variant-numeric:tabular-nums;width:100%;min-width:0;
 }
 .heat span{
@@ -321,6 +323,11 @@ input{font-family:inherit}
   font-size:10px;font-weight:800;color:#fff;background:var(--shell-2);overflow:hidden;
 }
 .heat .hdr{background:transparent;color:var(--ink-faint);font-size:10.5px}
+/* A tile carries an example rather than a number, so it needs room for
+   a line of text and cannot stay square like a times table cell. */
+.heat.strip{grid-template-columns:repeat(var(--hc,4),minmax(48px,1fr));width:auto;min-width:100%}
+.heat.strip span{aspect-ratio:auto;min-height:40px;padding:4px 2px;line-height:1.2;align-content:center}
+.heat.strip b{display:block;font-size:9.5px;font-weight:800;letter-spacing:-.2px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:11px;font-weight:700;color:var(--ink-soft)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:4px;vertical-align:-2px}
 .row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}

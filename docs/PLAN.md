@@ -13,7 +13,12 @@ pořadí se bude používat.
 
 ---
 
-## Krok 1. Rodičovská heatmapa nad všemi rodinami
+## Krok 1. Rodičovská heatmapa nad všemi rodinami. HOTOVO, září 2026
+
+Postavené přesně takhle: `heatBlock()` nad `{title, kind, cols, tiles}`, mřížka
+pro násobilku a dělení, pás dlaždic pro stupně, kbelíky a kroky dílny, souhrn
+jako `overallMastery()`. Jak to funguje a co přidá nová rodina, je
+v `PROJECT-STATE.md`, oddíl 7b. Zadání dole zůstává jako záznam, proč to tak je.
 
 **Proč první.** Nikoho neblokuje, nemění datový model a je to jediná obrazovka,
 která dnes rodiči lže. S každým dalším generátorem lže víc, takže čím dřív, tím

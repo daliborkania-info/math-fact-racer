@@ -1,12 +1,13 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po generátoru do tisíce a po
-postavení dílny
+Poslední aktualizace: 12. září 2026, po rodičovské heatmapě nad všemi rodinami
 
 **Kde se přestalo a kudy dál:** `add_sub_1000` je hotový a s ním trať `a1000`.
 Hotová je i **dílna**, druhý režim bez stopek a bez bodů za rychlost, zatím
-s jednou zakázkou, penězi. Na řadě je **krok 1 z `docs/PLAN.md`**, tedy
-rodičovská heatmapa nad všemi rodinami. Hotový prompt je na konci, v oddílu 14.
+s jednou zakázkou, penězi. Hotový je **krok 1 z `docs/PLAN.md`**, tedy
+rodičovská heatmapa nad všemi rodinami a vážený souhrn. Na řadě je **krok 2**,
+tedy vlna generátorů na klávesnici, první je `mult_beyond` a `div_beyond`.
+Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -404,6 +405,44 @@ nesmí, i když jsou to zrovna tři sloupce.
 
 ---
 
+## 7b. Rodičovská heatmapa
+
+Od září 2026 je to komponenta, ne natvrdo skládaná tabulka. Obrazovka o rodinách
+neví, rodina si řekne, co se má vykreslit.
+
+**Dva tvary.** `heatGrid()` pro to, co je součin dvou os, tedy násobilka
+a dělení. `heatStrip()` pro všechno ostatní, tedy jedna dlaždice na kbelík,
+stupeň nebo krok dílny. Obojí vrací stejný objekt `{title, kind, cols, tiles}`
+a vykresluje ho jeden `heatBlock()`. Počet sloupců jde do CSS proměnné `--hc`,
+takže `.heat` má jedno pravidlo pro obě šířky.
+
+**Dlaždice smí stát nad víc klíči.** Stupeň do dvaceti jich má sedmdesát,
+kbelík do sta jeden. `heatCell()` počítá průměrnou úroveň přes všechny klíče
+dlaždice, tedy dělí počtem klíčů, ne počtem procvičených; kdyby dělilo
+procvičenými, vypadal by načatý stupeň jako zvládnutý. Barevná škála je díky
+tomu v obou tvarech stejná.
+
+**Kbelík se pojmenovává příkladem, ne slovem.** `34+5` řekne rodiči víc než
+jakýkoli popisek a nepotřebuje překlad. Odčítací polovina se dopočítá ze
+sčítacího příkladu přes `minusEx()`, aby se totéž nepsalo dvakrát. Slovní
+popisky potřebují jen kroky dílny.
+
+**Co se ukazuje.** Rodina dostane blok, když je její trať otevřená, nebo když
+z ní dítě něco má v krabičce. Zamčená a nedotčená rodina by byla jen plocha
+prázdných čtverečků. Dílna je na mapě vždycky, takže má blok vždycky.
+
+**Souhrn nahoře** je `overallMastery()`, vážený průměr zvládnutí přes otevřené
+tratě, váhou je `poolSize()` klíčů trati. Nepočítají se `mix` a `weak`, protože
+nemají vlastní učivo, ani `school`, protože svůj pool půjčuje od ostatních
+a počítal by tytéž příklady podruhé. Dílna taky ne, není to trať.
+
+**Nová rodina** přidá jeden `push()` do `heatSpecs()`, tabulku příkladů vedle
+`H_EX` a `K_EX`, a pokud potřebuje slovní popisky, klíče `heat_*` ve třech
+jazycích. Ty se skládají dynamicky, takže prefix `heat_` je v poli `dyn`
+v `tests/i18n.test.js`.
+
+---
+
 ## 8. Testy
 
 V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
@@ -427,7 +466,9 @@ stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kr
 do tisíce, u kterých ověřuje i to, že každý kbelík dělá to, co slibuje, a dílnu,
 tedy že hltavé drobné jsou opravdu nejmenší, že úloha uzná své vlastní řešení
 a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas.
-`flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami.
+`flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
+a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
+profil v krabičce, a že souhrn nahoře není jen z násobilky.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
 `tests/fixtures/legacy-profiles.json` a jen se přidávají, nikdy neupravují.
@@ -694,14 +735,11 @@ sloupce. Dvě nebo tři políčka vedle sebe se do řádku nevejdou a tři velk�
 tlačítka do třísloupcového gridu jen náhodou. Rozměry jsou navíc zopakované
 podruhé v media query pro nízké displeje.
 
-**C. Viditelnost pro rodiče.** Heatmapa v rodičovské sekci je doslova tabulka
-jedenáct krát jedenáct pro malou násobilku, klíče se skládají jen přes `mk()`.
-Sčítání, počítání do sta ani hodiny tam nejsou vidět, přestože se normálně
-ukládají. Horní souhrn zvládnutí počítá taky jen z násobilky, takže dítě, které
-dva měsíce jede sčítání do sta, uvidí nula procent. S každou další rodinou je
-ta obrazovka nepravdivější. Řešení je udělat z mřížky komponentu, kterou si
-každá rodina naplní vlastními popisky a klíči, a souhrn počítat jako vážený
-průměr přes otevřené tratě.
+**C. Viditelnost pro rodiče. Hotovo, září 2026.** Heatmapa byla doslova tabulka
+jedenáct krát jedenáct pro malou násobilku a souhrn nahoře počítal taky jen
+z násobilky, takže dítě, které dva měsíce jede sčítání do sta, vidělo nula
+procent. Teď je to komponenta, podrobnosti v oddílu 7b. Nová rodina si dopíše
+jeden řádek do `heatSpecs()` a je vidět.
 
 **D. Pasti, na které se dá naběhnout.**
 
@@ -833,8 +871,9 @@ v `rawItem()`, `poolKeys()`, `trackKeys()`, `reachedKeys()` pokud má stupně,
 vlastní `*Stage()` přes `stageIndex()`, větev v `buildRun()` přes
 `focusAndReview()`, záznam v `TRACKS` a `ENVS`, větev v `unlockState()`,
 násobitel v `thresholds()` a `maxLen` na položce, pokud odpověď přeleze tři
-číslice. Dál kapitoly v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s`
-ve všech třech jazycích v `src/i18n.js`.
+číslice, a blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí. Dál kapitoly
+v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech třech jazycích
+v `src/i18n.js`.
 
 V `tests/items.test.js`: export nových symbolů v `module.exports` na konci
 skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do
@@ -842,9 +881,9 @@ množiny `VALID` a vlastní okruh, který ověří, že každý kbelík dělá t
 slibuje. V `tests/flow.test.js` sedí natvrdo počet okruhů na mapě a počet
 zamčených kapitol, obojí je potřeba posunout.
 
-### Prompt pro nejbližší krok, tedy rodičovskou heatmapu
+### Prompt pro nejbližší krok, tedy vlnu generátorů na klávesnici
 
-Použij tenhle, pokud se pokračuje tam, kde se přestalo. Je to krok 1
+Použij tenhle, pokud se pokračuje tam, kde se přestalo. Je to krok 2
 z `docs/PLAN.md`; další kroky mají v tom souboru vlastní zadání a stačí v tomhle
 promptu vyměnit poslední odstavec.
 
@@ -856,12 +895,11 @@ promptu vyměnit poslední odstavec.
 > kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
 > něco navržené tak, jak je; jsou tam odkazy na studie.
 >
-> Dneska chci krok 1 z plánu, tedy rodičovskou heatmapu nad všemi rodinami
-> příkladů. Dneska ukazuje jen malou násobilku, takže dítě, které dva měsíce
-> jezdí sčítání do sta, hodiny a dílnu, tam vidí nulu. Chci dva tvary
-> zobrazení, mřížku pro násobilku a dělení a pás dlaždic pro kbelíkové rodiny,
-> a souhrn nahoře přepočítaný jako vážený průměr přes otevřené tratě. Podrobnosti
-> jsou v plánu.
+> Dneska chci první položku kroku 2 z plánu, tedy generátory `mult_beyond`
+> a `div_beyond`, násobení a dělení za hranicí malé násobilky. Hlavička klíče
+> `x`, znaménko uvnitř klíče jako u tisícovky. Odemkne to kapitoly 14, 16 a 31
+> třetího ročníku. Kontrolní seznam pro novou rodinu je v `PROJECT-STATE.md`,
+> oddíl 14, a nezapomeň na násobitel v `thresholds()` a na blok v `heatSpecs()`.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
 > build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové

@@ -19,6 +19,7 @@ const DBg=()=>JSON.parse(w.localStorage.getItem('math-fact-racer-v1'));
 const tot=()=>parseFloat(d.getElementById('trail').getAttribute('stroke-dasharray'));
 const u=()=>+(1-parseFloat(d.getElementById('trail').style.strokeDashoffset)/tot()).toFixed(3);
 const ok=(n,c,x)=>console.log((c?'  OK  ':'  !!  ')+n+(x!==undefined?'   ['+x+']':''));
+const ev=s=>dom.window.eval(s);
 
 (async()=>{
 console.log('--- prvni spusteni ---');
@@ -82,7 +83,18 @@ click(q('[data-act="map"]')); click(q('[data-act="gate"]'));
 d.getElementById('gatein').value='0000'; click(q('[data-act="gatego"]'));
 ok('spatny kod odmitnut', /nesedí/.test(d.getElementById('gateerr').textContent));
 d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
-ok('heatmapa 11x11 ve scrollovacim obalu', qa('.heatwrap .heat span').length===121);
+ok('nasobilka je mrizka 11x11 ve scrollovacim obalu',
+   qa('.heatwrap .heat.grid')[0] && qa('.heatwrap .heat.grid')[0].querySelectorAll('span').length===121);
+ok('heatmapa neukazuje jen nasobilku', qa('.heatwrap .heat.strip').length>=3,
+   qa('.heatwrap .heat.strip').length+' pasu dlazdic');
+// pozor: nazvy trati jsou v rodicovske sekci i u prepinacu odemceni,
+// takze se hleda mezi nadpisy bloku, ne v textu cele obrazovky
+const bloky=()=>ev('JSON.stringify(heatSpecs(P()).map(s=>s.title))');
+ok('zamcena a nedotcena rodina se neukazuje', !/Do tisíce|Dělení/.test(bloky()), bloky());
+const multOnly=ev('Math.round(mastery(P(), MULT.map(f=>mk(f.a,f.b)))*100)');
+const shown=+q('.statrow .stat .v').textContent.replace(/\D/g,'');
+ok('souhrn uz neni jen nasobilka, ale vazeny prumer pres otevrene trate',
+   shown<multOnly, shown+' % celkem vs '+multOnly+' % jen nasobilka');
 click(qa('[data-act="qcount"]').find(b=>b.dataset.n==='10'));
 click(qa('[data-act="speed"]').find(b=>b.dataset.sp==='slow'));
 ok('nastaveni ulozeno', DBg().profiles[0].qCount===10 && DBg().profiles[0].speedMode==='slow');
@@ -122,7 +134,6 @@ await wait(1500);
 ok('zavod podle kapitoly probehl a drzel se nasobilky z kapitoly',
    tabs.length===10 && tabs.every(x=>/×|:/.test(x)), tabs.length+' otazek');
 console.log('--- hodiny ---');
-const ev=s=>dom.window.eval(s);
 click(q('[data-act="map"]'));
 click(qa('[data-act="play"]').find(b=>b.dataset.id==='clock')); click(q('[data-go]'));
 ok('otazkou je cifernik, ne text', qa('#qtext .dial').length===1 && qtext().indexOf('=')<0);
@@ -209,6 +220,26 @@ ok('soucastky pribyly', DBg().profiles[0].parts>partsBefore,
 ok('dilna se zapsala do krabicky', !!DBg().profiles[0].facts.wm1);
 ok('dilna nezkreslila prumerny cas', DBg().profiles[0].msN>0 &&
    DBg().profiles[0].msN < DBg().profiles[0].totalAns, 'merenych '+DBg().profiles[0].msN+' z '+DBg().profiles[0].totalAns);
+
+console.log('--- heatmapa nad vsemi rodinami ---');
+ev('go("map")'); click(q('[data-act="gate"]'));
+d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));
+// kazda rodina, kterou ma dite v krabicce, musi mit v rodicovske sekci vlastni blok
+const chybi=ev(`(function(){
+  const p=P();
+  const head={m:"heatMult",d:"trk_d1",a:"trk_a20",s:"trk_a20",p:"trk_a100",n:"trk_a100",
+              k:"trk_a1000",c:"trk_clock",w:"shopTitle"};
+  const want=new Set(Object.keys(p.facts).filter(k=>p.facts[k].reps>0).map(k=>t(head[k[0]])));
+  const have=new Set(heatSpecs(p).map(s=>s.title));
+  return [...want].filter(x=>!have.has(x)).join(", ");
+})()`);
+ok('kazda rodina z krabicky ma v rodicovske sekci blok', chybi==='', chybi||'zadna nechybi');
+ok('hodiny maji vlastni pas dlazdic', /7:00/.test(txt()) && /19:45/.test(txt()));
+ok('dilna je v heatmape taky', /Dílna/.test(txt()) && /nejmíň mincí/.test(txt()));
+ok('dlazdice hodin uz neco ukazuje',
+   ev('heatCell(P(), ["c1"]).has && heatCell(P(), ["c1"]).n===1'));
+ok('krok do dvaceti je dlazdice pres celou skupinu', ev('heatCell(P(), stageKeys(0)).n>10'),
+   ev('heatCell(P(), stageKeys(0)).n')+' prikladu v prvnim kroku');
 
 console.log('--- natery ---');
 const withParts=DBg(); withParts.profiles[0].parts=200;

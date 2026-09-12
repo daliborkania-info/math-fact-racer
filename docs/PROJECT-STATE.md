@@ -1,15 +1,16 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 9. září 2026
+Poslední aktualizace: 12. září 2026
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
 kódu, seznam opravených chyb, které se nesmí vrátit, a plán dalšího kroku.
 
-**Pokud jsi nová session, začni tímhle:** přečti tenhle soubor celý, pak `README.cs.md`
-kvůli zdůvodnění mechaniky a `src/app.js` kvůli kódu. Nepřepisuj hotová rozhodnutí
-z oddílu Nedotknutelné principy, aniž by o to uživatel výslovně požádal, jsou to
-odpovědi na konkrétní výzkum a na testování s dítětem.
+**Pokud jsi nová session, začni tímhle:** přečti tenhle soubor celý, pak
+`docs/kurikulum/README.md` kvůli modelu učiva, `README.cs.md` kvůli zdůvodnění
+mechaniky a `src/app.js` kvůli kódu. Nepřepisuj hotová rozhodnutí z oddílu
+Nedotknutelné principy, aniž by o to uživatel výslovně požádal, jsou to odpovědi
+na konkrétní výzkum a na testování s dítětem.
 
 ---
 
@@ -35,12 +36,16 @@ Pracovní složka je `~/Dokumenty/Kladska/math-fact-racer`, je to git repozitá�
 ```
 index.html                sestavený hratelný soubor, tohle se otevírá a tohle se hostuje
 build.py                  složí index.html ze zdrojů v src/
-src/index.template.html   kostra dokumentu se třemi značkami
+src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 173 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 185 klíčů
+src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
 docs/PROJECT-STATE.md     tenhle soubor
+docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
+docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
+tools/make-qr.py          generátor toho QR kódu
 README.md                 anglické README, hlavní, odkazuje na české
 README.cs.md              české README s podrobným zdůvodněním mechaniky
 manifest.webmanifest      pro přidání na plochu telefonu
@@ -50,7 +55,8 @@ dist/artifact.html        build bez obalu html/head/body, negitovaný
 ```
 
 Po každé změně ve `src/` je nutné spustit `python3 build.py`. Editovat přímo
-`index.html` je chyba, přepíše se.
+`index.html` je chyba, přepíše se. Pořadí vkládání je styly, `i18n.js`,
+`curricula.js`, `app.js`, takže `app.js` vidí `I18N` i `CURRICULA` jako globály.
 
 ---
 
@@ -81,6 +87,10 @@ z celé aplikace vymýceno, používá se "příklad".
 
 Nikdy nepoužívat licencované postavičky. Pokémoni a podobné byly výslovně
 odmítnuty a nahrazeny vlastními kreslenými tvory.
+
+**Co hra neumí, to nenabízí.** Žádné nastavení nesmí jít zvolit, pokud se pak
+tiše nic nestane. Platí to i na budoucí obrazovky, nejen na volbu kapitoly, kde
+to vzniklo.
 
 ---
 
@@ -122,7 +132,7 @@ prvního závodu a přímo předpovídá odemknutí další trati.
 **Odemykání.** Prahy zvládnutí: t2 od 0,7 na t1, t3 od 0,7 na t2, t4 od 0,7 na
 t3, t5 od 0,65 na t4, dělení od 0,55 celé násobilky, do stovky od 0,6 na do
 dvaceti. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
-tak jako tak. Rodič může každou trať přebít ručně.
+tak jako tak. Rodič může každou trať přebít ručně. Trať `school` je vždy otevřená.
 
 **Výběr příkladů.** Váha podle úrovně `[7, 8, 6.5, 3.4, 1.6, 0.8]`, zvýšená
 u dlouho neviděných a u těch, kde je víc chyb než úspěchů. Neviděné mají váhu
@@ -130,13 +140,15 @@ u dlouho neviděných a u těch, kde je víc chyb než úspěchů. Neviděné ma
 procent otázek z ohniska trati a třicet z dřívějších.
 
 **Stupně přechodu přes desítku.** Trať do dvaceti není jeden pytel příkladů,
-má pět stupňů podle toho, jak těžký je most přes desítku: bez přechodu a s
-desítkou jako sčítancem, pak přechod přes devítku, přes osmičku, přes sedmičku
-a nakonec zbytek. Příklad patří do stupně svého většího sčítance. Pořadí je
-převzaté ze čtvrtého dílu Matýskovy matematiky, který každému věnuje celou
-kapitolu, a platí i bez zvolené učebnice. Závod nese aktuální stupeň ze sedmdesáti
-procent, zbytek je opakování už zvládnutých stupňů, tedy stejný tvar jako
-u násobilkových tratí. Díky tomu začátečník potká jen součty do deseti.
+má pět stupňů podle toho, jak těžký je most přes desítku: `e1` bez přechodu
+a s desítkou jako sčítancem, `e2` přechod přes devítku, `e3` přes osmičku,
+`e4` přes sedmičku, `e5` zbytek. Příklad patří do stupně svého většího
+sčítance. Pořadí je převzaté ze čtvrtého dílu Matýskovy matematiky, který
+každému věnuje celou kapitolu, a platí i bez zvolené učebnice. Závod nese
+aktuální stupeň ze sedmdesáti procent, zbytek je opakování už zvládnutých
+stupňů, tedy stejný tvar jako u násobilkových tratí. Díky tomu začátečník
+potká jen součty do deseti. Aktuální stupeň hledá `as20Stage()` jako první,
+kde zvládnutí nedosáhlo 0,7.
 
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
 je zhruba polovina toho. U počítání do sta se prahy násobí 1,9.
@@ -145,7 +157,7 @@ je zhruba polovina toho. U počítání do sta se prahy násobí 1,9.
 
 ## 5. Trati
 
-Deset tratí, každá má vlastní generovaný okruh a prostředí.
+Jedenáct tratí, každá má vlastní generovaný okruh a prostředí.
 
 | id | obsah |
 | --- | --- |
@@ -155,10 +167,15 @@ Deset tratí, každá má vlastní generovaný okruh a prostředí.
 | t4 | násobilka 8, 9 |
 | t5 | celá malá násobilka |
 | d1 | dělení |
-| a20 | sčítání a odčítání do 20 |
+| a20 | sčítání a odčítání do 20, pět stupňů přechodu přes desítku |
 | a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
 | mix | vše odemčené dohromady |
 | weak | jen příklady s nejnižší úrovní |
+| school | učivo vybrané kapitoly učebnice, viz oddíl 11 |
+
+Trať `school` se na mapě objeví jen tehdy, když je v profilu zvolená učebnice
+a kapitola, a jde vždy na první místo. Nese název kapitoly jako podtitulek.
+V rodičovské sekci nemá přepínač odemknutí, řídí ji volba kapitoly.
 
 Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
 `s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky. Kanonicky vždy
@@ -181,6 +198,9 @@ profil = {
   trackRuns: { "t1": 8 },
   owned: [...], runner: "ri_auto", xp: { "pet_kiki": 120 },
   coins, force: {}, autoUnlock, qCount, speedMode,
+  curriculum: null,                      // id z CURRICULA, null = adaptivní režim
+  chapter: null,                         // číslo kapitoly uvnitř toho kurikula
+  chapterMode: "soft",                   // soft | hard
   streak, lastDay, bestStreak, runs, totalOk, totalAns, msSum, msN
 }
 ```
@@ -189,7 +209,8 @@ PIN je uložený jen jako hash funkcí `hashPin`. Není to skutečné zabezpeče
 jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 
 Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
-pokud je nemá. Nové migrace patří do `load()`.
+pokud je nemá, a `normalizeChapter()` srovná kapitolu. Nové migrace patří
+do `load()`, a pokud se týkají profilu jako celku, taky do větve `import`.
 
 ---
 
@@ -202,7 +223,8 @@ pokud je nemá. Nové migrace patří do `load()`.
    `DB.lang`, nebo dětský `profil.lang`. Rodičovské obrazovky jsou vyjmenované
    v `PARENT_VIEWS`.
 2. Úložiště. `load`, `save`, `P()`, `newProfile`, `touchStreak`.
-3. Příklady. Generování, klíče, výběr do závodu, zápis odpovědi do krabičky.
+3. Příklady. Generování, klíče, stupně `E_STAGES`, tratě, kurikulum, výběr do
+   závodu, zápis odpovědi do krabičky.
 4. Sbírka a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
 5. Závodní okruh. Uzavřená Bézierova křivka z osazeného generátoru, geometrie se
    počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `circuit(id)`,
@@ -210,22 +232,35 @@ pokud je nemá. Nové migrace patří do `load()`.
 6. Zvuk. Syntetizované tóny, žádné soubory.
 7. Obrazovky. `viewPlayers`, `viewMap`, `viewGame`, `viewResult`, `viewCollection`,
    `viewSetPin`, `viewGate`, `viewParent`.
-8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem.
+8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem, plus
+   druhý na `change` kvůli rozbalovacím nabídkám, které klik nevyvolávají.
 
-**Pozor na jednu past.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
+**Pozor na dvě pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
-způsobilo chybu.
+způsobilo chybu. A rozbalovací nabídka potřebuje `change`, ne `click`, takže
+nové `<select>` musí mít obsluhu v tom druhém posluchači.
 
 ---
 
 ## 8. Testy
 
 V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
-`tests/README.md`. Testy načítají sestavený `index.html`, takže před během je
-nutné pustit `build.py`.
+`tests/README.md`. Testy načítají sestavený `index.html`, kromě `items.test.js`,
+který skládá zdroje přímo, takže před během je nutné pustit `build.py`.
 
 Po každé změně mechaniky pusť `flow.test.js` a `items.test.js`, po každé změně
-textů `i18n.test.js` a `names.test.js`.
+textů `i18n.test.js` a `names.test.js`. Žádný test nevrací nenulový kód, kontroluje
+se výskyt `!!` ve výstupu:
+
+```bash
+python3 build.py
+for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
+```
+
+`items.test.js` pokrývá sedm okruhů: správnost všech generovaných příkladů,
+složení závodu na každé trati, platnost SVG, konzistenci kurikul, závod podle
+kapitoly v obou režimech, stupně přechodu přes desítku a pravidla výběru
+kapitoly. `flow.test.js` projede celou hru včetně volby učebnice.
 
 ---
 
@@ -255,133 +290,142 @@ s vodorovným posuvem.
 Bílý text na světlém podkladu na úvodní obrazovce. Světlý oblouk přes spodek
 fialové hlavičky se překrýval s podtitulkem, nahrazeno zaoblením hlavičky.
 
+Volba kapitoly bez generátoru nedělala nic. Šla vybrat, poznámka "zatím neumíme"
+se v nabídce usekla a rodič si nastavil kapitolu, se kterou se nestalo nic.
+Mezikrok s tichým návratem na dřívější kapitolu byl taky špatně, protože
+nastavení pořád dělalo něco jiného, než říkalo. Teď je kapitola bez generátoru
+nevybratelná, viz princip v oddílu 3.
+
 ---
 
 ## 10. Kde to teď stojí
 
-Repozitář je založený a má tři commity. **Ještě nebyl odeslán na GitHub.**
-Uživatel má SSH klíč, který je na GitHubu registrovaný jako deploy key
-repozitáře Obsidian-SecondBrain, ne jako klíč účtu, takže push zatím neprojde.
-Řešení je překlopit ten klíč z repozitáře na účet, nebo vyrobit druhý účtový
-klíč a rozlišit je aliasem v `~/.ssh/config`.
-
-Po pushi zbývá zapnout GitHub Pages, tedy Settings, Pages, zdroj větev `main`
-a složka root. Odkaz `https://daliborkania-info.github.io/math-fact-racer/`
-je už v obou README předvyplněný.
+Repozitář žije na `https://github.com/daliborkania-info/math-fact-racer`, je
+odeslaný a rodiče spolužáků si hru stahují. Hostuje ji GitHub Pages na
+`https://daliborkania-info.github.io/math-fact-racer/`, zdroj je větev `main`
+a složka root.
 
 Hra je zároveň publikovaná jako artefakt na claude.ai, ten se aktualizuje
 nahráním `dist/artifact.html`.
 
+**Push z prostředí Cowork neprojde.** Shell běží v izolovaném sandboxu, který
+nevidí SSH klíč ani agenta, jen připojenou složku. Commitovat jde, odeslat ne.
+Uživatel pushuje sám z terminálu. Sandbox navíc někdy nechá v `.git` zámek,
+který nejde smazat bez povolení mazání souborů; projeví se to hláškou
+`cannot lock ref HEAD`. Řeší to smazání `.git/*.lock` a `.git/objects/tmp_obj_*`.
+
 ---
 
-## 11. Další krok, rozšíření o učivo třetí třídy
+## 11. Učivo podle učebnice, hotová část
 
-**Fáze jedna je hotová.** Mapa učiva existuje a leží v `docs/kurikulum/`.
-Vznikla z pracovních sešitů Matýskova matematika 7. a 8. díl, které jsou
-dostupné ve čtečce ucebnice.online přes odkazy `qr.nns.cz`, jež poslal uživatel.
-Čte se to tak, že přečteš `docs/kurikulum/README.md`, pak katalog a pak mapu.
+**Model je dvouvrstvý a je to nejdůležitější rozhodnutí téhle fáze.**
+`docs/kurikulum/TEMATA.md` je katalog témat, tedy co hra umí nebo bude umět
+vygenerovat: jeden generátor plus jeden vstupní prvek plus zařazení do závodu
+nebo do dílny. Mapy jako `docs/kurikulum/nns-matysek-3.md` jsou uspořádané
+seznamy kapitol jedné konkrétní řady, které na katalog odkazují. Další učebnice
+znamená napsat další mapu, ne další generátory. Mapa nesmí zavést téma, které
+v katalogu není, to je signál, že katalog potřebuje rozšířit.
 
-Model je dvouvrstvý, a to je nejdůležitější rozhodnutí téhle fáze.
-`docs/kurikulum/TEMATA.md` je katalog témat, tedy co hra umí vygenerovat, jeden
-generátor plus jeden vstupní prvek plus zařazení do závodu nebo do dílny.
-`docs/kurikulum/nns-matysek-3.md` je mapa jedné konkrétní učebnice, tedy
-uspořádaný seznam kapitol odkazující na `id` z katalogu. Další učebnice znamená
-napsat další mapu, ne další generátory. Mapa nesmí zavést téma, které není
-v katalogu.
+**Zdroj map.** Matýskova matematika nakladatelství Nová škola. Druhý a třetí
+ročník jsou ověřené ze skutečných stránek, první, čtvrtý a pátý jen z obsahů,
+a témata, u kterých neznám formát odpovědi, jsou v mapách značená `?`.
 
-**Volba učebnice patří profilu**, ne aplikaci. Rodič ji v rodičovské sekci
-nastaví zvlášť pro každé dítě, protože sourozenci mohou mít různé učebnice.
-Profil má `curriculum`, `chapter` a `chapterMode`. Výchozí je
-`curriculum: null`, tedy dnešní adaptivní režim. Měkký režim kapitoly serveruje
-zhruba sedmdesát procent z aktuální kapitoly a zbytek podle Leitnerovy krabičky,
-tvrdý bere jen aktuální kapitolu, měkký je výchozí, protože jinak se rozpadne
-rozložené opakování.
+**Jak se čtou učebnice.** Nejlepší zdroj je čtečka na `mediacreator.cz`, protože
+u každé dvoustrany vypisuje názvy interaktivních cvičení jako text, takže je
+z ní vidět typ úlohy, ne jen název kapitoly. Adresa má tvar
+`mediacreator.cz/mc/index.php?opentitle=<titul>/<titul>.mc&pageord=1`. Veřejně
+odkazované jsou ale jen tři tituly, `Matyskova_matematika_4dil_2019`, `5dil`
+a `6dil`, všechny na stránce o aktualizovaném vydání 2018-2019 na
+matyskova-matematika.cz. Oba weby nakladatele jsem projel přes sitemapy, 914
+stránek, žádné další matematické tituly tam nejsou a jména titulů v adresách
+jsou nesystematická, takže uhodnout je nejde. Čtečka `ucebnice.online` otevře
+konkrétní sešit přes odkaz `qr.nns.cz`, celý katalog ale vyžaduje registraci
+a třicetidenní zkušební přístup. Účet zakládat nebudu. Další učebnice tedy
+chodí tak, že uživatel pošle odkaz, nebo se sám přihlásí v prohlížeči a já pak
+katalog přečtu.
 
-**Tohle je hotové a v kódu.** Data leží v `src/curricula.js`, což je nový
-zdrojový soubor, který `build.py` vkládá mezi `i18n.js` a `app.js`. Jsou v něm
-tři kurikula pro první až třetí ročník, dohromady sedmdesát kapitol, z toho
-třicet osm s poolem, který hra umí zahrát. Kapitola bez poolu se dá vybrat, ale
-trať pro ni nevznikne, a v nabídce je označená jako "zatím neumíme". Čtvrtý
-a pátý ročník v aplikaci nejsou, protože by v nich bylo skoro všechno šedé,
-mapy k nim ale existují v `docs/kurikulum/`.
+**Volba učebnice patří profilu**, ne aplikaci, protože sourozenci mohou mít
+různé učebnice. Profil má `curriculum`, `chapter` a `chapterMode`. Výchozí je
+`curriculum: null`, tedy adaptivní režim. Měkký režim serveruje zhruba sedmdesát
+procent z aktuální kapitoly a zbytek z dřívějších kapitol podle Leitnerovy
+krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože jinak se
+rozpadne rozložené opakování.
 
-Kapitola se do hry propisuje přes novou trať `school`, tedy "Co máte ve škole".
-Objeví se na mapě jen tehdy, když má vybraná kapitola dost zásoby, a nese název
-té kapitoly jako podtitulek. Bylo to zvolené proti variantě, kdy by kapitola
-překreslovala všechny existující tratě. Tohle je menší zásah, dítě tomu rozumí
-a ostatní tratě fungují beze změny.
+**Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
+95 kapitol, z toho 55 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
-**Co hra neumí, to nenabízí.** Kapitola bez generátoru je v seznamu vidět,
-ale je nevybratelná, tedy `disabled`. Je to rozhodnutí uživatele a platí
-i do budoucna: nikdy nesmí jít nastavit něco, co se pak tiše nestane. Dřív
-tam byla jen poznámka "zatím neumíme", kterou navíc rozbalovací nabídka
-usekla, a rodič si nastavil kapitolu, se kterou se nic nedělo. To je horší
-než nenabídnout ji vůbec.
-
-Rozhoduje `isPlayable(ch)`, tedy jestli `poolSize` vyjde aspoň na čtyři.
-`playableChapters(cur)` vrací, co jde vybrat, a volba učebnice skáče na první
-z nich, ne na první kapitolu v knize. `normalizeChapter(p)` srovná uložený
-profil na nejbližší dřívější hratelnou kapitolu, nikdy dopředu, a volá se
-v `load()` a po importu zálohy, aby profil nikdy neukazoval na kapitolu,
-která nic negeneruje. Seznam ukazuje celou knihu schválně, aby rodič viděl,
-kde třída je, i když to hra ještě neumí.
-
-**Pozor na dvě věci v kódu.** Pool je popsaný deklarativně, tedy `mult`, `div`,
-`as20` a `as100`, a `poolKeys()` ho překládá na klíče příkladů. Nikdy do
-kurikula nepiš klíče přímo. A `poolSize()` počítá kbelík do sta za čtyři, ne za
-jeden, protože jeden kbelíkový klíč generuje celou rodinu příkladů. Bez toho by
+**Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`
+a `as100`, a `poolKeys()` to překládá na klíče příkladů. Nikdy do kurikula
+nepiš klíče přímo. `poolSize()` počítá kbelík do sta za čtyři, ne za jeden,
+protože jeden kbelíkový klíč generuje celou rodinu příkladů; bez toho by
 kapitola s jediným kbelíkem vypadala jako prázdná.
 
-**Katalog učebnic na ucebnice.online je za registrací.** Přes odkazy `qr.nns.cz`
-jde otevřít konkrétní sešit bez přihlášení, celý katalog sta a více titulů ale
-vyžaduje účet a třicetidenní zkušební přístup. Účet zakládat nebudu, další
-učebnice tedy chodí tak, že uživatel pošle odkaz.
-
-**Fáze dvě, teď.** Nad katalogem dohodnout mechaniku u každého nového tématu,
-hlavně vstupní prvky `pad2`, `cmp`, `pick` a `clock`.
-
-**Fáze tři.** Teprve pak generátory a obrazovky, po tématech. Pilot je dělení
-se zbytkem, kapitola 27 mapy, tedy strany 30 až 35 osmého dílu.
-
-**Rozhodnutí, která už padla.**
-
-Pokrýt se má nakonec všechno: numerace a počítání do tisíce, dělení se zbytkem
-a násobky deseti, jednotky, čas a peníze, a taky geometrie a slovní úlohy.
-
-Navázání na školu bude obojí. Výchozí je adaptivní režim, rodič ale může
-v rodičovské sekci nastavit kapitolu, kde třída je, a hra pak servíruje
-převážně to učivo.
-
-Jako pilot se doporučilo dělení se zbytkem. Je to jádrová látka třetí třídy,
-vyžaduje jeden nový vstupní prvek, tedy druhé políčko na zbytek, a přitom se
-celé odehraje uvnitř existujícího závodu. Osmý díl mu věnuje tři dvoustrany,
-nejvíc ze všech témat obou dílů, a staví ho v pořadí číselná osa s násobky,
-výpočet podílu a zbytku, obrácená úloha na dělence, slovní úloha se zbytkem.
-Dělitele bere po dvojicích 2 a 3, 4 a 5, 6 a 7, 8 a 9, pak 10 a smíšené
-opakování, což je hotová osnova pro pět tratí.
+**Kapitola bez generátoru je nevybratelná.** Rozhoduje `isPlayable(ch)`, tedy
+`poolSize` aspoň čtyři. `playableChapters(cur)` vrací, co jde vybrat, a volba
+učebnice skáče na první z nich, ne na první kapitolu v knize.
+`normalizeChapter(p)` srovná uložený profil na nejbližší dřívější hratelnou
+kapitolu, nikdy dopředu, a volá se v `load()` i po importu zálohy. V seznamu
+je celá kniha schválně, aby rodič viděl, kde třída je, i když to hra ještě
+neumí; nehratelné položky jsou `disabled`.
 
 **Zásadní hranice návrhu.** Závod je trenažér plynulosti, ne přemýšlení. Patří
-do něj jen to, co se má zautomatizovat a kde je jedna číselná odpověď. Slovní
-úlohy, geometrie a čtení z tabulek potřebují druhý režim bez stopek a bez bodů
-za rychlost, protože odměňovat rychlost u úlohy, kde je hlavní práce pečlivé
-čtení, učí dítě hádat. Pracovně se pro ten druhý režim uvažovalo o názvu
-servis nebo dílna.
+do něj jen to, co se má zautomatizovat a kde je jedna krátká odpověď. Slovní
+úlohy, geometrie, písemné algoritmy a čtení z tabulek potřebují druhý režim bez
+stopek a bez bodů za rychlost, protože odměňovat rychlost u úlohy, kde je hlavní
+práce pečlivé čtení, učí dítě hádat. Pracovně se pro ten druhý režim uvažovalo
+o názvu servis nebo dílna. Zatím neexistuje.
 
-**Autorská práva.** Z naskenované učebnice se nesmí přebírat zadání ani obrázky.
-Legálně a užitečně se z ní bere jen struktura, tedy jaká témata, v jakém pořadí,
-v jakém rozsahu a jakým typem úlohy. Příklady se pak generují vlastní. Je to
-i lepší produkt, protože generátor jich vyrobí neomezeně a umí je stupňovat.
-
-**Co si vyžádá úpravu architektury.** Témata dostanou vedle obtížnosti i pozici
-v učebnici, tedy číslo kapitoly. Rodičovská sekce dostane přepínač kapitoly.
-Tabulka zvládnutých příkladů přestane být mřížka deset krát deset a stane se
-z ní seznam témat s pruhy, ve kterém bude mřížka násobilky jednou položkou.
-Dělení se zbytkem potřebuje dvě vstupní políčka, porovnávání čísel tři velká
-tlačítka místo klávesnice, řazení čísel přetahování.
+**Autorská práva.** Z učebnice se přebírá výhradně struktura, tedy jaká témata,
+v jakém pořadí, v jakém rozsahu a jakým typem úlohy. Zadání ani obrázky se
+nepřebírají, příklady se generují vlastní. Je to i lepší produkt, protože
+generátor jich vyrobí neomezeně a umí je stupňovat.
 
 ---
 
-## 12. Dobrovolná podpora projektu
+## 12. Další krok
+
+**Pilot: dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
+osmého dílu. Je to jádrová látka třetí třídy, sešit jí věnuje tři dvoustrany,
+nejvíc ze všech témat obou dílů, a celá se odehraje uvnitř existujícího závodu.
+Potřebuje jediný nový vstupní prvek, druhé políčko na zbytek.
+
+Sešit ji staví v pořadí, které stojí za to zachovat: vyznačení násobků dělitele
+na číselné ose, výpočet podílu a zbytku, obrácená úloha na doplnění dělence,
+slovní úloha, kde je zbytek smyslem zadání. Dělitele bere po dvojicích 2 a 3,
+4 a 5, 6 a 7, 8 a 9, pak 10 a nakonec smíšené opakování, což je hotová osnova
+pro pět podkapitol nebo pět tratí.
+
+Co je k tomu potřeba: klíč příkladu `r{dělenec}x{dělitel}`, vstupní prvek `pad2`
+se dvěma políčky, rozšíření `poolKeys()` o `divrem`, doplnění kapitoly 27 v
+`src/curricula.js` a texty ve třech jazycích. Typická chyba je zbytek větší nebo
+rovný děliteli, na to má chybová hláška reagovat konkrétně.
+
+**Levnější první krok, pokud se nechce dělat pilot.** Trať `written_add_sub`
+nebo spíš dodělání vstupních prvků `cmp` a `pick`, protože odemknou hodně
+kapitol najednou. Porovnávání je ale poznávání, ne vybavování, takže porušuje
+první z nedotknutelných principů a patří dovnitř jen jako doplněk, nikdy jako
+celá trať.
+
+**Co dál v katalogu.** Podle map jsou nejvíc potřeba, v tomhle pořadí:
+`div_remainder`, `written_add_sub` (objevuje se už v druhé třídě, dřív než jsem
+čekal), `mult_beyond` a `div_beyond`, `clock_read`, `unit_convert`,
+`order_of_ops`, `missing_operand`, `times_more_less`.
+
+**Zlomky mají zvláštní poznámku.** V druhé třídě se objevují jako vedlejší
+produkt dělení, tedy poloviny u dvojky, třetiny u trojky, čtvrtiny u čtyřky.
+Až se bude psát `fraction_read`, má navázat na tohle, ne to stavět od nuly
+ve třetí třídě.
+
+**Co si vyžádá úpravu architektury.** Tabulka zvládnutých příkladů v rodičovské
+sekci přestane být mřížka deset krát deset a stane se z ní seznam témat s pruhy,
+ve kterém bude mřížka násobilky jednou položkou. Dělení se zbytkem potřebuje dvě
+vstupní políčka, porovnávání čísel tři velká tlačítka místo klávesnice, řazení
+čísel přetahování.
+
+---
+
+## 13. Dobrovolná podpora projektu
 
 Hra zůstává zdarma, MIT, bez reklam a bez sledování. Vedle toho je v README
 sekce s výzvou k dobrovolnému příspěvku, umístěná až za Licencí, tedy dole.
@@ -393,7 +437,9 @@ hře nijak nepozná. Žádné odemykání, žádné počítadlo cíle, žádný 
 **Zvolený kanál.** QR platba podle českého standardu SPAYD, obrázek přímo
 v repozitáři. Nulové poplatky, žádná registrace pro dárce, rodič to zvládne
 na tři klepnutí v bankovní aplikaci. QR se generuje skriptem `tools/make-qr.py`
-knihovnou `segno`, není závislé na žádné externí službě.
+knihovnou `segno`, není závislé na žádné externí službě. Účet je
+`2800927751/2010`, IBAN `CZ4920100000002800927751`, Fio, bez předvyplněné
+částky.
 
 **Zamítnuté kanály a proč.** Buy Me a Coffee si bere pět procent navždy
 a podporuje jen kartu. Ko-fi je levnější, nula procent z jednorázových
@@ -417,15 +463,23 @@ správy.
 
 ---
 
-## 13. Hotový prompt pro novou session
+## 14. Hotový prompt pro novou session
 
-> Pokračujeme v projektu Math Fact Racer, což je hra na procvičování násobilky
-> pro mého osmiletého syna. Repozitář je v `~/Dokumenty/Kladska/math-fact-racer`.
-> Přečti si nejdřív `docs/PROJECT-STATE.md`, je tam kompletní stav, mechanika,
-> architektura a plán. Pak `README.cs.md` kvůli zdůvodnění návrhu a `src/app.js`
-> kvůli kódu. Zdroje se editují v `src/`, po každé změně se pouští
-> `python3 build.py` a testy z `tests/`. Piš mi česky, kód a komentáře anglicky.
-> Nedotknutelné principy z oddílu 3 neměň bez mého pokynu.
+> Pokračujeme v projektu Math Fact Racer, což je hra na procvičování počítání
+> pro mého osmiletého syna, kterou už používají rodiče spolužáků. Repozitář je
+> v `~/Dokumenty/Kladska/math-fact-racer`.
 >
-> Dneska chci [doplň, například: poslat ti první kapitolu učebnice k analýze /
-> dodělat push na GitHub / opravit tohle a tamto].
+> Přečti si nejdřív `docs/PROJECT-STATE.md` celý, je tam kompletní stav,
+> mechanika, architektura, opravené chyby a plán. Pak `docs/kurikulum/README.md`
+> kvůli modelu učiva a `src/app.js` kvůli kódu.
+>
+> Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně se pouští
+> `python3 build.py` a pak testy z `tests/`, u kterých se hlídá výskyt `!!`
+> ve výstupu. Nové chování patří do testů, ne jen do kódu.
+>
+> Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
+> principy z oddílu 3 neměň bez mého pokynu. Push na GitHub dělám sám, z tvého
+> prostředí neprojde, takže jen commituj a řekni mi, co poslat.
+>
+> Dneska chci [doplň, například: napsat generátor dělení se zbytkem podle
+> oddílu 12 / projet další učebnici, odkaz posílám / opravit tohle a tamto].

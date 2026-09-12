@@ -15,8 +15,8 @@ node tests/names.test.js
 
 | File | What it covers |
 | --- | --- |
-| `flow.test.js` | Whole game cycle: parent code, profile creation, racer picker, a race with mistakes, records, garage purchase, parent section, second profile |
-| `items.test.js` | Generates thousands of questions and verifies every answer by evaluating the printed expression; checks race composition and that no sprite renders as NaN |
+| `flow.test.js` | Whole game cycle: parent code, profile creation, racer picker, a race with mistakes, records, garage purchase, parent section, textbook and chapter selection, second profile |
+| `items.test.js` | Generates thousands of questions and verifies every answer by evaluating the printed expression; checks race composition, sprite validity, curriculum consistency, both chapter modes, the within-twenty stages, and the rules for which chapter can be picked |
 | `i18n.test.js` | Dictionary completeness across cs/en/de and a full race in each language |
 | `names.test.js` | Racer names render in every language in both the pre-race picker and the garage |
 

@@ -50,6 +50,7 @@ src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
 tests/fixtures/           zamrazené profily starších verzí, jen se přidávají
 docs/PROJECT-STATE.md     tenhle soubor
+docs/ROADMAP.md           produktovy plan, vc. resersi o motivaci a inkluzi
 docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
 docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
 tools/make-qr.py          generátor toho QR kódu
@@ -593,6 +594,11 @@ teď přes `as100`. Je to prohloubení, ne odemčení, a navíc potřebuje díln
 **Zbytek prvního ročníku čeká na `count_objects`.** Kapitoly 1 až 3 jsou
 počítání předmětů na obrázku, nic pro závod. Dílna, do které patří, už stojí,
 takže zbývá jen ten generátor a kresba počítaných věcí.
+
+**Vrstva nad tímhle je v `docs/ROADMAP.md`**, tedy co s hrou jako s produktem:
+volba světa místo závodu pro děti, které závodění neláká, sbírky vázané na
+Leitnerovu krabičku, mapa jako svět a seznam věcí, které se do dětské hry
+přidat nesmí. Vzniklo to z rešerše, u každého zjištění je odkaz na studii.
 
 ## 12b. Další krok
 

@@ -98,8 +98,11 @@ téma, je to druhý pohled na dělení. Až se bude psát `fraction_read`, stoj�
 to na tohle navázat, ne to stavět od nuly ve třetí třídě.
 
 **Geometrie a určování času se táhnou celým ročníkem** jako pravidelné vsuvky,
-zhruba jedna dvoustrana po každé kapitole. Do závodu nepatří, ale v mapě mají
-svoje kapitoly, aby číslování souhlasilo s knihou a rodič našel, kde je.
+zhruba jedna dvoustrana po každé kapitole. V mapě mají svoje kapitoly, aby
+číslování souhlasilo s knihou a rodič našel, kde je. Určování času do závodu
+patří a od generátoru `clock_read` je hratelné, takže kapitoly 2, 9, 14, 16,
+18, 25 a 38 se daly zapnout. Samotná geometrie do závodu nepatří a kapitola 44
+zůstává jediná, která nepůjde zapnout nikdy.
 
 **Písemné sčítání a odčítání pod sebou je už v pátém dílu**, tedy v druhé
 třídě, ne až ve třetí. To je dřív, než jsem čekal, a posouvá to `written_add_sub`

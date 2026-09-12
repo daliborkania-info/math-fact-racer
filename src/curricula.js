@@ -21,11 +21,14 @@
  *                                 carry: "yes" crosses ten, "no" stays below
  *                                 addend: one of the two addends is in the list
  *   as100 [bucket ids]            h1..h5, the difficulty buckets within 100
+ *   clock [bucket ids]            c1..c6, telling the time by precision,
+ *                                 c6 being the afternoon 24 hour reading
  *
  * Source of the sequences: docs/kurikulum/. Structure only, no content.
  * ------------------------------------------------------------------ */
 const ALL_TABLES = [1,2,3,4,5,6,7,8,9,10];
 const ALL_H = ["h1","h2","h3","h4","h5"];
+const ALL_C = ["c1","c2","c3","c4","c5","c6"];
 
 const CURRICULA = [
   {
@@ -61,30 +64,30 @@ const CURRICULA = [
     grade: 2,
     chapters: [
       {n:1,  name:"Opakování do dvaceti bez přechodu", src:"4. díl, s. 2–5",   pool:{as20:{carry:"no"}}},
-      {n:2,  name:"Určování času a osová souměrnost",  src:"4. díl, s. 6–9",   pool:null},
+      {n:2,  name:"Určování času a osová souměrnost",  src:"4. díl, s. 6–9",   pool:{clock:["c1","c2"]}},
       {n:3,  name:"Finanční gramotnost, mince a směňování", src:"4. díl, s. 10–11", pool:null},
       {n:4,  name:"Sčítání 9 +, odčítání 11 −",        src:"4. díl, s. 12–25", pool:{as20:{carry:"yes", addend:[9]}}},
       {n:5,  name:"Sčítání 8 +, odčítání 12 −",        src:"4. díl, s. 26–37", pool:{as20:{carry:"yes", addend:[8,9]}}},
       {n:6,  name:"Sčítání 7 +, odčítání 13 −",        src:"4. díl, s. 38–47", pool:{as20:{carry:"yes", addend:[7,8,9]}}},
       {n:7,  name:"Sčítání 6 + a 5 +, odčítání 14 − a 15 −", src:"4. díl, s. 48–55", pool:{as20:{carry:"yes", addend:[5,6,7,8,9]}}},
       {n:8,  name:"Sčítání 4 +, 3 +, 2 +, odčítání 16 − až 18 −", src:"4. díl, s. 56–61", pool:{as20:{carry:"yes"}}},
-      {n:9,  name:"Určování času a čtvrtina",          src:"4. díl, s. 62–65", pool:null},
+      {n:9,  name:"Určování času a čtvrtina",          src:"4. díl, s. 62–65", pool:{clock:["c1","c2","c3"]}},
       {n:10, name:"Opakování do dvaceti",              src:"5. díl, s. 2–5",   pool:{as20:{maxSum:20}}},
       {n:11, name:"Desítky a jednotky, obor do sta",   src:"5. díl, s. 8–11",  pool:{as100:["h3"]}},
       {n:12, name:"Sčítání a odčítání desítek",        src:"5. díl, s. 12–19", pool:{as100:["h3"]}},
       {n:13, name:"Početní operace v oboru 0 až 39",   src:"5. díl, s. 20–31", pool:{as100:["h1","h2"]}},
-      {n:14, name:"Určování času, tři čtvrtiny",       src:"5. díl, s. 32–33", pool:null},
+      {n:14, name:"Určování času, tři čtvrtiny",       src:"5. díl, s. 32–33", pool:{clock:["c1","c2","c3"]}},
       {n:15, name:"Početní operace v oboru 0 až 59",   src:"5. díl, s. 34–47", pool:{as100:["h1","h2","h3"]}},
-      {n:16, name:"Určování času a rýsování úsečky",   src:"5. díl, s. 48–49", pool:null},
+      {n:16, name:"Určování času a rýsování úsečky",   src:"5. díl, s. 48–49", pool:{clock:["c1","c2","c3","c4"]}},
       {n:17, name:"Početní operace v oboru 0 až 100",  src:"5. díl, s. 50–61", pool:{as100:ALL_H}},
-      {n:18, name:"Určování času a osová souměrnost",  src:"5. díl, s. 62–65", pool:null},
+      {n:18, name:"Určování času a osová souměrnost",  src:"5. díl, s. 62–65", pool:{clock:["c1","c2","c3","c4"]}},
       {n:19, name:"Násobení číslem 2",                 src:"6. díl, s. 2–5",   pool:{mult:[2]}},
       {n:20, name:"Dělení číslem 2",                   src:"6. díl, s. 6–9",   pool:{mult:[2], div:[2]}},
       {n:21, name:"Násobení číslem 3",                 src:"6. díl, s. 10–13", pool:{mult:[2,3]}},
       {n:22, name:"Dělení číslem 3",                   src:"6. díl, s. 14–15", pool:{mult:[2,3], div:[2,3]}},
       {n:23, name:"Násobení a dělení číslem 1 a 0",    src:"6. díl, s. 16–19", pool:{mult:[1,2,3], div:[2,3]}},
       {n:24, name:"Procvičování násobilky 1, 2, 3",    src:"6. díl, s. 20–21", pool:{mult:[1,2,3], div:[2,3]}},
-      {n:25, name:"Geometrie a určování času",         src:"6. díl, s. 22–23", pool:null},
+      {n:25, name:"Geometrie a určování času",         src:"6. díl, s. 22–23", pool:{clock:["c1","c2","c3","c4"]}},
       {n:26, name:"Násobení číslem 4",                 src:"6. díl, s. 24–25", pool:{mult:[4]}},
       {n:27, name:"Dělení číslem 4",                   src:"6. díl, s. 26–29", pool:{mult:[4], div:[4]}},
       {n:28, name:"Násobení číslem 5",                 src:"6. díl, s. 30–31", pool:{mult:[5]}},
@@ -97,7 +100,7 @@ const CURRICULA = [
       {n:35, name:"Násobení číslem 7",                 src:"6. díl, s. 46–47", pool:{mult:[7]}},
       {n:36, name:"Dělení číslem 7",                   src:"6. díl, s. 48–49", pool:{mult:[7], div:[7]}},
       {n:37, name:"Procvičování násobilky 6 a 7",      src:"6. díl, s. 50–51", pool:{mult:[1,2,3,4,5,6,7,10], div:[2,3,4,5,6,7,10]}},
-      {n:38, name:"Geometrie a určování času",         src:"6. díl, s. 52–53", pool:null},
+      {n:38, name:"Geometrie a určování času",         src:"6. díl, s. 52–53", pool:{clock:["c1","c2","c3","c4","c5"]}},
       {n:39, name:"Násobení číslem 8",                 src:"6. díl, s. 54–55", pool:{mult:[8]}},
       {n:40, name:"Dělení číslem 8",                   src:"6. díl, s. 56–57", pool:{mult:[8], div:[8]}},
       {n:41, name:"Násobení číslem 9",                 src:"6. díl, s. 58–59", pool:{mult:[9]}},
@@ -115,7 +118,7 @@ const CURRICULA = [
       {n:1,  name:"Opakování, sčítání a odčítání do 100", src:"7. díl, s. 2–5",   pool:{as100:ALL_H}},
       {n:2,  name:"Opakování, násobilka 1, 2, 3, 4, 10",  src:"7. díl, s. 6–7",   pool:{mult:[1,2,3,4,10], div:[1,2,3,4,10]}},
       {n:3,  name:"Opakování, násobilka 5, 6, 7, 8, 9",   src:"7. díl, s. 8–9",   pool:{mult:[5,6,7,8,9], div:[5,6,7,8,9]}},
-      {n:4,  name:"Hodiny a určování času",               src:"7. díl, s. 10–11", pool:null},
+      {n:4,  name:"Hodiny a určování času",               src:"7. díl, s. 10–11", pool:{clock:ALL_C}},
       {n:5,  name:"Zkouška správnosti",                   src:"7. díl, s. 12–13", pool:null},
       {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:null},
       {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:null},

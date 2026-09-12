@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,C_BUCKETS,clockKeys,clockStage,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -25,14 +25,47 @@ for(const k of keys) for(let i=0;i<40;i++){
 }
 console.log('zkontrolovano prikladu:',checked,'| chyb:',bad);
 
+// 1b. hodiny: cifernik musi souhlasit s odpovedi a odpoved se zapisuje jako cas
+let clkBad=0, clkN=0;
+const HAND=/<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)" stroke="(#182543|#5b4bd6)" stroke-width="[53]"/g;
+for(const k of A.clockKeys()) for(let i=0;i<80;i++){
+  const it=A.itemFromKey(k); clkN++;
+  const h=Math.floor(it.answer/100), m=it.answer%100;
+  const okRange = h>=1 && h<=23 && m>=0 && m<=59 && it.disp===h+':'+(m<10?'0':'')+m;
+  if(!okRange){clkBad++;if(clkBad<5)console.log('CHYBA casu',k,it.answer,it.disp);continue;}
+  const noon=!!(A.C_BUCKETS.find(b=>b.id===k)||{}).pm;
+  if(noon!==(h>12)){clkBad++;if(clkBad<5)console.log('spatna pulka dne',k,it.disp);continue;}
+  if(noon!==!!it.night){clkBad++;if(clkBad<5)console.log('mesic nesouhlasi s casem',k,it.disp);continue;}
+  // rucicky na ciferniku musi ukazovat presne to, co je spravna odpoved
+  const hands=[...it.svg.matchAll(HAND)];
+  if(hands.length!==2){clkBad++;if(clkBad<5)console.log('cifernik nema dve rucicky',k,hands.length);continue;}
+  const ang=g=>{const a=(Math.atan2(+g[3]-46,-(+g[4]-54))*180/Math.PI+360)%360; return a;};
+  const near=(a,b)=>Math.min(Math.abs(a-b),360-Math.abs(a-b))<1.5;
+  if(!near(ang(hands[0]),((h%12)*30+m*0.5)%360)){clkBad++;if(clkBad<5)console.log('mala rucicka jinde',k,it.disp);continue;}
+  if(!near(ang(hands[1]),m*6)){clkBad++;if(clkBad<5)console.log('velka rucicka jinde',k,it.disp);}
+}
+console.log('zkontrolovano ciferniku:',clkN,'| chyb:',clkBad);
+
 // 2. delka a rozmanitost zavodu na vsech tratich
 const p=A.newProfile('T'); A.DB.profiles=[p]; A.DB.current=p.id;
 for(const t of A.TRACKS){
   const it=A.buildRun(p,t);
-  let dup=0; for(let i=1;i<it.length;i++) if(it[i].key===it[i-1].key) dup++;
-  const uniq=new Set(it.map(x=>x.key)).size;
-  console.log(t.id.padEnd(5), 'otazek', it.length, '| ruznych', uniq, '| za sebou stejne', dup, '|', it.slice(0,4).map(x=>x.text+'='+x.answer).join('  '));
+  // kbelikovy klic je cela rodina otazek, takze rozmanitost se meri na
+  // vygenerovanem zadani, ne na klici
+  const face=x=>x.disp||x.text;
+  let dup=0; for(let i=1;i<it.length;i++) if(face(it[i])===face(it[i-1])) dup++;
+  const uniq=new Set(it.map(face)).size;
+  if(dup){console.log('  !!  stejna otazka dvakrat za sebou na trati',t.id,dup+'x');}
+  console.log(t.id.padEnd(6), 'otazek', it.length, '| ruznych', uniq, '| za sebou stejne', dup, '|', it.slice(0,4).map(x=>face(x)+(x.kind==='clock'?'':'='+x.answer)).join('  '));
 }
+// sampionat nesmi zacatecnikovi podstrcit jemnejsi cas, nez na jakem je
+let mixBad=0;
+const mixp=A.newProfile('M'); A.DB.profiles=[mixp]; A.DB.current=mixp.id;
+Object.keys(mixp.force).length; mixp.autoUnlock=false;   // vsechno otevrene
+for(const it of A.buildRun(mixp,A.trackById('mix'))) if(it.kind==='clock'&&it.key!=='c1'){
+  mixBad++;console.log('  !!  sampionat dal zacatecnikovi',it.disp);break;
+}
+console.log('sampionat respektuje stupen hodin:',mixBad?'ne':'ano');
 
 // 3. platnost SVG (parovani tagu a NaN)
 let svgBad=0;
@@ -46,6 +79,7 @@ const VALID=new Set();
 A.MULT.forEach(f=>{VALID.add(A.mk(f.a,f.b)); if(f.a>1) VALID.add(A.dk(f.a,f.b));});
 A.ADD.forEach(f=>{VALID.add(A.ak(f.a,f.b)); VALID.add(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{VALID.add('p'+b.id); VALID.add('n'+b.id);});
+A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
 for(const c of A.CURRICULA){
@@ -147,3 +181,21 @@ for(const c of A.CURRICULA){
 const rn=A.newProfile('X'); rn.curriculum='neexistuje'; rn.chapter=5; A.normalizeChapter(rn);
 if(rn.chapter!==null){selBad++;console.log('kapitola prezila zruseni ucebnice');}
 console.log('nabizenych kapitol:',offered,'| zamcenych:',blocked,'| chyb:',selBad);
+
+// 7b. hodiny se stupnuji stejne jako prechod pres desitku
+let clStBad=0;
+const zeg=A.newProfile('H'); A.DB.profiles=[zeg]; A.DB.current=zeg.id;
+if(A.clockStage(zeg)!==0){clStBad++;console.log('zacatecnik nezacina celymi hodinami');}
+const clRun0=A.buildRun(zeg,A.trackById('clock'));
+if(clRun0.length!==20){clStBad++;console.log('spatna delka zavodu s hodinami',clRun0.length);}
+for(const it of clRun0) if(it.key!=='c1'){clStBad++;console.log('zacatecnik dostal jemnejsi cas',it.disp);break;}
+if(new Set(clRun0.map(x=>x.disp)).size<6){clStBad++;console.log('cele hodiny se malo stridaji',new Set(clRun0.map(x=>x.disp)).size);}
+zeg.facts.c1={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()};
+if(A.clockStage(zeg)!==1){clStBad++;console.log('po zvladnuti celych hodin se neposunul');}
+const clRun1=A.buildRun(zeg,A.trackById('clock'));
+const clFocus=clRun1.filter(x=>x.key==='c2').length;
+if(clFocus<clRun1.length*0.5){clStBad++;console.log('druhy stupen nenese zavod',clFocus+'/'+clRun1.length);}
+if(clFocus===clRun1.length){clStBad++;console.log('chybi opakovani celych hodin');}
+// odpoledni cas se objevi az v poslednim kbelicku
+for(const it of clRun1) if(it.night){clStBad++;console.log('vecerni cas prisel prilis brzo',it.disp);break;}
+console.log('chyb ve stupnich hodin:',clStBad);

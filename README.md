@@ -20,6 +20,7 @@ Times tables practice for children of roughly seven to ten, played as a lap arou
 | Division | the same facts read backwards |
 | Up to twenty | addition and subtraction within 20 |
 | Up to a hundred | addition and subtraction within 100 |
+| The clock | reading a dial, from whole hours to afternoon times |
 | Championship | everything unlocked, mixed |
 | Trouble spots | only the facts the child keeps missing |
 
@@ -27,7 +28,7 @@ Tracks unlock as the previous one is learned. A parent can override any of that.
 
 ### Or follow whatever the class is doing
 
-The parent section can be pointed at a textbook and the chapter the class has reached. A track called **What school is doing** then appears on the map and practises exactly that material. Built in so far is Matýskova matematika for years one to three, seventy chapters in total, a Czech series.
+The parent section can be pointed at a textbook and the chapter the class has reached. A track called **What school is doing** then appears on the map and practises exactly that material. Built in so far is Matýskova matematika for years one to three, a Czech series: ninety five chapters in total, sixty three of which the game can practise. The rest stay visible but cannot be picked, so a parent can still see where the class is.
 
 It is set per player, so siblings can follow different books. Loosely means about seventy percent of the questions come from the chosen chapter while the rest returns from earlier material so it is not lost. The default is no textbook at all, where the game picks the material itself from what the child finds hard.
 

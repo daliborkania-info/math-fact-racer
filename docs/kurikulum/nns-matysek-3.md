@@ -79,9 +79,13 @@ jedna položka, pro generátor `add_sub_1000` je to šest kbelíků obtížnosti
 ## Co z toho hra umí dnes
 
 Kapitoly 1 až 3 a 8 až 10 jsou pokryté existujícími tratěmi `t1` až `t5`, `d1`,
-`a20` a `a100`. To je zhruba čtyřicet procent sedmého dílu. Pro dítě, jehož
-třída je v první polovině roku, je tedy hra použitelná hned, jakmile přibude
-volba učebnice a kapitoly, i bez jediného nového generátoru.
+`a20` a `a100`. Kapitola 4 přibyla s generátorem `clock_read`. To je deset
+kapitol z třiatřiceti, tedy zhruba polovina sedmého dílu. Pro dítě, jehož
+třída je v první polovině roku, je hra použitelná hned.
+
+Celý osmý díl, tedy kapitoly 21 až 32, je zatím zamčený. Nejvíc kapitol z něj
+odemkne `add_sub_1000`, který drží kapitoly 23, 24 a 25 a je architektonicky
+jen další sada kbelíků vedle `add_sub_100`.
 
 ## Pilot
 

@@ -1,6 +1,6 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026
+Poslední aktualizace: 12. září 2026, po přidání generátoru hodin
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -150,14 +150,25 @@ stupňů, tedy stejný tvar jako u násobilkových tratí. Díky tomu začáteč
 potká jen součty do deseti. Aktuální stupeň hledá `as20Stage()` jako první,
 kde zvládnutí nedosáhlo 0,7.
 
+**Kbelíky přesnosti u hodin.** Trať hodin má stejný tvar jako stupně přechodu
+přes desítku, jen kbelíky jdou po přesnosti čtení: `c1` celé hodiny, `c2` půl,
+`c3` čtvrt a tři čtvrtě, `c4` zbylé pětiminutovky, `c5` na minutu, `c6`
+odpolední zápis po dvanácté. Kbelíky jsou exkluzivní, aktuální nese sedmdesát
+procent závodu a hrubší se vracejí jako opakování. Aktuální kbelík hledá
+`clockStage()`. Odpověď se píše jako na displeji, tedy 7:45 se ťuká 745 a 19:45
+se ťuká 1945, uvnitř je to hodina krát sto plus minuty, tedy jedno celé číslo.
+Jestli se myslí dopoledne nebo večer, říká slunce nebo měsíc vedle ciferníku,
+takže jedna otázka má pořád jednu odpověď.
+
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
-je zhruba polovina toho. U počítání do sta se prahy násobí 1,9.
+je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u hodin 2,4,
+protože přečíst ciferník a naťukat čtyři číslice trvá déle než vybavit si spoj.
 
 ---
 
 ## 5. Trati
 
-Jedenáct tratí, každá má vlastní generovaný okruh a prostředí.
+Dvanáct tratí, každá má vlastní generovaný okruh a prostředí.
 
 | id | obsah |
 | --- | --- |
@@ -169,6 +180,7 @@ Jedenáct tratí, každá má vlastní generovaný okruh a prostředí.
 | d1 | dělení |
 | a20 | sčítání a odčítání do 20, pět stupňů přechodu přes desítku |
 | a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
+| clock | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
 | mix | vše odemčené dohromady |
 | weak | jen příklady s nejnižší úrovní |
 | school | učivo vybrané kapitoly učebnice, viz oddíl 11 |
@@ -178,8 +190,14 @@ a kapitola, a jde vždy na první místo. Nese název kapitoly jako podtitulek.
 V rodičovské sekci nemá přepínač odemknutí, řídí ji volba kapitoly.
 
 Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
-`s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky. Kanonicky vždy
-`a <= b`, komutativita se sbaluje.
+`s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky, `c1` až `c6`
+hodiny. Kanonicky vždy `a <= b`, komutativita se sbaluje.
+
+Klíč začínající písmenem z `FAMILY_HEADS`, tedy `p`, `n` nebo `c`, není jeden
+příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`. Proto
+se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegeneruje otázku,
+která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor přidá
+písmeno do `FAMILY_HEADS`, nic víc.
 
 ---
 
@@ -235,10 +253,14 @@ do `load()`, a pokud se týkají profilu jako celku, taky do větve `import`.
 8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem, plus
    druhý na `change` kvůli rozbalovacím nabídkám, které klik nevyvolávají.
 
-**Pozor na dvě pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
+**Pozor na tři pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
-způsobilo chybu. A rozbalovací nabídka potřebuje `change`, ne `click`, takže
-nové `<select>` musí mít obsluhu v tom druhém posluchači.
+způsobilo chybu. Rozbalovací nabídka potřebuje `change`, ne `click`, takže
+nové `<select>` musí mít obsluhu v tom druhém posluchači. A otázka není vždycky
+řádek textu: `questionHTML()` skládá celý řádek včetně rovnítka nebo ciferníku
+a mezi otázkami se přepisuje celý `#qbox`, takže `#abox` se po každé otázce
+musí najít znovu. Nikdy nesahej na `#qtext` přes `textContent`, pokud může
+nést obrázek.
 
 ---
 
@@ -257,10 +279,11 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá sedm okruhů: správnost všech generovaných příkladů,
-složení závodu na každé trati, platnost SVG, konzistenci kurikul, závod podle
-kapitoly v obou režimech, stupně přechodu přes desítku a pravidla výběru
-kapitoly. `flow.test.js` projede celou hru včetně volby učebnice.
+`items.test.js` pokrývá devět okruhů: správnost všech generovaných příkladů,
+shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
+trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
+stupně přechodu přes desítku, pravidla výběru kapitoly a kbelíky hodin.
+`flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami.
 
 ---
 
@@ -352,11 +375,11 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 55 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 63 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
-**Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`
-a `as100`, a `poolKeys()` to překládá na klíče příkladů. Nikdy do kurikula
+**Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
+`as100` a `clock`, a `poolKeys()` to překládá na klíče příkladů. Nikdy do kurikula
 nepiš klíče přímo. `poolSize()` počítá kbelík do sta za čtyři, ne za jeden,
 protože jeden kbelíkový klíč generuje celou rodinu příkladů; bez toho by
 kapitola s jediným kbelíkem vypadala jako prázdná.
@@ -383,9 +406,63 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 ---
 
-## 12. Další krok
+## 12. Chybějící generátory, změřeno
 
-**Pilot: dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
+Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
+kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
+dojmu. Stav po přidání hodin je 63 hratelných kapitol z 95, po ročnících
+11/18, 42/44 a 10/33.
+
+| generátor | vstup | kapitol | kde |
+| --- | --- | --- | --- |
+| `add_sub_1000` | `pad` | 3 | g3: 23, 24, 25 |
+| `mult_beyond` + `div_beyond` | `pad` | 3 | g3: 14, 16, 31 |
+| `unit_convert` + `time_convert` | `pad` | 2 | g3: 18, 29 |
+| `rounding_10` + `rounding_100` | `pad` | 2 | g3: 7, 26 |
+| `order_of_ops` | `pad` | 2 | g3: 13, 30 |
+| `chain_3` | `pad` | 1 | g3: 11 |
+| `mult_div_10_100` + `mult_round` | `pad` | 1 | g3: 28 |
+| `missing_operand` + `inverse_check` | `pad` | 1 | g3: 5 |
+| `div_remainder` | `pad2` | 1 | g3: 27 |
+| `place_value` | `pad3` | 1 | g3: 21 |
+| `parity` + `digit_count` | `pick` | 1 | g3: 6 |
+| `compare_numbers` + `compare_units` | `cmp` | 2 | g3: 17, 22 |
+| `fraction_read` | `frac`, dílna | 2 | g3: 19, 32 |
+| `written_mult` | `col`, dílna | 1 | g3: 15 |
+| `count_objects` | dílna | 3 | g1: 1, 2, 3 |
+| `finance_money` | dílna | 1 | g2: 3 |
+| rozsah `as20` v teens | žádný nový | 4 | g1: 15 až 18 |
+
+**Hlavní zjištění.** Patnáct z třiadvaceti zamčených kapitol třetí třídy
+nepotřebuje na vstupu vůbec nic nového, stačí generátory na `pad`. Třetí třída
+tím jde z 10/33 na 25/33, aniž by se sáhlo na klávesnici.
+
+**`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
+posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
+teď přes `as100`. Je to prohloubení, ne odemčení, a navíc potřebuje dílnu.
+
+**Kapitoly 15 až 18 prvního ročníku nejsou o chybějícím generátoru**, ale o díře
+v klíčovém prostoru, viz poznámka u `add_sub_20` v katalogu.
+
+## 12b. Další krok
+
+Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`, a uvnitř
+toho začít `add_sub_1000`, protože je to páteř osmého dílu a architektonicky
+jen další sada kbelíků vedle `add_sub_100`. Pak `mult_beyond` a `div_beyond`,
+`rounding_10` a `rounding_100`, `chain_3`, `order_of_ops`, `mult_div_10_100`
+a `mult_round`, `unit_convert` a `time_convert`, nakonec `missing_operand`
+a `inverse_check`, protože to nejsou samostatné rodiny, ale modifikátory
+existujících, a to je jiný typ zásahu do `itemFromKey`.
+
+Teprve pak nové vstupní prvky: `pad2` a `div_remainder`, `pad3` a `place_value`,
+`pick` a dvojice `parity` s `digit_count`, úplně nakonec `cmp` a porovnávání.
+Dílna až po tom všem.
+
+**Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
+to dál. Mapa tím naroste a bude ji potřeba přeskládat do skupin, jakmile tratí
+bude patnáct a víc.
+
+**Pilot pro `pad2`: dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
 osmého dílu. Je to jádrová látka třetí třídy, sešit jí věnuje tři dvoustrany,
 nejvíc ze všech témat obou dílů, a celá se odehraje uvnitř existujícího závodu.
 Potřebuje jediný nový vstupní prvek, druhé políčko na zbytek.
@@ -401,16 +478,11 @@ se dvěma políčky, rozšíření `poolKeys()` o `divrem`, doplnění kapitoly 
 `src/curricula.js` a texty ve třech jazycích. Typická chyba je zbytek větší nebo
 rovný děliteli, na to má chybová hláška reagovat konkrétně.
 
-**Levnější první krok, pokud se nechce dělat pilot.** Trať `written_add_sub`
-nebo spíš dodělání vstupních prvků `cmp` a `pick`, protože odemknou hodně
-kapitol najednou. Porovnávání je ale poznávání, ne vybavování, takže porušuje
-první z nedotknutelných principů a patří dovnitř jen jako doplněk, nikdy jako
-celá trať.
-
-**Co dál v katalogu.** Podle map jsou nejvíc potřeba, v tomhle pořadí:
-`div_remainder`, `written_add_sub` (objevuje se už v druhé třídě, dřív než jsem
-čekal), `mult_beyond` a `div_beyond`, `clock_read`, `unit_convert`,
-`order_of_ops`, `missing_operand`, `times_more_less`.
+**Porovnávání zůstává poslední úmyslně.** `cmp` a `pick` vypadají jako levný
+způsob, jak odemknout hodně naráz, ale změřeno to nesedí, jsou to tři kapitoly
+dohromady. Navíc je porovnávání poznávání, ne vybavování, takže porušuje první
+z nedotknutelných principů a patří dovnitř jen jako doplněk, nikdy jako celá
+trať.
 
 **Zlomky mají zvláštní poznámku.** V druhé třídě se objevují jako vedlejší
 produkt dělení, tedy poloviny u dvojky, třetiny u trojky, čtvrtiny u čtyřky.

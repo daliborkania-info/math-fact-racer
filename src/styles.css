@@ -249,6 +249,9 @@ input{font-family:inherit}
 .answerbox.ok{background:#d9f8e8;border-color:var(--mint);color:var(--mint-dark)}
 .answerbox.bad{background:var(--berry-soft);border-color:var(--berry);color:#b3325a;animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}45%{transform:translateX(6px)}70%{transform:translateX(-3px)}}
+/* a question that is a picture rather than a line of arithmetic */
+.qsvg{display:flex;align-items:center}
+.qsvg .dial{width:clamp(96px,26vw,132px);height:clamp(96px,26vw,132px);display:block}
 .hintline{min-height:38px;text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.35;font-weight:700}
 .hintline b{font-family:var(--font-display);font-size:19px;color:var(--ink)}
 

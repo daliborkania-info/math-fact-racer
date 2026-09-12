@@ -35,7 +35,8 @@ click(q('[data-act="newplayer"]'));
 ok('pri zakladani se avatar nevybira', qa('[data-pick]').length===0);
 d.querySelector('#nm').value='Kuba'; click(q('[data-go]'));
 ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
-ok('mapa ma 10 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===10);
+ok('mapa ma 11 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===11);
+ok('trat hodin je na mape a odemcena od zacatku', /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
 
 console.log('--- zavod s chybami ---');
 click(q('[data-act="play"]'));
@@ -99,8 +100,9 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===24, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===23, zamcene().length+' zamcenych z 33');
 ok('dvacitka je mezi zamcenymi', zamcene().includes(16) && zamcene().includes(27));
+ok('kapitola s hodinami uz zamcena neni', !zamcene().includes(4));
 ok('hratelne kapitoly zamcene nejsou', !zamcene().includes(1) && !zamcene().includes(12));
 ok('vysvetleni k sedym kapitolam je videt', /Šedé kapitoly/.test(txt()));
 ok('u vybrane kapitoly se slibuje trat', /jede přesně podle téhle kapitoly/.test(txt()));
@@ -117,6 +119,31 @@ const tabs=[]; while(inRace() && tabs.length<40){ tabs.push(qtext()); type(answe
 await wait(1500);
 ok('zavod podle kapitoly probehl a drzel se nasobilky z kapitoly',
    tabs.length===10 && tabs.every(x=>/×|:/.test(x)), tabs.length+' otazek');
+console.log('--- hodiny ---');
+const ev=s=>dom.window.eval(s);
+click(q('[data-act="map"]'));
+click(qa('[data-act="play"]').find(b=>b.dataset.id==='clock')); click(q('[data-go]'));
+ok('otazkou je cifernik, ne text', qa('#qtext .dial').length===1 && qtext().indexOf('=')<0);
+ok('u ciferniku je napsano, jak se cas zapisuje', /Kolik je hodin/.test(d.getElementById('hint').textContent));
+ok('zacatecnik dostane jen cele hodiny', ev('RUN.items.every(i=>i.key==="c1")'));
+click(qa('[data-k]').find(b=>b.dataset.k==='7')); click(qa('[data-k]').find(b=>b.dataset.k==='4'));
+click(qa('[data-k]').find(b=>b.dataset.k==='5'));
+ok('cas se v policku pise s dvojteckou', d.getElementById('abox').textContent==='7:45');
+click(qa('[data-k]').find(b=>b.dataset.k==='del')); click(qa('[data-k]').find(b=>b.dataset.k==='del'));
+click(qa('[data-k]').find(b=>b.dataset.k==='del'));
+const cas0=ev('RUN.items[0].answer');
+type(cas0+100);                              // klasicka chyba, mala rucicka o hodinu dal
+await wait(300);
+ok('cas o hodinu vedle ma vlastni hlasku', /Malá ručička/.test(d.getElementById('hint').textContent),
+   d.getElementById('hint').textContent.slice(0,70));
+await wait(1700);
+let cn=1;
+while(inRace() && cn<40){ type(ev('RUN.items[RUN.idx].answer')); cn++; await wait(640); }
+await wait(1500);
+ok('zavod s hodinami dojel do cile', cn>10, cn+' otazek');
+ok('hodiny se zapsaly do krabicky', DBg().profiles[0].facts.c1 && DBg().profiles[0].facts.c1.reps>5,
+   'c1 reps '+((DBg().profiles[0].facts.c1||{}).reps));
+
 click(q('[data-act="map"]')); click(q('[data-act="gate"]'));
 d.getElementById('gatein').value='1234'; click(q('[data-act="gatego"]'));
 const cs2=sel('[data-act="curriculumsel"]');

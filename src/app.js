@@ -149,6 +149,25 @@ const H_BUCKETS = [
   {id:"h5", label:"two digit plus two digit with a carry"}
 ];
 
+/* Telling the time is not one skill either. The book adds precision one
+   step at a time and returns to it every few chapters all through the
+   second grade, so the buckets are exclusive: each one holds only the
+   minute positions it introduces, and everything earlier comes back as
+   review through the Leitner box, exactly like the bridges over ten.
+   The last bucket is the afternoon reading, which is where a quarter to
+   eight becomes 19:45. The sun or moon drawn beside the dial says which
+   half of the day is meant, so one dial still has one answer. */
+const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
+const C_BUCKETS = [
+  {id:"c1", mins:[0]},                            // whole hours
+  {id:"c2", mins:[30]},                           // half past
+  {id:"c3", mins:[15,45]},                        // quarter past and quarter to
+  {id:"c4", mins:[5,10,20,25,35,40,50,55]},       // the remaining five minute steps
+  {id:"c5", mins:null},                           // any minute at all
+  {id:"c6", mins:FIVES, pm:true}                  // afternoon, the 24 hour reading
+];
+const clockKeys = () => C_BUCKETS.map(b => b.id);
+
 const mk  = (a,b) => "m" + a + "x" + b;
 const dk  = (a,b) => "d" + a + "x" + b;
 const ak  = (a,b) => "a" + a + "p" + b;
@@ -173,6 +192,7 @@ const TRACKS = [
   {id:"d1",   op:"div",                                   env:"space"},
   {id:"a20",  op:"as20",                                  env:"beach"},
   {id:"a100", op:"as100",                                 env:"ocean"},
+  {id:"clock",op:"clock",                                 env:"clocktown"},
   {id:"mix",  op:"mix",                                   env:"night"},
   {id:"weak", op:"weak",                                  env:"storm"},
   {id:"school", op:"school",                              env:"school"}
@@ -212,6 +232,7 @@ function poolKeys(spec){
     out.push(...spec.as100.map(b => "p" + b));
     out.push(...spec.as100.map(b => "n" + b));
   }
+  if(spec.clock) out.push(...spec.clock);
   return [...new Set(out)];
 }
 /* A chapter is offered only when the game can actually generate it.
@@ -235,14 +256,19 @@ function normalizeChapter(p){
   p.chapter = (earlier.length ? earlier[earlier.length - 1] : ok[0]).n;
 }
 function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) : []; }
-/* How much variety a pool can actually produce. A bucket key inside 100
-   is a whole family of sums rather than a single fact, so it counts for
-   more than one. A chapter drives its own track only when it can fill a
-   race with enough variety; otherwise it stays selectable but shows no
-   track on the map. */
+/* How much variety a pool can actually produce. A bucket key is a whole
+   family of questions rather than a single fact, so it counts for more
+   than one. A chapter drives its own track only when it can fill a race
+   with enough variety; otherwise it stays selectable but shows no track
+   on the map.
+   Buckets are the normal shape for anything that is not an enumerable
+   fact, so the family test lives in one place rather than growing a
+   longer condition with every new topic. */
+const FAMILY_HEADS = "pnc";
+const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
-  for(const k of keys) n += (k[0] === "p" || k[0] === "n") ? 4 : 1;
+  for(const k of keys) n += isFamilyKey(k) ? 4 : 1;
   return n;
 }
 function schoolReady(p){ return isPlayable(chapterOf(p)); }
@@ -272,6 +298,7 @@ function trackKeys(p, tr){
   if(tr.op === "div")  return MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
   if(tr.op === "as20") return ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
+  if(tr.op === "clock") return clockKeys();
   return [];
 }
 /* Which bridge the child is currently building. The first stage that is
@@ -282,6 +309,15 @@ function as20Stage(p){
     if(mastery(p, stageKeys(i)) < .7) return i;
   }
   return E_STAGES.length - 1;
+}
+/* Same idea for the clock: the first level of precision not yet at the
+   threshold carries the race, so a child who has only ever seen whole
+   hours is not shown 17:23 on the first lap. */
+function clockStage(p){
+  for(let i = 0; i < C_BUCKETS.length; i++){
+    if(mastery(p, [C_BUCKETS[i].id]) < .7) return i;
+  }
+  return C_BUCKETS.length - 1;
 }
 function trackProgress(p, tr){
   if(tr.op === "mix" || tr.op === "weak") return 0;
@@ -296,7 +332,9 @@ function unlockState(p, tr){
   // safety valve: after ten races the next track opens regardless, so nobody gets stuck
   const many = id => ((p.trackRuns || {})[id] || 0) >= 10;
   switch(tr.id){
-    case "t1": case "a20": case "school": return {open:true};
+    // telling the time does not build on any of the arithmetic, so it
+    // never waits for it
+    case "t1": case "a20": case "clock": case "school": return {open:true};
     case "t2": return (m("t1") >= .7 || many("t1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t1"))};
     case "t3": return (m("t2") >= .7 || many("t2")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t2"))};
     case "t4": return (m("t3") >= .7 || many("t3")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t3"))};
@@ -338,6 +376,7 @@ function itemFromKey(key){
     return {key, text:(a+b) + " - " + sub, answer:(a+b)-sub, kind:"sub"};
   }
   if(head === "p" || head === "n") return hundredItem(key);
+  if(head === "c") return clockItem(key);
   return {key, text:"1 + 1", answer:2, kind:"add"};
 }
 
@@ -355,6 +394,60 @@ function hundredItem(key){
   if(x + y > 100){ y = Math.max(1, 100 - x); }
   if(plus)  return {key, text: x + " + " + y, answer: x+y, kind:"add100"};
   return {key, text:(x+y) + " - " + y, answer: x, kind:"sub100"};
+}
+
+/* The answer is the time as a digital watch shows it, typed on the same
+   keypad as everything else: 7:45 is keyed 745 and 19:45 is keyed 1945,
+   so hour times a hundred plus minutes is a single whole number and
+   nothing about scoring, records or the Leitner box has to change. */
+function clockItem(key){
+  const b = C_BUCKETS.find(x => x.id === key) || C_BUCKETS[0];
+  const m = b.mins ? b.mins[ri(0, b.mins.length - 1)] : ri(1, 59);
+  const face = b.pm ? ri(1, 11) : ri(1, 12);      // midnight and noon stay out of the 24 hour bucket
+  const h = b.pm ? face + 12 : face;
+  return {
+    key, kind:"clock", text:"", night: !!b.pm,
+    svg: clockSVG(face, m, !!b.pm),
+    answer: h * 100 + m,
+    disp: h + ":" + (m < 10 ? "0" : "") + m,
+    maxLen: 4,
+    ask: b.pm ? "clockAskPm" : "clockAsk"
+  };
+}
+/* Drawn from parameters like the circuits and the creatures, so the
+   dial costs a few hundred bytes and scales to any screen. */
+function clockSVG(face, m, night){
+  const cx = 46, cy = 54, R = 40;
+  const pt = (deg, r) => {
+    const a = (deg - 90) * Math.PI / 180;
+    return {x: +(cx + Math.cos(a) * r).toFixed(1), y: +(cy + Math.sin(a) * r).toFixed(1)};
+  };
+  let ticks = "";
+  for(let i = 0; i < 60; i++){
+    const big = i % 5 === 0;
+    const a = pt(i * 6, R - (big ? 7 : 4)), z = pt(i * 6, R - 1.5);
+    ticks += `<line x1="${a.x}" y1="${a.y}" x2="${z.x}" y2="${z.y}" stroke="${big ? "#4a5a80" : "#c9d3e8"}"`
+          +  ` stroke-width="${big ? 2.2 : 0.9}" stroke-linecap="round"/>`;
+  }
+  let nums = "";
+  for(let i = 1; i <= 12; i++){
+    const q = pt(i * 30, R - 11.5);
+    nums += `<text x="${q.x}" y="${q.y + 3.6}" text-anchor="middle" font-size="10" font-weight="800" fill="#182543">${i}</text>`;
+  }
+  const hh = pt((face % 12) * 30 + m * 0.5, R - 21);
+  const mm = pt(m * 6, R - 8);
+  const badge = night
+    ? `<path d="M85 8 a9 9 0 1 0 0 12 a7.2 7.2 0 0 1 0 -12 z" fill="#dfe6f7" stroke="#4a5a80" stroke-width="1.6" stroke-linejoin="round"/>`
+    : `<circle cx="86" cy="14" r="8.5" fill="#ffd93d" stroke="#d98b00" stroke-width="2"/>`;
+  return `<svg class="dial" viewBox="0 0 100 100" role="img" aria-hidden="true">
+    <circle cx="${cx}" cy="${cy}" r="${R + 3}" fill="#ece9ff"/>
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="#ffffff" stroke="#5b4bd6" stroke-width="3"/>
+    ${ticks}${nums}
+    <line x1="${cx}" y1="${cy}" x2="${hh.x}" y2="${hh.y}" stroke="#182543" stroke-width="5" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${mm.x}" y2="${mm.y}" stroke="#5b4bd6" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="3.4" fill="#182543"/>
+    ${badge}
+  </svg>`;
 }
 
 /* --- choose the questions for one race --- */
@@ -439,11 +532,23 @@ function buildRun(p, tr){
   } else if(tr.op === "as100"){
     const all = H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
     keys = sampleKeys(p, all, n, 10);
+  } else if(tr.op === "clock"){
+    // same shape again: the precision being learned carries the race,
+    // everything coarser comes back as review
+    const ci = clockStage(p);
+    const focus = [C_BUCKETS[ci].id];
+    const review = C_BUCKETS.slice(0, ci).map(b => b.id);
+    const nf = review.length ? Math.round(n * .7) : n;
+    keys = sampleKeys(p, focus, nf, 1).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
   } else if(tr.op === "mix"){
     const all = [];
     for(const other of TRACKS){
       if(other.op === "mix" || other.op === "weak") continue;
-      if(unlockState(p, other).open) all.push(...trackKeys(p, other));
+      if(!unlockState(p, other).open) continue;
+      // the clock is staged, so the championship must not hand out a
+      // reading finer than the one currently being learned
+      if(other.op === "clock") all.push(...C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id));
+      else all.push(...trackKeys(p, other));
     }
     keys = sampleKeys(p, [...new Set(all)], n, 3);
   } else { // weak
@@ -458,15 +563,26 @@ function buildRun(p, tr){
   for(let i = 1; i < keys.length; i++){
     if(keys[i] === keys[i-1] && i+1 < keys.length){ [keys[i],keys[i+1]] = [keys[i+1],keys[i]]; }
   }
-  return keys.slice(0, n).map(itemFromKey);
+  const out = keys.slice(0, n).map(itemFromKey);
+  // a bucket key is a whole family, so two neighbours drawn from the
+  // same bucket can still come out as the very same question; reroll
+  // rather than ask it twice in a row
+  const face = it => it.disp || it.text;
+  for(let i = 1; i < out.length; i++){
+    for(let g = 0; g < 8 && face(out[i]) === face(out[i-1]); g++) out[i] = itemFromKey(out[i].key);
+  }
+  return out;
 }
 
 /* --- record one answer into the Leitner box --- */
 const SPEED = { slow:{fast:5200, super:3000}, normal:{fast:3800, super:2100}, fast:{fast:2800, super:1500} };
 function thresholds(p, item){
   const s = SPEED[p.speedMode || "normal"];
-  const big = (item.kind === "add100" || item.kind === "sub100");
-  return { fast: s.fast * (big ? 1.9 : 1), super: s.super * (big ? 1.9 : 1) };
+  // reading a dial takes longer than recalling a fact, and the four
+  // digits of a time take longer to key in than one or two
+  const slower = item.kind === "clock" ? 2.4
+               : (item.kind === "add100" || item.kind === "sub100") ? 1.9 : 1;
+  return { fast: s.fast * slower, super: s.super * slower };
 }
 function record(p, item, correct, ms){
   const f = p.facts[item.key] || (p.facts[item.key] = {lv:0, reps:0, ok:0, bad:0, best:null, seen:0});
@@ -669,7 +785,8 @@ const ENVS = {
   ocean:{ hill1:"#3f9fc4", hill2:"#256d8c", dec:"#19566f", dec2:"#0f3f52"},
   night:{ hill1:"#33406e", hill2:"#1e2848", dec:"#3d4b7d", dec2:"#2a3560"},
   storm:{ hill1:"#5c6790", hill2:"#3d456b", dec:"#313a5f", dec2:"#222a49"},
-  school:{hill1:"#7fd4c2", hill2:"#46a894", dec:"#2d7f6d", dec2:"#1d5c4e"}
+  school:{hill1:"#7fd4c2", hill2:"#46a894", dec:"#2d7f6d", dec2:"#1d5c4e"},
+  clocktown:{hill1:"#f6c9d8", hill2:"#d992ad", dec:"#a85f81", dec2:"#7c4460"}
 };
 /* =================================================================
    5. RACE CIRCUIT
@@ -999,6 +1116,27 @@ function startRun(p, trackId){
 }
 const TARGET = 100;
 
+/* A question is either a line of arithmetic or a picture to read. The
+   equals sign belongs only to the first kind, so the whole question row
+   is rebuilt between questions rather than patched. */
+function questionHTML(item){
+  if(!item) return `<span id="qtext"></span><span class="answerbox" id="abox">?</span>`;
+  if(item.svg) return `<span id="qtext" class="qsvg">${item.svg}</span><span class="answerbox" id="abox">?</span>`;
+  return `<span id="qtext">${item.text}</span><span>=</span><span class="answerbox" id="abox">?</span>`;
+}
+/* Some questions need a word of framing before the child answers, for
+   instance whether the dial means morning or evening. */
+function askText(item){ return item && item.ask ? t(item.ask) : ""; }
+/* What the child sees in the answer box while typing. A time is keyed as
+   plain digits and gets its colon as soon as the reading is unambiguous. */
+function typedText(item, typed){
+  if(typed === "") return "?";
+  if(item && item.kind === "clock" && typed.length >= 3){
+    return typed.slice(0, -2) + ":" + typed.slice(-2);
+  }
+  return typed;
+}
+
 function viewGame(p){
   const tr = RUN.t;
   const pips = RUN.items.map((_, i) => {
@@ -1031,12 +1169,8 @@ function viewGame(p){
       <span class="gap" id="gap">${hasGhost ? t("gapEven") : t("gapFirst")}</span>
     </div>
     <div class="qzone">
-      <div class="question">
-        <span id="qtext">${RUN.items[RUN.idx] ? RUN.items[RUN.idx].text : ""}</span>
-        <span>=</span>
-        <span class="answerbox" id="abox">?</span>
-      </div>
-      <div class="hintline" id="hint"></div>
+      <div class="question" id="qbox">${questionHTML(RUN.items[RUN.idx])}</div>
+      <div class="hintline" id="hint">${askText(RUN.items[RUN.idx])}</div>
     </div>
     <div class="pad3">
       ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="key" data-k="${n}">${n}</button>`).join("")}
@@ -1174,11 +1308,11 @@ function drawRail(){ driveTo(myU(), ghostU()); }
 
 function tap(k){
   if(!RUN || RUN.state !== "ask") return;
-  const box = document.getElementById("abox");
+  const item = RUN.items[RUN.idx], box = document.getElementById("abox");
   if(k === "del"){ RUN.typed = RUN.typed.slice(0, -1); }
   else if(k === "ok"){ if(RUN.typed !== "") submit(); return; }
-  else if(RUN.typed.length < 3){ RUN.typed += k; }
-  box.textContent = RUN.typed === "" ? "?" : RUN.typed;
+  else if(RUN.typed.length < ((item && item.maxLen) || 3)){ RUN.typed += k; }
+  box.textContent = typedText(item, RUN.typed);
   box.className = "answerbox" + (RUN.typed ? " filled" : "");
 }
 
@@ -1201,6 +1335,24 @@ function showCombo(n){
   if(!c) return;
   if(n >= 3){ c.textContent = t("turbo", n); c.classList.add("on"); }
   else c.classList.remove("on");
+}
+
+/* Showing the right answer. A time is shown as a time, not as the whole
+   number the keypad turned it into. */
+function rightAnswerText(item){
+  if(item.kind === "clock") return t("clockIs", item.disp);
+  return item.text + " = " + item.answer;
+}
+/* The two mistakes a child actually makes on a dial are reading the hour
+   hand one hour ahead once it has passed the half, and reading the hands
+   the wrong way round. Naming the mistake beats repeating the answer. */
+function missHint(item, val){
+  if(item.kind === "clock" && !isNaN(val)){
+    const gh = Math.floor(val / 100), gm = val % 100, h = Math.floor(item.answer / 100), m = item.answer % 100;
+    if(gm === m && (gh - h === 1 || h - gh === 1)) return t("clockMissHour");
+    if(gh === m && gm === h) return t("clockMissSwap");
+  }
+  return t("wrongHint");
 }
 
 function submit(){
@@ -1249,7 +1401,7 @@ function submit(){
     box.className = "answerbox bad";
     flash("brake");
     sfx.bad(); buzz([18, 60, 18]);
-    hint.innerHTML = `<b>${item.text} = ${item.answer}</b><br>${t("wrongHint")}`;
+    hint.innerHTML = `<b>${rightAnswerText(item)}</b><br>${missHint(item, val)}`;
     RUN.wrongKeys.push(item);
     // the question returns as an extra one, nothing is dropped from the queue
     const tries = (item.tries || 0) + 1;
@@ -1280,11 +1432,12 @@ function submit(){
       return;
     }
     RUN.typed = ""; RUN.state = "ask"; RUN.t0 = Date.now();
-    const q = document.getElementById("qtext");
-    if(!q) return;
-    q.textContent = RUN.items[RUN.idx].text;
-    box.textContent = "?"; box.className = "answerbox";
-    hint.innerHTML = "";
+    const qb = document.getElementById("qbox");
+    if(!qb) return;
+    // the row is rebuilt because the next question may be a different
+    // shape, so the answer box has to be looked up again
+    qb.innerHTML = questionHTML(RUN.items[RUN.idx]);
+    hint.innerHTML = askText(RUN.items[RUN.idx]);
     const pipbox = document.querySelector(".pips");
     if(pipbox && pipbox.children.length !== RUN.items.length){
       pipbox.innerHTML = RUN.items.map(() => `<span class="pip"></span>`).join("");

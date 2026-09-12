@@ -27,7 +27,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `pad3` | tři políčka, stovky a desítky a jednotky | k dodělání |
 | `cmp` | tři velká tlačítka `<` `=` `>` | k dodělání |
 | `pick` | dvě až čtyři velká tlačítka s volbami | k dodělání |
-| `clock` | ciferník k přečtení, odpověď na `pad` | k dodělání |
+| `clock` | ciferník k přečtení, odpověď na `pad` | hotovo |
 | `frac` | čitatel a jmenovatel, dvě políčka | k dodělání |
 | `line` | číselná osa, klepnutí na pozici | k dodělání |
 | `col` | rozepsaný sloupec pro písemné počítání | k dodělání |
@@ -38,7 +38,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | --- | --- | --- | --- | --- |
 | `mult_table` | malá násobilka do 10 × 10 | `pad` | 1 až 100 | hotovo |
 | `div_table` | dělení v oboru malé násobilky | `pad` | 1 až 100 | hotovo |
-| `add_sub_10` | sčítání a odčítání do 10 | `pad` | 0 až 10 | nové |
+| `add_sub_10` | sčítání a odčítání do 10 | `pad` | 0 až 10 | hotovo, je to `add_sub_20` s `maxSum` |
 | `add_sub_20` | sčítání a odčítání do 20 | `pad` | 0 až 20 | hotovo |
 | `add_sub_100` | sčítání a odčítání do 100, pět kbelíků obtížnosti | `pad` | 0 až 100 | hotovo |
 | `missing_operand` | chybějící sčítanec, menšenec, činitel nebo dělenec | `pad` | podle nosného tématu | nové |
@@ -63,7 +63,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `digit_count` | jednociferné, dvojciferné, trojciferné | `pick` | 0 až 1000 | nové |
 | `compare_numbers` | porovnávání čísel | `cmp` | 0 až 1000 | nové |
 | `compare_units` | porovnávání veličin s jednotkami | `cmp` | podle jednotky | nové |
-| `clock_read` | přečtení analogových hodin na digitální čas | `clock` | 12 i 24 hodin | nové |
+| `clock_read` | přečtení analogových hodin na digitální čas | `clock` | 12 i 24 hodin | hotovo |
 
 ## Dílna
 
@@ -112,6 +112,13 @@ případy se zbytkem nula není potřeba, naopak patří dovnitř, protože rozl
 "beze zbytku" je součást dovednosti. Typická chyba je zbytek větší nebo rovný
 děliteli, na to má chybová hláška reagovat konkrétně.
 
+**`add_sub_20`, díra v rozsahu.** Klíč `a{a}p{b}` má oba sčítance do deseti,
+takže 12 + 3 se nedá zapsat vůbec, a kbelík `h1` do sta začíná na desítkách 2,
+takže to nepokryje ani on. Kapitoly 15 až 18 prvního ročníku, tedy obor do
+dvaceti bez přechodu, proto nejdou zapnout, i když generátor na první pohled
+existuje. Buď se rozšíří klíčový prostor `as20`, nebo přibude kbelík pro
+dvacítkový obor. Je to jediné místo v katalogu, kde chybí rozsah, ne generátor.
+
 **`add_sub_1000`.** Stejná architektura kbelíků jako `add_sub_100`, jen se
 štěpí podle toho, jestli se přechází přes stovku a jestli se přičítá
 jednociferné, dvojciferné, nebo celé stovky. Učebnice tomu věnuje devět
@@ -125,7 +132,18 @@ generátor je triviální.
 poznávání, ne vybavování, takže to porušuje první z nedotknutelných principů.
 Proto tam patří jen jako doplněk a nikdy jako celá trať.
 
-**`clock_read`.** Ciferník se kreslí parametricky stejně jako okruhy
-a postavičky, žádné obrázky. Odpověď je čas na klávesnici, ne výběr z možností.
-Učebnice po dítěti chce obě varianty, tedy dopolední i odpolední zápis, což
-znamená dvě odpovědi za jednu otázku.
+**`clock_read`, hotovo.** Ciferník se kreslí parametricky stejně jako okruhy
+a postavičky, žádné obrázky. Odpověď je čas na klávesnici, ne výběr z možností,
+a píše se jako na displeji, tedy 7:45 se ťuká 745 a 19:45 se ťuká 1945. Hodina
+krát sto plus minuty je jedno celé číslo, takže se nemusela měnit ani jedna
+řádka bodování, rekordů nebo Leitnerovy krabičky.
+
+Dopolední a odpolední zápis učebnice chce oba, ale ne jako dvě odpovědi za
+jednu otázku. Vedle ciferníku je nakreslené slunce nebo měsíc a to říká, která
+půlka dne se myslí. Jedna otázka tedy má pořád jednu odpověď a přechod na
+čtyřiadvacetihodinový zápis se tím učí zvlášť.
+
+Kbelíky jsou exkluzivní a jdou po přesnosti: `c1` celé hodiny, `c2` půl, `c3`
+čtvrt a tři čtvrtě, `c4` zbylé pětiminutovky, `c5` na minutu, `c6` odpolední
+zápis. Aktuální kbelík nese sedmdesát procent závodu, zbytek je opakování
+hrubších, tedy stejný tvar jako stupně přechodu přes desítku.

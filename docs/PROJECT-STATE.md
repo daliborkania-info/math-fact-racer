@@ -1,6 +1,10 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po přidání hodin a opravě oboru do dvaceti
+Poslední aktualizace: 12. září 2026, po hodinách, opravě oboru do dvaceti
+a přípravě engine na další rodiny příkladů
+
+**Kde se přestalo a kudy dál:** příprava popsaná v oddílu 12c je hotová, na
+řadě je generátor `add_sub_1000`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -286,6 +290,13 @@ profilu jako celku, taky do větve `import`.
 2. Úložiště. `load`, `save`, `P()`, `newProfile`, `touchStreak`.
 3. Příklady. Generování, klíče, stupně `E_STAGES`, tratě, kurikulum, výběr do
    závodu, zápis odpovědi do krabičky.
+   **Otázka si o sobě řekne všechno sama.** `itemFromKey()` obalí generátor
+   a doplní `input`, tedy na čem se odpovídá, `maxLen` a `check(napsané)`,
+   tedy co je správně. Výchozí je jedno celé číslo na číselné klávesnici,
+   takže generátor to řeší jen tehdy, když potřebuje něco jiného. Mimo
+   `itemFromKey` nikdo nesmí předpokládat, že odpověď je číslo.
+   **Vzorec sedmdesát ku třiceti je na jednom místě**, `focusAndReview()`,
+   a stupňování taky, `stageIndex()`. Nová rodina je volá, nepíše znovu.
 4. Sbírka a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
 5. Závodní okruh. Uzavřená Bézierova křivka z osazeného generátoru, geometrie se
    počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `circuit(id)`,
@@ -296,14 +307,17 @@ profilu jako celku, taky do větve `import`.
 8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem, plus
    druhý na `change` kvůli rozbalovacím nabídkám, které klik nevyvolávají.
 
-**Pozor na tři pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
+**Pozor na čtyři pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
 způsobilo chybu. Rozbalovací nabídka potřebuje `change`, ne `click`, takže
 nové `<select>` musí mít obsluhu v tom druhém posluchači. A otázka není vždycky
 řádek textu: `questionHTML()` skládá celý řádek včetně rovnítka nebo ciferníku
 a mezi otázkami se přepisuje celý `#qbox`, takže `#abox` se po každé otázce
 musí najít znovu. Nikdy nesahej na `#qtext` přes `textContent`, pokud může
-nést obrázek.
+nést obrázek. A čtvrtá: CSS třída `.keypad` je odpovídací plocha, `.keypad-pad`
+je konkrétní rozvržení číselné klávesnice. Jméno `pad3` je v katalogu témat
+vyhrazené pro vstupní prvek se třemi políčky, takže se na rozvržení používat
+nesmí, i když jsou to zrovna tři sloupce.
 
 ---
 
@@ -513,48 +527,51 @@ bude patnáct a víc.
 Soupis vznikl průchodem kódu, ne odhadem. Odkazuje na funkce, ne na řádky,
 protože ty se posouvají. Řazeno podle toho, co která skupina blokuje.
 
-**A. Rodiny na `pad`, tedy nejlevnější vlna.** Tyhle věci brání i tomu, co
-nepotřebuje nový vstupní prvek.
+**Hotová příprava, září 2026.** Šest nejlevnějších věcí ze seznamu je udělaných,
+takže tímhle se zabývat nemusíš: CSS třída se jmenuje `.keypad`, vzorec 70 ku 30
+je v `focusAndReview()`, stupňování v `stageIndex()`, otázka nese `input`,
+`maxLen` a `check(napsané)`, klávesnice se překresluje, když se u další otázky
+změní vstupní prvek, a `items.test.js` už neuvažuje jeden strop sto pro celou
+hru, ale rozsah po rodinách plus kontrolu, že otázka uzná svou odpověď
+a neuzná sousední. Zbytek dole platí.
 
-`tap()` má výchozí `maxLen` tři znaky, takže odpověď nad 999 nejde zadat.
-Hodiny to obcházejí vlastním `maxLen: 4`. `add_sub_1000` s výsledkem 1000 na to
-narazí jako první, stejně tak zaokrouhlování na stovky a násobení stem.
-
-`items.test.js` v prvním okruhu vyhodnocuje `it.text` jako výraz a vyžaduje
-odpověď v rozsahu 0 až 100. Cokoli nad sto neprojde testem, i když to v kódu
-funguje. Buď se rozsah uvolní podle rodiny, nebo generátor dodá vlastní
-ověřovací funkci; druhé je lepší, protože `eval(text)` stejně neumí nic, co
-není aritmetický řádek.
+**A. Rodiny na `pad`, tedy nejlevnější vlna.**
 
 `thresholds()` je ruční výraz, kde má každá rodina svůj násobitel prahů,
 zatím 2,4 pro hodiny a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
 prahy pro jednociferné vybavování a děti budou mít samé pomalé odpovědi.
+Tohle je jediná věc, na kterou se v téhle vlně dá zapomenout tiše.
 
-`buildRun()` má čtyři skoro totožné větve tvaru "sedmdesát procent aktuální
-ohnisko, zbytek opakování", jen s jinými parametry. Pátá kopie by měla vzniknout
-až po vytažení `focusAndReview()`. Stejně tak `as20Stage()` a `clockStage()`
-jsou doslovná kopie téhož algoritmu s prahem 0,7; patří do jedné `stageOf()`.
+Odpověď nad 999 potřebuje `maxLen: 4` přímo na položce, jinak ji nejde doťukat.
+Výchozí jsou tři znaky. `items.test.js` to hlídá, takže `add_sub_1000` bez toho
+neprojde, ale je dobré na to myslet rovnou.
+
+Do tabulky `RANGE` v `items.test.js` si každá nová rodina dopíše svůj rozsah
+odpovědi. Bez toho test skončí hláškou, že rodina nemá uvedený rozsah. Je to
+schválně jediné místo, kde se test musí rozšířit ručně spolu s kódem.
 
 **B. Nové vstupní prvky, tedy `pad2`, `pad3`, `cmp`, `pick`.**
 
-Celá dráha odpovědi počítá s jedním celým číslem: `RUN.typed` je jeden řetězec,
-`#abox` je jeden prvek, `typedText()` vrací jeden řetězec a `submit()` porovnává
-`parseInt(RUN.typed) === item.answer`. Dvě políčka potřebují pojem aktivního
-políčka, mazání přes hranici a hlavně `item.check(vstup)` místo porovnání
-skalárů. U hodin šla použít finta hodina krát sto plus minuty, u dělení se
-zbytkem je křehká, protože nerozliší špatný zápis od špatného výsledku.
+Porovnání odpovědi už přes `item.check()` prochází, ale zadávání pořád počítá
+s jedním polem: `RUN.typed` je jeden řetězec, `#abox` je jeden prvek a
+`typedText()` vrací jeden řetězec. Dvě políčka potřebují pojem aktivního
+políčka, přeskok po naplnění, mazání přes hranici a druhý `id`. To je zbylá
+práce na `pad2`, ale je to už jen `tap()`, `typedText()` a `questionHTML()`,
+ne celá dráha. U hodin šla použít finta hodina krát sto plus minuty, u dělení
+se zbytkem je křehká, protože nerozliší špatný zápis od špatného výsledku, takže
+`check` tam má dostat opravdové dvě hodnoty.
 
-Klávesnice je natvrdo v šabloně `viewGame()` a mezi otázkami se nepřekresluje,
-`submit()` mění jen `#qbox`, nápovědu, pipy a čítač. Tlačítka `<` `=` `>` navíc
-neprojdou přes `tap()`, který zná jen číslice, `del` a `ok`, a přes atribut
-`data-k`, který delegovaný posluchač zabírá dřív než `data-act`.
+Klávesnice se skládá v `keypadHTML(item)` a `submit()` ji vymění, když má další
+otázka jiný `input`. Nový vstupní prvek přidá větev tam, pravidlo
+`.keypad-<jméno>` do stylů a větev do `tap()`. Pozor: tlačítka musí buď použít
+`data-k` a projít přes `tap()`, nebo dostat vlastní atribut a vlastní větev,
+protože delegovaný posluchač bere `data-k` dřív než `data-act`.
 
-**Rozhodnutí, které zatím nikde nepadlo: smí jeden závod míchat různé vstupní
-prvky?** Měkký režim kapitoly i šampionát míchají klíče z různých rodin úplně
-samy, takže jakmile bude existovat první rodina s jiným vstupem, může po sobě
-přijít otázka na klávesnici, otázka na dvě políčka a otázka na tlačítka. Buď se
-klávesnice bude překreslovat u každé otázky, nebo se rodiny s odlišným vstupem
-ze společných závodů vyloučí. Tohle musí být hotové před prvním `pad2`.
+**Míchání vstupních prvků v jednom závodě je technicky vyřešené** tím, že se
+klávesnice mění spolu s otázkou. Zůstává jen posouzení, jestli je pro dítě
+únosné střídat klávesnici a tlačítka uvnitř jedné jízdy. To se dá rozhodnout
+až se skutečnou obrazovkou; pokud vyjde, že ne, brání se to jednou podmínkou
+v `buildRun()` a v `reachedKeys()`.
 
 `record()` bere správnost jako ano nebo ne. U dvou políček to znamená, že
 "podíl dobře, zbytek špatně" spadne do krabičky jako celá chyba. Změna by sáhla
@@ -576,11 +593,6 @@ průměr přes otevřené tratě.
 
 **D. Pasti, na které se dá naběhnout.**
 
-CSS třída `.pad3` znamená klávesnici o třech sloupcích, ale `pad3` v katalogu
-témat znamená tři políčka na stovky, desítky a jednotky. Až vznikne to druhé,
-nikdo po půl roce nepozná, které je které. Přejmenovat třídu na `.keypad` je
-dnes jednořádková změna.
-
 Hlavička klíče je jedno písmeno a `key.slice(1)` to předpokládá na čtyřech
 místech. Obsazené je `m` násobení, `d` dělení, `a` sčítání do 20, `s` odčítání
 do 20, `p` a `n` kbelíky do sta, `c` hodiny. Rezervované je `r` pro dělení se
@@ -601,12 +613,11 @@ první a cache je jen záloha pro offline, takže aktualizace se k dětem dostan
 `record()`, `mastery()`, `sampleKeys()`, `pickWeight()` a celá geometrie okruhu
 jsou nad klíčem skutečně obecné a nepotřebují sáhnout vůbec.
 
-**Doporučená příprava, než se sáhne na první nový vstupní prvek.** Přejmenovat
-`.pad3` na `.keypad`. Vytáhnout `focusAndReview()` a `stageOf()`. Zavést
-`item.check(vstup)` s výchozím porovnáním přes `parseInt`. Zavést `item.input`
-a překreslovat klávesnici spolu s otázkou, i když zatím existuje jen `pad`.
-Uvolnit `items.test.js` z rozsahu do sta. A rozhodnout tu otázku o míchání
-vstupních prvků v jednom závodě.
+**Co z toho je teď na řadě.** Rodiny na klávesnici jdou psát rovnou, cesta je
+volná. Před prvním `pad2` zbývá dodělat víc políček v `tap()`, `typedText()`
+a `questionHTML()`, což je odhadem půl dne. Heatmapa v rodičovské sekci je
+samostatný kus práce, který nikoho neblokuje, ale s každou další rodinou je
+ta obrazovka nepravdivější.
 
 ## 12d. Pilot pro `pad2`
 
@@ -698,3 +709,39 @@ správy.
 >
 > Dneska chci [doplň, například: napsat generátor dělení se zbytkem podle
 > oddílu 12 / projet další učebnici, odkaz posílám / opravit tohle a tamto].
+
+### Prompt pro nejbližší krok, tedy `add_sub_1000`
+
+Použij tenhle, pokud se pokračuje tam, kde se přestalo. Je záměrně konkrétní,
+protože příprava je hotová a zbývá jen práce.
+
+> Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
+> osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
+>
+> Přečti si celý `docs/PROJECT-STATE.md`, pak `docs/kurikulum/README.md`
+> a `docs/kurikulum/nns-matysek-3.md` kvůli učivu a `src/app.js` kvůli kódu.
+> Zvlášť si všimni oddílu 12c, tam je soupis toho, co v kódu překáží, a co už
+> je z něj hotové.
+>
+> Dneska chci generátor `add_sub_1000`, tedy sčítání a odčítání do tisíce.
+> Odemkne kapitoly 23, 24 a 25 třetího ročníku a je to páteř celého osmého dílu.
+> Architektonicky je to stejná věc jako `add_sub_100`, jen kbelíků bude podle
+> mapy šest, ne pět, protože se štěpí podle toho, jestli se přechází přes stovku
+> a jestli se přičítá jednociferné, dvojciferné, nebo celé stovky. Vlastní trať,
+> vlastní prostředí, texty ve třech jazycích.
+>
+> Nezapomeň na to, co se dělá u každé nové rodiny: písmeno hlavičky klíče do
+> `FAMILY_HEADS`, větev v `rawItem()`, `poolKeys()`, `trackKeys()`, `buildRun()`
+> přes `focusAndReview()`, `reachedKeys()` pokud bude mít stupně, záznam
+> v `TRACKS` a `ENVS`, větev v `unlockState()`, násobitel v `thresholds()`,
+> `maxLen: 4` na položce a řádek do tabulky `RANGE` v `items.test.js`.
+>
+> Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
+> build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové
+> chování patří do testů, ne jen do kódu. Žádná změna nesmí připravit existující
+> profil o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
+> model, přidej do `tests/fixtures/legacy-profiles.json` další zamrazený profil.
+>
+> Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
+> principy z oddílu 3 neměň bez mého pokynu. Push dělám sám, jen commituj
+> a řekni mi, co poslat.

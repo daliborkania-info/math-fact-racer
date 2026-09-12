@@ -11,17 +11,48 @@ const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
 // 1. overeni vsech typu prikladu
+//
+// Rozsah odpovedi se uvadi tady, po rodinach, ne jednim stropem pro
+// celou hru. Nova rodina si sem dopise radek; kdyz na to zapomene, test
+// ji nezna a spadne. Je to jediny zamerny bod, kde se test musi rozsirit
+// spolu s kodem.
+const RANGE={
+  m:[0,100],       // nasobeni v male nasobilce
+  d:[1,10],        // deleni v male nasobilce
+  a:[2,20],        // scitani do dvaceti vcetne desitkovych spoju
+  s:[0,19],        // odcitani do dvaceti
+  p:[1,100],       // plus do sta
+  n:[0,99],        // minus do sta
+  c:[100,2359]     // hodiny, hodina krat sto plus minuty
+};
 let bad=0,checked=0;
 const keys=[];
 A.MULT.forEach(f=>{keys.push(A.mk(f.a,f.b)); if(f.a>1) keys.push(A.dk(f.a,f.b));});
 A.ADD.forEach(f=>{keys.push(A.ak(f.a,f.b)); keys.push(A.sk(f.a,f.b));});
 A.H_BUCKETS.forEach(b=>{keys.push('p'+b.id); keys.push('n'+b.id);});
+A.clockKeys().forEach(k=>keys.push(k));
+const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
   const it=A.itemFromKey(k); checked++;
-  const parts=it.text.replace(/×/g,'*').replace(/:/g,'/').split(' ');
-  const val=eval(parts.join(' '));
-  const inRange = it.answer>=0 && it.answer<=100 && Number.isInteger(it.answer);
-  if(val!==it.answer||!inRange){bad++;if(bad<6)console.log('CHYBA',k,it.text,'ocekavano',val,'ma',it.answer);}
+  const r=RANGE[k[0]];
+  if(!r){say(k,'rodina nema v testu uvedeny rozsah odpovedi');break;}
+  if(!Number.isInteger(it.answer)||it.answer<r[0]||it.answer>r[1]){
+    say(k,'odpoved mimo rozsah rodiny: '+it.answer+' neni v '+r.join(' az '));continue;
+  }
+  // zadani, ktere je aritmeticky radek, se overi spoctenim; obrazkova
+  // otazka zadny takovy radek nema a overuje se jen pres check
+  if(/^[\d\s+\-×:]+$/.test(it.text)){
+    const val=eval(it.text.replace(/×/g,'*').replace(/:/g,'/'));
+    if(val!==it.answer){say(k,'zadani nesedi s odpovedi: '+it.text+' je '+val+', ma byt '+it.answer);continue;}
+  } else if(!it.svg){
+    say(k,'otazka neni ani vypocet, ani obrazek');continue;
+  }
+  // kazda otazka musi uznat svou odpoved a neuznat sousedni
+  if(!it.check(String(it.answer))){say(k,'otazka neuznala vlastni odpoved '+it.answer);continue;}
+  if(it.check(String(it.answer+1))){say(k,'otazka uznala i spatnou odpoved '+(it.answer+1));continue;}
+  // a musi jit zadat na tom, co nabizi
+  if(it.input!=='pad'){say(k,'nezname vstupni zarizeni '+it.input);continue;}
+  if(String(it.answer).length>it.maxLen){say(k,'odpoved '+it.answer+' se nevejde do '+it.maxLen+' znaku');}
 }
 console.log('zkontrolovano prikladu:',checked,'| chyb:',bad);
 

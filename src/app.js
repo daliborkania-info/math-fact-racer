@@ -323,24 +323,19 @@ function trackKeys(p, tr){
   if(tr.op === "clock") return clockKeys();
   return [];
 }
-/* Which bridge the child is currently building. The first stage that is
-   not yet at the unlock threshold, so mastered stages drop back to being
-   review rather than filling the race. */
-function as20Stage(p){
-  for(let i = 0; i < E_STAGES.length; i++){
-    if(mastery(p, stageKeys(i)) < .7) return i;
-  }
-  return E_STAGES.length - 1;
+/* Where the child is on a staged track: the first level not yet at the
+   threshold, so mastered levels drop back to being review rather than
+   filling the race. One implementation for every staged track; a track
+   only has to say how many levels it has and which keys each holds. */
+const STAGE_PASS = .7;
+function stageIndex(p, keysAt, count){
+  for(let i = 0; i < count; i++) if(mastery(p, keysAt(i)) < STAGE_PASS) return i;
+  return count - 1;
 }
-/* Same idea for the clock: the first level of precision not yet at the
-   threshold carries the race, so a child who has only ever seen whole
-   hours is not shown 17:23 on the first lap. */
-function clockStage(p){
-  for(let i = 0; i < C_BUCKETS.length; i++){
-    if(mastery(p, [C_BUCKETS[i].id]) < .7) return i;
-  }
-  return C_BUCKETS.length - 1;
-}
+// which bridge over ten is being built
+function as20Stage(p){ return stageIndex(p, stageKeys, E_STAGES.length); }
+// how finely the child can already read a dial
+function clockStage(p){ return stageIndex(p, i => [C_BUCKETS[i].id], C_BUCKETS.length); }
 /* What a track would actually serve right now. A staged track holds
    back the levels the child has not reached yet, and the championship
    has to respect that, otherwise it hands out material that the track
@@ -424,8 +419,20 @@ function unlockState(p, tr){
   return {open:true};
 }
 
-/* --- build one question from a fact key --- */
+/* --- build one question from a fact key ---
+   Every question answers two things about itself: what it is answered
+   on (`input`) and whether a given answer is right (`check`). The whole
+   catalogue so far is one whole number typed on the number pad, so that
+   is the default and only a family that needs something else has to say
+   so. Nothing outside here may assume the answer is a number. */
 function itemFromKey(key){
+  const it = rawItem(key);
+  if(!it.input)  it.input  = "pad";
+  if(!it.maxLen) it.maxLen = 3;
+  if(!it.check)  it.check  = typed => parseInt(typed, 10) === it.answer;
+  return it;
+}
+function rawItem(key){
   const head = key[0];
   if(head === "m"){
     const [a,b] = key.slice(1).split("x").map(Number);
@@ -560,13 +567,24 @@ function sampleKeys(p, pool, n, maxNew){
   while(out.length < n && out.length){ out.push(out[i++ % out.length]); }
   return out;
 }
+/* The shape almost every track uses: the material being learned carries
+   about seventy percent of the race and the rest comes back as review
+   through the Leitner box, which is what keeps the success rate near
+   eighty percent. Anything already in the focus is not reviewed twice.
+   New families call this rather than writing the split out again. */
+function focusAndReview(p, focus, review, n, maxNew){
+  const rest = [...new Set(review)].filter(k => !focus.includes(k));
+  if(!rest.length) return sampleKeys(p, focus, n, maxNew);
+  const nf = Math.round(n * .7);
+  return sampleKeys(p, focus, nf, maxNew).concat(sampleKeys(p, rest, n - nf, 0));
+}
 function buildRun(p, tr){
   const n = p.qCount || 20;
   let keys;
   if(tr.op === "school"){
     // The chapter sets the focus. In the soft mode the rest of the race
-    // still comes from earlier chapters through the Leitner box, because
-    // dropping spaced review would break the strongest part of the design.
+    // still comes from earlier chapters, because dropping spaced review
+    // would break the strongest part of the design.
     const focus = schoolPool(p);
     const cur = curriculumById(p.curriculum);
     if((p.chapterMode || "soft") === "hard" || !cur || !focus.length){
@@ -577,9 +595,7 @@ function buildRun(p, tr){
         if(ch.n >= p.chapter) break;
         earlier.push(...poolKeys(ch.pool));
       }
-      const review = [...new Set(earlier)].filter(k => !focus.includes(k));
-      const nf = review.length ? Math.round(n * .7) : n;
-      keys = sampleKeys(p, focus, nf, 6).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
+      keys = focusAndReview(p, focus, earlier, n, 6);
     }
   } else if(tr.op === "mult"){
     const focus = multFactsFor(tr.tables).map(f => mk(f.a,f.b));
@@ -588,32 +604,21 @@ function buildRun(p, tr){
       if(prev.id === tr.id) break;
       if(prev.op === "mult") earlier.push(...multFactsFor(prev.tables).map(f => mk(f.a,f.b)));
     }
-    const review = [...new Set(earlier)].filter(k => !focus.includes(k));
-    const nf = review.length ? Math.round(n * .7) : n;
-    keys = sampleKeys(p, focus, nf, 5).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
+    keys = focusAndReview(p, focus, earlier, n, 5);
   } else if(tr.op === "div"){
     const all = MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
     keys = sampleKeys(p, all, n, 5);
   } else if(tr.op === "as20"){
-    // same shape as the multiplication tracks: the current bridge carries
-    // the race, everything already crossed comes back as review
     const si = as20Stage(p);
-    const focus = stageKeys(si);
     const review = [];
     for(let i = 0; i < si; i++) review.push(...stageKeys(i));
-    const nf = review.length ? Math.round(n * .7) : n;
-    keys = sampleKeys(p, focus, nf, 5).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
+    keys = focusAndReview(p, stageKeys(si), review, n, 5);
   } else if(tr.op === "as100"){
     const all = H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
     keys = sampleKeys(p, all, n, 10);
   } else if(tr.op === "clock"){
-    // same shape again: the precision being learned carries the race,
-    // everything coarser comes back as review
     const ci = clockStage(p);
-    const focus = [C_BUCKETS[ci].id];
-    const review = C_BUCKETS.slice(0, ci).map(b => b.id);
-    const nf = review.length ? Math.round(n * .7) : n;
-    keys = sampleKeys(p, focus, nf, 1).concat(review.length ? sampleKeys(p, review, n - nf, 0) : []);
+    keys = focusAndReview(p, [C_BUCKETS[ci].id], C_BUCKETS.slice(0, ci).map(b => b.id), n, 1);
   } else if(tr.op === "mix"){
     const all = [];
     for(const other of TRACKS){
@@ -1195,6 +1200,19 @@ function questionHTML(item){
   if(item.svg) return `<span id="qtext" class="qsvg">${item.svg}</span><span class="answerbox" id="abox">?</span>`;
   return `<span id="qtext">${item.text}</span><span>=</span><span class="answerbox" id="abox">?</span>`;
 }
+/* The answering surface belongs to the question, not to the screen, so
+   a race may mix families that are answered differently. Only the
+   number pad exists so far; a new input element adds a branch here, a
+   `.keypad-<name>` rule in the stylesheet and a branch in `tap()`. */
+function keypadHTML(item){
+  const kind = (item && item.input) || "pad";
+  return `<div class="keypad keypad-${kind}" id="keypad" data-input="${kind}">
+    ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="key" data-k="${n}">${n}</button>`).join("")}
+    <button class="key del" data-k="del" aria-label="${t("clear")}">&#9003;</button>
+    <button class="key" data-k="0">0</button>
+    <button class="key act" data-k="ok">OK</button>
+  </div>`;
+}
 /* Some questions need a word of framing before the child answers, for
    instance whether the dial means morning or evening. */
 function askText(item){ return item && item.ask ? t(item.ask) : ""; }
@@ -1243,12 +1261,7 @@ function viewGame(p){
       <div class="question" id="qbox">${questionHTML(RUN.items[RUN.idx])}</div>
       <div class="hintline" id="hint">${askText(RUN.items[RUN.idx])}</div>
     </div>
-    <div class="pad3">
-      ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="key" data-k="${n}">${n}</button>`).join("")}
-      <button class="key del" data-k="del" aria-label="${t("clear")}">&#9003;</button>
-      <button class="key" data-k="0">0</button>
-      <button class="key act" data-k="ok">OK</button>
-    </div>
+    ${keypadHTML(RUN.items[RUN.idx])}
   </div>`;
 }
 
@@ -1430,7 +1443,7 @@ function submit(){
   const p = P(), item = RUN.items[RUN.idx];
   const ms = Date.now() - RUN.t0;
   const val = parseInt(RUN.typed, 10);
-  const correct = val === item.answer;
+  const correct = item.check(RUN.typed);
   const box = document.getElementById("abox"), hint = document.getElementById("hint");
   const car = document.getElementById("mycar");
   const flash = cls => {
@@ -1503,12 +1516,18 @@ function submit(){
       return;
     }
     RUN.typed = ""; RUN.state = "ask"; RUN.t0 = Date.now();
+    const next = RUN.items[RUN.idx];
     const qb = document.getElementById("qbox");
     if(!qb) return;
     // the row is rebuilt because the next question may be a different
     // shape, so the answer box has to be looked up again
-    qb.innerHTML = questionHTML(RUN.items[RUN.idx]);
-    hint.innerHTML = askText(RUN.items[RUN.idx]);
+    qb.innerHTML = questionHTML(next);
+    hint.innerHTML = askText(next);
+    // a race may mix families answered on different things; swap the
+    // answering surface only when it actually changes, so the keys do
+    // not flicker on every question
+    const kp = document.getElementById("keypad");
+    if(kp && kp.dataset.input !== (next.input || "pad")) kp.outerHTML = keypadHTML(next);
     const pipbox = document.querySelector(".pips");
     if(pipbox && pipbox.children.length !== RUN.items.length){
       pipbox.innerHTML = RUN.items.map(() => `<span class="pip"></span>`).join("");

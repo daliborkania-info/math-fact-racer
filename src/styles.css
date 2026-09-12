@@ -255,10 +255,16 @@ input{font-family:inherit}
 .hintline{min-height:38px;text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.35;font-weight:700}
 .hintline b{font-family:var(--font-display);font-size:19px;color:var(--ink)}
 
-.pad3{
-  flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+/* The answering surface. One kind exists so far, the number pad; each
+   further one brings its own modifier class, so the layout lives with
+   the input element rather than in the screen around it.
+   Do not call this pad3: in docs/kurikulum/TEMATA.md that name is taken
+   by the input element with three boxes for hundreds, tens and units. */
+.keypad{
+  flex:none;display:grid;gap:8px;
   padding:8px 14px calc(14px + var(--safe-b));background:var(--shell);
 }
+.keypad-pad{grid-template-columns:repeat(3,1fr)}
 .key{
   height:clamp(50px,8.6vh,64px);border-radius:var(--r-m);background:var(--paper);
   font-family:var(--font-display);font-size:26px;box-shadow:0 4px 0 var(--line);

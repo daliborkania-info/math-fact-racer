@@ -192,6 +192,7 @@ cs: {
   collectionNote: "Klepni na závodníka a vyrazí s tebou na dráhu. Zvířátka navíc rostou podle toho, kolik příkladů s nimi zvládneš.",
   machines: "Stroje",
   animals: "Zvířátka",
+  ducks: "Kačenka",
   buyTitle: "Vzít si {0}?",
   buyText: "Stojí {0} mincí. Máš jich {1}.",
   buyYes: "Beru",
@@ -318,7 +319,8 @@ cs: {
   ri_ponor: "Ponorka", ri_ufo: "Létající talíř", ri_mech: "Robot", ri_bugina: "Bugina",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Méďa", pet_kiki: "Kiki",
   pet_zub: "Zoubek", pet_duha: "Duháček", pet_puk: "Puk", pet_flek: "Flíček",
-  pet_sova: "Sovík", pet_drak: "Dráček", pet_hvezd: "Hvězdík", pet_noc: "Noční"
+  pet_sova: "Sovík", pet_drak: "Dráček", pet_hvezd: "Hvězdík", pet_noc: "Noční",
+  du_kacka: "Kačenka"
 },
 
 en: {
@@ -498,6 +500,7 @@ en: {
   collectionNote: "Tap a racer and it comes with you to the track. Animals also grow the more sums you solve with them.",
   machines: "Machines",
   animals: "Animals",
+  ducks: "Duck",
   buyTitle: "Take {0}?",
   buyText: "It costs {0} coins. You have {1}.",
   buyYes: "Take it",
@@ -623,7 +626,8 @@ en: {
   ri_ponor: "Submarine", ri_ufo: "Flying saucer", ri_mech: "Robot", ri_bugina: "Buggy",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bear", pet_kiki: "Kiki",
   pet_zub: "Toothy", pet_duha: "Rainbow", pet_puk: "Puck", pet_flek: "Patch",
-  pet_sova: "Owlet", pet_drak: "Dragon", pet_hvezd: "Starry", pet_noc: "Nightling"
+  pet_sova: "Owlet", pet_drak: "Dragon", pet_hvezd: "Starry", pet_noc: "Nightling",
+  du_kacka: "Duckie"
 },
 
 de: {
@@ -803,6 +807,7 @@ de: {
   collectionNote: "Tipp einen Renner an und er fährt mit dir los. Tiere wachsen außerdem, je mehr Aufgaben ihr zusammen schafft.",
   machines: "Fahrzeuge",
   animals: "Tiere",
+  ducks: "Ente",
   buyTitle: "{0} mitnehmen?",
   buyText: "Kostet {0} Münzen. Du hast {1}.",
   buyYes: "Nehmen",
@@ -928,7 +933,8 @@ de: {
   ri_ponor: "U-Boot", ri_ufo: "Fliegende Untertasse", ri_mech: "Roboter", ri_bugina: "Buggy",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bär", pet_kiki: "Kiki",
   pet_zub: "Zahni", pet_duha: "Regenbogi", pet_puk: "Puck", pet_flek: "Fleck",
-  pet_sova: "Eulchen", pet_drak: "Drachi", pet_hvezd: "Sternchen", pet_noc: "Nachtling"
+  pet_sova: "Eulchen", pet_drak: "Drachi", pet_hvezd: "Sternchen", pet_noc: "Nachtling",
+  du_kacka: "Entchen"
 }
 
 };

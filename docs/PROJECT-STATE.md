@@ -173,7 +173,7 @@ tests/                    regresní testy nad jsdom, viz tests/README.md
 tests/fixtures/           zamrazené profily starších verzí, jen se přidávají
 docs/PROJECT-STATE.md     tenhle soubor
 docs/ROADMAP.md           produktový plán, včetně rešerší o motivaci a inkluzi
-docs/PLAN.md              implementační plán, verze 2 ze 13. září: kroky A až G, co se kde mění
+docs/PLAN.md              implementační plán, verze 2 ze 13. září: kroky A až H, co se kde mění
 docs/PLAN-2026-09-12.md   předchozí plán, záznam kroků 1 až 4d a proč jsou postavené tak, jak jsou
 docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
 docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
@@ -196,7 +196,13 @@ do node se zaslepeným `document`, jak to dělá `tests/items.test.js`, zavolat
 do souboru a převést na obrázek přes `convert`. Tímhle se chytila hnědá obloha,
 rudé moře i fialová louka, a žádný test by je nenašel. Pozor, `convert`
 ignoruje `stroke-dashoffset`, takže čára postupu vypadá vždycky dojetá až do
-konce; v prohlížeči je to správně. **A `convert` nekreslí `linearGradient`**,
+konce; v prohlížeči je to správně. **A `convert` ignoruje `opacity`**, protože
+v tomhle stroji chybí delegát `rsvg-convert` a kreslí vlastní renderer
+ImageMagicku: bílé bříško s `opacity=".2"` vyjde čistě bílé a vypadá jako
+louže, přestože v prohlížeči je to jemný odlesk. Než se taková kresba
+posoudí, musí se průhlednost pro tu jednu kontrolu zamíchat do plné barvy
+(`fill` spočítaný jako `barva * (1-a) + bílá * a`), jinak se posuzuje něco,
+co prohlížeč nikdy neukáže. **A `convert` nekreslí `linearGradient`**,
 vezme první zarážku a vyplní jí celou plochu, takže krajina vyjde jednolitá
 a přechod `hill1` → `hill2` v ní není vidět. Paleta se proto posuzuje tak, že
 se z SVG vyřízne podkladový obdélník, scéna se vyrenderuje s průhledným

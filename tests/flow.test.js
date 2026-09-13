@@ -50,7 +50,11 @@ click(qa('[data-gr]').find(b=>b.dataset.gr==='3'));
 ok('po vyberu tridy uz tlacitko jde', !q('[data-go]').hasAttribute('disabled'));
 click(q('[data-go]'));
 ok('rocnik se ulozil do profilu', DBg().profiles[0].grade===3, 'grade '+DBg().profiles[0].grade);
-ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
+// startovnich zavodniku je od kroku H1 sedm, ne sest: pribyla gumova
+// kacenka a je zdarma, protoze se na ni pozdeji kupuji veci, ne ona sama.
+// Cislo se posunulo vedome, viz tests/README.md
+ok('profil dostal startovni sedmicku zdarma', DBg().profiles[0].owned.length===7, DBg().profiles[0].owned.join(','));
+ok('kacenka je mezi startovnimi zdarma', DBg().profiles[0].owned.includes('du_kacka'));
 // mapa treťáka zacina tam, kde je letos trida, ale ucivo, ktere se letos
 // opakuje, zustava pred dvermi: treti rocnik zacina opakovanim nasobilky
 // (kapitoly 2 a 3 sedmeho dilu), stovky (kapitola 1) a hodin (kapitola 4).
@@ -126,7 +130,8 @@ ok('misto ukazuje, kolik uz je ve sbirce', /0\/4\b/.test(txt()));
 console.log('--- zavod s chybami ---');
 // naschval nasobilka, ne prvni misto v rade: souhrn nize se porovnava s ni
 click(qa('[data-act="play"]').find(b=>b.dataset.id==='t1'));
-ok('vyber zavodnika pred zavodem', qa('[data-pick]').length===6);
+// sedm startovnich zavodniku od kroku H1, do nej jich bylo sest
+ok('vyber zavodnika pred zavodem', qa('[data-pick]').length===7, qa('[data-pick]').length+' zavodniku');
 click(qa('[data-pick]').find(b=>b.dataset.pick==='pet_kiki'));
 ok('vyber se ulozil', DBg().profiles[0].runner==='pet_kiki');
 click(q('[data-go]'));
@@ -168,8 +173,32 @@ click(q('[data-act="map"]')); click(q('[data-act="collection"]'));
 ok('ve sbirce zbyva co kupovat', qa('[data-act="buy"]').length>0, qa('[data-act="buy"]').length+' k odemceni');
 const coins=DBg().profiles[0].coins;
 click(qa('[data-act="buy"]')[0]); click(q('[data-yes]'));
-ok('nakup odecetl mince a nastavil jezdce', DBg().profiles[0].coins<coins && DBg().profiles[0].owned.length===7,
+// sedm startovnich plus jeden koupeny je osm; do kroku H1 to bylo sedm
+ok('nakup odecetl mince a nastavil jezdce', DBg().profiles[0].coins<coins && DBg().profiles[0].owned.length===8,
    coins+' -> '+DBg().profiles[0].coins);
+// kacenka ma v garazi vlastni sekci, je v ni odemcena a neda se koupit
+click(q('[data-act="map"]')); click(q('[data-act="collection"]'));
+ok('garaz ma sekci kacenky', !!d.getElementById('ducksec'));
+ok('kacenka je v garazi odemcena', qa('[data-act="use"]').some(b=>b.dataset.id==='du_kacka'));
+ok('kacenka se neda koupit za mince', !qa('[data-act="buy"]').some(b=>b.dataset.id==='du_kacka'));
+// zviratko roste, kacenka ne: kdyby prosla jako zviratko, dostala by v
+// dlazdici stupen, ke kteremu zadna druha kresba neexistuje
+ok('kacenka nema stupen rustu',
+   !qa('[data-act="use"]').find(b=>b.dataset.id==='du_kacka').querySelector('.lvl'));
+click(qa('[data-act="use"]').find(b=>b.dataset.id==='du_kacka'));
+ok('kacenka jde nasadit jako zavodnik', DBg().profiles[0].runner==='du_kacka');
+// nabidka pred startem se jen radi, nikdy nefiltruje, takze v ni stoji
+// vsech osm, kacenku nevyjimaje
+click(q('[data-act="map"]')); click(q('[data-act="play"]'));
+ok('nabidka pred startem ukazuje vsech osm vlastnenych', qa('[data-pick]').length===8,
+   qa('[data-pick]').length+' zavodniku');
+ok('kacenka je v nabidce pred startem', qa('[data-pick]').some(b=>b.dataset.pick==='du_kacka'));
+click(qa('[data-pick]').find(b=>b.dataset.pick==='ri_auto'));
+ok('zpet na auto', DBg().profiles[0].runner==='ri_auto');
+// list se zavira klepnutim mimo nej; test ho odklidi rovnou, aby dalsi
+// blok nehledal tlacitka pod nim
+q('.sheet').remove();
+click(q('[data-act="collection"]'));
 
 console.log('--- rodicovska sekce ---');
 click(q('[data-act="map"]')); click(q('[data-act="gate"]'));
@@ -463,7 +492,8 @@ ok('trat uz neni okruh, ale cesta se zastavkami',
    ev('route("trail","t1").closed')===false && ev('route("trail","t1").stops.length')>=6,
    ev('route("trail","t1").stops.length')+' zastavek');
 ok('okruh zustal uzavrenou smyckou', ev('route("circuit","t1").closed')===true);
-ok('vsichni koupeni zavodnici jsou porad k vyberu', qa('[data-pick]').length===7,
+// sedm startovnich vcetne kacenky plus jeden koupeny; do kroku H1 sedm
+ok('vsichni koupeni zavodnici jsou porad k vyberu', qa('[data-pick]').length===8,
    qa('[data-pick]').length+' zavodniku');
 ok('svet dal sve zavodniky dopredu', qa('[data-pick]')[0].dataset.pick.slice(0,4)==='pet_',
    qa('[data-pick]')[0].dataset.pick);

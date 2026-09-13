@@ -28,9 +28,13 @@ The same goes for anything else rare: measure it over many runs, do not soften i
 
 Several counts in `flow.test.js` are written down rather than derived: how many
 distinct routes and places the map has, how long a first and a second year map
-is, how many tracks the look ahead unfolds, and how many chapters of the third
-year are still locked. A new track or generator moves them, which is deliberate:
-the number has to be looked at and confirmed, not quietly recomputed.
+is, how many tracks the look ahead unfolds, how many chapters of the third
+year are still locked, and how many racers a profile starts with. A new track,
+generator or free starter moves them, which is deliberate: the number has to be
+looked at and confirmed, not quietly recomputed. The starter count went from six
+to seven in step H1, when the rubber duck arrived as a seventh free racer, and
+the two places that count a profile's racers after one purchase went from seven
+to eight with it.
 
 **Layout is checked in pictures, not in jsdom.** jsdom has no layout at all, so
 nothing here can tell whether the keypad fits under the question. What the tests

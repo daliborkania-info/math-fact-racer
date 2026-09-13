@@ -1162,6 +1162,371 @@ Otazníky u formátu odpovědi to nesundá, ty pořád potřebují stránky.
 
 ---
 
+## Krok H. Gumové kačenky a opravdová zvířata
+
+**Na pořadí s krokem G nezávisí.** G je učivo a kurikula, H je jen to, co se
+dá vlastnit a na co se dá koukat; nesdílejí jediný soubor kromě `app.js`
+a `i18n.js`, a i tam sahají do jiných oddílů. Stojí za G jen proto, že se
+plán píše v pořadí, ve kterém vznikal. Dá se udělat kdykoli, i mezi E a F,
+a jediné pořadí, které uvnitř kroku platí, je H1 → H2 → (H3, H4) → H5
+a H6 → H7; H8 je poslední.
+
+Podklad: `kacenky-navrh.md` (průzkum trhu s gumovými kačenkami a rozbor
+dnešní kresby postaviček, 13. září 2026) a fotka nabídky kačenek od
+uživatele z téhož dne. Katalog níž je podklad **plus to, co bylo na fotce
+a v podkladu chybělo**; co přibylo, je u příslušné části vypsané zvlášť.
+
+**Co to celé je.** Sedmý startovní závodník je gumová kačenka a je zdarma.
+Nekupuje se kačenka, kupuje se to, co má na sobě: pět nezávislých vrstev,
+65 dílů, dohromady 392 700 kombinací. Platí se **součástkami z dílny**, nikdy
+mincemi, takže je to zároveň odpověď na otevřenou otázku kroku 3b, tedy kam
+mají součástky jít, až budou koupené všechny nátěry. K tomu se dvanáct
+dnešních zvířat překreslí tak, aby to byla poznatelná zvířata, a přibude
+šestnáct nových.
+
+**Autorská práva, a je to nejdůležitější věta celého kroku.** Nedotknutelný
+princip z `PROJECT-STATE.md` oddíl 3 zakazuje licencované postavičky. Gumová
+kačenka je generický předmět, vyráběný od devatenáctého století desítkami
+firem, a je v pořádku. **Žádný jednotlivý díl ale nesmí být převzatá postava,
+maskot ani značková kačenka.** Každý díl je věc, ne bytost: klobouk, brýle,
+kruh, šála. Nejcitlivější jsou tři díly, u kterých se sklouzne nejsnáz:
+maska přes oči (`de_maska`), kulaté obroučky (`de_dioptr`) a klapka na oko
+(`de_klapka`). Maska je karnevalová maska se stužkou, ne domino v barvách
+konkrétního hrdiny, a plášť do katalogu proto nepatří vůbec. K obroučkám
+nikdy nepřibude jizva. Kontrolní otázka je jediná a platí pro každý díl
+i pro každé zvíře: **když se u kresby dá říct jméno postavy, je špatně.**
+
+**Ekonomika.** Díly stojí 6 až 30 součástek, celkem 939. Nejlevnější díl je
+levnější než polovina jedné zakázky, takže dítě, které dokončí jednu jedinou
+zakázku, si má vždycky co koupit; nejdražší jsou dvě zakázky, takže šetřit se
+vyplatí, ale ne déle než pár dní. Sekce v garáži jsou proto řazené od
+nejlevnějšího. Dnešním dvanácti zvířatům se cena **nemění ani o minci**;
+nových šestnáct dostane 35 až 200 mincí. Nic z toho se nelosuje, celý katalog
+i s cenami je vidět od první chvíle, žádný díl se nedá ztratit ani zdražit
+a **žádný díl nemá jiný atribut než kresbu**, takže vzhled dál nemá na jízdu
+vliv a soupeřem zůstává vlastní nejlepší jízda.
+
+### H1. Kačenka jako závodník, holá — HOTOVO 13. září 2026
+
+Sedmý startovní závodník zdarma, kreslený parametricky, bez jediného doplňku.
+
+- `src/app.js`: nové pole `DUCKS` s jedinou položkou `du_kacka`
+  (`{duck:true, c1, c2, cost:0}`), `ALL_ITEMS = PETS.concat(RIDES).concat(DUCKS)`,
+  `du_kacka` **na konec** `STARTERS`, kotvy `DUCK` a funkce `duckSVG(it)`
+  vedle `petSVG` a `rideSVG`, větev v `itemSVG()`.
+- **Třetí druh závodníka znamená třetí otázku.** Dosud se kód ptal jen
+  „je to stroj“ (`it.kind`) a všechno ostatní bralo za zvířátko. Kačenka
+  není ani jedno: nemaluje se a neroste. Proto `isPet(it) = !it.kind &&
+  !it.duck` a všechna tři místa, která se ptala obráceně, se musí přeptat
+  (stupeň v dlaždici garáže, `RUN.evolved` po závodě, náhled zamčené
+  dlaždice). Kdyby se to zapomnělo, kačenka by tiše sbírala zkušenosti
+  a vyrostla by do stupně, ke kterému žádná druhá kresba neexistuje.
+- **Datový model se nemění.** `load()` už dnes dopisuje každému profilu
+  chybějící startovní závodníky, takže starý profil kačenku dostane sám
+  a nic neztratí; fixture proto netřeba. Kačenka se přidává **na konec**
+  seznamu, aby se nikomu nezměnil první závodník (`STARTERS[0]`).
+- `src/i18n.js`: `du_kacka` a nadpis sekce `ducks` ve třech jazycích.
+- `viewCollection()`: vlastní nadpis `#ducksec` mezi zvířátky a nátěry,
+  tedy kačenka stojí ke zbytku závodníků a barvy zůstávají pod ní.
+- Testy: `items.test.js` okruh 3b (kačenka je zdarma, je startovní, není
+  ani stroj ani zvířátko, žádná kotva nevyjede z rámu po skupinové
+  transformaci, nad hlavou zbývá místo na klobouk a hlava se dotýká těla);
+  `flow.test.js` sedm kontrol navíc a **tři zapsaná čísla se posunula
+  vědomě**: startovních závodníků je sedm místo šesti a dvě místa, která
+  po jednom nákupu počítají závodníky profilu, jsou na osmi místo sedmi.
+- Past, která se potvrdila: `convert` v tomhle repozitáři **nemá delegáta
+  `rsvg-convert`**, takže kreslí vlastním rendererem a kromě `linearGradient`
+  a `stroke-dashoffset` ignoruje i `opacity`. Bříško s `opacity=".2"` vyjde
+  na PNG čistě bílé a vypadá jako louže. Než se paleta kačenky posoudí,
+  musí se průhlednost pro tu jednu kontrolu zamíchat do plné barvy, jinak
+  se posuzuje něco, co prohlížeč nikdy neukáže.
+
+### H2. Datový model a vrstva Tělo
+
+Deset těl, `db_*`, a s nimi celý datový model vrstev. Tohle je jediná část
+kroku H, která sahá na profil.
+
+- `newProfile()`: `duckParts: []` (koupené díly) a `duck: {}` (co má na sobě,
+  vrstva → id dílu).
+- `seedDuck(p)` v `load()` **a v `import` větvi**, protože se to týká profilu
+  jako celku: `p.duckParts = p.duckParts || []; p.duck = p.duck || {};`.
+  Chybějící `duck.body` znamená klasickou žlutou, takže starý profil vidí
+  kačenku hotovou, ne prázdnou.
+- **Migrace: nový zamrazený profil do `tests/fixtures/legacy-profiles.json`**,
+  tedy profil dnešní verze s `parts`, `paints` a `paint`, ale bez `duck*`.
+  `migration.test.js` ověří, že po načtení obě pole existují a že se nic
+  nezmenšilo. Je to jedna z mála věcí, které nejdou udělat zpětně: když se
+  profil dnešní verze nezamrazí teď, nebude už nikdy z čeho migraci ověřit.
+- `DUCK_BODY` (10 položek), `wearDuckPart(p, layer, id)`, obsluha `buyduck`
+  a `useduck` v posluchači kliknutí, přesná kopie tvaru `buypaint`
+  a `usepaint` včetně listu „nemáš dost součástek“.
+- `duckSVG` dostane druhý parametr, `duckSVG(it, outfit)`; barvy `c1` a `c2`
+  bere z vrstvy Tělo, ne z položky `du_kacka`.
+- Sekce v garáži pod nátěry. Dlaždice ukazuje **celou kačenku s tím jedním
+  dílem**, ne barevný čtvereček, ze stejného důvodu, jaký je dnes napsaný
+  nad `paintCells()`: barevný čtvereček dítěti neřekne nic o tom, jak to
+  bude vypadat.
+
+| id | název | `c1` / `c2` | čím se liší |
+| --- | --- | --- | --- |
+| db_klasik | Klasická | #ffd23f / #e0a41f | **zdarma**, výchozí, to, co si každý představí |
+| db_bila | Sněhová | #fdfdfd / #cfd6e0 | jediná téměř bílá, kontrast dělá jen křídlo |
+| db_ruzova | Růžová | #ff9ec4 / #e56d9d | jediná s **růžovým zobákem**, viz níž |
+| db_mint | Mátová | #8ee6d5 / #4bb8a4 | studená zeleň, jediná bez žluté složky |
+| db_nebeska | Nebeská | #7ad3ff / #3ea8e0 | modrá, od mátové ji dělí 40° odstínu |
+| db_limetka | Limetková | #a4e768 / #6fbb34 | jasná zeleň proti tlumené mátové |
+| db_levandule | Levandulová | #c9a8ff / #8a63d8 | fialová, jediná v té části kruhu |
+| db_ohniva | Ohnivá | #ff7a3d / #c23a12 | celooranžová kačenka z fotky; zobák dostane tmavší obrys, protože se tělu blíží |
+| db_uhel | Uhlová | #3a4360 / #1b2436 | jediná tmavá, bříško se u ní zesvětlí na .45 |
+| db_duhova | Duhová | přechod přes pět zastávek | jediná, která není plocha; `linearGradient` napříč tělem |
+
+Ceny: 0, 8, 10, 10, 12, 12, 15, 15, 18, 20, **145 celkem**.
+
+**Proti podkladu se mění jedna věc, a je z fotky.** Podklad říkal, že zobák
+zůstane oranžový vždycky, protože oranžový zobák je to, podle čeho se kačenka
+pozná. Na fotce je ale kačenka s **růžovým zobákem a dlouhými řasami** a je to
+jeden z motivů, které uživatel chce. Řešení: Tělo dostane **nepovinné pole
+`beak`** a vyplní ho **jediná položka z deseti**, `db_ruzova`. Pravidlo tím
+nepadá, jen dostává jednu vypsanou výjimku: zobák je oranžový, pokud tělo
+neřekne jinak, a jinak řekne jenom růžové. Řasy nejsou na zobáku, ale na
+vrstvě Oči, viz H4.
+
+**Past.** `convert` nekreslí `linearGradient` (vezme první zarážku) ani
+`opacity`, viz H1. Duhová kačenka se proto musí posoudit v prohlížeči, ne na
+PNG, a u každé vrstvy platí totéž pro průhlednost.
+
+### H3. Vzory a hlava
+
+Deset vzorů `dp_*` a dvacet dílů na hlavu `dh_*`, tedy třicet dílů a devadesát
+textů. Nejpočetnější část celého kroku.
+
+- `DUCK_PAT` (10) a `DUCK_HEAD` (20) v `src/app.js`, z-order v `duckSVG`:
+  zadní výbava → ocásek → tělo → hlava → **vzor** → bříško → křídlo → zobák →
+  oko → oční díl → **hlavový díl** → přední výbava.
+- Vzor se kreslí přes tělo i hlavu a **ořezává se `clipPath`** složeným
+  z elipsy těla a kruhu hlavy, jinak by puntíky vylétly do vzduchu. Pozice
+  jsou vždycky pevný seznam, nikdy losované: dvě stejně vybavené kačenky
+  musí vypadat stejně.
+- Všechny hlavové díly sedí na kotvě `DUCK.HEAD` a nesmí mít v sobě jediné
+  natvrdo napsané souřadnice hlavy.
+- `src/i18n.js`: 30 názvů ve třech jazycích.
+- Testy: v `items.test.js` nový okruh, který **projde všech 30 dílů**, každý
+  vykreslí na základní kačenku, ověří, že SVG jde naparsovat, že v něm není
+  `NaN` a že žádný bod nevyjede z rámu; rám se počítá stejně jako v okruhu
+  3b, tedy po skupinové transformaci.
+- Ruční kontrola je povinná, postup v `PROJECT-STATE.md` oddíl 2, s ohledem
+  na pasti z H1.
+
+Vzory (8 z podkladu + 2 z fotky): `dp_puntiky` puntíky 6, `dp_dres` **svislé
+pruhy jako fotbalový dres** 12 (z fotky), `dp_pruhy` vodorovné oblouky 8,
+`dp_kostka` závodní šachovnice 8, `dp_srdicka` srdíčka 10, `dp_hvezdicky`
+hvězdičky 12, `dp_maskac` maskáč 14, `dp_vlnky` vlnky 12, `dp_pasy` tři
+barevné pásy 16, `dp_mapa` **obrysy pevnin jako na globusu** 16 (z fotky).
+Celkem 114.
+
+Na hlavě (16 z podkladu + 4 z fotky): `dh_celenka` **bílá sportovní čelenka**
+6 (z fotky), `dh_ksilt` kšiltovka 8, `dh_satek` pirátský šátek 8, `dh_rohy`
+malé rohy 10, `dh_ousi` čelenka s oušky 10, `dh_kuchar` kuchařská čepice 12,
+`dh_cepice` zimní čepice s bambulí 12, `dh_hreben` **růžový hřeben jako
+punkový účes** 14 (z fotky), `dh_slamak` slamák 14, `dh_vencik` věneček
+z kytek 16, `dh_vavrin` **zelený vavřínový věnec** 16 (z fotky), `dh_prilba`
+stavařská přilba 16, `dh_kudrny` **blond kudrnaté vlasy** 18 (z fotky),
+`dh_cylindr` cylindr 18, `dh_hasic` hasičská 18, `dh_kapitan` kapitánská 20,
+`dh_helma` závodní helma 22, `dh_koruna` koruna 24, `dh_kovboj` kovbojský 24,
+`dh_kosmo` skafandr 28. Celkem 294.
+
+**`dh_kapitan` se proti podkladu mění podle fotky:** ne plochá bílá čepice
+s tmavým kšiltem, ale **tmavě modrá se zlatým lemem a kulatým odznakem**.
+Odznak je kroužek s kotvou nebo hvězdou, tedy tvar, ne znak žádné firmy ani
+námořnictva.
+
+**Past.** `dh_kosmo` (skafandr) je jediný průhledný díl, ostatní díly pod ním
+musí zůstat vidět, takže se kreslí naposledy a s nízkou krycí barvou; a to je
+právě to, co `convert` neukáže. `dh_ousi` je **čelenka s oušky, ne uši**:
+proužek čelenky musí být vidět, jinak je z kačenky zvíře a vrstva ztratí smysl.
+
+### H4. Oči a výbava
+
+Devět dílů na oči `de_*` a šestnáct kusů výbavy `dg_*`, tedy 25 dílů
+a 75 textů.
+
+- `DUCK_EYE` (9), `DUCK_GEAR` (16). Výbava má **dvě půlky**, `back` a `front`,
+  a `duckSVG` je kreslí na dvou různých místech, aby plovací kruh mohl obepnout
+  tělo (zadní oblouk za tělem, přední před ním), batoh a nádrž mohly viset za
+  ocáskem a míč mohl ležet před tělem.
+- Oči sedí na kotvě `DUCK.EYE`, výbava na `DUCK.BODY`, `DUCK.WING`
+  a `DUCK.WATER`.
+- 25 názvů ve třech jazycích, testy jako v H3.
+
+Oči (8 z podkladu + 1 z fotky): `de_brejle` sluneční brýle, tedy **dvě kulatá
+tmavá skla s můstkem** (motiv z fotky, podklad ho měl) 8, `de_sport` sportovní
+brýle 8, `de_rasy` **dlouhé řasy** 10 (z fotky), `de_potapec` plavecké brýle
+s páskem 10, `de_dioptr` kulaté obroučky 12, `de_maska` karnevalová maska 12,
+`de_klapka` klapka přes oko 14, `de_snorchl` **potápěčská maska s páskou přes
+hlavu** 16, `de_lyze` lyžařské brýle 18. Celkem 108.
+
+Výbava (14 z podkladu + 2 z fotky): `dg_motylek` motýlek 8, `dg_sal`
+**šála kolem krku** 10, `dg_privesek` přívěsek s hvězdou 10, `dg_plavky`
+plavky 12, `dg_mic` **černobílý fotbalový míč** 14 (z fotky), `dg_bubliny`
+bublinky 14, `dg_kridla` křidélka 14, `dg_vlajecka` vlaječka 16, `dg_klic`
+francouzský klíč 18, `dg_batoh` batoh 20, `dg_nadrz` **šedá dýchací nádrž na
+zádech** 20 (z fotky), `dg_vesta` záchranná vesta 20, `dg_stit` štít 22,
+`dg_kruh` plovací kruh 24, `dg_pneu` pneumatika 26, `dg_prkno` surf 30.
+Celkem 278.
+
+**Žádná pravidla vylučování nejsou.** Jedna vrstva, jeden díl, a přes sebe jde
+obléknout cokoli. Skafandr přes brýle je legrační a legrační je v pořádku.
+Zakazovat kombinace by znamenalo nabízet něco, co se pak tiše nestane, a to je
+přímo proti principu „co hra neumí, to nenabízí“.
+
+**Dvě pasti.** `de_maska` je ta nejcitlivější kresba celého kroku: karnevalová
+maska se stužkou na boku, v barvě, kterou si nese vrstva, **nikdy černá
+s pláštěm**. A `dg_privesek` je hvězdička na šňůrce, ne medaile; medaile se
+schválně nedá koupit, protože je to jediná věc, kterou dítě v závodě vyjezdí,
+a koupitelná medaile by ji znehodnotila.
+
+### H5. Dílna ukazuje, kam součástky jdou
+
+Tady se dořeší otevřená otázka kroku 3b.
+
+- **Rozhodnutí 3b nepadá, jen se odsouvá.** Nátěry stojí dohromady 390
+  součástek, plná zakázka dá patnáct, takže po šestadvaceti zakázkách je
+  obchod prázdný a bylo rozhodnuto, že se pak číslo přestane tvářit jako
+  peněženka a začne říkat, kolik práce je hotové celkem. Kačenčí díly za
+  939 součástek jsou dalších zhruba 63 plných zakázek, tedy dohromady
+  s nátěry kolem devadesáti; to je řádově školní rok při dvou zakázkách
+  týdně. **Podmínka pro přepnutí štítku se proto rozšíří z „všechny nátěry“
+  na „všechny nátěry a všechny díly“**, jinak nic.
+- Tlačítko „utrať součástky“ po zakázce dnes skáče na `#paintsec`; má mířit
+  tam, kde ještě něco koupitelného zbývá, tedy případně rovnou do kačenčí
+  sekce. Sekce v garáži jsou od téhle chvíle řazené od nejlevnějšího dílu,
+  aby první dlaždice byla ta, na kterou dítě má.
+- Kruhové okno nad pultem (`revealSVG`) kreslí vlastního závodníka dítěte,
+  takže kačenku odkrývá samo; ověřit, že se do kruhu vejde i s kloboukem
+  a se skafandrem, protože ty jdou nad obrys hlavy.
+- **Pravidlo „součástky se nedají vyjezdit a mince se nedají vydělat v dílně“
+  se nemění ani o kousek.** Kačenčí díly jsou výhradně za součástky, nikdy za
+  mince, i kdyby to bylo pohodlné. Když se 939 součástek ukáže jako moc,
+  správná páka je **zlevnit ceny, ne změnit měnu**; rozdělení měn je jediná
+  věc, která dílnu drží při životě.
+- Testy: `flow.test.js` koupí díl za součástky a ověří, že ho kačenka nese
+  a že se odečetly součástky, ne mince; a že po koupení všeho štítek změní
+  význam.
+
+**Past.** Garáž naroste zhruba na devadesát dlaždic a každá je celá kačenka,
+tedy devadesát SVG na jedné obrazovce. Komentář u sbírky nálezů říká, že celá
+sbírka je schválně **jedna** kresba právě kvůli počtu uzlů; tady hrozí přesně
+to, čemu se tam vyhýbalo. Pokud se to na telefonu projeví, řešení je menší
+náhled dlaždice nebo kreslit v dlaždici jen vybíranou vrstvu nad šedou
+siluetou, ne zmenšit katalog.
+
+### H6. Zvířata: přesnější kresba dvanácti dnešních
+
+**Nejdřív rozhodnutí R10 z oddílu 9. Bez něj se tahle část nedělá.**
+
+Dnešních dvanáct zvířat je jeden tvar s parametry (`body`, `ear`, `ex`, `pat`),
+takže výsledek je vždycky týž kulatý tvor, který má jednou špičaté a jednou
+kulaté uši. Dítě v něm nepozná konkrétní zvíře, protože tam žádné konkrétní
+zvíře není.
+
+- `PET_SHAPES` jako **tabulka funkcí, jedna na zvíře**. `petSVG(it, stage)`
+  je pak jen dispatcher plus společný obal: měřítko podle stupně, oči, úsměv
+  a hvězda na stupni 3. Sdílené pomocné funkce (`earTri`, `earRound`,
+  `earLong`, `legs`, `tail`, `snout`, `spots`, `stripes`) drží každé zvíře na
+  šesti až dvanácti řádcích.
+- Nepovinný háček `extra(stage)`: lvu povyroste hříva, ježkovi přibude řada
+  bodlin, žirafě krk, drakovi se rozevřou křídla (což dnes dělá natvrdo
+  `ex === "wings" && s >= 2`). Tři stupně a `EVO = [0, 70, 220]` se nemění.
+- **Žádné id, žádná cena a žádné jméno se nemění.** Na id visí `owned` a `xp`,
+  na ceně visí to, na co dítě šetří. Mění se jen kresba.
+
+| id | dnešní jméno | zvíře | podle čeho ho dítě pozná |
+| --- | --- | --- | --- |
+| pet_mecha | Méďa | medvěd | kulatá ouška vysoko a daleko od sebe, světlejší čumáková skvrna, malé oči blízko u sebe, žádný ocas |
+| pet_sova | Sovík | sova | srdcovitý obličejový závoj, obří kulaté oči s kroužkem, drobný háček zobáku, dvě pírka nahoře |
+| pet_drak | Dráček | drak | hřebínek z pěti trojúhelníků po zádech, netopýří křídla se třemi prsty, ocas s hrotem |
+| pet_zub | Zoubek | krokodýl | dlouhá plochá tlama s řadou trojúhelníkových zoubků, oči nahoře na hlavě, zubatý hřbet |
+| pet_kiki | Kiki | králík | dvě dlouhá ouška s růžovým vnitřkem, bílý bambulkový ocásek, trojúhelníkový nosík, dva zuby |
+| pet_lupi | Lupi | žirafa | velmi dlouhý krk, dva pahýlky s kuličkou, nepravidelné mnohoúhelníkové skvrny |
+| pet_bimbo | Bimbo | delfín | protažený rypec, srpovitá hřbetní ploutev, ocas do V, jedna tmavá čárka místo oka |
+| pet_puk | Puk | axolotl | tři pírkovité žábry po každé straně hlavy, široká usměvavá pusa, plochý ocas s lemem |
+| pet_flek | Flíček | pes | jedno ucho klopené a druhé vztyčené, černý nos, tmavá skvrna přes oko, ocásek nahoru |
+| pet_duha | Duháček | jednorožec | spirálový roh, hříva ze tří vln, kopýtka, ocas z vln |
+| pet_hvezd | Hvězdík | křeček | baculaté tělo bez krku, kulatá ouška, dvě lícní torby, drobounký ocásek, oříšek v tlapkách |
+| pet_noc | Noční | netopýr | blanitá křídla se třemi prsty, velké špičaté uši, nos do V, drobné nožky |
+
+**Dvě jména jsou na hraně.** Lupi znělo vlkem a bude z něj žirafa (dnešní žlutá
+se skvrnami je žirafa, ne vlk), Hvězdík znělo hvězdou a bude z něj křeček.
+U obou se mění nejen kresba, ale i to, co to zvíře je; když to bude uživateli
+vadit, dá se u nich nechat dnešní fantazijní tvar a zvíře doplnit jako nové id.
+Patří to k rozhodnutí R10.
+
+- Testy: platnost sprajtů pro všech dvanáct ve všech třech stupních, jména ve
+  třech jazycích, plus **ruční renderování do PNG všech dvanácti ve všech třech
+  stupních**; je to jediné místo, kde se pozná, jestli zvíře vypadá jako zvíře.
+
+**Past.** Kresba je celá ta funkce a žádný test ji neuvidí; `items.test.js`
+ověří, že SVG jde naparsovat a nevyjede z rámu, nic víc. A druhá: je to jediné
+místo celého kroku H, kde nová verze sáhne na něco, co dítě už má.
+
+### H7. Šestnáct nových zvířat
+
+Šestnáct položek v `PETS`, šestnáct tvarových funkcí v `PET_SHAPES`, 48 textů.
+Vybíráno podle dvou kritérií zároveň: zvíře, které má malé dítě rádo,
+a zvíře, jehož silueta se pozná i v kresbě široké 100 jednotek.
+
+`pet_kocka` kočka, `pet_tucnak` tučňák, `pet_liska` liška, `pet_jezek` ježek,
+`pet_zelva` želva, `pet_zaba` žába, `pet_slon` slon, `pet_lev` lev,
+`pet_panda` panda, `pet_kapy` kapybara, `pet_lenochod` lenochod,
+`pet_zralok` žralok, `pet_chobot` chobotnice, `pet_trex` T-rex,
+`pet_berus` beruška, `pet_papous` papoušek.
+
+Ceny 35, 45, 55, 65, 75, 85, 95, 105, 115, 125, 135, 150, 165, 180, 190, 200,
+tedy asi 1700 mincí celkem neboli kolem 55 závodů. Seřazené tak, aby
+**nejlevnější nové zvíře bylo levnější než nejdražší dnešní**; jinak by celá
+nová řada vypadala jako zeď.
+
+- Testy: platnost sprajtů, jména ve třech jazycích, `flow.test.js` koupí jedno
+  za mince, ruční renderování všech šestnácti.
+- **Pozor: `flow.test.js` čte seznam dlaždic v garáži a počty se posunou
+  potřetí** (poprvé v H1, podruhé v H2, potřetí tady). Každý ten posun musí
+  být vědomý a s komentářem, viz `tests/README.md`.
+- Zvířata jsou zvířata, ne animované postavy. Kočka, liška, panda ani tučňák
+  nejsou ničí; kreslí se podle skutečného zvířete. Drak, jednorožec a axolotl
+  jsou generické mytologické nebo skutečné bytosti a nesmí být nakreslené
+  podle konkrétní filmové podoby.
+
+### H8. Dokumentace
+
+- `PROJECT-STATE.md`: **stav v číslech** (dnes mluví o 341 klíčích a šesti
+  testových souborech; po H1 je klíčů 344), oddíl 4b (kam jdou součástky,
+  odpověď na 3b), oddíl 6 (`duckParts`, `duck`, `seedDuck()`, nová fixture),
+  oddíl 7 bod 4 (kresba: `DUCK` a jeho kotvy, `duckSVG`, vrstvy, `isPet()`,
+  `PET_SHAPES`), oddíl 8 (počty kontrol ve `flow.test.js` a nové okruhy
+  `items.test.js`). Oddíl 5 beze změny, trati se to netýká.
+- **Oddíl 2 `PROJECT-STATE.md`**: k poznámce o `convert` dopsat, že v tomhle
+  stroji chybí delegát `rsvg-convert`, takže se ignoruje i `opacity`, ne jen
+  `linearGradient` a `stroke-dashoffset`.
+- `ROADMAP.md`: nový obsah do rytmu z oddílu 3, tedy do okna mezi třetím
+  a šestým týdnem.
+- `docs/PLAN.md`: krok 3b označit za dořešený a krok H za hotový.
+- `tests/README.md`: nové okruhy a posunutá čísla.
+
+### Co se kde mění, souhrnně
+
+| soubor | co |
+| --- | --- |
+| `src/app.js` | `DUCKS`, `DUCK`, `duckSVG()`, `isPet()`, `DUCK_BODY/PAT/HEAD/EYE/GEAR`, `wearDuckPart()`, `seedDuck()`, `newProfile()`, `STARTERS`, `ALL_ITEMS`, `itemSVG()`, `viewCollection()`, obsluha `buyduck`/`useduck`, podmínka štítku součástek, `PET_SHAPES` + 28 tvarů, `petSVG()` |
+| `src/i18n.js` | asi 240 nových klíčů: 65 dílů + 16 zvířat + kačenka + nadpisy vrstev + hlášky nákupu, vše ve třech jazycích |
+| `src/styles.css` | pravděpodobně nic; sekce dílů použijí dnešní `.grid` a `.item` |
+| `tests/fixtures/legacy-profiles.json` | jeden nový zamrazený profil (H2) |
+| `tests/migration.test.js` | kontrola `duckParts` a `duck` |
+| `tests/items.test.js` | nové okruhy: kačenka, každý díl kačenky, každé zvíře |
+| `tests/flow.test.js` | posunuté počty (H1, H2, H7), nákup dílu za součástky |
+| `tests/names.test.js` | projde samo, ale počty v jeho výpisu narostou |
+
+---
+
 ## 8. Kontrolní seznam pro každý krok
 
 1. Přečíst `PROJECT-STATE.md` oddíly 3, 7 a 14 a tenhle krok.
@@ -1281,6 +1646,40 @@ volitelné pole `kid` na kapitole, `trackSub()` vezme `kid`, když je, jinak
 neutrální text, a učebnicový název dítěti nedá nikdy. Pokud ne, zůstává dnešní
 stav a dítě čte, co stojí v knize.
 
+**R10. Smí se překreslit dnešních dvanáct zvířat?** Krok H6 chce nahradit
+jeden parametrický tvar dvanácti vlastními kresbami, aby Méďa vypadal jako
+medvěd a Kiki jako králík. Formálně se neztratí nic: id, jméno, cena, `xp`
+i `owned` zůstávají, takže krabička, sbírka ani mince se nehnou a
+`migration.test.js` nemá co chytat. **Je to ale jediné místo celého kroku H,
+kde nová verze sáhne na něco, co dítě už má.** Hra běží na cizích telefonech
+a nová verze se do nich dostane sama při dalším načtení, takže se dítě jednoho
+rána podívá a Kiki bude vypadat jinak, aniž by se ho kdokoli zeptal. To je
+věcně něco jiného než přidaný obsah a rozhodnout to má uživatel.
+
+Doporučení: **ano, překreslit, ale ne samostatně.** Tři důvody. Za prvé, dnešní
+dvanáctka není dvanáct zvířat, je to jeden tvar s přepínači, a celé zadání
+kroku H zní „hodně zvířátek, která opravdu vypadají jako konkrétní zvířata“;
+nechat dvanáct obecných tvorů vedle šestnácti poznatelných zvířat je horší než
+obě čistá řešení, protože ve stejné mřížce by stály dvě různé kresebné řeči
+a ta stará by vypadala jako chyba. Za druhé, ztráta je menší, než se zdá:
+jméno i barva zůstávají a zvíře se ke každému vybíralo právě podle nich, takže
+růžová Kiki s dlouhýma ušima zůstane růžová Kiki s dlouhýma ušima, jen nakreslená
+líp. Za třetí, čím dřív se to udělá, tím míň dětí to potká; za rok bude
+dvanáctka zaběhaná víc než dnes a cena stejného kroku bude vyšší.
+
+Dvě podmínky k tomu doporučení. **H6 a H7 se mají vydat spolu**, v jedné verzi,
+aby to dítě četlo jako „zvěřinec vyrostl“ a ne jako „vyměnili mi parťáka“.
+A **Lupi a Hvězdík jsou jiný případ než zbylých deset**: u nich se nemění jen
+kvalita kresby, ale i to, co to zvíře je (Lupi zní vlkem a byla by z něj
+žirafa, Hvězdík zní hvězdou a byl by z něj křeček). Tam doporučuju **nechat
+dnešní fantazijní tvar** a žirafu s křečkem přidat jako nová id v H7; nic se
+tím neztratí, jen se přidá, a překreslených zůstane deset.
+
+Pokud ne, zůstává dnešní kresba a H6 se vypustí; H7 pak přidá šestnáct
+poznatelných zvířat vedle dvanácti obecných a s tím rozdílem se bude muset žít.
+Střední cesta, tedy překreslit jen ta zvířata, která dnes vypadají nejhůř,
+se nedoporučuje: to je právě ten stav dvou kresebných řečí v jedné mřížce.
+
 ---
 
 ## 10. Jak s plánem pracovat: hlavní session řídí, subagenti implementují
@@ -1339,7 +1738,8 @@ Nálezy jdou dalšímu implementačnímu subagentovi.
 **Rozdělení kroků na subagenty:** A jeden; B0 jeden; B jeden (B1 až B7 patří
 k sobě, rodina se nedá půlit); C dva, první C1 až C3 a C5, druhý C4 a C7;
 D1, D2, D3, D4 po jednom; E1 dva, nejdřív dvě políčka bez generátoru, pak
-generátor po rozhodnutí R2; F jeden; G až po ověření map.
+generátor po rozhodnutí R2; F jeden; G až po ověření map; H1 až H8 po jednom
+a v pořadí, protože všechny sahají do `app.js`, H6 a H7 až po rozhodnutí R10.
 
 ---
 

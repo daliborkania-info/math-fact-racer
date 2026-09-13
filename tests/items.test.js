@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -161,8 +161,52 @@ console.log('sampionat respektuje stupne:',mixBad?'ne':'ano');
 let svgBad=0;
 A.PETS.forEach(x=>[1,2,3].forEach(s=>{const v=A.petSVG(x,s); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id,s);}}));
 A.RIDES.forEach(x=>{const v=A.rideSVG(x); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id);}});
+A.DUCKS.forEach(x=>{const v=A.duckSVG(x); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id);}});
 Object.keys(A.ENVS).forEach(e=>{const v=A.sceneSVG('circuit',e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  ENV problem',e);}});
 console.log('vadnych SVG:',svgBad);
+
+// 3b. kacenka
+//
+// Kresba je jedina vec, kterou test neuvidi, takze se hlida aspon to, co
+// se spocitat da: ze zadny bod nevyjede z ramu (kotvy jsou spolecne pro
+// vsechny budouci vrstvy, takze kdyz ujede kotva, ujede s ni vsechno)
+// a ze kacenka neni ani stroj, ani zviratko. Kdyby prosla jako zviratko,
+// zacala by sbirat zkusenosti a vyrostla by do stupne, ke kteremu zadna
+// druha kresba neexistuje.
+let dBad=0;
+const dsay=m=>{dBad++;console.log('  !!  '+m);};
+const duck=A.DUCKS[0];
+const dsvg=A.duckSVG(duck);
+if(A.DUCKS.length!==1) dsay('kacenek uz neni jedna, krok H1 pocital s jednou');
+if(duck.cost!==0) dsay('kacenka neni zdarma, stoji '+duck.cost);
+if(!A.STARTERS.includes(duck.id)) dsay('kacenka neni mezi startovnimi zavodniky');
+if(A.STARTERS[0]!=='ri_auto') dsay('prvni startovni zavodnik se zmenil na '+A.STARTERS[0]);
+if(A.isPet(duck)) dsay('kacenka projde jako zviratko a zacne rust');
+if(duck.kind) dsay('kacenka projde jako stroj a dostane nater');
+if(A.itemById(duck.id)!==duck) dsay('kacenka nejde najit podle id');
+// ram je 100 x 118 a kresba je v nem zvetsena skupinovou transformaci,
+// takze se body prepocitaji stejne, jako je prepocita prohlizec
+const fit=/translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+)\) translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(dsvg);
+if(!fit) dsay('kacenka ztratila skupinovou transformaci, kotvy uz nesedi s ramem');
+else{
+  const [tx,ty,s,ox,oy]=fit.slice(1).map(Number);
+  const px=x=>tx+s*(x+ox), py=y=>ty+s*(y+oy);
+  const B=A.DUCK.BODY,H=A.DUCK.HEAD;
+  const pts=[[B.x-B.rx,B.y],[B.x+B.rx,B.y],[B.x,B.y-B.ry],[B.x,B.y+B.ry],
+             [H.x-H.r,H.y],[H.x+H.r,H.y],[H.x,H.y-H.r],[H.x,H.y+H.r],
+             [A.DUCK.EYE.x,A.DUCK.EYE.y],[A.DUCK.WING.x,A.DUCK.WING.y],
+             [A.DUCK.BEAK.x+21,A.DUCK.BEAK.y],[A.DUCK.TAIL.x-22,A.DUCK.TAIL.y-15]];
+  for(const [x,y] of pts){
+    if(px(x)<0||px(x)>100||py(y)<0||py(y)>118){dsay('kotva vyjela z ramu: '+x+','+y+' -> '+px(x).toFixed(1)+','+py(y).toFixed(1));break;}
+  }
+  // nad hlavou musi zbyt misto, jinak nebude kam posadit klobouk
+  const room=py(H.y-H.r);
+  if(room<18) dsay('nad hlavou zbyva jen '+room.toFixed(1)+', na klobouk to nestaci');
+  // hlava se musi dotykat tela, jinak by kacenka byla dva kusy
+  const overlap=(H.y+H.r)-(B.y-B.ry*Math.sqrt(Math.max(0,1-Math.pow((H.x-B.x)/B.rx,2))));
+  if(overlap<=0) dsay('hlava se nedotyka tela, chybi '+(-overlap).toFixed(1));
+}
+console.log('kacenka:',dBad?'chyb '+dBad:'v poradku');
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
 const VALID=new Set();

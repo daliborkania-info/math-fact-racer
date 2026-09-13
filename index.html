@@ -922,6 +922,7 @@ cs: {
   collectionNote: "Klepni na závodníka a vyrazí s tebou na dráhu. Zvířátka navíc rostou podle toho, kolik příkladů s nimi zvládneš.",
   machines: "Stroje",
   animals: "Zvířátka",
+  ducks: "Kačenka",
   buyTitle: "Vzít si {0}?",
   buyText: "Stojí {0} mincí. Máš jich {1}.",
   buyYes: "Beru",
@@ -1048,7 +1049,8 @@ cs: {
   ri_ponor: "Ponorka", ri_ufo: "Létající talíř", ri_mech: "Robot", ri_bugina: "Bugina",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Méďa", pet_kiki: "Kiki",
   pet_zub: "Zoubek", pet_duha: "Duháček", pet_puk: "Puk", pet_flek: "Flíček",
-  pet_sova: "Sovík", pet_drak: "Dráček", pet_hvezd: "Hvězdík", pet_noc: "Noční"
+  pet_sova: "Sovík", pet_drak: "Dráček", pet_hvezd: "Hvězdík", pet_noc: "Noční",
+  du_kacka: "Kačenka"
 },
 
 en: {
@@ -1228,6 +1230,7 @@ en: {
   collectionNote: "Tap a racer and it comes with you to the track. Animals also grow the more sums you solve with them.",
   machines: "Machines",
   animals: "Animals",
+  ducks: "Duck",
   buyTitle: "Take {0}?",
   buyText: "It costs {0} coins. You have {1}.",
   buyYes: "Take it",
@@ -1353,7 +1356,8 @@ en: {
   ri_ponor: "Submarine", ri_ufo: "Flying saucer", ri_mech: "Robot", ri_bugina: "Buggy",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bear", pet_kiki: "Kiki",
   pet_zub: "Toothy", pet_duha: "Rainbow", pet_puk: "Puck", pet_flek: "Patch",
-  pet_sova: "Owlet", pet_drak: "Dragon", pet_hvezd: "Starry", pet_noc: "Nightling"
+  pet_sova: "Owlet", pet_drak: "Dragon", pet_hvezd: "Starry", pet_noc: "Nightling",
+  du_kacka: "Duckie"
 },
 
 de: {
@@ -1533,6 +1537,7 @@ de: {
   collectionNote: "Tipp einen Renner an und er fährt mit dir los. Tiere wachsen außerdem, je mehr Aufgaben ihr zusammen schafft.",
   machines: "Fahrzeuge",
   animals: "Tiere",
+  ducks: "Ente",
   buyTitle: "{0} mitnehmen?",
   buyText: "Kostet {0} Münzen. Du hast {1}.",
   buyYes: "Nehmen",
@@ -1658,7 +1663,8 @@ de: {
   ri_ponor: "U-Boot", ri_ufo: "Fliegende Untertasse", ri_mech: "Roboter", ri_bugina: "Buggy",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bär", pet_kiki: "Kiki",
   pet_zub: "Zahni", pet_duha: "Regenbogi", pet_puk: "Puck", pet_flek: "Fleck",
-  pet_sova: "Eulchen", pet_drak: "Drachi", pet_hvezd: "Sternchen", pet_noc: "Nachtling"
+  pet_sova: "Eulchen", pet_drak: "Drachi", pet_hvezd: "Sternchen", pet_noc: "Nachtling",
+  du_kacka: "Entchen"
 }
 
 };
@@ -3790,6 +3796,16 @@ const RIDES = [
   {id:"ri_mech",    kind:"mech",   c1:"#5b6b8c", c2:"#ff6b6b", cost:60},
   {id:"ri_bugina",   kind:"buggy",  c1:"#2f3b57", c2:"#a4e768", cost:80}
 ];
+/* The rubber duck is the seventh free starter and a third kind of racer:
+   not a machine, so no paint goes on it, and not an animal, so it does
+   not grow with experience. It is free because what a child is meant to
+   collect here are the things that go on a duck, not the duck itself,
+   and an entry that had to be raced for would put the whole of it behind
+   the race. A rubber duck is a generic object, not a character; nothing
+   drawn on it may ever become one. */
+const DUCKS = [
+  {id:"du_kacka", duck:true, c1:"#ffd23f", c2:"#e0a41f", cost:0}
+];
 /* Paints are what parts are for. They are bought with workshop currency
    only, so they cannot be raced for, and they change nothing but the
    colour of a machine: the rival is still your own best lap, and a
@@ -3815,10 +3831,18 @@ function wearPaint(p, paintId){
   if(paintId) p.paint[base] = paintId; else delete p.paint[base];
 }
 
-/* The starter six are free and picked before each race, the rest cost coins. */
-const STARTERS = ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha"];
-const ALL_ITEMS = PETS.concat(RIDES);
+/* The starter seven are free and picked before each race, the rest cost
+   coins. The duck is appended rather than inserted, so nobody's first
+   racer changes: `load()` hands every profile, however old, whatever it
+   is missing from this list, which is the whole of what adding a free
+   starter costs. */
+const STARTERS = ["ri_auto", "ri_raketa", "ri_mech", "pet_kiki", "pet_lupi", "pet_mecha", "du_kacka"];
+const ALL_ITEMS = PETS.concat(RIDES).concat(DUCKS);
 const itemById = id => ALL_ITEMS.find(i => i.id === id) || PETS[0];
+/* Three kinds of racer and only one of them grows. Everywhere that used
+   to ask "is it a machine" has to ask this instead, or the duck would
+   quietly earn a growth stage it has no second drawing for. */
+const isPet = it => !it.kind && !it.duck;
 const nameOf = it => t(typeof it === "string" ? it : it.id);
 const EVO = [0, 70, 220];   // experience needed for growth stages 1, 2, 3
 
@@ -3954,8 +3978,63 @@ function rideSVG(it){
   }
   return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${g}</svg>`;
 }
+
+/* --- the duck ---
+   Anchors, not numbers written into the shapes. A hat belongs on the
+   head, goggles on the eye, a ring around the body; if each of those
+   carried its own copy of where the head is, the day the head moves
+   would be the day every one of them slides off. So the drawing reads
+   DUCK and nothing else does arithmetic on it.
+   The frame is the same 100 x 118 as an animal, and the duck sits low
+   in it on purpose: the empty band above the head is head room, and a
+   tall hat is going to need all of it.
+   The draw order below has empty slots in it. They are the layers, and
+   today every one of them is empty: this duck wears nothing at all. */
+const DUCK = {
+  BODY:  {x:46, y:76, rx:32, ry:22},   // the float: everything hangs off it
+  HEAD:  {x:60, y:50, r:17},           // hats, hair and helmets sit here
+  EYE:   {x:66, y:45},                 // glasses, masks and patches sit here
+  WING:  {x:44, y:76},                 // what is held or strapped on goes here
+  BEAK:  {x:71, y:50},                 // stays orange: it is how a duck reads
+  TAIL:  {x:26, y:66},                 // a backpack hangs behind this
+  WATER: 88                            // where a swim ring would meet the body
+};
+function duckSVG(it){
+  const B = DUCK.BODY, H = DUCK.HEAD, E = DUCK.EYE, W = DUCK.WING, K = DUCK.BEAK, T = DUCK.TAIL;
+  // the layers, all empty today: nothing is worn and nothing is for sale
+  const back = "", pat = "", eyewear = "", headwear = "", front = "";
+  const g = back
+    // the tail goes in before the body, so the body hides where it grows out
+    + `<path d="M${T.x+4} ${T.y-4} L${T.x-22} ${T.y-15} L${T.x-2} ${T.y+14} Z" fill="${it.c2}"/>`
+    + `<ellipse cx="${B.x}" cy="${B.y}" rx="${B.rx}" ry="${B.ry}" fill="${it.c1}"/>`
+    // the head overlaps the body, so the neck is the notch the two leave
+    + `<circle cx="${H.x}" cy="${H.y}" r="${H.r}" fill="${it.c1}"/>`
+    + pat
+    // the pale underside, kept wholly inside the body: any part of it
+    // that reached past the edge would read as a puddle, not a belly
+    + `<ellipse cx="${B.x+2}" cy="${B.y+7}" rx="${B.rx*.75}" ry="${B.ry*.61}"`
+    + ` fill="#fff" opacity=".2"/>`
+    + `<path d="M${W.x-16} ${W.y-10} Q ${W.x+4} ${W.y-12} ${W.x+10} ${W.y+2}`
+    + ` Q ${W.x-2} ${W.y+12} ${W.x-14} ${W.y+6} Z" fill="${it.c2}"/>`
+    + `<path d="M${K.x} ${K.y-5} Q ${K.x+14} ${K.y-6} ${K.x+17} ${K.y-1}`
+    + ` Q ${K.x+18} ${K.y+2} ${K.x+13} ${K.y+4} Q ${K.x+6} ${K.y+6} ${K.x} ${K.y+5} Z"`
+    + ` fill="#ff9f1c"/>`
+    // the lower half of the bill, darker, so the beak is a beak and not a wedge
+    + `<path d="M${K.x} ${K.y+1} Q ${K.x+8} ${K.y+3.5} ${K.x+15.5} ${K.y+1}`
+    + ` Q ${K.x+13} ${K.y+4.5} ${K.x+6} ${K.y+5.6} Q ${K.x+2.5} ${K.y+6} ${K.x} ${K.y+5} Z"`
+    + ` fill="#e5820c"/>`
+    + `<circle cx="${E.x}" cy="${E.y}" r="3.4" fill="#22314f"/>`
+    + `<circle cx="${E.x-1.1}" cy="${E.y-1.3}" r="1.2" fill="#fff"/>`
+    + eyewear + headwear + front;
+  // a duck is wide and low, so it is grown a little and lifted to fill the
+  // frame the way an animal does; what is left above the head is head room
+  return `<svg viewBox="0 0 100 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`
+       + `<g transform="translate(50 63) scale(1.08) translate(${-B.x} -65.5)">${g}</g></svg>`;
+}
+
 function itemSVG(p, id){
   const it = itemById(id);
+  if(it.duck) return duckSVG(it);
   if(!it.kind) return petSVG(it, stageOf(p, id));
   const pa = paintById((p.paint || {})[id]);
   return rideSVG(pa ? Object.assign({}, it, {c1: pa.c1, c2: pa.c2}) : it);
@@ -5700,7 +5779,7 @@ function finishRun(){
   p.trackRuns[RUN.t.id] = (p.trackRuns[RUN.t.id] || 0) + 1;
   p.xp[p.runner] = (p.xp[p.runner] || 0) + RUN.okCount;
   const before = RUN.stageBefore;
-  RUN.evolved = !itemById(p.runner).kind && before && stageOf(p, p.runner) > before;
+  RUN.evolved = isPet(itemById(p.runner)) && before && stageOf(p, p.runner) > before;
   save();
   sfx.win();
   go("result");
@@ -6033,14 +6112,14 @@ function tokenCardHTML(p, spec, gained){
 function viewCollection(p){
   const cell = it => {
     const owned = p.owned.includes(it.id);
-    const st = it.kind ? 0 : stageOf(p, it.id);
+    const st = isPet(it) ? stageOf(p, it.id) : 0;
     const xp = p.xp[it.id] || 0;
     const nextAt = st === 1 ? EVO[1] : st === 2 ? EVO[2] : null;
     const prevAt = st === 1 ? 0 : EVO[1];
     const pct = nextAt ? Math.min(100, Math.round((xp - prevAt) / (nextAt - prevAt) * 100)) : 100;
     if(!owned){
       return `<button class="item locked" data-act="buy" data-id="${it.id}">
-        <span class="pic">${it.kind ? rideSVG(it) : petSVG(it, 1)}</span>
+        <span class="pic">${it.duck ? duckSVG(it) : it.kind ? rideSVG(it) : petSVG(it, 1)}</span>
         <span class="nm">&#129689; ${it.cost}</span></button>`;
     }
     return `<button class="item ${p.runner === it.id ? "sel" : ""}" data-act="use" data-id="${it.id}">
@@ -6064,6 +6143,8 @@ function viewCollection(p){
       <div class="grid">${RIDES.map(cell).join("")}</div>
       <div class="h2 pad" style="margin-bottom:8px">${t("animals")}</div>
       <div class="grid">${PETS.map(cell).join("")}</div>
+      <div class="h2 pad" id="ducksec" style="margin-bottom:8px">${t("ducks")}</div>
+      <div class="grid">${DUCKS.map(cell).join("")}</div>
       <div class="h2 pad" id="paintsec" style="margin-bottom:8px">${t("paints")}</div>
       <div class="pad muted" style="margin-bottom:10px">${t("paintsNote")}</div>
       <div class="grid">${paintCells(p)}</div>

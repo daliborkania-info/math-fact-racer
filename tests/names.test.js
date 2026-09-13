@@ -15,9 +15,8 @@ async function check(lang){
   // nevznikne; test pak spadl na prvni obrazovce, kterou uz neuvidel
   click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Sam';
   click(qa('[data-gr]').find(b=>b.dataset.gr==='3')); click(q('[data-go]'));
-  // panel vyberu zavodnika pred startem; mapa treťáka zacina u letosniho
-  // ucivo, ktere je zatim zamcene, takze se jede z minulych let za dvermi
-  click(q('[data-act="back"]'));
+  // panel vyberu zavodnika pred startem; prvni misto na mape treťáka je
+  // mala nasobilka, kterou treti trida opakuje a ma otevrenou od zacatku
   click(q('[data-act="play"]'));
   const start=qa('.pickitem .nm').map(e=>e.textContent);
   click(q('[data-more]'));

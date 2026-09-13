@@ -916,6 +916,10 @@ for(const tr of A.TRACKS){
   const bezRocniku = tr.op==='school' || tr.op==='mix' || tr.op==='weak';
   if(!tr.grade && !bezRocniku) gsay('trat '+tr.id+' nepatri do zadneho rocniku');
   if(tr.grade && (tr.grade<1||tr.grade>3)) gsay('trat '+tr.id+' ma rocnik mimo rozsah: '+tr.grade);
+  // thru je posledni rocnik, ve kterem se ucivo jeste opakuje, a nesmi byt
+  // drive nez rok zavedeni ani za koncem toho, co hra zna
+  if(tr.thru && (tr.thru<tr.grade||tr.thru>A.MAX_GRADE))
+    gsay('trat '+tr.id+' ma thru mimo rozsah: '+tr.thru);
 }
 // starsi profil bez rocniku vidi porad vsechno
 const gp={};
@@ -939,7 +943,9 @@ if(!vidi(rk3).includes('a1000')||!vidi(rk3).includes('a20')) gsay('tretak neco z
 for(const p of [rk2,rk3]) for(const tr of A.TRACKS) if(tr.grade && tr.grade<p.grade && !A.inGrade(p,tr))
   gsay('rocnik '+p.grade+' schoval drivejsi trat '+tr.id);
 // predel rocniku: yearOf() rozhoduje, co je na mape letosni, co minule
-// a co teprve prijde, a ptá se na nej celá mapa misto tr.grade
+// a co teprve prijde, a ptá se na nej celá mapa misto tr.grade. Uciva se
+// tyka dvojice cisel, rok zavedeni (grade) a posledni rok opakovani
+// (thru); za dvermi je ucivo az po tom druhem.
 const rk4=A.newProfile('G4',4);
 for(const p of [rk1,rk2,rk3,rk4]) for(const tr of A.TRACKS){
   const y=A.yearOf(p,tr);
@@ -949,22 +955,44 @@ for(const p of [rk1,rk2,rk3,rk4]) for(const tr of A.TRACKS){
     if(y!=='own') gsay('trat '+tr.id+' ma byt vzdycky letosni, ale pro rocnik '+p.grade+' je '+y);
     continue;
   }
-  const cekano = tr.grade<p.grade ? 'past' : (tr.grade>p.grade ? 'ahead' : 'own');
+  if(tr.thru && tr.thru<tr.grade) gsay('trat '+tr.id+' se opakuje driv, nez se zavede');
+  const thru = tr.thru || tr.grade;
+  const cekano = tr.grade>p.grade ? 'ahead' : (thru<p.grade ? 'past' : 'own');
   if(y!==cekano) gsay('yearOf('+p.grade+','+tr.id+') je '+y+', ma byt '+cekano);
   // co je na mape videt, to nikdy neni "ahead", a naopak
   if(A.inGrade(p,tr) && y==='ahead') gsay('viditelna trat '+tr.id+' oznacena jako pristi rok');
   if(!A.inGrade(p,tr) && y!=='ahead') gsay('neviditelna trat '+tr.id+' neoznacena jako pristi rok');
 }
+// ucivo, ktere se letos opakuje, patri do hlavniho bloku, ne za dvere.
+// Tohle je ta regrese: treti trida zacina opakovanim male nasobilky
+// (kapitoly 2 a 3 sedmeho dilu), stovky (kapitola 1) a hodin (kapitola 4),
+// a po kroku B0 se treťákovi vsechno tohle schovalo za dvere.
+for(const id of ['t1','t2','t3','t4','t5','d1','a100','clock'])
+  if(A.yearOf(rk3,A.trackById(id))!=='own') gsay('treťák ma '+id+' za dvermi, i kdyz ji letos opakuje');
+for(const id of ['a3','a5','a7','a10','a15','a20','bridge'])
+  if(A.yearOf(rk3,A.trackById(id))!=='past') gsay('treťák ma '+id+' v hlavnim bloku, i kdyz se k ni uz nevraci');
+for(const id of ['a3','a20','bridge','t1','clock'])
+  if(A.yearOf(rk2,A.trackById(id))!=='own') gsay('druhak ma '+id+' jinde nez v hlavnim bloku');
 // sklada se jen rocnik, ktery ma vlastni trat; ctvrty zadnou nema, takze by
 // slozeni schovalo celou mapu za jedny dvere, a takove jsou vsechny starsi profily
 for(const p of [rk1,rk2,rk3]) if(!A.foldsYears(p)) gsay('rocnik '+p.grade+' se neskládá, i kdyz ma vlastni trat');
 if(A.foldsYears(rk4)) gsay('ctvrtak sklada mapu, i kdyz nema vlastni trat');
 if(A.foldsYears(gp)) gsay('starsi profil bez rocniku sklada mapu');
-// prvnak nema co slozit, od druhaka uz ano
-for(const p of [rk1,rk2,rk3]){
-  const minule=A.visibleTracks(p).filter(tr=>A.yearOf(p,tr)==='past').length;
-  if(p.grade===1 && minule) gsay('prvnak ma za sebou '+minule+' trati z minulych let');
-  if(p.grade>1 && !minule) gsay('rocnik '+p.grade+' nema co slozit za dvere');
+// prvnak ani druhak nemaji co slozit: prvnak je na zacatku a druhak cely
+// prvni rocnik opakuje. Dvere tedy patri az treti tride a je za nimi sedm
+// trati, obory prvniho rocniku a most.
+const minuleU=p=>A.visibleTracks(p).filter(tr=>A.yearOf(p,tr)==='past');
+for(const p of [rk1,rk2]) if(minuleU(p).length)
+  gsay('rocnik '+p.grade+' ma za dvermi '+minuleU(p).length+' trati, i kdyz je vsechny letos opakuje');
+if(minuleU(rk3).length!==7) gsay('treťák ma za dvermi '+minuleU(rk3).length+' trati misto sedmi');
+// A hlavne: v hlavnim bloku mapy, tedy bez dveri a bez ukazky, musi mit
+// kazdy cerstvy profil aspon jednu trat, na kterou jde rovnou klepnout.
+// Kdyby se tohle znovu rozeslo, dite se posadi k mape a nema co delat.
+for(const p of [rk1,rk2,rk3,rk4]){
+  const hlavni=A.visibleTracks(p).filter(tr=>A.yearOf(p,tr)==='own');
+  A.DB.profiles=[p]; A.DB.current=p.id;
+  const otevrene=hlavni.filter(tr=>A.unlockState(p,tr).open).map(tr=>tr.id);
+  if(!otevrene.length) gsay('rocnik '+p.grade+' nema v hlavnim bloku mapy ani jednu otevrenou trat');
 }
 // ukazka nabizi prave jeden dalsi rocnik, nikdy vic a nikdy zpatky
 for(const p of [rk1,rk2,rk3]){

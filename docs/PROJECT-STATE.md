@@ -1,6 +1,6 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 13. září 2026, po krocích A, B0 a B nového plánu
+Poslední aktualizace: 13. září 2026, po krocích A, B0, B a opravě B0b nového plánu
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
 nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
@@ -51,12 +51,19 @@ Na mapě stojí před `beyond`, tedy v pořadí učebnice. K tomu přibylo, že 
 zadání si samo řekne o menší písmo, protože `47 + 5 - 3 = ?` se v plné velikosti
 na telefon nevejde.
 
-**Otevřené po kroku B0: R1 z oddílu 9 plánu.** Čerstvý třeťák má po složení mapy
-všechny letošní tratě zamčené za stovkou a mostem, takže první, co musí udělat,
-je otevřít dveře do minulých let. To je zatím správně v tom smyslu, že učivo
-navazuje, ale znamená to, že mapa, na kterou dítě přijde, nemá ani jedno místo,
-na které jde klepnout. R1 (učivo minulých let otevřené staršímu dítěti) to řeší
-jednou podmínkou v `unlockState()`; uživatel ho zatím nechtěl, rozhodnutí čeká.
+**Oprava B0b je hotová** (13. září): skládání se ptalo na rok, ve kterém se
+učivo zavádí, a schovalo tím třeťákovi malou násobilku, stovku i hodiny, tedy
+to, čím třetí třída začíná. Tratě mají od téhle opravy vedle `grade` i `thru`,
+poslední ročník, ve kterém se učivo ještě opakuje, a `yearOf()` se ptá na
+rozsah. Třeťákovi zůstalo za dveřmi sedm tratí, obory prvního ročníku a most,
+a v hlavním bloku má rovnou otevřenou násobilku a hodiny. Druhák dveře nemá
+vůbec, protože celý první ročník opakuje. Viz oddíl 7d.
+
+**R1 z oddílu 9 plánu zůstává neudělaná a už netlačí.** Byla to odpověď na to,
+že čerstvý třeťák nemá na mapě jediné místo, na které jde klepnout; tenhle
+důvod padl s opravou B0b, protože násobilka i hodiny jsou otevřené od začátku.
+R1 (otevřít staršímu dítěti celé minulé roky) je tedy dnes jen pohodlí navíc
+a čeká na rozhodnutí uživatele.
 
 **Na řadě je krok C**, responzivita a písmo podle ročníku, a dál podle
 `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
@@ -439,29 +446,38 @@ Dvaadvacet tratí, každá má vlastní generovanou cestu a vlastní prostředí
 v každém ze čtyř světů; tvar cesty je na trati, ne na světě, mění se s ním
 krajina kolem ní a to, čím cesta končí.
 
-| id | ročník | obsah |
-| --- | --- | --- |
-| t1 | 2 | násobilka 1, 2, 5, 10 |
-| t2 | 2 | násobilka 3, 4 |
-| t3 | 2 | násobilka 6, 7 |
-| t4 | 2 | násobilka 8, 9 |
-| t5 | 2 | celá malá násobilka |
-| d1 | 2 | dělení |
-| chain | 3 | řetězec tří čísel se dvěma znaménky, tři kbelíky podle oboru |
-| beyond | 3 | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
-| round | 3 | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
-| a3, a5, a7, a10, a15, a20 | 1 | šest oborů prvního ročníku, sčítání a odčítání bez přechodu přes desítku, viz oddíl 4 |
-| bridge | 2 | sčítání a odčítání s přechodem přes desítku, čtyři mosty |
-| a100 | 2 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
-| a1000 | 3 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
-| clock | 2 | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
-| mix | 2 | vše odemčené dohromady |
-| weak | 1 | jen příklady s nejnižší úrovní |
-| school | - | učivo vybrané kapitoly učebnice, viz oddíl 11 |
+| id | ročník | do | obsah |
+| --- | --- | --- | --- |
+| t1 | 2 | 4 | násobilka 1, 2, 5, 10 |
+| t2 | 2 | 4 | násobilka 3, 4 |
+| t3 | 2 | 4 | násobilka 6, 7 |
+| t4 | 2 | 4 | násobilka 8, 9 |
+| t5 | 2 | 4 | celá malá násobilka |
+| d1 | 2 | 4 | dělení |
+| chain | 3 | 3 | řetězec tří čísel se dvěma znaménky, tři kbelíky podle oboru |
+| beyond | 3 | 3 | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
+| round | 3 | 3 | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
+| a3, a5, a7, a10, a15, a20 | 1 | 2 | šest oborů prvního ročníku, sčítání a odčítání bez přechodu přes desítku, viz oddíl 4 |
+| bridge | 2 | 2 | sčítání a odčítání s přechodem přes desítku, čtyři mosty |
+| a100 | 2 | 3 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
+| a1000 | 3 | 3 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
+| clock | 2 | 3 | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
+| mix | 2 | - | vše odemčené dohromady |
+| weak | 1 | - | jen příklady s nejnižší úrovní |
+| school | - | - | učivo vybrané kapitoly učebnice, viz oddíl 11 |
 
-Ročník je rok, ve kterém se učivo trati probírá, odečtený z map učebnic. Mapa
-ukazuje letošní ročník a všechny dřívější; co je dál, je za dílnou pod ukázkou.
-Podrobnosti v oddílu 7d.
+**Učivo má dvě čísla, ne jedno.** `grade` je rok, ve kterém se učivo zavádí,
+`thru` (sloupec "do") poslední rok, ve kterém se k němu třída ještě vrací;
+obojí je odečtené z map učebnic a `thru` chybí tam, kde se rovná `grade`.
+Malá násobilka se zavádí ve druhé třídě, ale třetí jí začíná (kapitoly 2 a 3
+sedmého dílu) a čtvrtá ji opakuje taky (kapitola 5 prvního dílu), takže
+`grade 2, thru 4`. Stovka a hodiny `thru 3`, obory prvního ročníku `thru 2`.
+
+Na `thru` se ptá **jedině `yearOf()`**, tedy jen to, co je na mapě před dveřmi
+a co za nimi. Odemykání, `inGrade()`, ukázka dalšího roku i filtr rodičovské
+heatmapy se pořád ptají na `grade`, protože to je rok, ve kterém učivo začíná.
+Mapa ukazuje letošní ročník a všechny dřívější; co je dál, je za dílnou pod
+ukázkou. Podrobnosti v oddílu 7d.
 
 Trať `school` se na mapě objeví jen tehdy, když je v profilu zvolená učebnice
 a kapitola, a jde vždy na první místo. Nese název kapitoly jako podtitulek.
@@ -766,12 +782,33 @@ minulých let zůstává v profilu, v krabičce, v šampionátu i v rodičovské
 beze změny, vrací se k němu Leitnerova krabička a odemykání se nemění. Na mapě
 je jen za dveřmi.
 
+**Za dveřmi je jen to, k čemu se třída už nevrací, ne všechno starší.** První
+verze skládání se ptala na rok, ve kterém se učivo zavádí, a schovala tím
+třeťákovi malou násobilku, stovku i hodiny. To je přesně naopak, než jak
+vypadá školní rok: třetí třída začíná opakováním malé násobilky (kapitoly 2
+a 3 sedmého dílu Matýska), stovky (kapitola 1) a hodin (kapitola 4), a hra
+vznikla právě kvůli tomuhle opakování. Učivo má proto v `TRACKS` dvě čísla,
+`grade` a `thru`, viz oddíl 5, a `yearOf(p, tr)` se ptá na rozsah: co je
+zavedené později, je `"ahead"`, co se naposled opakovalo dřív než letos, je
+`"past"`, zbytek je `"own"`. Na `thru` se neptá nic jiného než tahle jediná
+funkce.
+
+**Druhák dveře nemá**, protože celý první ročník se ve druhé třídě opakuje
+(kapitola 1 čtvrtého dílu, "Opakování do dvaceti bez přechodu"), takže nemá co
+dát za ně. Jeho mapa je jeden blok, celý letošní, bez dveří i bez milníku,
+a to je správně. Dveře a milník se ukazují podle toho, jestli je aspoň jedna
+trať `"past"`, nikdy podle `tr.grade < g`; dnes to znamená od třetí třídy.
+
 **Tvar mapy shora dolů:** dveře do minulých let (`.place.backdoor`,
 `data-act="back"`, s podtitulkem, které třídy jsou za nimi, a v patičce
 součtem rozsvícených míst ve sbírkách těch tratí), za nimi rozbalené tratě
 minulých let s třídou `past` (plný vzhled, ne čárkovaný, protože je to učivo,
 které dítě má, ne ukázka), pak **milník** `.milestone` s letošním ročníkem,
 pak letošní tratě, dílna a nakonec dveře do příštího roku s ukázkou.
+
+**Podtitulek dveří vychází z ročníků tratí, které jsou opravdu `"past"`**, ne
+z rozsahu 1 až g-1; dělá to `gradeList(past)`. Třeťák tam má "1. a 2. třída",
+protože za dveřmi jsou obory prvního ročníku i most přes desítku.
 
 **Milník je ten předěl, kvůli kterému to celé je,** takže stojí na cestě
 vždycky, ať jsou dveře otevřené, nebo zavřené. Není to tlačítko. Mezi místa se
@@ -788,17 +825,21 @@ jen proto, aby je prvňák neviděl.
 mapu za jedny dveře, a jsou to zároveň všechny starší profily, kterým
 `seedGrade()` dal čtyřku. Pravidlo je ve `foldsYears(p)`: skládá se jen ročník,
 který má v `TRACKS` aspoň jednu vlastní trať. Až krok G přinese učivo čtvrtého
-ročníku, začne se skládat i on. Prvňák dveře zpátky nemá taky, ale z druhé
-strany: nemá co složit.
+ročníku, začne se skládat i on. Prvňák a druhák dveře zpátky nemají taky, ale
+z druhé strany: nemají co složit.
 
 **Po rozbalení i po sbalení se pohled posune na milník**, `go("map",
 {focus:"milestone"})`. Rozbalení přidá místa nad letošní blok, cesta vyroste
 směrem nahoru a pod prstem by se jinak objevilo něco jiného.
 
-**Čerstvý třeťák má po složení mapu bez jediné otevřené trati**, protože
-letošní tratě visí na zvládnutí těch loňských a odemykání tenhle krok nemění.
-Dveře do minulých let jsou tedy jeho první klepnutí. Jestli se to má změnit,
-řeší rozhodnutí R1 v `docs/PLAN.md`, oddíl 9; zatím se nedělá.
+**V hlavním bloku mapy musí mít každý čerstvý profil aspoň jednu otevřenou
+trať.** Hlídá to okruh 14 v `items.test.js` pro všechny čtyři ročníky, protože
+právě tohle se rozbilo: čerstvý třeťák chvíli neměl otevřené nic a jeho první
+klepnutí musely být dveře do minulých let. Dnes má otevřenou malou násobilku
+(`t1`) a hodiny (`clock`), obojí bez čekání na loňsko. Odemykání
+(`unlockState()`) se kvůli tomu nezměnilo ani o řádek; rozhodnutí R1
+v `docs/PLAN.md`, oddíl 9, tedy otevřít starším dětem celé minulé roky,
+zůstává neudělané a není na něm nic závislého.
 
 **Ročník se vybírá při zakládání hráče** a nedá se přeskočit; předvolba by byla
 tichý odhad, který buď zavalí prvňáka, nebo schová půlku hry třeťákovi. Rodič
@@ -857,9 +898,12 @@ jezdců jen řadí; a tvary cest, tedy že okruh zůstal uzavřený, že ostatn�
 vedou z jedné strany na druhou, že cesta nevyjede ze scény a že se patnáct
 tratí v jednom světě od sebe pozná; a ročníky, tedy že prvňák nevidí násobilku,
 že dřívější ročník nikdy nezmizí z dosahu, že `yearOf()` sedí pro každou trať
-a každý ročník a že šampionát, slabá místa i trať podle školy jsou vždycky
-letošní, že se skládá jen ročník s vlastní tratí, že ukázka nabízí právě jeden
-rok dopředu a že šampionát ani rodičovská sekce nemluví o tom, co na mapě není.
+a každý ročník včetně `thru`, tedy že třeťák má malou násobilku, stovku
+i hodiny v hlavním bloku a za dveřmi jen obory prvního ročníku a most, a že
+šampionát, slabá místa i trať podle školy jsou vždycky letošní, že se skládá
+jen ročník s vlastní tratí, že **hlavní blok mapy má pro každý ročník aspoň
+jednu otevřenou trať**, že ukázka nabízí právě jeden rok dopředu a že šampionát
+ani rodičovská sekce nemluví o tom, co na mapě není.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
@@ -871,15 +915,18 @@ prvňákův první závod nevyleze nad tři.
 `flow.test.js` navíc projde celý ročníkový tok: založí prvňáka, ověří, že má
 krátkou mapu a žádné dveře zpátky, rozbalí ukázku, spustí z ní trať
 a zkontroluje, že se ročník nezměnil a že přepnutí hráče ukázku složí. Od kroku
-B0 měří i předěl ročníků: složenou i rozbalenou mapu třeťáka a druháka, že
-dveře zpátky jsou od druhé třídy, že milník nese číslo třídy i se složenou
-mapou, že rozbalení nezapíše do profilu ani písmeno, že přepnutí hráče mapu
+B0 měří i předěl ročníků: složenou i rozbalenou mapu třeťáka, že má malou
+násobilku v hlavním bloku a otevřenou, že za dveřmi je sedm tratí, tedy obory
+prvního ročníku a most, že druhák je jeden blok bez dveří i bez milníku, že
+milník nese číslo třídy i se složenou mapou, že podtitulek dveří říká "1. a 2.
+třída", že rozbalení nezapíše do profilu ani písmeno, že přepnutí hráče mapu
 zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `items.test.js` postaví od kroku A pět set závodů na každé z tratí `a3`, `a5`,
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má od kroku B0 170 kontrol, po kroku A jich bylo 153: navíc
+`flow.test.js` má od kroku B0b 175 kontrol, po kroku B0 jich bylo 170 a po
+kroku A 153: navíc
 předěl ročníků popsaný výše, a už od kroku A vynulování postupu, po kterém
 prvňák zůstane prvňákem a nastavení rodiče se nehne, zatímco krabička, mince
 a medaile jsou pryč, a dva různé chybné počty dílků, které musí dát dva štítky,
@@ -985,6 +1032,17 @@ třetí třídu a dostal jednadvacet míst v jedné řadě, ve které nebylo poz
 kde končí loňsko a kde začíná "jeho" učivo. Minulé roky se teď skládají za
 dveře a mezi ně a letošek se postavil milník s číslem třídy; nic z toho se
 neztratilo, jen to na mapě není v cestě, viz oddíl 7d.
+
+Skládání pak třeťákovi schovalo malou násobilku. Hned při dalším hraní se
+ukázalo, že krok B0 sice udělal předěl, ale postavil ho na roku, ve kterém se
+učivo **zavádí**, takže za dveřmi skončila násobilka, stovka i hodiny, tedy
+přesně to, čím třetí třída začíná (kapitoly 1 až 4 sedmého dílu) a kvůli čemu
+hra vznikla. Čerstvý třeťák navíc neměl na mapě jedinou otevřenou trať. Učivo
+má proto od 13. září dvě čísla, rok zavedení a poslední rok opakování, a ptá
+se na ně `yearOf()`; za dveřmi zůstaly jen obory prvního ročníku a most.
+Druhák tím dveře ztratil úplně, protože celý první ročník opakuje. Napříště to
+hlídá kontrola, že hlavní blok mapy má pro každý ročník aspoň jednu otevřenou
+trať.
 
 ---
 
@@ -1354,7 +1412,9 @@ Od kroku 4 a 4c v něm přibyly dva body, prostředí ve čtyřech světech a ro
 3. `poolKeys()`, `trackKeys()`, a `reachedKeys()`, pokud má rodina stupně
 4. vlastní `*Stage()` přes `stageIndex()`, pokud má stupně
 5. větev v `buildRun()`, vždycky přes `focusAndReview()`, nikdy vlastní poměr
-6. záznam v `TRACKS` **včetně `grade`**, bez něj se trať neobjeví na mapě nikomu
+6. záznam v `TRACKS` **včetně `grade`**, bez něj se trať neobjeví na mapě
+   nikomu; a `thru`, pokud se učivo opakuje i v dalších ročnících, jinak
+   spadne po roce za dveře do minulých let
 7. paleta v `ENVS` a **prostředí ve všech třech zbylých světech ve `WORLDS`**,
    jinak bude nová trať ve stezce, na obloze i v hlubině vypadat jako v okruhu;
    paleta si přes `tok` řekne, co se v ní sbírá, a přes `dark`, jestli je noční
@@ -1377,11 +1437,13 @@ skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do 
 `VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co slibuje.
 
 **V `tests/flow.test.js` sedí natvrdo tahle čísla** a každá nová trať je posune.
-Od kroku B0 se měří zvlášť složená a rozbalená mapa, viz oddíl 7d: třeťák má
-složeno 6 různých cest a 8 míst a rozbaleno 21 cest a 23 míst, druhák má
-složeno 13 míst a rozbaleno 19, prvňák má 8 a dveře zpátky nemá, čtvrťák vidí
-celou mapu, tedy 22 míst a žádné dveře ani milník. Dál sedí počet tratí
-v ukázce druhého ročníku (10) a počet zamčených kapitol třetí třídy (14 z 33).
+Od kroku B0 se měří zvlášť složená a rozbalená mapa, viz oddíl 7d, a od B0b
+platí tahle: třeťák má složeno 14 různých cest a 16 míst (1 dveře, 14 tratí
+letoška, dílna) a rozbaleno 21 cest a 23 míst, za dveřmi má 7 tratí; druhák má
+18 míst bez dveří a bez milníku a k tomu dveře dopředu; prvňák má 8 a dveře
+zpátky nemá; čtvrťák vidí celou mapu, tedy 22 míst a žádné dveře ani milník.
+Dál sedí počet tratí v ukázce druhého ročníku (10) a počet zamčených kapitol
+třetí třídy (14 z 33).
 
 **Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
 `grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v
@@ -1397,15 +1459,18 @@ s dnešním úkolem.
 
 **Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
 a 4d. Z vlny A jsou hotové tři položky ze sedmi. Revize ze 13. září sepsala
-`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0 a B, nejbližší je
+`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B a oprava B0b,
+nejbližší je
 C (responzivita a písmo podle ročníku, jedna až dvě session). Z rozhodnutí
 v oddílu 9 plánu padla R4 (řetězec před `beyond`) a R7 (vynulování nechá
-nastavení), obojí podle doporučení. R1 (žebřík minulých let) je odložené,
-viz hlavička; R5 a R6 se rozhodují v kroku C a plán u obou doporučuje ano.
+nastavení), obojí podle doporučení. R1 (žebřík minulých let) je odložené a po
+B0b už není naléhavé, viz hlavička; R5 a R6 se rozhodují v kroku C a plán
+u obou doporučuje ano.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se
-skládá podle ročníku a ukázka dalšího roku se nikam nezapisuje (7d), první ročník
+skládá podle ročníku, za dveřmi je jen učivo, ke kterému se třída už nevrací,
+a ukázka dalšího roku se nikam nezapisuje (7d), první ročník
 je žebřík šesti oborů bez přechodu přes desítku (4) a zakázka v dílně patří do
 ročníku (4b).
 
@@ -1458,7 +1523,7 @@ ročníku (4b).
 
 Varianta bez průběžných otázek: session dojede zbytek plánu sama, rozhodnutí
 z oddílu 9 plánu bere podle doporučení a krok G jen připraví. Použij, když
-nechceš být u toho. Kroky A, B0 a B jsou hotové, začíná se krokem C.
+nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se krokem C.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.

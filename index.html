@@ -1996,26 +1996,48 @@ function stageKeys(i){
    the clock, and the third the thousand, rounding and everything past
    the tables. A track without a grade belongs to no particular year:
    the trouble spots are useful from the first week, and the school track
-   follows whatever chapter the parent picked. */
+   follows whatever chapter the parent picked.
+
+   Material has two years, though, not one: the year it is introduced and
+   the year it is last revised. `thru` is that second one, the last year
+   in which the track still belongs to the main block of the map; when it
+   is missing it equals `grade`. Only yearOf() reads it. Everything else
+   -- inGrade(), peekTracks(), unlocking, the parent heat map -- keeps
+   asking `grade`, because that is still the year the material starts in.
+   Without this the third year lost the times table behind the door to
+   earlier years, and revising the table is where the third year begins. */
 /* The order here is the order of the road on the map, so it runs the way
    the school years do: the first year's ranges, then crossing the ten,
    then the tables and the hundred, then the third year. */
 const TRACKS = [
-  {id:"a3",   op:"band",                                  env:"dunes",    grade:1},
-  {id:"a5",   op:"band",                                  env:"shore",    grade:1},
-  {id:"a7",   op:"band",                                  env:"palms",    grade:1},
-  {id:"a10",  op:"band",                                  env:"bay",      grade:1},
-  {id:"a15",  op:"band",                                  env:"cliffs",   grade:1},
-  {id:"a20",  op:"band",                                  env:"beach",    grade:1},
+  /* The first year's ranges are chapter 1 of the fourth part, "Opakování do
+     dvaceti bez přechodu", so the second year opens on them; the third year
+     map never comes back to twenty, hence thru 2. */
+  {id:"a3",   op:"band",                                  env:"dunes",    grade:1, thru:2},
+  {id:"a5",   op:"band",                                  env:"shore",    grade:1, thru:2},
+  {id:"a7",   op:"band",                                  env:"palms",    grade:1, thru:2},
+  {id:"a10",  op:"band",                                  env:"bay",      grade:1, thru:2},
+  {id:"a15",  op:"band",                                  env:"cliffs",   grade:1, thru:2},
+  {id:"a20",  op:"band",                                  env:"beach",    grade:1, thru:2},
+  /* Crossing the ten is the second year alone. The third year's chapter 10
+     crosses the base ten within a hundred, which is a100, not this. */
   {id:"bridge",op:"bridge",                               env:"pier",     grade:2},
-  {id:"t1",   op:"mult",  tables:[1,2,5,10],              env:"meadow",   grade:2},
-  {id:"t2",   op:"mult",  tables:[3,4],                   env:"forest",   grade:2},
-  {id:"t3",   op:"mult",  tables:[6,7],                   env:"canyon",   grade:2},
-  {id:"t4",   op:"mult",  tables:[8,9],                   env:"peaks",    grade:2},
-  {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city",     grade:2},
-  {id:"d1",   op:"div",                                   env:"space",    grade:2},
-  {id:"a100", op:"as100",                                 env:"ocean",    grade:2},
-  {id:"clock",op:"clock",                                 env:"clocktown",grade:2},
+  /* The tables and dividing are revised at the very start of the third year,
+     chapters 2 and 3 of the seventh part ("Opakování, násobilka ..."), and
+     again in the fourth year, part one chapter 5 ("Opakování, násobení
+     a dělení"), so they stay in the main block through the fourth. */
+  {id:"t1",   op:"mult",  tables:[1,2,5,10],              env:"meadow",   grade:2, thru:4},
+  {id:"t2",   op:"mult",  tables:[3,4],                   env:"forest",   grade:2, thru:4},
+  {id:"t3",   op:"mult",  tables:[6,7],                   env:"canyon",   grade:2, thru:4},
+  {id:"t4",   op:"mult",  tables:[8,9],                   env:"peaks",    grade:2, thru:4},
+  {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city",     grade:2, thru:4},
+  {id:"d1",   op:"div",                                   env:"space",    grade:2, thru:4},
+  /* The hundred is chapter 1 of the seventh part, "Opakování, sčítání
+     a odčítání do 100"; the fourth year revises the thousand instead. */
+  {id:"a100", op:"as100",                                 env:"ocean",    grade:2, thru:3},
+  /* Telling the time is chapter 2 of the fourth part and comes back as
+     chapter 4 of the seventh, "Hodiny a určování času". */
+  {id:"clock",op:"clock",                                 env:"clocktown",grade:2, thru:3},
   // the chain of three numbers is chapter 11 and multiplying past the
   // tables is chapter 14, so on the map it comes first: the road runs in
   // the order of the book
@@ -2046,15 +2068,21 @@ const gradeOf = p => (p && p.grade) || MAX_GRADE;
    yearOf() and viewMap(). */
 function inGrade(p, tr){ return !tr.grade || tr.grade <= gradeOf(p); }
 /* Which year a place on the map belongs to, seen from this profile:
-   "past", "own" or "ahead". The championship, the weak-spot track and
-   the school track carry a grade only so that a first year does not see
+   "past", "own" or "ahead". It asks a range, not a single year: material
+   is behind the door only once the class has stopped coming back to it,
+   which is `thru`. The times table is introduced in the second year and
+   revised in the first weeks of the third, so a third year still has it
+   in front of the door. The championship, the weak-spot track and the
+   school track carry a grade only so that a first year does not see
    them; whatever year the child is in, they are that year's, so they
    never end up behind the door to earlier years. Everything on the map
    asks this rather than reading tr.grade. */
 function yearOf(p, tr){
   if(!tr.grade || tr.op === "mix" || tr.op === "weak" || tr.op === "school") return "own";
   const g = gradeOf(p);
-  return tr.grade < g ? "past" : (tr.grade > g ? "ahead" : "own");
+  if(tr.grade > g) return "ahead";
+  const thru = tr.thru || tr.grade;
+  return thru < g ? "past" : "own";
 }
 /* Does this year fold the earlier ones away? Only a year that has tracks
    of its own. The fourth has none yet, so folding would put the whole
@@ -4219,7 +4247,13 @@ function viewMap(p){
   /* Earlier years are folded away, so the map starts where the class is
      rather than reading as one long continuation of the last two years.
      Nothing is taken away: the material stays in the profile, in the box
-     and in the parent area, it is simply behind a door here. */
+     and in the parent area, it is simply behind a door here.
+
+     The door and the year sign hang on there being something behind
+     them, that is at least one track yearOf() calls "past", never on
+     tr.grade being lower. A second year revises the whole of the first
+     year, so it has nothing behind a door and gets neither -- which is
+     right: its map is one block, all of it this year's. */
   const past = foldsYears(p) ? shown.filter(tr => yearOf(p, tr) === "past") : [];
   const folding = past.length > 0;
   const own = folding ? shown.filter(tr => yearOf(p, tr) !== "past") : shown;

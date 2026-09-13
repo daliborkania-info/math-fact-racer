@@ -268,6 +268,46 @@ třeťáka byla pokračování prvních dvou tříd bez předělu".
 
 Commit: `Fold the earlier years away so the map starts where the class is`.
 
+### B0b. Za dveře patří jen to, k čemu se třída nevrací — HOTOVO 13. září 2026
+
+Oprava kroku B0, přišla z hraní týž den. B0 použil na předěl `yearOf()`, které
+se ptalo na `tr.grade`, tedy na rok, kdy se učivo **zavádí**, a schovalo tím
+třeťákovi malou násobilku, stovku i hodiny. To je přesně to, čím třetí třída
+začíná: sedmý díl Matýska má kapitolu 1 "Opakování, sčítání a odčítání do 100",
+kapitoly 2 a 3 "Opakování, násobilka ..." a kapitolu 4 "Hodiny a určování
+času". Hra vznikla kvůli tomu, že se třeťákům na začátku roku opakuje malá
+násobilka, takže ji schovat za dveře je regrese, ne uklizení mapy.
+
+Učivo má proto dvě čísla: `grade` je rok zavedení, nový nepovinný `thru` je
+poslední ročník, ve kterém trať zůstává v hlavním bloku mapy (chybí-li, platí
+`grade`). `yearOf()` se ptá na rozsah, na `thru` se neptá nic jiného;
+`inGrade()`, `peekTracks()`, odemykání ani filtr heatmapy se nezměnily.
+Hodnoty: `t1` až `t5` a `d1` `thru 4` (kapitoly 2 a 3 sedmého dílu a kapitola 5
+prvního dílu čtvrtého ročníku, "Opakování, násobení a dělení"), `a100` a
+`clock` `thru 3` (kapitoly 1 a 4 sedmého dílu; čtvrtý ročník opakuje tisícovku,
+ne stovku), obory prvního ročníku `thru 2` (kapitola 1 čtvrtého dílu), `bridge`
+beze změny, protože kapitola 10 třetího ročníku je přechod přes základ deset
+v oboru do sta, tedy `a100`.
+
+Proti zadání se upřesnilo tohle: `viewMap()` už se na `tr.grade` neptalo, dveře
+i milník viselo na `past.length > 0`, takže tam stačil komentář; totéž
+`gradeList(past)` u podtitulku dveří. Za to bylo potřeba přepsat druhákovu část
+`flow.test.js`, protože **druhák teď dveře nemá vůbec** (celý první ročník
+opakuje) a kontrola, že přepnutí hráče mapu složí, se musela přesunout na
+třeťáka. `i18n.test.js` a `names.test.js` už nemusí před závodem otevírat dveře
+do minulých let, protože první místo na mapě třeťáka je otevřená násobilka.
+Kontrol ve `flow.test.js` je po tomhle kroku 175.
+
+Čísla na mapě: třeťák má složeno 14 cest a 16 míst (bylo 6 a 8), rozbaleno
+21 cest a 23 míst (stejně jako dřív, jen sedm z nich je za dveřmi místo
+patnácti); druhák má 18 míst v jednom bloku bez dveří a bez milníku (bylo 13
+složeno a 19 rozbaleno); prvňák a čtvrťák se nehnuli. Nová kontrola v okruhu 14
+`items.test.js` hlídá, že hlavní blok mapy má pro každý ročník aspoň jednu
+trať, kterou `unlockState()` hlásí jako otevřenou; třeťákovi to dnes dělá `t1`
+a `clock`. R1 z oddílu 9 se nedělala a odemykání se nezměnilo ani o řádek.
+
+Commit: `Keep the material the class is revising in front of the door`.
+
 ---
 
 ## Krok B. `chain_3`, trať `chain` — HOTOVO 13. září 2026
@@ -899,6 +939,11 @@ ročníku s `expectOpen` všech oborů). Dopady: šampionát čerpá i z nich (j
 opakování, správně), souhrn v rodičovské sekci je zpočátku nižší, protože
 váží i neprocvičené obory; to je pravdivé číslo. Doporučení: ano. Pokud ne,
 zůstává dnešní chování a plán se nemění.
+
+*Po opravě B0b už R1 netlačí.* Třeťák má v hlavním bloku otevřenou násobilku
+i hodiny, takže mapa, na kterou přijde, má na co klepnout. Zůstává jen to
+křivé místo, že `a100` stojí v jeho letošním bloku zamčená za mostem, který je
+za dveřmi; R1 by to spravila, ale nic na ní nestojí.
 
 **R2. Klíč dělení se zbytkem.** Rodina po dělitelích `r2` až `r10` (návrh
 plánu) proti vyčíslitelným `r{dělenec}x{dělitel}` (`TEMATA.md`). Doporučení:

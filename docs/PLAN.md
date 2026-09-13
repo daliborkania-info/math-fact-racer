@@ -71,7 +71,18 @@ nejvíc kapitol za nejmíň práce (zbytek vlny A).
 
 ---
 
-## Krok A. Opravy z revize
+## Krok A. Opravy z revize — HOTOVO 13. září 2026
+
+Proti plánu se upřesnily tři věci: R7 se udělalo podle doporučení, tedy
+vynulování nechává `grade`, `lang`, `world`, `curriculum`, `chapter`,
+`chapterMode`, `qCount`, `speedMode` a `autoUnlock`; `flow.test.js`
+a `names.test.js` se cestou musely opravit, protože obě padaly na kroku, který
+rozhraní už nemá (klik na "mapu" na mapě a zakládání hráče bez volby třídy),
+takže poslední kontroly nikdy nedoběhly a dnešních 154 kontrol je proti 148
+z oddílu 0 hlavně tímhle; a A6 samo o sobě tmavé pruhy po stranách scény
+neodstraní, protože strop výšky pořád ořízne poměr stran při šířce 375 px,
+jen už scénu nedeformuje na užších displejích — zbytek toho bloku má stejně
+na starosti krok C.
 
 Sedm malých zásahů, žádný nemění datový model, takže bez nové fixture. Každý
 dostane vlastní kontrolu v testu, ať se nevrátí. Dělá se před čímkoli dalším,

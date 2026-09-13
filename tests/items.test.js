@@ -107,6 +107,25 @@ for(const t of A.TRACKS){
   if(dup){console.log('  !!  stejna otazka dvakrat za sebou na trati',t.id,dup+'x');}
   console.log(t.id.padEnd(6), 'otazek', it.length, '| ruznych', uniq, '| za sebou stejne', dup, '|', it.slice(0,4).map(x=>face(x)+(x.kind==='clock'?'':'='+x.answer)).join('  '));
 }
+// 2b. mala zasoba a dvacet otazek: jeden zavod na trati nic nedokaze, protoze
+// dvojice vznikaly zhruba v jednom zavode z dvaceti. Trati prvniho roku maji
+// nejmensi zasobu klicu, takze se na nich meri po peti stech zavodech.
+let neigh=0, neighFace=0;
+for(const id of ['a3','a5','a7','a10']){
+  const q=A.newProfile('N'); A.DB.profiles=[q]; A.DB.current=q.id; q.autoUnlock=false;
+  let pair=0, same=0;
+  for(let r=0;r<500;r++){
+    const run=A.buildRun(q,A.trackById(id));
+    for(let i=1;i<run.length;i++){
+      if(run[i].key===run[i-1].key) pair++;
+      if((run[i].disp||run[i].text)===(run[i-1].disp||run[i-1].text)) same++;
+    }
+  }
+  if(pair||same) console.log('  !!  sousedni dvojice na trati',id,'klicu',pair,'tvari',same);
+  neigh+=pair; neighFace+=same;
+}
+console.log('500 zavodu na a3/a5/a7/a10 | sousednich klicu',neigh,'| sousednich tvari',neighFace);
+
 // sampionat nesmi zacatecnikovi podstrcit stupen, na ktery jeste nedosel
 let mixBad=0;
 const mixp=A.newProfile('M'); A.DB.profiles=[mixp]; A.DB.current=mixp.id;

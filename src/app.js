@@ -1008,15 +1008,25 @@ function buildRun(p, tr){
   // A neighbour swap is not enough once a pool is tiny: the first range
   // of the first year holds four facts and twenty questions, so the pass
   // has to look further down the queue for something different rather
-  // than only at the next one.
+  // than only at the next one, and in both directions, because a pair
+  // sitting at the end of the queue has nothing to its right to trade with.
+  const fits = (i, j) => {
+    // moving keys[i] to j and keys[j] to i must not create a pair at
+    // either end; neighbours that are the swapped slots themselves are
+    // skipped, they are being replaced
+    const x = keys[i], y = keys[j];
+    if(y === keys[i-1]) return false;
+    if(i + 1 < keys.length && i + 1 !== j && y === keys[i+1]) return false;
+    if(j - 1 >= 0 && j - 1 !== i && x === keys[j-1]) return false;
+    if(j + 1 < keys.length && j + 1 !== i && x === keys[j+1]) return false;
+    return true;
+  };
   for(let i = 1; i < keys.length; i++){
     if(keys[i] !== keys[i-1]) continue;
-    for(let j = i + 1; j < keys.length; j++){
-      if(keys[j] === keys[i-1]) continue;
-      if(j + 1 < keys.length && keys[j+1] === keys[i]) continue;
-      [keys[i], keys[j]] = [keys[j], keys[i]];
-      break;
-    }
+    let j = -1;
+    for(let k = i + 1; k < keys.length && j < 0; k++) if(fits(i, k)) j = k;
+    for(let k = i - 2; k >= 0 && j < 0; k--) if(fits(i, k)) j = k;
+    if(j >= 0) [keys[i], keys[j]] = [keys[j], keys[i]];
   }
   const out = keys.slice(0, n).map(itemFromKey);
   // a bucket key is a whole family, so two neighbours drawn from the
@@ -3169,7 +3179,11 @@ function finishJob(){
   go("jobdone");
 }
 function viewJobDone(p){
-  const miss = [...new Map(JOB.missed.map(i => [i.key + "|" + i.amount, i])).values()].slice(0, 3);
+  // Two tasks of the same kind are the same chip only when they really ask
+  // the same thing. Counting pieces has no amount, so the amount alone
+  // glued every counting task into one chip.
+  const miss = [...new Map(JOB.missed.map(i =>
+    [i.key + "|" + (i.answer !== undefined ? i.answer : i.amount), i])).values()].slice(0, 3);
   return `<div class="scr">
     <div class="scr-scroll">
       <div class="result">
@@ -3857,8 +3871,14 @@ document.addEventListener("click", e => {
   if(act === "resetprogress"){
     ask(t("resetTitle"), t("resetText"), t("resetYes"), () => {
       const i = DB.profiles.findIndex(x => x.id === DB.current);
-      const nm = DB.profiles[i].name;
-      const np = newProfile(nm); np.id = DB.current;
+      const old = DB.profiles[i];
+      // Wiping progress wipes progress, not the settings the parent made.
+      // The school year above all: without it the child would be handed
+      // the whole map of the top year on the next screen.
+      const np = newProfile(old.name, old.grade); np.id = DB.current;
+      for(const k of ["lang","world","curriculum","chapter","chapterMode","qCount","speedMode","autoUnlock"]){
+        if(old[k] !== undefined) np[k] = old[k];
+      }
       DB.profiles[i] = np; save(); go("map");
     });
     return;

@@ -11,7 +11,10 @@ async function check(lang){
   const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
   click(qa('[data-act="parentlang"]').find(b=>b.dataset.lang===lang));
   d.getElementById('pin1').value='1234'; click(q('[data-act="savepin"]'));
-  click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Sam'; click(q('[data-go]'));
+  // zalozeni hrace uz chce i tridu, bez ni je tlacitko zakazane a profil
+  // nevznikne; test pak spadl na prvni obrazovce, kterou uz neuvidel
+  click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Sam';
+  click(qa('[data-gr]').find(b=>b.dataset.gr==='3')); click(q('[data-go]'));
   // panel vyberu zavodnika pred startem
   click(q('[data-act="play"]'));
   const start=qa('.pickitem .nm').map(e=>e.textContent);

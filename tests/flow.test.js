@@ -439,15 +439,25 @@ const dilku=()=>ev('JOB.items[JOB.idx].answer');
 ok('na obrazku je tolik dilku, kolik ma byt odpoved',
    ev('(JOB.items[JOB.idx].pic.match(/<g transform="translate/g)||[]).length')===dilku(),
    dilku()+' dilku');
+// naschval dve ruzne chyby ve dvou ulohach tehoz druhu: uloha s dilky nema
+// castku, takze je od sebe musi odlisit odpoved, jinak splynou v jeden stitek
+const chyby=[];
 let kn=0;
 while(ev('view.name')==='job' && kn<20){
   while(qa('#counter [data-drop]').length) click(q('#counter [data-drop]'));
-  for(let i=0;i<dilku();i++) click(q('[data-coin]'));
+  const dl=dilku(), klic=ev('JOB.items[JOB.idx].key'), opak=ev('!!JOB.items[JOB.idx].retry');
+  const chybne = !opak && (chyby.length===0 || (chyby.length===1 && chyby[0].k===klic && chyby[0].d!==dl));
+  if(chybne) chyby.push({k:klic,d:dl});
+  const polozit = chybne ? (dl>1 ? dl-1 : dl+1) : dl;
+  for(let i=0;i<polozit;i++) click(q('[data-coin]'));
   click(q('[data-act="jobcheck"]'));
   if(ev('view.name')==='job') click(q('[data-act="jobcheck"]'));
   kn++;
 }
 ok('zakazka s pocitanim dosla do konce', ev('view.name')==='jobdone', 'obrazovka '+ev('view.name'));
+if(chyby.length===2) ok('dve ruzne chyby v pocitani daly dva stitky', qa('.factchips .factchip').length===2,
+   qa('.factchips .factchip').length+' stitku pro '+chyby.map(x=>x.d).join(' a '));
+else console.log('  --  v tomhle behu nevysly dve ruzne chyby, stitky neovereny');
 ok('pocitani se zapsalo do krabicky', !!prvni().facts.wc1);
 ok('prvnak dostal soucastky', prvni().parts>0, prvni().parts+' soucastek');
 ok('sbirka dilny prvnaka je jen za jeho zakazku', ev('shopSpec(P()).keys.length')===3,
@@ -466,12 +476,39 @@ ok('mapa druhaka je delsi', qa('.place:not(.peekdoor)').length===18 && /Rozjezd/
 ok('druhak vidi ukazku treti tridy', /Do tisíce/.test((click(q('[data-act="peek"]')), txt())));
 
 console.log('--- druhy hrac ---');
-click(q('[data-act="map"]')); click(q('[data-act="players"]'));
+// mapa zadne tlacitko "mapa" nema, uz na ni stojime; ten klik navic tady test
+// shazoval, takze posledni ctyri kontrolce nikdy nedosly na radu
+click(q('[data-act="players"]'));
 click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Anička';
 click(qa('[data-gr]').find(b=>b.dataset.gr==='2')); click(q('[data-go]'));
-ok('druhy profil ma vlastni postup', DBg().profiles.length===2 && DBg().profiles[1].coins===0);
+// v tuhle chvili uz stoji v datech tri profily: Kuba, Prvnak a Anicka; kontrola
+// cekala dva jeste z doby, kdy prvnaka test nezakladal, a nikdy nedobehla
+const anicka=()=>DBg().profiles.find(x=>x.name==='Anička');
+ok('novy profil ma vlastni postup', DBg().profiles.length===3 && anicka().coins===0,
+   DBg().profiles.length+' profilu');
 click(q('[data-act="play"]')); click(q('[data-go]'));
 ok('kratsi zavod dle nastaveni prvniho hrace se neprenasi', qa('.pip').length===20, qa('.pip').length+' otazek');
+
+console.log('--- vynulovani postupu ---');
+// vlastni prvnak, at se nesaha na nic, co uz test overil vyse
+click(q('[data-act="quit"]')); click(q('[data-yes]'));   // z rozjeteho zavodu na mapu
+click(q('[data-act="players"]'));
+click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Terka';
+click(qa('[data-gr]').find(b=>b.dataset.gr==='1')); click(q('[data-go]'));
+ev('(function(){const p=P();p.world="trail";p.qCount=10;p.speedMode="slow";p.chapterMode="hard";'
+  +'p.facts.t1x2={lv:3,reps:4,ok:3,bad:1,best:900,seen:1};p.stars.t1x2=true;p.coins=40;p.parts=7;'
+  +'p.done.t1=2;p.trackRuns.t1=3;p.opened.t1=true;p.streak=4;save();})()');
+click(q('[data-act="gate"]')); d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));
+click(q('[data-act="resetprogress"]')); click(q('[data-yes]'));
+const ter=()=>DBg().profiles.find(x=>x.name==='Terka');
+ok('vynulovani nechalo prvnaka prvnakem', ter().grade===1, 'grade '+ter().grade);
+ok('vynulovani nechalo nastaveni rodice',
+   ter().world==='trail' && ter().qCount===10 && ter().speedMode==='slow' && ter().chapterMode==='hard',
+   ter().world+' / '+ter().qCount+' / '+ter().speedMode+' / '+ter().chapterMode);
+ok('vynulovani smazalo postup',
+   !Object.keys(ter().facts).length && !Object.keys(ter().stars).length && !Object.keys(ter().done).length
+   && ter().coins===0 && ter().parts===0 && ter().streak===0,
+   Object.keys(ter().facts).length+' prikladu, '+ter().coins+' minci');
 
 console.log('\nchyby za behu:', errs.length?errs.join('\n'):'zadne');
 process.exit(0);

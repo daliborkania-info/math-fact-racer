@@ -34,7 +34,14 @@ Tentýž den přišlo z hraní: syn s nastavenou třetí třídou viděl mapu ja
 pokračování prvních dvou tříd bez předělu, takže dřívější ročníky se mají
 složit a rozbalovat jen na žádost (krok B0 plánu; mění rozhodnutí z oddílu 7d).
 
-**Na řadě je krok A, pak B0, pak krok B**, tedy `chain_3`, kapitola 11 třetího
+**Krok A je hotový** (13. září): míchání fronty už nedá dvě stejné otázky za
+sebou, vynulování postupu nechá rodiči nastavení včetně ročníku, výsledek
+zakázky rozliší dvě různé chyby v počítání dílků a tři místa v CSS jsou
+srovnaná (`dvh` až za `vh`, strop výšky spodního listu, mrtvé selektory pro
+nízké displeje). Při tom se ukázalo, že `flow.test.js` a `names.test.js`
+padaly na zastaralém kroku a poslední kontroly nedobíhaly; opravené je to taky.
+
+**Na řadě je krok B0, pak krok B**, tedy `chain_3`, kapitola 11 třetího
 ročníku, pak krok C, responzivita a písmo podle ročníku, a dál podle
 `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
@@ -776,6 +783,17 @@ prvňákův první závod nevyleze nad tři.
 `flow.test.js` navíc projde celý ročníkový tok: založí prvňáka, ověří, že má
 krátkou mapu, rozbalí ukázku, spustí z ní trať a zkontroluje, že se ročník
 nezměnil a že přepnutí hráče ukázku složí.
+`items.test.js` postaví od kroku A pět set závodů na každé z tratí `a3`, `a5`,
+`a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
+klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
+vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
+`flow.test.js` má od kroku A 154 kontrol: navíc vynulování postupu, po kterém
+prvňák zůstane prvňákem a nastavení rodiče se nehne, zatímco krabička, mince
+a medaile jsou pryč, a dva různé chybné počty dílků, které musí dát dva štítky,
+ne jeden. Do kroku A jich dobíhalo 148, protože `flow.test.js` i `names.test.js`
+padaly na kroku, který dnešní rozhraní už nemá (tlačítko "mapa" na mapě
+a zakládání hráče bez volby třídy); poslední kontroly obou souborů proto od té
+změny nikdo neviděl.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
 `tests/fixtures/legacy-profiles.json` a jen se přidávají, nikdy neupravují.
@@ -849,7 +867,19 @@ podle šířky cesty.
 
 V nejmenším oboru padaly dvě stejné otázky za sebou. Ochrana proti tomu koukala
 jen na souseda, což při čtyřech příkladech na dvacet otázek nestačí; teď hledá
-dál ve frontě.
+dál ve frontě, a od kroku A **oběma směry**. Hledání jen doprava nenašlo partnera
+pro dvojici na konci fronty: v osmi tisících závodech na `a3` až `a10` zůstalo
+698 sousedících dvojic, po doplnění obou směrů a podmínky na oba konce prohození
+nula.
+
+Vynulování postupu bralo rodiči nastavení. `newProfile()` se volalo bez ročníku,
+takže prvňák skončil ve čtvrtém ročníku a viděl celou mapu; padl i jazyk dítěte,
+svět, učebnice, kapitola, délka závodu a rychlost. Teď se postup maže a
+nastavení zůstávají.
+
+Výsledek zakázky slepil dvě různé chybné úlohy do jednoho štítku. Chyby se
+rozlišovaly podle částky, kterou úloha s počítáním dílků nemá; teď podle
+odpovědi, a částka je záloha pro úlohy s penězi.
 
 Volba kapitoly bez generátoru nedělala nic. Šla vybrat, poznámka "zatím neumíme"
 se v nabídce usekla a rodič si nastavil kapitolu, se kterou se nestalo nic.

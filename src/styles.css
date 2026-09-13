@@ -55,8 +55,11 @@ input{font-family:inherit}
   width:100%;
   max-width:520px;
   margin:0 auto;
-  min-height:100dvh;
+  /* vh first as the fallback, dvh last so it wins where it is understood;
+     the other way round iOS Safari kept vh and hid the bottom row of the
+     keypad under the browser bar */
   min-height:100vh;
+  min-height:100dvh;
   background:var(--shell);
   display:flex;flex-direction:column;
   overflow:hidden;
@@ -386,6 +389,11 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
 .sheet .inner{
   width:100%;max-width:520px;background:var(--paper);border-radius:var(--r-xl) var(--r-xl) 0 0;
   padding:22px 20px calc(22px + var(--safe-b));animation:up .26s cubic-bezier(.2,.9,.3,1);
+  /* a tall sheet on a phone held sideways has to scroll, never lose its
+     title over the top edge */
+  max-height:calc(100vh - 8px);
+  max-height:calc(100dvh - 8px);
+  overflow-y:auto;
 }
 @keyframes up{from{transform:translateY(100%)}}
 .sheet h3{font-family:var(--font-display);font-size:21px;margin:0 0 6px}
@@ -490,8 +498,9 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
   .reveal{width:64px;height:64px}
   .revealbox{padding:0 18px 6px}
   .putcoin{width:38px;height:38px}
-  .stage{height:148px}
-  .runner,.ghost{width:54px;height:54px;bottom:30px}
+  /* a cap, not a fixed height: a fixed one overrode the aspect ratio and
+     left dark bars beside the scene */
+  .stage{max-height:148px}
   .question{font-size:clamp(32px,10vw,44px)}
   .answerbox{height:52px;font-size:34px;min-width:92px}
 }

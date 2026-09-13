@@ -27,6 +27,12 @@ the number has to be looked at and confirmed, not quietly recomputed.
 A run is clean when no line contains `!!`. The tests print in Czech because that
 is the working language of the project; the code and comments are English.
 
+How long they take: `items.test.js` runs in about a second and is the one to
+run after every change to the engine; `names.test.js` a few seconds;
+`migration.test.js` under ten; `i18n.test.js` and `flow.test.js` about a
+minute each, because they drive whole games through jsdom. Run those two
+before a commit rather than after every edit.
+
 **Touching the data model means adding a fixture.** `migration.test.js` is the
 only guard for children on phones that are not ours, so any change to what a
 profile stores gets a new frozen profile in `fixtures/legacy-profiles.json`.

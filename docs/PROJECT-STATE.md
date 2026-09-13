@@ -22,9 +22,21 @@ rozložený na šest oborů podle učebnice, protože prvňák dostával 20 - 10
 přechod přes desítku přesunutý do druhé třídy (4d). Zakázky dílny dostaly ročník
 a přibylo počítání dílků pro prvňáky, čímž je první ročník pokrytý celý.
 
-**Na řadě je zbytek vlny A z kroku 2**, tedy `chain_3`, kapitola 11 třetího
-ročníku, a dál podle oddílu 12b. Nic nepřestavuje a nic neblokuje. Hotový prompt
-je na konci, v oddílu 14.
+**13. září proběhla revize celého repozitáře** (kód, dokumentace, testy,
+vyrenderované obrazovky na telefonu a tabletu v obou orientacích) a z ní vznikl
+`docs/PLAN.md` verze 2. Mechanika je v pořádku, testy procházejí; našlo se šest
+drobných chyb k opravě (krok A plánu, mimo jiné nestabilní míchání fronty
+a vynulování postupu, které bere ročník) a jedno velké téma: hra není
+responzivní, na telefonu na šířku se závod ani dílna nevejdou na obrazovku,
+na tabletu běží v úzkém sloupci a písmo nerozlišuje ročník (krok C plánu).
+
+Tentýž den přišlo z hraní: syn s nastavenou třetí třídou viděl mapu jako
+pokračování prvních dvou tříd bez předělu, takže dřívější ročníky se mají
+složit a rozbalovat jen na žádost (krok B0 plánu; mění rozhodnutí z oddílu 7d).
+
+**Na řadě je krok A, pak B0, pak krok B**, tedy `chain_3`, kapitola 11 třetího
+ročníku, pak krok C, responzivita a písmo podle ročníku, a dál podle
+`docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -69,7 +81,8 @@ tests/                    regresní testy nad jsdom, viz tests/README.md
 tests/fixtures/           zamrazené profily starších verzí, jen se přidávají
 docs/PROJECT-STATE.md     tenhle soubor
 docs/ROADMAP.md           produktový plán, včetně rešerší o motivaci a inkluzi
-docs/PLAN.md              implementační plán, sedm kroků plus 4c a 4d, co se kde mění
+docs/PLAN.md              implementační plán, verze 2 ze 13. září: kroky A až G, co se kde mění
+docs/PLAN-2026-09-12.md   předchozí plán, záznam kroků 1 až 4d a proč jsou postavené tak, jak jsou
 docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
 docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
 tools/make-qr.py          generátor toho QR kódu
@@ -281,8 +294,10 @@ podstrčil by dítěti lehčí příklad a nikde by to nebylo vidět.
 
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
 je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u počítání do
-tisíce 2,2, u hodin 2,4, protože přečíst ciferník a naťukat čtyři číslice trvá
-déle než vybavit si spoj.
+tisíce 2,2, u zaokrouhlování 2,0, u hodin 2,4, protože přečíst ciferník a
+naťukat čtyři číslice trvá déle než vybavit si spoj, a za násobilkou 2,6,
+protože rozložit číslo a vynásobit obě půlky je víc práce než jeden přechod.
+Všechno je na jednom místě, `thresholds()`.
 
 ---
 
@@ -421,8 +436,8 @@ komutativita se sbaluje. U dvacítky smí být
 druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
 nepotřebují na obor do dvaceti bez přechodu jedinou výjimku.
 
-Klíč začínající písmenem z `FAMILY_HEADS`, tedy `p`, `n`, `c` nebo `k`, není
-jeden příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`.
+Klíč začínající písmenem z `FAMILY_HEADS`, dnes `p`, `n`, `c`, `k`, `x` a `o`,
+není jeden příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`.
 Proto se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegeneruje
 otázku, která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor
 přidá písmeno do `FAMILY_HEADS`, nic víc.
@@ -1025,8 +1040,8 @@ okruhy v `items.test.js`. Nic z bodů A až D se neukázalo jako skrytý blokát
 **A. Rodiny na `pad`, tedy nejlevnější vlna.**
 
 `thresholds()` je ruční výraz, kde má každá rodina svůj násobitel prahů,
-zatím 2,4 pro hodiny, 2,2 pro počítání do tisíce a 1,9 pro počítání do sta.
-Kdo na to zapomene, dostane
+zatím 2,6 za násobilkou, 2,4 pro hodiny, 2,2 pro počítání do tisíce, 2,0 pro
+zaokrouhlování a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
 prahy pro jednociferné vybavování a děti budou mít samé pomalé odpovědi.
 Tohle je jediná věc, na kterou se v téhle vlně dá zapomenout tiše.
 
@@ -1245,21 +1260,12 @@ Použij tenhle, pokud se pokračuje tam, kde se přestalo. Další kroky mají
 v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
 s dnešním úkolem.
 
-**Kde přesně stojíme.** Kroky 1, 3 a 4 jsou hotové, tedy všechno, co něco
-přestavuje, a k tomu 4c a 4d, které v plánu nebyly. Z kroku 2, vlny A, jsou
-hotové dvě položky ze sedmi. Zbytek plánu už jsou samostatné přírůstky a pořadí
-mezi nimi je volné:
-
-- **Zbytek vlny A**, tedy `chain_3`, pak `order_of_ops`, `mult_div_10_100`
-  s `mult_round`, `unit_convert` s `time_convert` a nakonec `missing_operand`
-  s `inverse_check`. Sedm zamčených kapitol třetí třídy, nic nového na vstupu.
-- **Krok 5, vlna B**, tedy `pad2` a dělení se zbytkem. Před ním je půl dne
-  práce na víc políčkách v `tap()`, `typedText()` a `questionHTML()`.
-- **Krok 6, další zakázka do dílny**, tedy `word_problem`, slovní úlohy. Je to
-  první zakázka, kde se generuje text, ne čísla.
-- **Krok 7, čtvrtý a pátý ročník.** Mapy v `docs/` existují, ale jen z obsahů,
-  takže je před zapnutím potřeba ověřit; do té doby je čtvrtý ročník v aplikaci
-  jen `grade: 4`, tedy "všechno", a ukázka dalšího roku se u něj neukazuje.
+**Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
+a 4d. Z vlny A jsou hotové dvě položky ze sedmi. Revize ze 13. září sepsala
+`docs/PLAN.md` verze 2 s kroky A až G; nejbližší jsou A (opravy z revize,
+hodina), B (`chain_3`, jedna session) a C (responzivita a písmo podle ročníku,
+jedna až dvě session). Oddíl 9 plánu má sedm rozhodnutí, která má udělat
+uživatel; než padnou, dělá se to, co na nich nezávisí.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se
@@ -1270,22 +1276,30 @@ ročníku (4b).
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
 >
-> Přečti si celý `docs/PROJECT-STATE.md` kvůli stavu a mechanice, pak
-> `docs/PLAN.md` kvůli tomu, co se dělá dál a v jakém pořadí, a `src/app.js`
-> kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
-> něco navržené tak, jak je; jsou tam odkazy na studie. Mapy učiva jsou
+> Přečti si celý `docs/PROJECT-STATE.md` kvůli stavu a mechanice, pak celý
+> `docs/PLAN.md` kvůli tomu, co se dělá dál, v jakém pořadí a kde v kódu se
+> sahá, a `src/app.js` kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když
+> potřebuješ vědět, proč je něco navržené tak, jak je. Mapy učiva jsou
 > v `docs/kurikulum/`, na generátor se bez nich nepouštěj.
 >
-> Dneska chci `chain_3` z kroku 2, tedy třetí položku vlny A, kapitolu 11
-> třetího ročníku, tedy řetězec tří členů typu 7 + 5 - 3. Hlavička klíče `q`,
-> kbelíky podle oboru. Jdi podle kontrolního seznamu pro novou rodinu z oddílu
-> 14 a nepřeskoč `grade` v `TRACKS`, prostředí ve všech čtyřech světech,
-> násobitel v `thresholds()` ani blok v `heatSpecs()`.
+> Dneska chci v tomhle pořadí, každý krok jako vlastní commit: krok A celý
+> (opravy z revize), krok B0 (dřívější ročníky na mapě složené za dveře,
+> milník s třídou před letošním blokem), a pokud zbude čas, krok B, tedy
+> `chain_3`, kapitolu 11 třetího ročníku, řetězec tří členů typu 7 + 5 - 3,
+> hlavička klíče `q`, tři kbelíky podle oboru. U B jdi přesně podle oddílů B1
+> až B7 plánu a podle kontrolního seznamu pro novou rodinu v oddílu 14 tohohle
+> souboru; nepřeskoč `grade` v `TRACKS`, prostředí ve všech čtyřech světech,
+> násobitel v `thresholds()`, blok v `heatSpecs()` ani zalamování dlouhé
+> otázky z B7. Rozhodnutí z oddílu 9 plánu, která se kroků týkají (R4 poloha
+> řetězce na mapě, R7 vynulování postupu), ber podle doporučení, pokud ti
+> neřeknu jinak; R1 (žebřík minulých let) zatím nedělej.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
-> build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové
-> chování patří do testů, ne jen do kódu. Žádná změna nesmí připravit existující
-> profil o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
+> build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu;
+> `items.test.js` je vteřina a pouští se po každé změně, `flow.test.js`
+> a `i18n.test.js` jsou minuta a pouští se před commitem. Nové chování patří
+> do testů, ne jen do kódu. Žádná změna nesmí připravit existující profil
+> o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
 > model, přidej do `tests/fixtures/legacy-profiles.json` další zamrazený profil.
 >
 > Když něco kreslíš nebo měníš vzhled, vyrenderuj si to a podívej se na to;
@@ -1293,4 +1307,6 @@ ročníku (4b).
 >
 > Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
 > principy z oddílu 3 neměň bez mého pokynu. Push dělám sám, jen commituj
-> a řekni mi, co poslat.
+> a řekni mi, co poslat. Na konci označ hotové kroky v `docs/PLAN.md` a
+> aktualizuj tenhle soubor včetně promptu pro další session, kde bude
+> dalším úkolem krok C.

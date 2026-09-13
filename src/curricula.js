@@ -28,6 +28,10 @@
  *   divBeyond  [bucket ids]       and the same examples read backwards.
  *                                 The two are separate fields because the
  *                                 book teaches them as separate chapters
+ *   multTens [bucket ids]         1..2, multiplying by ten, by a hundred
+ *   divTens  [bucket ids]         and by a round ten, and the same
+ *                                 products read backwards. Two fields
+ *                                 for the same reason as past the tables
  *   round [bucket ids]            o1..o3, rounding: tens under a hundred,
  *                                 tens of a three digit number, hundreds
  *   chain [bucket ids]            1..3, three numbers and two signs,
@@ -51,6 +55,7 @@ const ALL_K = ["b1","b2","b3","b4","b5","b6"];
 const ALL_X = ["1","2","3","4"];
 const ALL_O = ["o1","o2","o3"];
 const ALL_Z = ["1","2","3","4"];
+const ALL_G = ["1","2"];
 
 const CURRICULA = [
   {
@@ -175,7 +180,10 @@ const CURRICULA = [
       {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29", pool:{as1000:ALL_K, as100:ALL_H}},
       {n:26, name:"Zaokrouhlování na desítky a stovky",   src:"8. díl, s. 30",    pool:{round:ALL_O}},
       {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35", pool:null},
-      {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39", pool:null},
+      // the chapter teaches both directions on the same four pages, so
+      // unlike chapters 14 and 16 it asks for both fields at once
+      {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39",
+             pool:{multTens:ALL_G, divTens:ALL_G}},
       {n:29, name:"Převody jednotek",                     src:"8. díl, s. 38–41", pool:null},
       {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:{ops:ALL_Z}},
       {n:31, name:"Mimo rozsah malé násobilky do tisíce", src:"8. díl, s. 42–47",

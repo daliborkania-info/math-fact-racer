@@ -341,6 +341,21 @@ const Z_BUCKETS = [
 ];
 const opsKeys = ids => ids.map(b => "z" + b);
 
+/* Ten, a hundred, and the round tens that follow from them. The eighth
+   part gives four pages to multiplying and dividing by ten and by a
+   hundred and lets the round tens fall straight out of it: 3 × 40 is
+   3 × 4 with the nought put back. The two buckets are that pair, the
+   bare nought first and then a table fact wearing one.
+   Dividing is the same product read backwards, so one bucket trains
+   both directions, exactly as past the tables does; the key says which
+   way round it is, `gm` or `gd`, and the bucket id is a plain number,
+   which is the convention that family set. */
+const G_BUCKETS = [
+  {id:"1", label:"times and divided by ten and a hundred"},
+  {id:"2", label:"times and divided by a round ten"}
+];
+const tensKeys = ids => ids.map(b => "gm" + b).concat(ids.map(b => "gd" + b));
+
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
   {id:"c1", mins:[0]},                            // whole hours
@@ -423,6 +438,10 @@ const TRACKS = [
   // chain of three numbers and multiplying past the tables
   {id:"ops",  op:"ops",                                   env:"amethyst", grade:3},
   {id:"beyond",op:"beyond",                               env:"savanna",  grade:3},
+  // ten, a hundred and the round tens are chapter 28, and they are the
+  // same skill as multiplying past the tables read one step further, so
+  // the road keeps the two of them side by side
+  {id:"tens", op:"tens",                                  env:"mulberry", grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
   {id:"mix",  op:"mix",                                   env:"night",    grade:2},
@@ -516,6 +535,10 @@ function poolKeys(spec){
   // book, so unlike the hundred a chapter may ask for only one of them
   if(spec.multBeyond) out.push(...spec.multBeyond.map(b => "xm" + b));
   if(spec.divBeyond)  out.push(...spec.divBeyond.map(b => "xd" + b));
+  // ten and a hundred are one chapter with two directions in it, and
+  // the two are kept apart here for the same reason as past the tables
+  if(spec.multTens) out.push(...spec.multTens.map(b => "gm" + b));
+  if(spec.divTens)  out.push(...spec.divTens.map(b => "gd" + b));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.ops) out.push(...opsKeys(spec.ops));
@@ -559,7 +582,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxoqz";
+const FAMILY_HEADS = "pnckxoqzg";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -606,6 +629,7 @@ function trackKeys(p, tr){
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
   if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
+  if(tr.op === "tens")  return tensKeys(G_BUCKETS.map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.map(b => b.id));
   if(tr.op === "ops")   return opsKeys(Z_BUCKETS.map(b => b.id));
@@ -631,6 +655,10 @@ function as1000Stage(p){ return stageIndex(p, i => as1000Keys([K_BUCKETS[i].id])
 // how far past the times table the child has got; multiplying and
 // dividing one bucket are the same step, so they rise and fall together
 function beyondStage(p){ return stageIndex(p, i => beyondKeys([X_BUCKETS[i].id]), X_BUCKETS.length); }
+// the bare nought comes before a table fact wearing one, and each
+// bucket multiplies and divides together, so the two rise and fall as
+// one step
+function tensStage(p){ return stageIndex(p, i => tensKeys([G_BUCKETS[i].id]), G_BUCKETS.length); }
 // how far the rounding has got: tens under a hundred, then tens of a
 // three digit number, then hundreds
 function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
@@ -652,6 +680,7 @@ function reachedKeys(p, tr){
   if(tr.op === "clock") return C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id);
   if(tr.op === "as1000") return as1000Keys(K_BUCKETS.slice(0, as1000Stage(p) + 1).map(b => b.id));
   if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
+  if(tr.op === "tens") return tensKeys(G_BUCKETS.slice(0, tensStage(p) + 1).map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.slice(0, chainStage(p) + 1).map(b => b.id));
   if(tr.op === "ops") return opsKeys(Z_BUCKETS.slice(0, opsStage(p) + 1).map(b => b.id));
@@ -751,6 +780,10 @@ function unlockState(p, tr){
     // splitting 12 × 3 into 30 + 6 only works once the table underneath
     // is there, and the track teaches dividing as well as multiplying
     case "beyond": return (m("d1") >= .6 || many("d1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_d1"))};
+    // putting a nought back on 3 × 4 is the step straight after splitting
+    // 12 × 3 apart, so this one waits on the track that teaches the
+    // splitting rather than on the table underneath it
+    case "tens": return (m("beyond") >= .5 || many("beyond")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_beyond"))};
     // rounding needs place value rather than fluent arithmetic, so it
     // opens earlier than the thousand does, and its own first bucket
     // keeps the child on two digit numbers until they are solid
@@ -815,6 +848,7 @@ function rawItem(key){
   if(head === "p" || head === "n") return hundredItem(key);
   if(head === "k") return thousandItem(key);
   if(head === "x") return beyondItem(key);
+  if(head === "g") return tensItem(key);
   if(head === "o") return roundItem(key);
   if(head === "q") return chainItem(key);
   if(head === "z") return opsItem(key);
@@ -900,6 +934,46 @@ function beyondItem(key){
   }
   if(plus) return {key, text: x + " × " + m, answer: x * m, kind:"multx"};
   return {key, text:(x * m) + " : " + m, answer: x, kind:"divx"};
+}
+
+/* Ten, a hundred and the round tens. Built by construction like every
+   family since the thousand: both numbers come out of ranges that
+   already hold the bucket and the product, so nothing is ever trimmed
+   back afterwards and a division can never be left with a remainder.
+   The product never passes a thousand, which is the range the eighth
+   part works in; the whole thousand is allowed, because 10 × 100 is one
+   of the lines the chapter is actually about, and that is the one
+   answer here that needs a fourth digit.
+   A round number reads as easily in front as behind and the book writes
+   it both ways, so which side it lands on is drawn too. */
+function tensItem(key){
+  const times = key[1] === "m";        // m multiplies, d reads it backwards
+  const b = key.slice(2);
+  let x, r;                            // the plain number and the round one
+  if(b === "1"){
+    // 23 × 10 and 4 × 100: the round number is the ten or the hundred
+    // itself and the other one is as big as a thousand leaves room for
+    if(Math.random() < .5){ r = 10;  x = ri(2, 99); }
+    else                  { r = 100; x = ri(2, 10); }
+  } else {
+    // 3 × 40: a fact from the small table with a nought put back on it
+    r = ri(2, 9) * 10;
+    x = ri(2, 9);
+  }
+  if(times){
+    const flip = Math.random() < .5;
+    return {key, kind:"multten", maxLen:4,
+            text:(flip ? r : x) + " × " + (flip ? x : r), answer: x * r};
+  }
+  /* Dividing by the round number is what the chapter is named after, so
+     the first bucket only ever does that: 230 : 23 would be dividing by
+     a two digit number, which nothing has taught yet. The second bucket
+     may go either way, because both halves of 3 × 40 are things the
+     child can divide by, and reading it back as 120 : 3 is where the
+     round answer comes from. */
+  const byRound = b === "1" || Math.random() < .5;
+  return {key, kind:"divten", maxLen:4,
+          text:(x * r) + " : " + (byRound ? r : x), answer: byRound ? x : r};
 }
 
 /* Rounding is the first question that is not an equation. The line
@@ -1271,6 +1345,10 @@ function buildRun(p, tr){
     const xi = beyondStage(p);
     const review = beyondKeys(X_BUCKETS.slice(0, xi).map(b => b.id));
     keys = focusAndReview(p, beyondKeys([X_BUCKETS[xi].id]), review, n, 2);
+  } else if(tr.op === "tens"){
+    const gi = tensStage(p);
+    const review = tensKeys(G_BUCKETS.slice(0, gi).map(b => b.id));
+    keys = focusAndReview(p, tensKeys([G_BUCKETS[gi].id]), review, n, 2);
   } else if(tr.op === "round"){
     const oi = roundStage(p);
     const review = roundKeys(O_BUCKETS.slice(0, oi).map(b => b.id));
@@ -1599,7 +1677,11 @@ function thresholds(p, item){
   // them is the longest piece of thinking in the game so far, brackets
   // included, so it gets a little more room than a chain of plus and
   // minus does
+  // putting a nought back is a rule rather than a piece of arithmetic,
+  // so it needs a little longer than a plain fact and nowhere near as
+  // long as splitting a number apart does
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "multten" || item.kind === "divten" ? 1.8
                : item.kind === "ops" ? 2.4
                : item.kind === "chain" ? 2.0
                : item.kind === "round" ? 2.0
@@ -1915,6 +1997,12 @@ const ENVS = Object.assign({
   // that already has a pink clock town and a purple city, so a dusky
   // violet belongs there and is unmistakable next to either of them.
   amethyst: pal(272, 285, 44, "crystal", {sat:30}),
+  // A mulberry moor for the circuit. The greens, the sands, the blues
+  // and the warm reds are all spoken for, and the two violets that are
+  // there are a pale pink clock town and a dusky amethyst, so a strong
+  // magenta is the one place in the wheel that is still free, and next
+  // to either of those two it cannot be taken for the same place.
+  mulberry: pal(318, 330, 50, "flower", {sat:40}),
   dunes:  pal( 46,  90, 72, "shell"),
   shore:  pal( 38, 190, 76, "shell"),
   palms:  pal(105, 150, 58, "leaf"),
@@ -1950,6 +2038,11 @@ const ENVS = Object.assign({
   // the one khaki hollow among two dozen greens, darker and yellower
   // than the birch wood and greener than the stubble field
   tr_hollow: pal( 70,  95, 50, "stone"),
+  // a bluebell wood: the flowers make the top of the slope and the wood
+  // floor stays green underneath, which is how the trail wears a colour
+  // that is not a ground colour; the heath and the orchard do the same,
+  // and this one is the blue of the three
+  tr_bells:  pal(232, 118, 56, "flower", {h2:118, l2:46, sat:34}),
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
@@ -1978,6 +2071,10 @@ const ENVS = Object.assign({
   // a deeper blue than the rest of the sky, so it does not read as the
   // grey of the dust; the fresh green horizon is what names the place
   sk_gate:   pal(214, 110, 48, "leaf",    {h2: 96, l2:78, sat:56}),
+  // the last light: still a blue overhead, but a deeper one than any
+  // daytime sky here, and the horizon is rose rather than the gold the
+  // sunset and the ember already use
+  sk_afterglow: pal(240, 330, 40, "flower", {h2:330, l2:66}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
   dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
@@ -2007,7 +2104,11 @@ const ENVS = Object.assign({
   dp_shoal:  pal(188, 150, 62, "shell",   {h2:158, l2:52, sat:38}),
   // water above and a bed of yellow green weed below, which is the one
   // floor colour the deep has not used yet
-  dp_weed:   pal(194,  84, 62, "leaf",    {h2: 84, l2:38})
+  dp_weed:   pal(194,  84, 62, "leaf",    {h2: 84, l2:38}),
+  // a bed of purple urchins: the water stays blue and the floor takes
+  // the one colour the deep has not used, between the pearl bank's pink
+  // and the sunken city's indigo
+  dp_urchins:pal(202, 288, 58, "crystal", {h2:288, l2:44})
 });
 
 /* --- worlds ---
@@ -2027,21 +2128,24 @@ const WORLDS = [
    env:{a3:"tr_moss", a5:"tr_ferns", a7:"tr_birch", a10:"tr_clearing", a15:"tr_creek",
         a20:"tr_brook", bridge:"tr_log",
         t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
-        d1:"tr_burrow", chain:"tr_reeds", ops:"tr_hollow", beyond:"tr_field", round:"tr_quarry",
+        d1:"tr_burrow", chain:"tr_reeds", ops:"tr_hollow", beyond:"tr_field",
+        tens:"tr_bells", round:"tr_quarry",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
    env:{a3:"sk_meadowair", a5:"sk_hilltop", a7:"sk_updraft", a10:"sk_first", a15:"sk_flock",
         a20:"sk_breeze", bridge:"sk_arch",
         t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
-        d1:"sk_void", chain:"sk_haze", ops:"sk_gate", beyond:"sk_dust", round:"sk_storm",
+        d1:"sk_void", chain:"sk_haze", ops:"sk_gate", beyond:"sk_dust",
+        tens:"sk_afterglow", round:"sk_storm",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
    env:{a3:"dp_pool", a5:"dp_tide", a7:"dp_grass", a10:"dp_coral", a15:"dp_drift",
         a20:"dp_lagoon", bridge:"dp_arch",
         t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
-        d1:"dp_abyss", chain:"dp_shoal", ops:"dp_weed", beyond:"dp_sand", round:"dp_cavern",
+        d1:"dp_abyss", chain:"dp_shoal", ops:"dp_weed", beyond:"dp_sand",
+        tens:"dp_urchins", round:"dp_cavern",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -3997,6 +4101,10 @@ const H_EX = {h1:"34+5", h2:"37+6", h3:"30+40", h4:"23+41", h5:"25+47"};
 const K_EX = {b1:"300+200", b2:"342+5", b3:"347+6", b4:"320+40", b5:"342+25", b6:"372+45"};
 const C_EX = {c1:"7:00", c2:"7:30", c3:"7:15", c4:"7:20", c5:"7:23", c6:"19:45"};
 const X_EX = {"1":"12×3", "2":"17×5", "3":"34×6", "4":"213×3"};
+// this family names both directions itself: dividing by a round number
+// is not the multiplication read backwards on paper, so deriving the
+// second half from the first would print the wrong example
+const G_EX = {m1:"7×10", d1:"70:10", m2:"3×40", d2:"120:40"};
 const O_EX = {"1":"47→50", "2":"347→350", "3":"347→300"};
 const Q_EX = {"1":"7+5-3", "2":"30+40-20", "3":"47+5-3"};
 const Z_EX = {"1":"4+3×5", "2":"(4+3)×5", "3":"300+7×8", "4":"500-(40+30)"};
@@ -4028,6 +4136,12 @@ function heatSpecs(p){
     ({label: X_EX[b.id], keys:["xm" + b.id], tip: X_EX[b.id]}))
     .concat(X_BUCKETS.map(b =>
     ({label: divEx(X_EX[b.id]), keys:["xd" + b.id], tip: divEx(X_EX[b.id])})))));
+  // ten and a hundred are the step straight after that, so the two
+  // multiplying blocks stand together the way the tracks do on the map
+  push("tens", heatStrip(t("trk_tens"), 2, G_BUCKETS.map(b =>
+    ({label: G_EX["m" + b.id], keys:["gm" + b.id], tip: G_EX["m" + b.id]}))
+    .concat(G_BUCKETS.map(b =>
+    ({label: G_EX["d" + b.id], keys:["gd" + b.id], tip: G_EX["d" + b.id]})))));
   // the first year is one block of six ranges rather than six blocks of
   // one, because a parent reads it as one ladder
   push("a3", heatStrip(t("heatBands"), 6, BANDS.map(b =>

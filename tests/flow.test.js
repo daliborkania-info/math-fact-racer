@@ -54,14 +54,14 @@ ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, 
 // mapa treťáka zacina tam, kde je letos trida, ale ucivo, ktere se letos
 // opakuje, zustava pred dvermi: treti rocnik zacina opakovanim nasobilky
 // (kapitoly 2 a 3 sedmeho dilu), stovky (kapitola 1) a hodin (kapitola 4).
-// V hlavnim bloku je tedy 15 trati: t1 az t5, d1, a100, clock, pet trati
+// V hlavnim bloku je tedy 16 trati: t1 az t5, d1, a100, clock, sest trati
 // tretiho rocniku a k tomu sampionat se slabymi misty. Plus dilna a dvere
-// zpatky je to 17 mist; cest je 15, dilna ani dvere nahled nemaji.
-// Pet trati tretiho rocniku je od kroku D1: retezec, poradi operaci,
-// za nasobilkou, zaokrouhlovani a tisicovka.
+// zpatky je to 18 mist; cest je 16, dilna ani dvere nahled nemaji.
+// Sest trati tretiho rocniku je od kroku D2: retezec, poradi operaci,
+// za nasobilkou, kulata cisla, zaokrouhlovani a tisicovka.
 const cesty=()=>new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size;
-ok('slozena mapa treťáka ma 15 ruznych cest', cesty()===15, cesty()+' okruhu');
-ok('slozena mapa ma 17 mist', qa('.world .place').length===17, qa('.world .place').length+' mist');
+ok('slozena mapa treťáka ma 16 ruznych cest', cesty()===16, cesty()+' okruhu');
+ok('slozena mapa ma 18 mist', qa('.world .place').length===18, qa('.world .place').length+' mist');
 // tohle je ta regrese, kvuli ktere thru vzniklo: treťák si sedne k mape
 // a rovnou ma na co klepnout, nemusi hledat dvere do minulych let
 ok('mala nasobilka je treťákovi na mape a otevrena',
@@ -75,6 +75,11 @@ ok('retezec stoji na mape pred tratí za nasobilkou',
 ok('poradi operaci stoji mezi retezcem a tratí za nasobilkou',
    mista().indexOf('Co dřív')>mista().indexOf('Řetězec')
    && mista().indexOf('Co dřív')<mista().indexOf('Za násobilkou'),
+   mista().join(', '));
+// kapitola 28 prijde az po kapitole 14, takze kulata cisla lezi na ceste
+// hned za tratí za nasobilkou; je to tentyz pocetni krok o stupen dal
+ok('kulata cisla stoji hned za tratí za nasobilkou',
+   mista().indexOf('Kulatá čísla')===mista().indexOf('Za násobilkou')+1,
    mista().join(', '));
 ok('dvere do minulych let jsou od druhe tridy',
    qa('.place.backdoor[data-act="back"]').length===1 && /Z minulých let/.test(txt()));
@@ -90,7 +95,7 @@ ok('trat hodin je v hlavnim bloku, uz ne za dvermi',
    /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
 const predRozbalenim=JSON.stringify(DBg());
 click(q('[data-act="back"]'));
-ok('rozbaleni ukazalo minule roky', cesty()===22, cesty()+' okruhu');
+ok('rozbaleni ukazalo minule roky', cesty()===23, cesty()+' okruhu');
 ok('za dvermi je sest oboru prvniho rocniku a most', qa('.place.past').length===7 && qa('.place.peek').length===0,
    qa('.place.past').length+' trati z minulych let');
 ok('minule roky jsou plne, ne carkovane jako ukazka', /Do tří/.test(txt())
@@ -98,9 +103,9 @@ ok('minule roky jsou plne, ne carkovane jako ukazka', /Do tří/.test(txt())
 ok('o rozbaleni neni v ulozenych datech ani slovo', JSON.stringify(DBg())===predRozbalenim);
 ok('predel je videt i s rozbalenou mapou', qa('.milestone').length===1);
 // mapa uz neni svisly seznam: mista lezi podel cesty a zamcene je vidět taky
-// rozbaleno je to porad 24 mist, jen jich vic patri do hlavniho bloku:
-// 1 dvere + 7 minulych + 15 letosnich + dilna
-ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===24 && qa('.worldroad path').length>0,
+// rozbaleno je to porad 25 mist, jen jich vic patri do hlavniho bloku:
+// 1 dvere + 7 minulych + 16 letosnich + dilna
+ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===25 && qa('.worldroad path').length>0,
    qa('.world .place').length+' mist');
 ok('kazde misto ma svou polohu v mape', qa('.place').every(el=>/left:/.test(el.getAttribute('style')||'')));
 ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky a sedmičky/.test(txt()),
@@ -196,7 +201,7 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===12, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===11, zamcene().length+' zamcenych z 33');
 ok('scitani a odcitani vice cisel se da vybrat', !zamcene().includes(11));
 ok('deleni se zbytkem a zlomky jsou mezi zamcenymi', zamcene().includes(27) && zamcene().includes(32));
 // nasobeni a deleni mimo malou nasobilku uz umime, takze jeho tri kapitoly zamcene byt nesmi
@@ -206,6 +211,8 @@ ok('mimo rozsah male nasobilky se da vybrat',
 ok('zaokrouhlovani se da vybrat', !zamcene().includes(7) && !zamcene().includes(26));
 // poradi operaci umime od kroku D1, takze jeho dve kapitoly uz zamcene nejsou
 ok('poceti operace se zavorkami se daji vybrat', !zamcene().includes(13) && !zamcene().includes(30));
+// nasobeni a deleni deseti a stem umime od kroku D2, tedy kapitola 28
+ok('nasobeni a deleni 10 a 100 se da vybrat', !zamcene().includes(28));
 // obor do tisice uz umime, takze jeho tri kapitoly zamcene byt nesmi
 ok('obor do tisice se da vybrat', !zamcene().includes(23) && !zamcene().includes(24) && !zamcene().includes(25));
 ok('kapitola s hodinami uz zamcena neni', !zamcene().includes(4));
@@ -562,12 +569,12 @@ ok('predel treťáka nese jeho rocnik', /3\. třída/.test(q('.milestone').textC
 ok('dvere rikaji, ktere roky jsou za nimi', /1\. a 2\. třída/.test(q('.place.backdoor').textContent),
    q('.place.backdoor .sub').textContent.trim());
 click(q('[data-act="back"]'));
-ok('rozbalena mapa treťáka je delsi', qa('.place:not(.peekdoor)').length===24 && /Do tří/.test(txt()),
+ok('rozbalena mapa treťáka je delsi', qa('.place:not(.peekdoor)').length===25 && /Do tří/.test(txt()),
    qa('.place:not(.peekdoor)').length+' mist');
 // prepnuti hrace mapu zase slozi, stejne jako zavreni hry
 click(q('[data-act="players"]')); click(qa('[data-act="pick"]').find(b=>b.dataset.id===prvni().id));
 ok('prepnuti hrace mapu slozilo', qa('.place.past').length===0 && qa('.place.backdoor').length===1
-   && qa('.place:not(.peekdoor)').length===17);
+   && qa('.place:not(.peekdoor)').length===18);
 
 console.log('--- druhy hrac ---');
 // mapa zadne tlacitko "mapa" nema, uz na ni stojime; ten klik navic tady test
@@ -615,7 +622,7 @@ ok('ctvrtak cte pismo v zakladni velikosti', d.documentElement.dataset.grade==='
 ok('ctvrtak nema dvere zpatky ani predel',
    qa('.place.backdoor').length===0 && qa('.milestone').length===0);
 ok('ctvrtak vidi celou mapu jako driv',
-   qa('.place').length===23 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
+   qa('.place').length===24 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
    qa('.place').length+' mist');
 ok('ctvrtak nema ani dvere dopredu, nic dalsiho neni', qa('.place.peekdoor').length===0);
 

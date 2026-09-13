@@ -911,7 +911,21 @@ v `heatSpecs()` se čtyřmi dlaždicemi `Z_EX = {"1":"4+3×5", "2":"(4+3)×5",
 "3":"300+7×8", "4":"(300+60):4"}`. Otázka `(300 + 60) : 4` má 11 znaků bez
 mezer, tedy `q-xlong`; ověř, že se vejde na 360 px při `--tx:1.04`.
 
-### D2. `mult_div_10_100` a `mult_round`, hlavička `g`, trať `tens`, kapitola 28
+### D2. `mult_div_10_100` a `mult_round`, hlavička `g`, trať `tens`, kapitola 28 — HOTOVO 13. září 2026
+
+Proti plánu se upřesnil strop: součin smí dosáhnout na **celý tisíc**, protože
+`10 × 100` a `1000 : 100` jsou příklady, na kterých kapitola stojí, a jsou to
+jediná zadání rodiny se čtvrtou číslicí, takže `maxLen: 4` má co hlídat.
+K tomu dvě věci, které plán neřešil: v prvním kbelíku se dělí **jen deseti nebo
+stem**, jinak by vzniklo `230 : 23`, tedy dělení dvojciferným číslem, které hra
+nikde neučí, zatímco druhý kbelík jde oběma směry (`120 : 40` i `120 : 3`);
+a kulatý činitel se losuje na obě strany (`3 × 40` i `40 × 3`), protože tak to
+píše i učebnice. Nejdelší zadání rodiny je `1000 : 100`, deset znaků včetně
+mezer, tedy `q-long`, ne `q-xlong`. Z navržených palet prošly na obrázku všechny
+čtyři, ale až po porovnání se sousedy: okruh dostal sytou magentu `mulberry`
+(tlumenější varianty splývaly s `amethyst`), stezka bluebell les `tr_bells`,
+obloha večerní `sk_afterglow` s modrým vrškem a růžovým obzorem a hlubina
+fialové ježovky `dp_urchins`. Kontrol ve `flow.test.js` je po tomhle kroku 188.
 
 Konvence jako `beyond`: `g` plus `m` nebo `d` plus číslo kbelíku. `gm1`
 násobení deseti a stem (`7 × 10`, `4 × 100`, `23 × 10`, součin do tisíce),

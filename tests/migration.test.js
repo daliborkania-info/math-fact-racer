@@ -28,6 +28,18 @@ function fillFacts(tag){
     for(let a=1;a<=10;a++) for(let b=a;b<=10;b++)
       out['m'+a+'x'+b]={lv:(i++%3?2:1),reps:5,ok:4,bad:1,best:2600,seen:1757000000000};
   }
+  if(tag==='cela-nasobilka-a-za-ni-jen-rozjete'){
+    // cela mala nasobilka i deleni na urovni 4, tedy zaslouzene otevrena
+    // trat za nasobilkou, ale sama ta trat je jen nacata: osm klicu na
+    // urovni 1 dela zvladnuti 1/3, tedy pod branou 0,5, kterou se otevira
+    // trat Kulatá čísla. Nova verze ji tedy nesmi otevrit sama.
+    for(let a=1;a<=10;a++) for(let b=a;b<=10;b++){
+      out['m'+a+'x'+b]={lv:4,reps:7,ok:7,bad:0,best:1800,seen:1757000000000};
+      if(a>1) out['d'+a+'x'+b]={lv:4,reps:6,ok:6,bad:0,best:2100,seen:1757000000000};
+    }
+    for(const h of ['xm','xd']) for(const i of ['1','2','3','4'])
+      out[h+i]={lv:1,reps:3,ok:2,bad:1,best:4200,seen:1757000000000};
+  }
   if(tag==='a20-stare-klice-na-uroven-2'){
     // obor do dvaceti tak, jak vypadal pred pridanim desitkovych spoju:
     // oba scitance do deseti. Uroven 2 dela zvladnuti 2/3, tedy tesne

@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -34,6 +34,7 @@ const RANGE={
   o:[10,1000],     // zaokrouhleni, nejmensi desitka az kulaty tisic
   q:[0,100],       // retezec tri cisel, nikdy pod nulu a nikdy pres sto
   z:[0,1000],      // co se pocita driv, nikdy pod nulu a nikdy pres tisic
+  g:[1,1000],      // kulata cisla, soucin nikdy pres tisic
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -46,6 +47,7 @@ A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -168,6 +170,7 @@ A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -712,6 +715,89 @@ if(A.poolKeys(cur3.chapters.find(x=>x.n===13).pool).length!==2){
   zStBad++;console.log('  !!  kapitola 13 ma mit jen dva kbeliky, sedmy dil je do sta');}
 console.log('chyb ve stupnich poradi operaci:',zStBad);
 
+// 7n. kulata cisla: kazdy kbelik dela to, co slibuje
+//
+// Kbelik 1 nasobi a deli deseti nebo stem, kbelik 2 kulatou desitkou
+// nebo tim, co k ni patri z male nasobilky. Soucin nikdy nesmi prelezt
+// tisic a deleni nikdy nesmi mit zbytek; oboji se overuje z textu
+// zadani, ne z toho, co si generator mysli.
+let tnBad=0, tnN=0, tnCtvrta=0;
+const tnsay=m=>{tnBad++; if(tnBad<8) console.log('  !!  '+m);};
+for(const b of A.G_BUCKETS){
+  for(let i=0;i<600;i++){
+    const mi=A.itemFromKey('gm'+b.id), di=A.itemFromKey('gd'+b.id); tnN+=2;
+    if(mi.maxLen!==4||di.maxLen!==4){tnsay('kulata cisla maji mit misto na ctyri cislice');break;}
+    const mm=mi.text.match(/^(\d+) × (\d+)$/);
+    if(!mm){tnsay('nasobeni nema tvar cislo krat cislo: '+mi.text);break;}
+    const a=+mm[1], c=+mm[2];
+    // jeden z cinitelu musi byt kulaty, at uz stoji vpredu, nebo vzadu
+    const kulate=[a,c].filter(v=>v%10===0);
+    if(!kulate.length){tnsay('ani jeden cinitel neni kulaty: '+mi.text);break;}
+    if(b.id==='1'){
+      // jedno z cisel je deset nebo sto a to druhe se do tisice vejde;
+      // kulaty cinitel smi stat vpredu i vzadu a "10 × 100" je oboji
+      // zaraz, takze se zkousi obe prirazeni
+      const sedi=[[a,c],[c,a]].some(([xx,rr]) =>
+        (rr===10&&xx>=2&&xx<=99)||(rr===100&&xx>=2&&xx<=10));
+      if(!sedi){tnsay('kbelik 1 ma nasobit deseti nebo stem: '+mi.text);break;}
+    } else {
+      const kulat=a%10===0?a:c, maly=a%10===0?c:a;
+      if(kulat<20||kulat>90||kulat%10!==0){tnsay('kbelik 2 ma nasobit kulatou desitkou: '+mi.text);break;}
+      if(maly<2||maly>9){tnsay('kbelik 2 ma druhe cislo jednociferne: '+mi.text);break;}
+    }
+    if(a*c>1000){tnsay('soucin prelezl tisic: '+mi.text);break;}
+    if(String(a*c).length>4){tnsay('soucin se nevejde do ctyr cislic: '+mi.text);break;}
+    if(String(mi.answer).length===4) tnCtvrta++;
+    const dm=di.text.match(/^(\d+) : (\d+)$/);
+    if(!dm){tnsay('deleni nema tvar cislo deleno cislo: '+di.text);break;}
+    const del=+dm[1], dl=+dm[2];
+    if(del>1000){tnsay('deleny soucin prelezl tisic: '+di.text);break;}
+    if(dl===0||del%dl!==0){tnsay('deleni nevychazi beze zbytku: '+di.text);break;}
+    if(b.id==='1'&&dl!==10&&dl!==100){tnsay('kbelik 1 ma delit deseti nebo stem: '+di.text);break;}
+    // ve druhem kbeliku se deli bud kulatou desitkou, nebo tim
+    // jednocifernym, ktere k ni patri; nic tretiho
+    if(b.id==='2'&&!((dl%10===0&&dl>=20&&dl<=90)||(dl>=2&&dl<=9))){
+      tnsay('kbelik 2 deli necim, co v nem nema co delat: '+di.text);break;}
+    if(di.answer!==del/dl){tnsay('podil nesedi: '+di.text);break;}
+  }
+}
+// cely tisic se musi objevovat, jinak by maxLen 4 nemel co hlidat
+if(tnCtvrta===0) tnsay('kulaty tisic se nikdy neobjevil, ctvrta cislice je zbytecna');
+console.log('zkontrolovano kulatych cisel:',tnN,'| chyb:',tnBad);
+
+// 7o. kulata cisla se stupnuji a stoji na trati za nasobilkou
+let tnStBad=0;
+const tg=A.newProfile('G1'); A.DB.profiles=[tg]; A.DB.current=tg.id;
+if(A.tensStage(tg)!==0){tnStBad++;console.log('  !!  zacatecnik nezacina desitkou a stovkou');}
+const tnRun0=A.buildRun(tg,A.trackById('tens'));
+for(const it of tnRun0) if(it.key.slice(2)!=='1'){tnStBad++;console.log('  !!  zacatecnik dostal tezsi kbelik',it.text);break;}
+if(!tnRun0.some(it=>it.key[1]==='m')||!tnRun0.some(it=>it.key[1]==='d')){
+  tnStBad++;console.log('  !!  kbelik netrenuje oba smery naraz');}
+A.tensKeys(['1']).forEach(k=>tg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.tensStage(tg)!==1){tnStBad++;console.log('  !!  po zvladnuti prvniho kbeliku se neposunul');}
+const tnRun1=A.buildRun(tg,A.trackById('tens'));
+const tnFocus=tnRun1.filter(it=>it.key.slice(2)==='2').length;
+if(tnFocus<tnRun1.length*0.5){tnStBad++;console.log('  !!  druhy kbelik nenese zavod',tnFocus+'/'+tnRun1.length);}
+if(tnFocus===tnRun1.length){tnStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+const gg=A.newProfile('G2'); A.DB.profiles=[gg]; A.DB.current=gg.id;
+if(A.unlockState(gg,A.trackById('tens')).open){tnStBad++;console.log('  !!  kulata cisla jsou otevrena hned od zacatku');}
+// stoji to na trati za nasobilkou, ne na cele male nasobilce
+A.trackKeys(gg,A.trackById('t5')).forEach(k=>gg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.unlockState(gg,A.trackById('tens')).open){tnStBad++;console.log('  !!  otevrela to nasobilka misto trati za nasobilkou');}
+A.trackKeys(gg,A.trackById('beyond')).forEach(k=>gg.facts[k]={lv:2,reps:9,ok:7,bad:2,best:3000,seen:Date.now()});
+if(!A.unlockState(gg,A.trackById('tens')).open){tnStBad++;console.log('  !!  rozjeta trat za nasobilkou neotevrela kulata cisla');}
+// kapitola 28 je az za kapitolou 14, takze i na mape stoji za tratí
+// za nasobilkou
+const tnPor=A.TRACKS.map(x=>x.id);
+if(tnPor.indexOf('tens')!==tnPor.indexOf('beyond')+1){
+  tnStBad++;console.log('  !!  kulata cisla nestoji na mape hned za tratí za nasobilkou');}
+const tnCur3=A.CURRICULA.find(c=>c.id==='nns-matysek-3');
+const tn28=tnCur3.chapters.find(x=>x.n===28);
+if(!A.isPlayable(tn28)){tnStBad++;console.log('  !!  kapitola 28 porad nejde vybrat');}
+if(!A.poolKeys(tn28.pool).every(k=>k[0]==='g')){tnStBad++;console.log('  !!  kapitola 28 neukazuje na kulata cisla');}
+if(A.poolKeys(tn28.pool).length!==4){tnStBad++;console.log('  !!  kapitola 28 ma mit oba kbeliky v obou smerech');}
+console.log('chyb ve stupnich kulatych cisel:',tnStBad);
+
 // 7k. dlouhe zadani si rekne o mensi pismo, kratke ne
 let qhBad=0;
 const qh=k=>A.questionHTML(A.itemFromKey(k));
@@ -732,6 +818,19 @@ for(const b of ['z1','z2','z3','z4']) for(let i=0;i<300;i++){
 }
 if(zDelka<13){qhBad++;console.log('  !!  nejdelsi zadani rodiny je kratsi, nez plan cekal:',zDelsi);}
 console.log('nejdelsi zadani poradi operaci:',zDelsi,'('+zDelka+' znaku)');
+// kulata cisla jsou proti tomu kratka rodina: nejdelsi zadani je
+// "1000 : 100", tedy deset znaku vcetne mezer, takze dostane prostredni
+// velikost, a kratke "7 × 10" musi zustat v plne
+let tnDelka=0, tnDelsi='';
+for(const b of ['gm1','gd1','gm2','gd2']) for(let i=0;i<600;i++){
+  const it=A.itemFromKey(b), h=A.questionHTML(it);
+  if(String(it.text).length>tnDelka){tnDelka=String(it.text).length; tnDelsi=it.text;}
+  if(/q-xlong/.test(h)){qhBad++;console.log('  !!  kulate cislo si vzalo nejmensi pismo',it.text);break;}
+  if(String(it.text).length>=9&&!/q-long/.test(h)){
+    qhBad++;console.log('  !!  dlouhe kulate cislo si nereklo o mensi pismo',it.text);break;}
+}
+if(tnDelsi!=='1000 : 100'){qhBad++;console.log('  !!  nejdelsi kulate cislo neni "1000 : 100", ale',tnDelsi);}
+console.log('nejdelsi zadani kulatych cisel:',tnDelsi,'('+tnDelka+' znaku)');
 if(/q-long|q-xlong/.test(qh('m7x8'))){qhBad++;console.log('  !!  kratka otazka si zbytecne zmensila pismo');}
 if(/q-long|q-xlong/.test(qh('xm4'))){qhBad++;console.log('  !!  trojciferne nasobeni se zmensilo, i kdyz se veslo');}
 if(/q-long|q-xlong/.test(qh('c1'))){qhBad++;console.log('  !!  obrazkova otazka se meri jako text');}

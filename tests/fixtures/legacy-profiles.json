@@ -1767,6 +1767,169 @@
      }
     ]
    }
+  },
+  {
+   "id": "v10-pred-kulatymi-cisly",
+   "note": "zari 2026, tretak z verze pred tratí Kulatá čísla, tedy pred nasobenim a delenim deseti a stem. Trat za nasobilkou uz odemcenou ma a zavodil na ni, ale zvladnuti drzi hluboko pod branou 0,5, takze se mu nova trat nesmi sama otevrit bez zasluhy, presne jako to hlida v3 u trati za nasobilkou, v8 u retezce a v9 u poradi operaci. Poradi operaci uz otevrene ma, protoze celou nasobilku umi, a to je spravne: brana se posuzuje podle zasluhy, ne podle stari profilu. Datovy model se nemeni, fixture je tu kvuli te brane a kvuli tomu, ze pribyla trat na mape",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "bridge",
+    "t1",
+    "t2",
+    "t3",
+    "t4",
+    "t5",
+    "d1",
+    "clock",
+    "a100",
+    "beyond",
+    "ops"
+   ],
+   "expectClosed": [
+    "tens",
+    "chain",
+    "round",
+    "a1000"
+   ],
+   "expectChapter": 16,
+   "expectWorld": "circuit",
+   "expectGrade": 3,
+   "expectStars": [
+    "a4p6"
+   ],
+   "expectNoStars": [
+    "xm1",
+    "ph1"
+   ],
+   "db": {
+    "current": "stareG",
+    "sound": true,
+    "lang": "cs",
+    "pin": "stu901",
+    "profiles": [
+     {
+      "id": "stareG",
+      "name": "Vojta",
+      "lang": "cs",
+      "_fillFacts": "cela-nasobilka-a-za-ni-jen-rozjete",
+      "facts": {
+       "a4p6": {
+        "lv": 5,
+        "reps": 11,
+        "ok": 11,
+        "bad": 0,
+        "best": 1400,
+        "seen": 1757000000000
+       },
+       "ph1": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 4,
+        "bad": 1,
+        "best": 3400,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "a4p6": true
+      },
+      "best": {
+       "t1": {
+        "dist": 121,
+        "hist": [],
+        "n0": 20
+       },
+       "beyond": {
+        "dist": 96,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 3,
+       "t5": 2,
+       "d1": 2,
+       "beyond": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_bugina",
+       "ri_motor",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "pet_duha"
+      ],
+      "runner": "ri_motor",
+      "xp": {
+       "ri_motor": 210
+      },
+      "coins": 340,
+      "parts": 9,
+      "paints": [
+       "pa_neon"
+      ],
+      "paint": {
+       "ri_motor": "pa_neon"
+      },
+      "jobRuns": {
+       "money": 3
+      },
+      "trackRuns": {
+       "t1": 5,
+       "t2": 3,
+       "t3": 2,
+       "t4": 2,
+       "t5": 3,
+       "d1": 3,
+       "a100": 2,
+       "clock": 4,
+       "beyond": 2
+      },
+      "opened": {
+       "a3": true,
+       "a5": true,
+       "a7": true,
+       "a10": true,
+       "a15": true,
+       "a20": true,
+       "bridge": true,
+       "t1": true,
+       "t2": true,
+       "t3": true,
+       "t4": true,
+       "t5": true,
+       "d1": true,
+       "clock": true,
+       "a100": true,
+       "beyond": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-3",
+      "chapter": 16,
+      "chapterMode": "soft",
+      "world": "circuit",
+      "grade": 3,
+      "streak": 2,
+      "lastDay": null,
+      "bestStreak": 6,
+      "runs": 15,
+      "totalOk": 241,
+      "totalAns": 288,
+      "msSum": 780000,
+      "msN": 270,
+      "created": 1757460000000
+     }
+    ]
+   }
   }
  ]
 }

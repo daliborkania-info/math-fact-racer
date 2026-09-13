@@ -53,8 +53,8 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `div_beyond` | dělení mimo rozsah malé násobilky, 56 : 4, totéž sezení pozpátku | `pad` | do 1000 | hotovo |
 | `div_remainder` | dělení se zbytkem | `pad2` | dělitel 2 až 10 | **pilot** |
 | `div_remainder_inv` | doplnění dělence ze zadaného podílu a zbytku | `pad` | dělitel 2 až 10 | nové |
-| `mult_div_10_100` | násobení a dělení deseti a stem | `pad` | do 1000 | nové |
-| `mult_round` | násobení číslem končícím nulami a dělení takového čísla | `pad` | do 1000 | nové |
+| `mult_div_10_100` | násobení a dělení deseti a stem | `pad` | do 1000 | hotovo |
+| `mult_round` | násobení číslem končícím nulami a dělení takového čísla | `pad` | do 1000 | hotovo |
 | `place_value` | rozklad trojciferného čísla na stovky, desítky, jednotky | `pad3` | 100 až 999 | nové |
 | `add_sub_1000` | sčítání a odčítání do tisíce, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku | `pad` | 0 až 1000 | hotovo |
 | `time_elapsed` | kolik minut nebo hodin uplynulo | `pad` | do 24 h | nové |
@@ -145,6 +145,17 @@ Zadání je řada čtyř až pěti členů a otázka na další člen, napříkl
 `80, 40, 20, 10`, tedy geometrická stejně jako aritmetická. Odpověď je jedno
 číslo na klávesnici, takže se do závodu vejde beze změny vstupních prvků.
 Podrobnosti o zdroji jsou v [ZDROJE-RVP.md](ZDROJE-RVP.md).
+
+**`mult_div_10_100` a `mult_round`, hotovo.** Jedna trať `tens` a jedna rodina
+klíčů `g`, protože je to v učebnici jedna dvoustrana a jedna dovednost: vrátit
+číslu nulu. Dva kbelíky, v prvním se násobí a dělí přímo deseti a stem
+(`23 × 10`, `1000 : 100`), ve druhém kulatou desítkou (`3 × 40`, `120 : 40`
+i `120 : 3`). Klíč nese směr uvnitř, `gm` a `gd`, stejně jako u `mult_beyond`,
+takže jeden kbelík trénuje obě strany zároveň a obě stoupají společně.
+Součin se staví konstrukcí rozsahů a nikdy nepřeleze tisíc; celý tisíc dovolený
+je, protože `10 × 100` a `1000 : 100` jsou příklady, na kterých kapitola stojí.
+V prvním kbelíku se dělí jen deseti nebo stem, aby nevzniklo `230 : 23`, tedy
+dělení dvojciferným číslem, které hra nikde neučí.
 
 **`times_more_less`.** Pozor na rozdíl mezi "o kolik" a "kolikrát". Je to
 nejčastější zdroj chyb v celé třetí třídě a stojí za samostatné téma, i když

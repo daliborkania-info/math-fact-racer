@@ -1,7 +1,8 @@
 # Stav projektu a předávací dokument
 
 Poslední aktualizace: 13. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
-prvních třech položkách kroku D nového plánu a opravě řazení mapy (C3b)
+prvních třech položkách kroku D nového plánu, opravě řazení mapy (C3b) a opravě
+nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
 nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
@@ -102,6 +103,20 @@ kreslí ji `questionHTML()` za odpovídací políčko a měří se do délky ř�
 Na mapě stojí hned za `a1000`, protože kilometr je tisíc metrů, a odtud se taky
 otevírá. Proti plánu se upřesnilo, že do tisíce zůstává i číslo v zadání, ne
 jen odpověď, viz oddíl 4 a `docs/PLAN.md`.
+
+**Oprava po kontrole kroků D1 a D2 je hotová** (13. září): tři palety trati
+`chain` byly barevně totéž co jejich sousedi a vizuální kontrola u kroku B to
+neukázala, protože `convert` přechod vůbec nekreslí, viz oddíl 9. `marsh` je
+teď tmavě bahenní zelená, `sk_haze` modrá obloha s fialovým oparem na obzoru
+a `dp_shoal` světlá lastura na dně pod jasnou vodou; nejbližší soused je
+32, 49 a 38 ΔE daleko. Aby se to nevrátilo, hlídá odstup palet okruh 13c
+v `items.test.js`. K tomu: registr hlaviček klíčů v oddílu 12c je srovnaný
+(chyběly `q`, `z`, `g`, `u` a nikdy tam nebylo `w`), `tests/README.md` mluví
+i o kulatých číslech, nejdelší zadání rodiny `ops` je `510 - (46 - 31)` místo
+příkladu, který nemohl vzniknout, v záporné závorce `z2` se losují oba členy
+z oboru kbelíku, takže vzniká i `(45 - 17) : 4`, a neznámý kbelík padá
+v `opsItem()` i `tensItem()` hlasitě. Název kapitoly na dětské mapě je
+učitelský žargon; je to starší věc a leží jako R9 v oddílu 9 `docs/PLAN.md`.
 
 **Na řadě je poslední položka kroku D** (D4), tedy doplňování chybějícího členu
 nad existujícími klíči, a dál podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
@@ -396,6 +411,11 @@ tisíce na straně sčítání a jeho závorka je ta, která výsledek opravdu m
 konstrukcí rozsahů, ne ořezem: nejdřív se losuje násobící člen a pak číslo
 z rozsahu, který kbelík už drží, takže se nic nedodatečně neupravuje a žádný
 mezivýsledek neklesne pod nulu.
+V záporné závorce druhého kbelíku se od 13. září losují **oba členy** z oboru
+kbelíku, tedy do sta; odčítanec býval jen jednociferný, takže `(45 - 17) : 4`
+nemohlo vzniknout a zúžení nebylo nikde zapsané. Hodnota závorky se losuje
+dřív než její členy, takže na výsledku ani na tom, že dělení vyjde beze
+zbytku, se tím nemění nic.
 
 **Kulatá čísla.** `tens`, kapitola 28 třetího ročníku. Dva kbelíky a v každém
 oba směry, tedy čtyři klíče: `gm1` násobení deseti a stem (`7 × 10`, `23 × 10`,
@@ -861,6 +881,14 @@ si druhý konec řeknou samy přes `h2` a `l2`. Pravidlo, které z toho plyne:
 nese ten spodní. Bez toho vyšlo rudé moře a hnědá obloha. `sat` je pro kámen,
 mlhu a bouřku, které musí být tlumené.
 
+**Nová paleta musí být od všech ostatních v témže světě aspoň 22 ΔE**, měřeno
+jako Euklidovská délka rozdílu obou konců přechodu v Lab. Tolik má každá paleta
+přidaná od září 2026 a hlídá to okruh 13c v `items.test.js`; starší palety
+laťku nesplňují všechny, takže test drží zapsaný dluh po světech a ten smí jen
+klesat. Palety s `dark` do měření nevstupují, protože noční zem se kreslí
+pevnou dvojicí barev a jejich vlastní kopce se nikde neobjeví. Bez téhle
+kontroly se to neuhlídá okem ani v kódu, viz oddíl 9.
+
 **Texty se přebíjejí přes `w_<svet>_<klic>`.** `t()` hledá nejdřív klíč se
 světem a pak holý, takže ve slovníku jsou jen slova, která se opravdu liší,
 a zbytek se nekopíruje čtyřikrát. Který svět platí, drží `CUR_WORLD`, nastavuje
@@ -1161,7 +1189,10 @@ sbírku, tedy že se místo rozsvítí až na úrovni 4, že po poklesu úrovně
 dopočítá starší profil; kruh v dílně, tedy počet zakrytých výsečí; a světy, tedy
 že každý svět má pro každou trať vlastní prostředí, že žádná paleta nezůstala
 nepoužitá, že přepnutí světa nehne učivem, odemčením ani rekordy a že nabídku
-jezdců jen řadí; a tvary cest, tedy že okruh zůstal uzavřený, že ostatní světy
+jezdců jen řadí; **barevný odstup palet**, tedy že si žádné dvě palety jednoho
+světa nejsou blízko, měřeno v Lab přes oba konce přechodu, práh 22 ΔE a zapsaný
+dluh starších dvojic, který smí jen klesat (okruh 13c, zavedený 13. září, viz
+oddíl 9); a tvary cest, tedy že okruh zůstal uzavřený, že ostatní světy
 vedou z jedné strany na druhou, že cesta nevyjede ze scény a že se patnáct
 tratí v jednom světě od sebe pozná; a ročníky, tedy že prvňák nevidí násobilku,
 že dřívější ročník nikdy nezmizí z dosahu, že `yearOf()` sedí pro každou trať
@@ -1381,6 +1412,23 @@ u dítěte, které se teprve učí číst souvislý text, se nesmí odhadovat.**
 to okruh 15 v `items.test.js`, který chce, aby v každém řádku rostlo `left`
 s pořadím, a k tomu i to, že vratná čára je vodorovná a že se celá stopa
 silnice vejde mezi dva řádky se čtyřmi pixely rezervy.
+
+**Tři palety trati `chain` byly barevně totéž co jejich sousedi a vizuální
+kontrola u kroku B to neukázala.** `sk_haze` byla 5,7 ΔE od `sk_hilltop`
+a 9,4 od `sk_kite`, tedy tatáž bledě zelená obloha třikrát; `dp_shoal` splývala
+s `dp_lagoon`, `dp_garden` i `dp_grass` (15 až 17), tedy čtyři stejná
+zelenomodrá dna; `marsh` byla 15,1 od `school`, dvě mátové louky vedle sebe
+v jednom okruhu. Proč to prošlo: palety se kontrolovaly na obrázku z `convert`,
+jenže **`convert` `linearGradient` nekreslí**, vezme první zarážku a vyplní jí
+celou plochu, takže dvě palety lišící se spodním koncem přechodu daly tentýž
+obrázek a rozdíl, který dítě na mapě vidí, na kontrolním obrázku nebyl vůbec.
+Od 13. září se paleta posuzuje dvěma způsoby naráz: na obrázku složeném podle
+postupu z oddílu 2 (podkladový obdélník se z SVG vyřízne a podloží přechodem
+z ImageMagicku) a číselně, okruhem 13c v `items.test.js`. Poučení: **kontrola
+na obrázku platí jen tehdy, když se na obrázku opravdu kreslí to, co se
+posuzuje**, a barva je věc, kterou v kódu nepozná nikdo: sousední řádek má
+tentýž tvar a jiná čísla. Zbytek dluhu je změřený a zapsaný, nejblíž si jsou
+`sk_hilltop` a `sk_kite` s 5,3 ΔE.
 
 ---
 
@@ -1639,15 +1687,26 @@ jeden řádek do `heatSpecs()` a je vidět.
 **D. Pasti, na které se dá naběhnout.**
 
 Hlavička klíče je jedno písmeno a `key.slice(1)` to předpokládá na čtyřech
-místech. Obsazené je `m` násobení, `d` dělení, `a` sčítání do 20, `s` odčítání
-do 20, `p` a `n` kbelíky do sta, `k` celý obor do tisíce včetně znaménka,
-`x` násobení a dělení za násobilkou včetně znaménka,
-`o` zaokrouhlování, `c` hodiny. Rezervované je `r` pro dělení se
-zbytkem. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká slepením
-`"p" + "h1"`; jako hlavička rodiny by se to pralo. Stejně tak `b` je vnitřní id
-kbelíků do tisíce. Míst je šestadvacet a
-plánovaných generátorů kolem dvaceti, takže nová rodina se znaménkem ho má
-nést uvnitř klíče jako tisícovka, ne brát si dvě písmena jako stovka.
+místech. **Tenhle seznam je registr a musí se doplnit v témže kroku, ve kterém
+rodina vzniká**, jinak si příští rodina sáhne po obsazeném písmenu; po krocích
+B a D1 až D3 byl čtyři kroky pozadu. Obsazené je `m` násobení, `d` dělení,
+`a` sčítání do 20, `s` odčítání do 20, `p` a `n` kbelíky do sta, `k` celý obor
+do tisíce včetně znaménka, `x` násobení a dělení za násobilkou včetně znaménka,
+`o` zaokrouhlování, `q` řetězec tří čísel, `z` pořadí operací, `g` kulatá čísla
+včetně znaménka, `u` převody jednotek, `c` hodiny a `w` zakázky dílny, které
+leží v téže krabičce, i když je žádný pool závodu nevyrobí (`isJobKey`).
+Rezervované je `r` pro dělení se zbytkem.
+
+Kbelíkové rodiny z toho jsou `FAMILY_HEADS` v `src/app.js`, dnes řetězec
+`pnckxoqzgu`, tedy tenhle seznam bez jednotlivých spojů (`m`, `d`, `a`, `s`)
+a bez dílny (`w`); obojí musí sedět, `poolSize` a `buildRun` se ptají právě
+`FAMILY_HEADS`. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká
+slepením `"p" + "h1"`; jako hlavička rodiny by se to pralo. Stejně tak `b` je
+vnitřní id kbelíků do tisíce. Šestnáct písmen je tedy pryč a volných zbývá
+deset (`b`, `e`, `f`, `h`, `i`, `j`, `l`, `t`, `v`, `y`, z toho `b` a `h` jen
+opatrně), zatímco plánovaných generátorů je kolem deseti, takže nová rodina se
+znaménkem ho má nést uvnitř klíče jako tisícovka, ne brát si dvě písmena jako
+stovka.
 
 Kbelíky mají dvě různé konvence: `c1` je rovnou celý klíč, `h1` a `b1` se
 prefixují. Nová kbelíková rodina si musí vědomě vybrat jednu.
@@ -1655,6 +1714,12 @@ prefixují. Nová kbelíková rodina si musí vědomě vybrat jednu.
 Tiché nouzové cesty schovávají chyby. Neznámý klíč vrátí z `itemFromKey()`
 příklad 1 + 1, prázdný pool spadne v `buildRun()` na malou násobilku a chybějící
 prostředí na louku. Při vývoji nové rodiny to vypadá, že to skoro funguje.
+Uvnitř rodiny se to od 13. září 2026 nedělá: neznámý kbelík je hlasitý pád,
+`noBucket(kde, klíč)` v `opsItem()` a `tensItem()`, vedle hlasitých pádů
+u prázdného rozsahu převodu a u nedokončitelného řetězce. Zbývají dvě tichá
+místa téhož druhu, `unitItem()` bere u neznámého kbelíku `U_BUCKETS[0]`
+a `chainTriple()` spadne na poslední větev; dnes to nikdo nevyrobí, protože
+klíče vznikají z kbelíků, ale rovnat se to má stejně.
 
 **E. Co blokátor není, i když to tak vypadá.** Service worker má cache
 pojmenovanou `math-fact-racer-v1` a nemění se, ale načítá se ze sítě jako

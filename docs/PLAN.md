@@ -888,8 +888,14 @@ hra zatím nikde neučí (je to rodina `tens` z kroku D2). `z4` proto roste do
 tisíce na straně sčítání a jeho závorka je ta, která výsledek opravdu mění,
 tedy `500 - (40 + 30)`; `Z_EX` a heatmapa nesou tenhle příklad. Zbytek vyšel
 podle plánu, včetně násobitele prahů 2,4 a `maxLen: 4` u `z3` a `z4`.
-Nejdelší zadání rodiny je tím pádem `900 - (89 + 99)`, patnáct znaků včetně
-mezer, tedy `q-xlong`, jak plán čekal. Ze čtyř navržených palet prošla na
+Kontrola kroku k tomu 13. září našla, že v záporné závorce `z2` byl odčítanec
+vždycky jednociferný, takže `(45 - 17) : 4` nešlo vylosovat; oba členy se teď
+losují z oboru kbelíku, hodnota závorky se losuje před nimi, takže dělení dál
+vychází beze zbytku a výsledek zůstává do sta.
+Nejdelší zadání rodiny je tím pádem `510 - (46 - 31)`, patnáct znaků včetně
+mezer, tedy `q-xlong`, jak plán čekal. (Do 13. září tu stálo `900 - (89 + 99)`;
+délka seděla, příklad ne, protože členy závorky se losují z `ri(11,89)` a
+devětadevadesát mezi nimi nikdy nepadne.) Ze čtyř navržených palet prošla na
 obrázku hned napoprvé jen stezka; okruh šel z žlutozeleného bambusu na
 fialovou `amethyst`, protože mezi loukou, lesem a savanou vypadal jako další
 pole, obloha dostala sytější modrou, aby se nepletla s prachem, a v hlubině se
@@ -1225,6 +1231,31 @@ zněním čekaným na přelomu 2026 a 2027, takže se dělení do ročníků je�
 posunout, a že přepínač bude hrubší než u třetí třídy, tedy po čtvrtinách roku
 místo po dvoustranách. Pokud ne, čeká se na Matýska a čtvrtý a pátý ročník
 zůstávají bez kurikula.
+
+**R9. Název kapitoly na dětské mapě je učitelský žargon.** `trackSub()` dává
+trati "Co máte ve škole" jako podtitulek název kapitoly z učebnice, tak jak
+stojí v `src/curricula.js`. Ty názvy jsou psané pro učitele a rodiče, takže
+osmiletý čte na svojí mapě "Početní operace se závorkami" (kapitola 13),
+"Sloučené početní operace" (kapitola 30) nebo "Početní operace v oboru 0 až
+39" (kapitola 13 druhého ročníku). Není to chyba kroku D1, vzorec je starší
+a týká se všech pětadevadesáti kapitol; nová kapitola jen přidala další
+jazykolam. Kreslí se to na dvou dětských místech, na kartě mapy a v nabídce
+závodníka před startem, a obojí jde přes `trackSub()`, tedy přes jedno místo.
+Dvě cesty ven: **(a)** dopsat do každé kapitoly v `curricula.js` dětský název
+vedle učebnicového a ukazovat dítěti ten, nebo **(b)** na dětských
+obrazovkách název kapitoly neukazovat vůbec a nechat tam `trk_schools`, tedy
+"podle učebnice"; rodič má název dál v nabídce kapitol i v rodičovské sekci,
+kde se právě podle něj vybírá a kde sedět s učebnicí musí. Doporučení: **(b)
+hned a (a) později**, protože oddíl 3 `PROJECT-STATE.md`, tedy nedotknutelné
+principy, říká, že žádný text v dětské části
+nesmí obsahovat učitelský žargon, a to je pravidlo o tom, co dítě čte, ne
+o tom, kde se to vzalo. (b) je jeden řádek v `trackSub()` a platí okamžitě
+pro všechny kapitoly, včetně těch, které teprve přibudou; (a) je pětadevadesát
+nových názvů, a pokud se má chovat jako zbytek rozhraní, tak v každém ze tří
+jazyků, tedy práce na celý krok. Až (a) přijde, dá se přidávat po kapitolách:
+volitelné pole `kid` na kapitole, `trackSub()` vezme `kid`, když je, jinak
+neutrální text, a učebnicový název dítěti nedá nikdy. Pokud ne, zůstává dnešní
+stav a dítě čte, co stojí v knize.
 
 ---
 

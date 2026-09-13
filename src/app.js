@@ -985,6 +985,14 @@ function beyondItem(key){
   return {key, text:(x * m) + " : " + m, answer: x, kind:"divx"};
 }
 
+/* A key whose bucket the family does not have is a broken caller, not a
+   question. Falling out of a chain of ifs into its last branch hands the
+   child whatever that branch happens to make, under a key that promised
+   something else, and nothing anywhere says a word. The chain of three
+   numbers and the conversions already refuse out loud when a bucket
+   cannot be served, so a bucket that does not exist at all says so too. */
+function noBucket(where, key){ throw new Error(where + ": unknown bucket " + key); }
+
 /* Ten, a hundred and the round tens. Built by construction like every
    family since the thousand: both numbers come out of ranges that
    already hold the bucket and the product, so nothing is ever trimmed
@@ -996,19 +1004,21 @@ function beyondItem(key){
    A round number reads as easily in front as behind and the book writes
    it both ways, so which side it lands on is drawn too. */
 function tensItem(key){
-  const times = key[1] === "m";        // m multiplies, d reads it backwards
+  const dir = key[1];                  // m multiplies, d reads it backwards
   const b = key.slice(2);
+  if(dir !== "m" && dir !== "d") noBucket("tensItem", key);
+  const times = dir === "m";
   let x, r;                            // the plain number and the round one
   if(b === "1"){
     // 23 × 10 and 4 × 100: the round number is the ten or the hundred
     // itself and the other one is as big as a thousand leaves room for
     if(Math.random() < .5){ r = 10;  x = ri(2, 99); }
     else                  { r = 100; x = ri(2, 10); }
-  } else {
+  } else if(b === "2"){
     // 3 × 40: a fact from the small table with a nought put back on it
     r = ri(2, 9) * 10;
     x = ri(2, 9);
-  }
+  } else noBucket("tensItem", key);
   if(times){
     const flip = Math.random() < .5;
     return {key, kind:"multten", maxLen:4,
@@ -1175,7 +1185,8 @@ function opsItem(key){
   const e = b === "1" ? opsPlain(100)
           : b === "2" ? opsBracket()
           : b === "3" ? opsPlain(1000)
-          : opsBracketPair();
+          : b === "4" ? opsBracketPair()
+          : noBucket("opsItem", key);
   const it = {key, kind:"ops", text: e.text, answer: e.answer};
   if(b === "3" || b === "4") it.maxLen = 4;
   return it;
@@ -1236,10 +1247,16 @@ function opsBracket(){
     tail = " × " + c; answer = s * c;
   }
   if(minus){
-    // the bracket is a subtraction, so the first term is the value plus
-    // whatever is taken away again; a minus bucket keeps the value under
-    // ninety so that first term still fits in two digits
-    const b = ri(1, Math.min(9, 100 - s));
+    // The bracket is a subtraction, so the first term is the value plus
+    // whatever is taken away again, and both of them are drawn inside
+    // the hundred this bucket counts in; a minus bucket holds the value
+    // under ninety so that there is always room left for the second
+    // term. What is taken away used to be a single digit, which quietly
+    // ruled out every line like (45 - 17) : 4, and the narrowing was
+    // written down nowhere. Widening it costs nothing: the value of the
+    // bracket is settled above, so the answer is the same however the
+    // two terms are chosen and the division is still exact.
+    const b = ri(1, 99 - s);
     return {text: "(" + (s + b) + " - " + b + ")" + tail, answer};
   }
   const a = ri(1, s - 1);
@@ -2090,11 +2107,14 @@ const ENVS = Object.assign({
   // The first year's ranges, a coastline that walks along beside the
   // beach the twenty track already had: the child goes from the dunes
   // down to the water and along it, and crossing the ten is the pier.
-  // A marsh for the circuit: a deep blue green, the one colour family
-  // none of the fifteen hand mixed circuit places and none of the
-  // coastline uses. Darker than the school track's mint on purpose, or
-  // the two would read as the same place on a thumbnail.
-  marsh:  pal(170, 150, 52, "drop"),
+  // A marsh for the circuit: dark bog green, the wet ground under the
+  // reeds. The first draft was a blue green that meant to be darker than
+  // the school track's mint and was not: the two ends of the two
+  // gradients came out fifteen apart and on a thumbnail it was the same
+  // mint place twice. This one is the one green the circuit did not have,
+  // the dark olive of standing water, thirty two from the forest, which
+  // is the nearest thing to it anywhere on the map.
+  marsh:  pal( 92,  74, 34, "drop"),
   // A violet plateau for the circuit. The green end of the circuit is
   // full (meadow, forest, savanna, marsh), and a yellow green ground
   // read as one more field on a thumbnail; the circuit is the world
@@ -2175,7 +2195,13 @@ const ENVS = Object.assign({
   sk_night:  pal(236, 250, 14, "star",    {h2:242, l2:27, dark:1}),
   sk_fog:    pal(212, 218, 58, "drop",    {h2:216, l2:81, sat:22}),
   sk_kite:   pal(200, 140, 52, "leaf",    {h2:150, l2:79}),
-  sk_haze:   pal(204, 170, 60, "drop",    {h2:160, l2:82}),
+  // Haze over a far ridge, which is violet rather than green. The first
+  // draft put a pale green horizon here, six from the hilltop and nine
+  // from the kite, so the sky had the same pale green place three times
+  // over; every other horizon in this world is pale as well, so what was
+  // free was not a hue but a depth. This one is the only deep horizon
+  // among them, forty nine from the arch, the nearest violet.
+  sk_haze:   pal(212, 280, 46, "drop",    {h2:274, l2:56}),
   // a deeper blue than the rest of the sky, so it does not read as the
   // grey of the dust; the fresh green horizon is what names the place
   sk_gate:   pal(214, 110, 48, "leaf",    {h2: 96, l2:78, sat:56}),
@@ -2210,10 +2236,14 @@ const ENVS = Object.assign({
   dp_midnight:pal(230, 245, 18, "star",   {h2:240, l2: 9, dark:1}),
   dp_murk:   pal(190, 200, 42, "drop",    {h2:196, l2:26, sat:20}),
   dp_garden: pal(185, 145, 56, "flower",  {h2:150, l2:40}),
-  // a shallow: the floor is close enough to the surface that the water
-  // still colours it, so it is a muted green blue rather than the grass
-  // green the first draft gave it, which read as a lawn under water
-  dp_shoal:  pal(188, 150, 62, "shell",   {h2:158, l2:52, sat:38}),
+  // a shell bank in shallow water: bright water over a floor of pale
+  // broken shell. Muting it towards the water, which is what the second
+  // draft did, only put it among the green blue floors of the lagoon,
+  // the garden and the weed meadow, all three of them within sixteen of
+  // it; the floor down here has to be the thing that names the place, so
+  // this one is the palest and pinkest of them, thirty eight from the
+  // pearl bank, which is the nearest floor that is not green
+  dp_shoal:  pal(186, 300, 50, "shell",   {h2:298, l2:74}),
   // water above and a bed of yellow green weed below, which is the one
   // floor colour the deep has not used yet
   dp_weed:   pal(194,  84, 62, "leaf",    {h2: 84, l2:38}),

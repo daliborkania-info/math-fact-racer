@@ -898,7 +898,8 @@ const qh=k=>A.questionHTML(A.itemFromKey(k));
 for(const b of ['q1','q2','q3']) for(let i=0;i<200;i++)
   if(!/q-long|q-xlong/.test(qh(b))){qhBad++;console.log('  !!  retezec si nerekl o mensi pismo',b);break;}
 // poradi operaci je jeste delsi radek nez retezec: nejkratsi zadani ma
-// devet znaku ("4 + 3 × 5") a nejdelsi patnact ("900 - (89 + 99)"),
+// devet znaku ("4 + 3 × 5") a nejdelsi patnact ("510 - (46 - 31)";
+// cleny zavorky jsou dvouciferne z ri(11,89), takze 99 mezi nimi nepadne),
 // takze zadny kbelik nesmi zustat v plne velikosti a cely ctvrty musi
 // dostat tu nejmensi
 let zDelka=0, zDelsi='';
@@ -1266,6 +1267,73 @@ for(const [w,znak] of [['sky','<circle cx="52" cy="36"'],['deep','stroke="#18253
 if(!/f0c063|8a5a2b|a76f36/.test(scena('deep','t1'))) rsay('v hlubine chybi truhla na konci');
 if(!scena('sky','t1').includes('#ff6b6b')) rsay('na obloze chybi duhova brana nebo start');
 console.log('zkontrolovano cest:',A.WORLDS.length*vsechnyTrati.length,'| chyb:',rBad);
+
+// 13c. zadne dve palety jednoho sveta si nesmi byt barevne blizko
+//
+// Paleta se v kodu nelisi nicim napadnym: sousedni radek ma tentyz tvar
+// a jina cisla, takze tri skoro stejna mista vedle sebe projdou ctenim
+// kodu i vsemi ostatnimi kontrolami. Na obrazku se to pozna, ale jen
+// tehdy, kdyz se prechod opravdu vykresli: `convert` linearGradient
+// nekresli vubec, vezme prvni zarazku a vyplni ji celou plochu, takze
+// dve palety, ktere se lisi spodnim koncem, na nem vyjdou stejne. Tohle
+// je proto jedina kontrola, ktera rozdil mista od jeho souseda hlida
+// sama od sebe.
+//
+// Mira: oba konce prechodu se prevedou do Lab a vezme se odmocnina ze
+// souctu ctvercu obou dE, tedy vzdalenost te dvojice barev jako celku.
+// Pocita se z hill1 a hill2, protoze prechod zabira na nahledu nejvic
+// plochy. Palety s `dark` do toho nevstupuji: nocni zem se kresli
+// pevnou dvojici barev a vlastni kopce takove palety se nikde
+// neobjevi, takze srovnavat je by nerikalo nic. Srovnava se uvnitr
+// sveta, protoze dve mista na jedne mape si dite srovnava, kdezto mista
+// ze dvou svetu vedle sebe nikdy nestoji.
+//
+// Prah je 22 dE a je to laťka, kterou splnila kazda paleta pridana od
+// zari 2026 (nejtesnejsi je amethyst s 23). Starsi palety ji zdaleka
+// nesplnuji vsechny a nejblizsi dvojice oblohy ma 5,3, takze samotny
+// prah by dnesni stav neprosel. Hlida se proto dluh: kolik dvojic pod
+// prahem ma ktery svet. Cislo smi klesat, nikdy stoupat, takze nova ani
+// prekreslena paleta blizko k sousedovi neprojde. Palety trati chain
+// byly do 13. zari 2026 presne takove a cisla byla o ctrnact vyssi:
+// okruh 5 (marsh proti school, 15), obloha 40 (sk_haze proti sk_hilltop,
+// 5,7) a hlubina 16 (dp_shoal proti dp_lagoon, 15,5).
+let pBad=0;
+const psay=m=>{pBad++; console.log('  !!  '+m);};
+const PAL_PRAH=22, PAL_DNO=5.2;
+const PAL_DLUH={circuit:4, trail:11, sky:31, deep:12};
+const palLab=hex=>{
+  const n=parseInt(hex.slice(1),16);
+  const g=v=>{v/=255; return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const r=g((n>>16)&255), z=g((n>>8)&255), b=g(n&255);
+  const f=t=>t>0.008856?Math.cbrt(t):(7.787*t+16/116);
+  const X=f((r*0.4124564+z*0.3575761+b*0.1804375)/0.95047);
+  const Y=f( r*0.2126729+z*0.7151522+b*0.0721750);
+  const Z=f((r*0.0193339+z*0.1191920+b*0.9503041)/1.08883);
+  return [116*Y-16, 500*(X-Y), 200*(Y-Z)];
+};
+const palDE=(a,b)=>{const x=palLab(a),y=palLab(b);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]);};
+const palOdstup=(a,b)=>Math.hypot(palDE(A.ENVS[a].hill1,A.ENVS[b].hill1),palDE(A.ENVS[a].hill2,A.ENVS[b].hill2));
+let palNej=1e9, palNejParek='';
+for(const w of A.WORLDS){
+  const jmena=[...new Set(A.TRACKS.map(tr=>A.envOf({world:w.id},tr)))].filter(n=>A.ENVS[n]&&!A.ENVS[n].dark);
+  const blizke=[];
+  for(let i=0;i<jmena.length;i++) for(let j=i+1;j<jmena.length;j++){
+    const d=palOdstup(jmena[i],jmena[j]);
+    if(d<PAL_PRAH) blizke.push([d,jmena[i],jmena[j]]);
+    if(d<palNej){palNej=d; palNejParek=jmena[i]+' a '+jmena[j];}
+  }
+  blizke.sort((a,b)=>a[0]-b[0]);
+  const dluh=PAL_DLUH[w.id];
+  if(dluh===undefined) psay('svet '+w.id+' nema v testu zapsany dluh blizkych palet');
+  else if(blizke.length>dluh){
+    psay('ve svete '+w.id+' pribyly palety blizsi nez '+PAL_PRAH+' dE: '+blizke.length+' dvojic misto '+dluh);
+    for(const b of blizke.slice(0,5)) console.log('        '+b[1]+' a '+b[2]+': '+b[0].toFixed(1)+' dE');
+  } else if(blizke.length<dluh)
+    console.log('  ..  svet '+w.id+' ma blizkych dvojic uz jen '+blizke.length+' z '+dluh+', zapis do testu nizsi cislo');
+}
+// a dno, aby uz tak blizka dvojice nemohla tise srust jeste vic
+if(palNej<PAL_DNO) psay('nejblizsi dve palety klesly na '+palNej.toFixed(1)+' dE ('+palNejParek+'), dno je '+PAL_DNO);
+console.log('nejblizsi dve palety:',palNejParek,'('+palNej.toFixed(1)+' dE) | chyb:',pBad);
 
 // 14. rocniky
 //

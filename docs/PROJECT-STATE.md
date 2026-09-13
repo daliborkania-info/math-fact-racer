@@ -1,6 +1,6 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 13. září 2026, po ročnících a rozdělení prvního ročníku
+Poslední aktualizace: 13. září 2026, po krocích A, B0 a B nového plánu
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
 nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
@@ -50,6 +50,13 @@ do profilu.
 Na mapě stojí před `beyond`, tedy v pořadí učebnice. K tomu přibylo, že dlouhé
 zadání si samo řekne o menší písmo, protože `47 + 5 - 3 = ?` se v plné velikosti
 na telefon nevejde.
+
+**Otevřené po kroku B0: R1 z oddílu 9 plánu.** Čerstvý třeťák má po složení mapy
+všechny letošní tratě zamčené za stovkou a mostem, takže první, co musí udělat,
+je otevřít dveře do minulých let. To je zatím správně v tom smyslu, že učivo
+navazuje, ale znamená to, že mapa, na kterou dítě přijde, nemá ani jedno místo,
+na které jde klepnout. R1 (učivo minulých let otevřené staršímu dítěti) to řeší
+jednou podmínkou v `unlockState()`; uživatel ho zatím nechtěl, rozhodnutí čeká.
 
 **Na řadě je krok C**, responzivita a písmo podle ročníku, a dál podle
 `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
@@ -1391,9 +1398,10 @@ s dnešním úkolem.
 **Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
 a 4d. Z vlny A jsou hotové tři položky ze sedmi. Revize ze 13. září sepsala
 `docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0 a B, nejbližší je
-C (responzivita a písmo podle ročníku, jedna až dvě session). Oddíl 9 plánu má
-sedm rozhodnutí, která má udělat uživatel; než padnou, dělá se to, co na nich
-nezávisí.
+C (responzivita a písmo podle ročníku, jedna až dvě session). Z rozhodnutí
+v oddílu 9 plánu padla R4 (řetězec před `beyond`) a R7 (vynulování nechá
+nastavení), obojí podle doporučení. R1 (žebřík minulých let) je odložené,
+viz hlavička; R5 a R6 se rozhodují v kroku C a plán u obou doporučuje ano.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se
@@ -1413,19 +1421,23 @@ ročníku (4b).
 > si zdroje přečte sám. Po návratu subagenta sám pusť `python3 build.py`
 > a `node tests/items.test.js | grep '  !!  '`, u kroků sahajících na
 > obrazovky nebo profil i `flow.test.js` a `migration.test.js`, prohlédni
-> `git log -1 --stat`, a teprve pak zadej další krok. Po kroku B pusť
-> kontrolního subagenta podle oddílu 10. Když subagent hlásí rozpor s plánem,
-> rozhodni podle plánu, nebo se zeptej mě.
+> `git log -1 --stat`, a teprve pak zadej další krok. Po každé části kroku C
+> pusť kontrolního subagenta podle oddílu 10 a jeho nálezy dej opravit dalšímu
+> subagentovi, než půjdeš dál. Když subagent hlásí rozpor s plánem, rozhodni
+> autonomně podle plánu.
 >
-> Dneska chci v tomhle pořadí, každý krok jako vlastní commit: krok A celý
-> (opravy z revize), krok B0 (dřívější ročníky na mapě složené za dveře,
-> milník s třídou před letošním blokem), a pokud zbude čas, krok B, tedy
-> `chain_3`, kapitolu 11 třetího ročníku, řetězec tří členů typu 7 + 5 - 3,
-> hlavička klíče `q`, tři kbelíky podle oboru, přesně podle oddílů B1 až B7
-> a kontrolního seznamu pro novou rodinu v oddílu 14 tohohle souboru.
-> Rozhodnutí z oddílu 9 plánu, která se kroků týkají (R4 poloha řetězce na
-> mapě, R7 vynulování postupu), ber podle doporučení a řekni to subagentovi
-> v zadání; R1 (žebřík minulých let) zatím nedělej.
+> Dneska chci krok C, tedy responzivitu a písmo podle ročníku, ve dvou
+> subagentech a dvou commitech přesně podle oddílu 10 plánu: první dostane
+> C1 až C3 a C5 (závod a dílna na šířku, mapa podle šířky, drobnosti a
+> manifest), druhý C4 a C7 (měřítko písma podle ročníku a nový
+> `tests/style.test.js`). Rozhodnutí z oddílu 9 plánu, která se kroku týkají
+> (R5 měřítka písma, R6 mapa na tabletu), ber podle doporučení a řekni to
+> subagentovi v zadání; R1 (žebřík minulých let) zatím nedělej.
+>
+> Obrazovky z kroku C se v sandboxu prohlédnout nedají, jsdom rozvržení nemá.
+> Až bude krok hotový, řekni mi, které rozměry mám projít sám, nebo mi nabídni,
+> že `dist/artifact.html` nahraješ do mého artefaktu na claude.ai a prohlédneš
+> si ho ve vestavěném prohlížeči s emulací rozměrů.
 >
 > Pravidla, která patří do každého zadání subagentovi: zdroje se editují
 > v `src/`, nikdy `index.html`; po každé změně `python3 build.py` a testy
@@ -1439,14 +1451,14 @@ ročníku (4b).
 > Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
 > které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
 > hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
-> úkolem byl krok C (dva subagenti, C1 až C3 s C5 a pak C4 s C7), a ověř,
-> že subagenti označili hotové kroky v `docs/PLAN.md`.
+> úkolem byl krok D (D1 až D4, každá rodina vlastní subagent a vlastní
+> commit), a ověř, že subagenti označili hotové kroky v `docs/PLAN.md`.
 
 ### Prompt pro autonomní dokončení celého plánu
 
-Varianta bez průběžných otázek: session dojede kroky A až F sama, rozhodnutí
+Varianta bez průběžných otázek: session dojede zbytek plánu sama, rozhodnutí
 z oddílu 9 plánu bere podle doporučení a krok G jen připraví. Použij, když
-nechceš být u toho.
+nechceš být u toho. Kroky A, B0 a B jsou hotové, začíná se krokem C.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
@@ -1461,21 +1473,20 @@ nechceš být u toho.
 > přepiš v tomhle souboru hlavičku "Kde se přestalo" jednou větou, aby šlo
 > po případném přerušení navázat.
 >
-> Pořadí a rozdělení: A; B0; R1 jako samostatný commit hned po B0; B; C ve
-> dvou subagentech (C1 až C3 s C5, pak C4 s C7); D1, D2, D3, D4 po jednom;
-> E1 ve dvou (nejdřív dvě políčka `pad2`, pak generátor dělení se zbytkem);
-> E2; E3; E4; F. Po B, po obou částech C, po každém D a po E1 pusť
-> kontrolního subagenta a jeho nálezy dej opravit dalšímu subagentovi před
-> tím, než jdeš dál. Krok G nedělej: mapy čtvrtého a pátého ročníku nejsou
+> Pořadí a rozdělení: C ve dvou subagentech (C1 až C3 s C5, pak C4 s C7);
+> D1, D2, D3, D4 po jednom; E1 ve dvou (nejdřív dvě políčka `pad2`, pak
+> generátor dělení se zbytkem); E2; E3; E4; F. Po obou částech C, po každém D
+> a po E1 pusť kontrolního subagenta a jeho nálezy dej opravit dalšímu
+> subagentovi před tím, než jdeš dál. Krok G nedělej: mapy čtvrtého a pátého ročníku nejsou
 > ověřené ze stránek a k tomu potřebuješ mě; místo toho na konci sepiš do
 > `docs/PLAN.md` u kroku G, co přesně je k ověření a co se změní v datovém
 > modelu.
 >
 > Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentům
-> v zadání: R1 ano (učivo minulých let starším dětem otevřené, vlastní
-> commit, fixture), R2 rodina po dělitelích `r2` až `r10`, R3 původní klíč,
-> R4 řetězec před `beyond`, R5 měřítka 1,25 / 1,12 / 1,04 / 1,0, R6 sloupce
-> na tabletu, R7 vynulování nechá nastavení. Kde subagent narazí na něco,
+> v zadání: R2 rodina po dělitelích `r2` až `r10`, R3 původní klíč,
+> R5 měřítka 1,25 / 1,12 / 1,04 / 1,0, R6 sloupce na tabletu. R4 a R7 už
+> padly v kroku A a B. R1 (učivo minulých let starším dětem otevřené) je
+> jediné, které nech na mně, ani ho nedělej. Kde subagent narazí na něco,
 > co plán neřeší, rozhodni ve prospěch nedotknutelných principů z oddílu 3
 > a zapiš rozhodnutí do plánu k danému kroku.
 >
@@ -1506,7 +1517,7 @@ nechceš být u toho.
 >
 > Na konci: aktualizuj celý tenhle soubor (hlavička, stav v číslech, tabulky
 > tratí a klíčů, oddíl 12, kontrolní seznam v oddílu 14 s novými čísly,
-> prompt pro další session, kde bude dalším úkolem krok G), ověř, že
+> prompt pro další session, kde bude dalším úkolem krok G a rozhodnutí R1), ověř, že
 > `docs/PLAN.md` má u každého kroku HOTOVO nebo ODLOŽENO s datem, pusť
 > všech pět testů naposledy a napiš mi česky, stručně: seznam commitů
 > k pushnutí v pořadí, která rozhodnutí padla a proč, co je odložené a proč,

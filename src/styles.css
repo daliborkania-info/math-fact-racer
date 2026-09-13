@@ -146,26 +146,34 @@ input{font-family:inherit}
 .chip.warm{background:#fff5df;border-color:#ffdc9a;color:#8a5a00}
 .chip.fire{background:#ffeadf;border-color:#ffc4a3;color:#a34400}
 
-.tracks{display:flex;flex-direction:column;gap:12px;padding:8px 18px 0}
-.track{
-  position:relative;display:flex;align-items:center;gap:14px;width:100%;
-  padding:14px;border-radius:var(--r-l);border:2px solid var(--line);
-  background:var(--paper);text-align:left;box-shadow:var(--shadow-soft);overflow:hidden;
+/* The map is a world: places sit along a winding road instead of
+   stacking into a column. Position comes from the markup, computed in
+   JS, so the road and the places cannot drift apart; the stylesheet only
+   says what a place looks like. */
+.world{position:relative;margin:10px 14px 0}
+.worldroad{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.place{
+  position:absolute;width:44%;max-width:205px;display:flex;flex-direction:column;gap:5px;
+  padding:9px;border-radius:var(--r-l);border:2px solid var(--line);
+  background:var(--paper);text-align:left;box-shadow:var(--shadow-soft);
 }
-.track:active{transform:translateY(2px)}
-.track .thumb{
-  width:94px;height:52px;flex:none;border-radius:13px;overflow:hidden;position:relative;
+.place:active{transform:translateY(2px)}
+.place .thumb{
+  width:100%;aspect-ratio:400/205;border-radius:11px;overflow:hidden;position:relative;
   border:2px solid rgba(24,37,67,.12);background:#1a2440;
 }
-.track .thumb svg{position:absolute;inset:0;width:100%;height:100%}
-.track .body{flex:1;min-width:0}
-.track .nm{font-family:var(--font-display);font-size:18px;line-height:1.15}
-.track .sub{font-size:12.5px;color:var(--ink-soft);font-weight:700;margin-top:1px}
-.track .bar{height:8px;border-radius:99px;background:var(--shell-2);margin-top:8px;overflow:hidden}
-.track .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),#6ee7a8)}
-.track .medal{position:absolute;top:10px;right:12px;font-size:17px}
-.track.locked{filter:grayscale(.85);opacity:.62}
-.track.locked .lockmsg{font-size:12px;color:var(--ink-soft);font-weight:700;margin-top:6px}
+.place .thumb svg{position:absolute;inset:0;width:100%;height:100%}
+.place .nm{font-family:var(--font-display);font-size:15px;line-height:1.1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.place .sub{font-size:11px;color:var(--ink-soft);font-weight:700;line-height:1.25;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.place .bar{height:7px;border-radius:99px;background:var(--shell-2);overflow:hidden}
+.place .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),#6ee7a8)}
+.place .foot{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;
+  color:var(--ink-soft);min-height:16px}
+.place .tokc{margin-left:auto;font-size:11px;color:var(--ink-faint);white-space:nowrap}
+.place.locked{filter:grayscale(.85);opacity:.6}
+.place.locked .lockmsg{font-size:11px;color:var(--ink-soft);font-weight:700;line-height:1.25}
 
 /* ---------- race screen ---------- */
 .game{position:relative;display:flex;flex-direction:column;flex:1;min-height:0;background:#0d1428}
@@ -386,6 +394,17 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
 .pickitem.sel{border-color:var(--grape);background:var(--grape-soft);box-shadow:0 0 0 3px rgba(91,75,214,.16)}
 .pickitem.sel .nm{color:var(--grape-dark)}
 .pickscroll{max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}
+/* the world picker: a strip of landscapes, because a world is something
+   you look at rather than a word you read */
+.worldgrid{display:flex;flex-direction:column;gap:9px}
+.pickworld{display:flex;align-items:center;gap:12px;text-align:left;padding:8px;
+  border-radius:var(--r-m);border:2px solid var(--line);background:var(--paper)}
+.pickworld .thumb{width:82px;height:46px;flex:none;border-radius:10px;overflow:hidden;
+  position:relative;border:2px solid rgba(24,37,67,.12);background:#1a2440}
+.pickworld .thumb svg{position:absolute;inset:0;width:100%;height:100%}
+.pickworld .nm{font-family:var(--font-display);font-size:16px;display:block;line-height:1.15}
+.pickworld .sub{font-size:11.5px;color:var(--ink-soft);font-weight:700;display:block}
+.pickworld.sel{border-color:var(--grape);background:var(--grape-soft);box-shadow:0 0 0 3px rgba(91,75,214,.16)}
 
 /* ---------- workshop ----------
    The race screen is dark, loud and moving. This one is deliberately
@@ -393,9 +412,9 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
    The child should be able to tell which mode they are in from across
    the room. */
 .chip.cool{background:#eef0ff;border-color:#c9cfff;color:#3b3a8f}
-.track.shopcard{background:linear-gradient(160deg,#fff6e6,#ffe9c9);border-color:#f0cf95}
-.shopthumb{display:grid;place-items:center;font-size:38px;background:#ffdfa8 !important}
-.track.shopcard .medal{font-size:14px;font-weight:800;color:#8a5a00;top:12px}
+.place.shopplace{background:linear-gradient(160deg,#fff6e6,#ffe9c9);border-color:#f0cf95}
+.shopthumb{display:grid;place-items:center;font-size:34px;background:#ffdfa8 !important}
+.place.shopplace .foot{color:#8a5a00}
 
 .shop{background:#fdf7ee}
 .jobs{display:flex;flex-direction:column;gap:12px;padding:8px 18px 0}

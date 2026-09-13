@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -596,6 +596,82 @@ for(let done=0;done<=6;done++){
 if(cover(A.revealSVG(pic,9,6))!==0){rvBad++;console.log('  !!  vic vyresenych nez dilu kruh rozbilo');}
 if(cover(A.revealSVG(pic,-1,6))!==6){rvBad++;console.log('  !!  zaporny pocet kruh rozbil');}
 console.log('chyb v kruhu dilny:',rvBad);
+
+// 13. svety
+//
+// Svet je jina kabat teze hry, nikdy druha hra. Smi menit krajinu,
+// poradi nabizenych jezdcu a hrstku slov. Nesmi sahnout na ucivo, na
+// obtiznost, na odemykani ani na rekordy, a nesmi ditěti nic vzit.
+let wBad=0;
+const wsay=m=>{wBad++; if(wBad<10) console.log('  !!  '+m);};
+// kazdy svet krome okruhu ma vlastni prostredi pro kazdou trat
+for(const w of A.WORLDS){
+  const seen=new Set();
+  for(const tr of A.TRACKS){
+    const e=A.envOf({world:w.id}, tr);
+    if(!A.ENVS[e]){wsay('svet '+w.id+' odkazuje na nezname prostredi '+e+' u trati '+tr.id);continue;}
+    if(w.id!=='circuit' && e===tr.env) wsay('svet '+w.id+' nechal trati '+tr.id+' puvodni krajinu');
+    if(seen.has(e)) wsay('svet '+w.id+' dal dvema tratim tutez krajinu: '+e);
+    seen.add(e);
+  }
+}
+// zadna paleta nezustala nepouzita, tedy zadny preklep v mapovani
+const used=new Set(A.TRACKS.map(tr=>tr.env));
+for(const w of A.WORLDS) for(const tr of A.TRACKS) used.add(A.envOf({world:w.id}, tr));
+const zbyle=Object.keys(A.ENVS).filter(k=>!used.has(k));
+if(zbyle.length) wsay('nepouzite palety: '+zbyle.join(','));
+// kazda paleta ma ctyri barvy a rika, co se v ni sbira
+for(const k of Object.keys(A.ENVS)){
+  const e=A.ENVS[k];
+  for(const c of ['hill1','hill2','dec','dec2'])
+    if(!/^#[0-9a-f]{6}$/i.test(e[c]||'')) wsay('paleta '+k+' nema barvu '+c+': '+e[c]);
+  if(!e.tok) wsay('paleta '+k+' nerika, co se v ni sbira');
+  if(/NaN|undefined/.test(A.circuitThumb(k,'t1',.5))) wsay('vadny nahled okruhu v prostredi '+k);
+}
+// neznamy svet spadne na okruh, at uz z ulozeneho profilu, nebo preklepem
+const sw={world:'neexistuje'}; A.seedWorld(sw);
+if(sw.world!=='circuit') wsay('neznamy svet se nesrovnal na okruh');
+const sw2={}; A.seedWorld(sw2);
+if(sw2.world!=='circuit') wsay('profil bez sveta nedostal okruh');
+if(A.envOf({world:'neexistuje'}, A.trackById('t1'))!=='meadow') wsay('neznamy svet nekresli okruh');
+// prepnuti sveta nesmi hnout ucivem, odemykanim ani velikosti sbirky
+const wp=A.newProfile('W'); A.DB.profiles=[wp]; A.DB.current=wp.id;
+A.trackKeys(wp,A.trackById('a20')).forEach(k=>wp.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
+wp.best={t1:{dist:118,hist:[],n0:20}}; wp.done={t1:3}; wp.trackRuns={t1:4};
+const snap=id=>{
+  wp.world=id;
+  return JSON.stringify({
+    keys: A.TRACKS.map(tr=>A.trackKeys(wp,tr)),
+    open: A.TRACKS.map(tr=>A.unlockState(wp,tr).open),
+    coll: A.TRACKS.map(tr=>{const s=A.trackSpec(wp,tr); return s?s.keys:null;}),
+    best: wp.best, done: wp.done
+  });
+};
+const zaklad=snap('circuit');
+for(const w of A.WORLDS) if(snap(w.id)!==zaklad) wsay('svet '+w.id+' zmenil ucivo, odemceni nebo rekordy');
+// zavod v jinem svete bere tytez klice
+wp.world='deep';
+const deepRun=A.buildRun(wp,A.trackById('t1'));
+const t1keys=new Set(A.trackKeys(wp,A.trackById('t1')));
+for(const it of deepRun) if(!t1keys.has(it.key)){wsay('svet podstrcil do zavodu cizi priklad '+it.key);break;}
+// nabidka jezdcu se jen radi, nikdy nefiltruje
+for(const w of A.WORLDS){
+  const rp={world:w.id};
+  const ord=A.ridesOrder(rp, A.ALL_ITEMS);
+  if(ord.length!==A.ALL_ITEMS.length) wsay('svet '+w.id+' ubral jezdce: '+ord.length+' z '+A.ALL_ITEMS.length);
+  if(new Set(ord.map(x=>x.id)).size!==A.ALL_ITEMS.length) wsay('svet '+w.id+' jezdce zdvojil');
+  for(const it of A.ALL_ITEMS) if(!ord.some(x=>x.id===it.id)) {wsay('svet '+w.id+' zapomnel jezdce '+it.id);break;}
+  const prvni=worldById2(w.id).rides[0];
+  if(ord[0].id!==prvni) wsay('svet '+w.id+' nedal sve jezdce dopredu, prvni je '+ord[0].id);
+}
+function worldById2(id){ return A.WORLDS.find(w=>w.id===id); }
+// jezdec, ktereho dite vlastni, jde vybrat v kazdem svete
+const own=['ri_ufo','pet_noc','ri_auto'];
+for(const w of A.WORLDS){
+  const ord=A.ridesOrder({world:w.id}, A.ALL_ITEMS.filter(it=>own.includes(it.id)));
+  if(ord.length!==own.length) wsay('svet '+w.id+' schoval koupeneho jezdce');
+}
+console.log('svetu:',A.WORLDS.length,'| palet:',Object.keys(A.ENVS).length,'| chyb:',wBad);
 
 // 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
 let trBad=0;

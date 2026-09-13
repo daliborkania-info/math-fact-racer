@@ -18,7 +18,9 @@
   "             popsane v migration.test.js",
   "expectStars = klice, kterym se pri nacteni musi dopocitat misto ve",
   "              sbirce; expectNoStars naopak ty, ktere se rozsvitit",
-  "              nesmi, protoze v krabicce nedosahly urovne ctyri"
+  "              nesmi, protoze v krabicce nedosahly urovne ctyri",
+  "expectWorld = svet, ve kterem profil po nacteni skonci; starsi profil",
+  "              patri do okruhu, protoze tam uz byl"
  ],
  "cases": [
   {
@@ -828,6 +830,207 @@
       "msSum": 1090000,
       "msN": 396,
       "created": 1757200000000
+     }
+    ]
+   }
+  },
+  {
+   "id": "v5-pred-svety",
+   "note": "zari 2026, profil z verze se sbirkou, ale jeste bez svetu: nezna world. Musi skoncit v okruhu, tedy tam, kde uz byl, a nesmi po nem zmizet ani jeden koupeny zavodnik, i kdyz ho zvoleny svet nenabizi na prvnim miste",
+   "expectOpen": [
+    "t1",
+    "t2",
+    "d1",
+    "a20",
+    "a100",
+    "round",
+    "beyond",
+    "clock",
+    "weak"
+   ],
+   "expectClosed": [
+    "t4",
+    "t5",
+    "a1000",
+    "mix"
+   ],
+   "expectChapter": null,
+   "expectWorld": "circuit",
+   "expectStars": [
+    "m4x9",
+    "m5x5",
+    "a7p8",
+    "o1",
+    "wm1"
+   ],
+   "expectNoStars": [
+    "d3x6",
+    "ph3",
+    "xm1"
+   ],
+   "db": {
+    "current": "pold8",
+    "sound": false,
+    "lang": "de",
+    "pin": "def456",
+    "profiles": [
+     {
+      "id": "pold8",
+      "name": "Toma",
+      "lang": "de",
+      "facts": {
+       "m4x9": {
+        "lv": 5,
+        "reps": 13,
+        "ok": 12,
+        "bad": 1,
+        "best": 1800,
+        "seen": 1757000000000
+       },
+       "m5x5": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 2200,
+        "seen": 1757000000000
+       },
+       "d3x6": {
+        "lv": 2,
+        "reps": 6,
+        "ok": 4,
+        "bad": 2,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "a7p8": {
+        "lv": 4,
+        "reps": 10,
+        "ok": 9,
+        "bad": 1,
+        "best": 2600,
+        "seen": 1757000000000
+       },
+       "ph3": {
+        "lv": 3,
+        "reps": 8,
+        "ok": 6,
+        "bad": 2,
+        "best": 4600,
+        "seen": 1757000000000
+       },
+       "o1": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 5200,
+        "seen": 1757000000000
+       },
+       "xm1": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 3,
+        "bad": 2,
+        "best": 6100,
+        "seen": 1757000000000
+       },
+       "wm1": {
+        "lv": 5,
+        "reps": 10,
+        "ok": 9,
+        "bad": 1,
+        "best": null,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "m4x9": true,
+       "m5x5": true,
+       "a7p8": true,
+       "o1": true,
+       "wm1": true
+      },
+      "best": {
+       "t1": {
+        "dist": 129,
+        "hist": [],
+        "n0": 20
+       },
+       "a20": {
+        "dist": 104,
+        "hist": [],
+        "n0": 15
+       }
+      },
+      "done": {
+       "t1": 3,
+       "a20": 2,
+       "round": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "ri_ufo",
+       "pet_drak"
+      ],
+      "runner": "ri_ufo",
+      "xp": {
+       "pet_drak": 130
+      },
+      "coins": 210,
+      "parts": 41,
+      "paints": [
+       "pa_lava",
+       "pa_frost"
+      ],
+      "paint": {
+       "ri_ufo": "pa_lava"
+      },
+      "jobRuns": {
+       "money": 5
+      },
+      "trackRuns": {
+       "t1": 7,
+       "t2": 3,
+       "a20": 6,
+       "a100": 3,
+       "round": 2,
+       "beyond": 1,
+       "clock": 1
+      },
+      "opened": {
+       "t1": true,
+       "t2": true,
+       "a20": true,
+       "a100": true,
+       "round": true,
+       "beyond": true,
+       "clock": true,
+       "d1": true
+      },
+      "force": {
+       "weak": true
+      },
+      "autoUnlock": true,
+      "qCount": 25,
+      "speedMode": "fast",
+      "curriculum": null,
+      "chapter": null,
+      "chapterMode": "soft",
+      "streak": 1,
+      "lastDay": null,
+      "bestStreak": 9,
+      "runs": 23,
+      "totalOk": 402,
+      "totalAns": 455,
+      "msSum": 1210000,
+      "msN": 441,
+      "created": 1757300000000
      }
     ]
    }

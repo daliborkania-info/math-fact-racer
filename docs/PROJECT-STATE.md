@@ -1,20 +1,21 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po sbírkách
+Poslední aktualizace: 12. září 2026, po světech a mapě
 
 **Kde se přestalo a kudy dál:** hotová je **dílna**, druhý režim bez stopek
 a bez bodů za rychlost, zatím s jednou zakázkou, penězi. Hotový je **krok 1
 z `docs/PLAN.md`**, tedy rodičovská heatmapa nad všemi rodinami a vážený
 souhrn, **první dvě položky kroku 2**, tedy `mult_beyond` s `div_beyond`
-a trať `beyond`, a `rounding_10` s `rounding_100` a trať `round`, a celý
-**krok 3**, tedy sbírky vázané na Leitnerovu krabičku, obě části.
-Na řadě je **krok 4, mapa jako svět**, a vedle něj kdykoli **třetí položka
-kroku 2**, tedy `chain_3`, kapitola 11.
+a trať `beyond`, a `rounding_10` s `rounding_100` a trať `round`, celý
+**krok 3**, tedy sbírky vázané na Leitnerovu krabičku, a celý **krok 4**, tedy
+čtyři světy a mapa jako krajina s cestou mezi místy.
 
-**Mapa je na hranici.** Tratí je patnáct a v oddílu 12b se říkalo, že u téhle
-hranice svislý seznam přestává stačit. Krok 4 z `docs/PLAN.md` mapu přestavuje
-a čím dřív, tím líp; krok 3, který mu musel předcházet, je od teď z cesty.
-Hotový prompt je na konci, v oddílu 14.
+**Mapa už na hranici není.** Byl to důvod, proč krok 4 nešlo odkládat: patnáct
+tratí ve svislém seznamu přestávalo být mapa. Od teď je to krajina a další trať
+do ní jen přibude jako další místo.
+
+Na řadě je **zbytek vlny A z kroku 2**, tedy `chain_3`, kapitola 11, a dál podle
+oddílu 12b. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -315,7 +316,8 @@ se do průměrné doby odpovědi.
 
 ## 5. Trati
 
-Patnáct tratí, každá má vlastní generovaný okruh a prostředí.
+Patnáct tratí, každá má vlastní generovaný okruh a vlastní prostředí v každém
+ze čtyř světů; okruh je na světě nezávislý, mění se jen krajina kolem něj.
 
 | id | obsah |
 | --- | --- |
@@ -391,6 +393,7 @@ profil = {
   curriculum: null,                      // id z CURRICULA, null = adaptivní režim
   chapter: null,                         // číslo kapitoly uvnitř toho kurikula
   chapterMode: "soft",                   // soft | hard
+  world: "circuit",                      // kabat hry, nikdy ne obtiznost
   streak, lastDay, bestStreak, runs, totalOk, totalAns, msSum, msN
 }
 ```
@@ -400,8 +403,8 @@ jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 
 Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
 pokud je nemá, `normalizeChapter()` srovná kapitolu, `seedOpened()` doplní
-seznam otevřených tratí, `seedShop()` prázdnou dílnu a `seedStars()` sbírku.
-Nové migrace patří do `load()`, a pokud se týkají
+seznam otevřených tratí, `seedShop()` prázdnou dílnu, `seedStars()` sbírku
+a `seedWorld()` svět. Nové migrace patří do `load()`, a pokud se týkají
 profilu jako celku, taky do větve `import`.
 
 **Sbírka je vlastní pole, ne pohled do krabičky.** Místo se rozsvítí ve chvíli,
@@ -525,6 +528,55 @@ v `tests/i18n.test.js`.
 
 ---
 
+## 7c. Světy a mapa
+
+Od září 2026 má hra čtyři světy: `circuit`, `trail`, `sky` a `deep`. Je to
+**jedna hra v jiném kabátě, nikdy dvě hry**; proč právě takhle, je
+v `ROADMAP.md`, oddíl 2, včetně experimentu, ve kterém byla genderově neutrální
+hra oblíbenější než hra cílená na vlastní pohlaví.
+
+**Co svět mění.** Krajinu každé trati, pořadí nabízených jezdců a hrstku slov.
+**Co nemění: učivo, obtížnost, odemykání ani rekordy.** Rekordy se ukládají pod
+`tr.id`, takže přepnutí světa je nechává být, a to tak musí zůstat.
+
+**Nabídka jezdců se jen řadí, nikdy nefiltruje.** `ridesOrder()` dá dopředu
+jezdce daného světa a za ně všechny ostatní. Kdyby svět filtroval, přišlo by
+dítě přepnutím světa o koupený stroj, a to je přesně to, co zakazuje oddíl 3.
+
+**Krajinu určuje jediné místo, `envOf(p, tr)`.** `TRACKS` si nechává `env` jako
+výchozí hodnotu pro okruh, ostatní světy mají vlastní mapu trať na prostředí.
+Čte to mapa, závodní obrazovka i sbírka; nikdo jiný se na `tr.env` dívat nemá.
+
+**Paleta je čtyři barvy plus dva příznaky.** `dark` znamená noční oblohu místo
+křoví, `tok` říká, co se v prostředí sbírá. Obojí bývalo v seznamu jinde v kódu
+a při šedesáti prostředích by to nešlo udržet. Prvních patnáct palet je ručních
+a jsou to barvy okruhu, **nesahat na ně**; zbylých pětačtyřicet se generuje
+funkcí `pal(odstín země, odstín porostu, světlost, co se sbírá, noc)`, takže
+další svět stojí patnáct krátkých řádků, ne šedesát ručně míchaných barev.
+
+**Texty se přebíjejí přes `w_<svet>_<klic>`.** `t()` hledá nejdřív klíč se
+světem a pak holý, takže ve slovníku jsou jen slova, která se opravdu liší,
+a zbytek se nekopíruje čtyřikrát. Který svět platí, drží `CUR_WORLD`, nastavuje
+ho `applyLang()` a v rodičovské sekci je prázdný, protože rodič mluví o hře,
+ne z ní. Dnes se přebíjejí tři klíče: `whichRacer`, `letsGo` a `crossedLine`.
+
+**Volba světa je na mapě, ne za rodičovským kódem.** Je to dětská volba a funguje
+přes to, že se v ní dítě pozná; schovat ji dospělým by ji zrušilo.
+
+**Mapa je krajina.** `viewMap()` rozmístí místa podél vinoucí se cesty:
+`worldSpots()` počítá polohy ze seedu světa, `worldRoad()` prokládá jejich středy
+esíčky. Vodorovně se měří v procentech a svisle v pixelech, takže se to vejde do
+každého telefonu; cesta je jedno SVG přes celou plochu s `vector-effect`, jinak
+by ji roztažení do šířky rozmázlo. **Klepnutí na místo skočí rovnou na trať**,
+cesta je ozdoba; jediná nalezená studie hlásí u povinného průchodu centrem
+pokles pocitu kompetence a autonomie. Zamčené místo je vidět, jen je tmavé,
+a není to tlačítko. Dílna má vlastní místo a vlastní vzhled.
+
+**Rozměry jsou spočítané, ne odhadnuté.** Místo je široké 44 procent a sousedi
+jsou po 96 pixelech, takže se dvě místa na téže straně nepřekryjou a dva sloupce
+se nedotknou ani na nejužším telefonu. `flow.test.js` to ověřuje polohami, ne
+pohledem.
+
 ## 8. Testy
 
 V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
@@ -550,7 +602,10 @@ tedy že hltavé drobné jsou opravdu nejmenší, že úloha uzná své vlastní
 a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas. K tomu
 sbírku, tedy že se místo rozsvítí až na úrovni 4, že po poklesu úrovně nezhasne,
 že ho rozsvítí i klíč dílny, že je sbírka trati velká jako trať a že `seedStars()`
-dopočítá starší profil; a kruh v dílně, tedy počet zakrytých výsečí.
+dopočítá starší profil; kruh v dílně, tedy počet zakrytých výsečí; a světy, tedy
+že každý svět má pro každou trať vlastní prostředí, že žádná paleta nezůstala
+nepoužitá, že přepnutí světa nehne učivem, odemčením ani rekordy a že nabídku
+jezdců jen řadí.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
@@ -768,10 +823,10 @@ Stojí, takže další témata dílny jsou od téhle chvíle jen další zakázk
 třetí ročník plný.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
-to dál. Mapa tím naroste a bude ji potřeba přeskládat do skupin, jakmile tratí
-bude patnáct a víc. Po zaokrouhlování je jich přesně patnáct, takže tahle
-hranice právě padla. Krok 4 z `docs/PLAN.md` mapu přestavuje a měl by přijít
-dřív než další rodina.
+to dál. Hranice patnácti tratí, u které svislý seznam přestával být mapou, padla
+po zaokrouhlování a krok 4 ji vyřešil: mapa je od září 2026 krajina s cestou,
+takže další trať je jen další místo na ní. Cenou za to je, že nová rodina musí
+dostat prostředí ve všech čtyřech světech, ne v jednom.
 
 ## 12c. Co stojí v cestě
 
@@ -974,9 +1029,10 @@ Tohle projela tisícovka a sedělo to do puntíku. V `src/app.js`: písmeno hlav
 klíče do `FAMILY_HEADS`, definice kbelíků nebo stupňů, generátor, větev
 v `rawItem()`, `poolKeys()`, `trackKeys()`, `reachedKeys()` pokud má stupně,
 vlastní `*Stage()` přes `stageIndex()`, větev v `buildRun()` přes
-`focusAndReview()`, záznam v `TRACKS` a `ENVS`, tvar sbírky v `TOKEN_KIND`
-(bez něj spadne na hvězdu a všechny nové tratě vypadají stejně),
-větev v `unlockState()`,
+`focusAndReview()`, záznam v `TRACKS` a `ENVS` **a prostředí ve všech třech
+zbylých světech ve `WORLDS`**, jinak bude nová trať ve stezce, na obloze
+i v hlubině vypadat jako v okruhu; paleta si rovnou řekne přes `tok`, co se v ní
+sbírá. Dál větev v `unlockState()`,
 násobitel v `thresholds()` a `maxLen` na položce, pokud odpověď přeleze tři
 číslice, a blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí. Dál kapitoly
 v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech třech jazycích
@@ -994,16 +1050,18 @@ Použij tenhle, pokud se pokračuje tam, kde se přestalo. Další kroky mají
 v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
 s dnešním úkolem.
 
-**Kde přesně stojíme.** Kroky 1 a 3 jsou hotové. Z kroku 2, vlny A, jsou hotové
-dvě položky ze sedmi. Na řadě jsou dvě možnosti a tentokrát je pořadí mezi nimi
-volné, protože to, co muselo být první, už stojí:
+**Kde přesně stojíme.** Kroky 1, 3 a 4 jsou hotové, tedy všechno, co něco
+přestavuje. Z kroku 2, vlny A, jsou hotové dvě položky ze sedmi. Zbytek plánu
+už jsou samostatné přírůstky a pořadí mezi nimi je volné:
 
-- **Krok 4, mapa jako svět a volba světa.** Tratí je patnáct, což je hranice,
-  u které svislý seznam přestává stačit, takže odkládat ho dál už něco stojí.
-  Sbírka z kroku 3 existuje, takže mapa už ví, co má ukazovat, a předělá se
-  jednou.
-- **Zbytek vlny A**, tedy `chain_3` a dál. Nic neblokuje a nic nepřestavuje,
-  takže se dá vložit kdykoli mezi ostatní kroky.
+- **Zbytek vlny A**, tedy `chain_3`, pak `order_of_ops`, `mult_div_10_100`
+  s `mult_round`, `unit_convert` s `time_convert` a nakonec `missing_operand`
+  s `inverse_check`. Kontrolní seznam pro novou rodinu je nad tímhle promptem
+  a od kroku 4 je v něm navíc prostředí ve všech čtyřech světech.
+- **Krok 5, vlna B**, tedy `pad2` a dělení se zbytkem. Před ním je půl dne
+  práce na víc políčkách v `tap()`, `typedText()` a `questionHTML()`.
+- **Krok 6, další zakázka do dílny**, nejspíš `count_objects`, což je poslední
+  díra v celém prvním ročníku.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
@@ -1013,16 +1071,10 @@ volné, protože to, co muselo být první, už stojí:
 > kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
 > něco navržené tak, jak je; jsou tam odkazy na studie.
 >
-> Dneska chci krok 4 z plánu, tedy mapu jako svět a volbu světa, obě části.
-> Nejdřív 4a, tedy `p.world` a `envOf(p, tr)` místo tří míst, která dneska čtou
-> `tr.env` natvrdo, a překlady přes `w_<svet>_<klic>` s návratem na holý klíč.
-> Pak 4b, tedy rozmístění tratí v prostoru místo svislého seznamu. Pozor,
-> klepnutí na trať na ni musí skočit rovnou, přelet je ozdoba, kterou jde
-> přeskočit, dílna zůstává vlastní místo mimo řadu tratí a sbírka z kroku 3 se
-> na trati i na dílně ukazuje.
->
-> Tohle sahá na datový model, takže do `tests/fixtures/legacy-profiles.json`
-> patří další zamrazený profil, bez `world`.
+> Dneska chci `chain_3` z kroku 2, tedy třetí položku vlny A, kapitolu 11
+> třetího ročníku. Hlavička klíče `q`, kbelíky podle oboru. Drž se kontrolního
+> seznamu pro novou rodinu z oddílu 14, hlavně násobitele v `thresholds()`,
+> bloku v `heatSpecs()` a prostředí ve všech čtyřech světech.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
 > build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové

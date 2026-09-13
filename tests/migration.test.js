@@ -103,6 +103,18 @@ for(const c of FX.cases){
        navic.length?'rozsvitilo se '+navic.join(','):'ok');
   }
 
+  // svet: starsi profil patri do okruhu, protoze v nem uz hral, a zadny
+  // svet mu nesmi vzit koupeneho zavodnika z nabidky
+  if(c.expectWorld){
+    ok('profil skoncil ve spravnem svete', after.profiles[0].world===c.expectWorld,
+       'svet '+after.profiles[0].world);
+    const vsude=w.eval(`(function(){
+      const p=P(), own=ALL_ITEMS.filter(i=>p.owned.includes(i.id));
+      return WORLDS.every(x=>ridesOrder({world:x.id}, own).length===own.length);
+    })()`);
+    ok('zadny svet neschoval koupeneho zavodnika', vsude===true);
+  }
+
   if(c.expectChapter!==null){
     const ch=after.profiles[0].chapter;
     ok('kapitola se srovnala jen dozadu', ch===c.expectChapter,

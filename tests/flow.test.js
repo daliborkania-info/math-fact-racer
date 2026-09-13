@@ -39,6 +39,15 @@ ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, 
 ok('mapa ma 14 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===14,
    new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size+' okruhu');
 ok('trat hodin je na mape a odemcena od zacatku', /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
+// mapa uz neni svisly seznam: mista lezi podel cesty a zamcene je vidět taky
+ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===15 && qa('.worldroad path').length>0,
+   qa('.world .place').length+' mist');
+ok('kazde misto ma svou polohu v mape', qa('.place').every(el=>/left:/.test(el.getAttribute('style')||'')));
+ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky a sedmičky/.test(txt()),
+   qa('.place.locked').length+' zamcenych');
+ok('zamcene misto neni tlacitko', qa('.place.locked').every(el=>el.tagName!=='BUTTON'));
+ok('dilna je vlastni misto mimo rady trati', qa('.place.shopplace[data-act="shop"]').length===1);
+ok('misto ukazuje, kolik uz je ve sbirce', /0\/34/.test(txt()));
 
 console.log('--- zavod s chybami ---');
 click(q('[data-act="play"]'));
@@ -316,6 +325,37 @@ const zkus=ev(`(function(){
   return p.stars[k] === true;
 })()`);
 ok('rozsvicene misto nezhasne ani po chybe a poklesu urovne', zkus===true);
+
+console.log('--- volba sveta ---');
+ev('go("map")');
+const rekordy=JSON.stringify(DBg().profiles[0].best);
+const krajinaOkruh=q('.place .thumb svg stop').getAttribute('stop-color');
+ok('volba sveta je na mape, ne za rodicovskym kodem', qa('[data-act="worldpick"]').length===1);
+click(q('[data-act="worldpick"]'));
+ok('nabidka ma vsechny ctyri svety', qa('[data-act="worldset"]').length===4 && /Stezka/.test(d.body.textContent));
+// ctyri nahledy teze trati v jednom dokumentu: kdyby mely stejne id
+// prechodu, vykreslily by se vsechny barvou toho prvniho
+ok('kazdy svet se v nabidce ukazuje svou barvou',
+   new Set(qa(".pickworld .thumb svg linearGradient[id^='tg_'] stop[offset='0']").map(s=>s.getAttribute('stop-color'))).size===4,
+   new Set(qa(".pickworld .thumb svg linearGradient[id^='tg_'] stop[offset='0']").map(s=>s.getAttribute('stop-color'))).size+' ruznych');
+click(qa('[data-act="worldset"]').find(b=>b.dataset.id==='trail'));
+ok('svet se ulozil do profilu', DBg().profiles[0].world==='trail', DBg().profiles[0].world);
+ok('krajina se zmenila', q('.place .thumb svg stop').getAttribute('stop-color')!==krajinaOkruh);
+ok('jmena trati zustala', /Rozjezd/.test(txt()) && /Hodiny/.test(txt()));
+ok('rekordy prepnuti sveta neprezilo nic neubralo', JSON.stringify(DBg().profiles[0].best)===rekordy);
+ok('ucivo se nezmenilo', ev('trackKeys(P(), trackById("t1")).length')===34,
+   ev('trackKeys(P(), trackById("t1")).length')+' prikladu');
+click(q('[data-act="play"]'));
+ok('ve stezce se jde, ne jede', /Jdeme/.test(d.body.textContent) && /S kým půjdeš/.test(d.body.textContent));
+ok('vsichni koupeni zavodnici jsou porad k vyberu', qa('[data-pick]').length===7,
+   qa('[data-pick]').length+' zavodniku');
+ok('svet dal sve zavodniky dopredu', qa('[data-pick]')[0].dataset.pick.slice(0,4)==='pet_',
+   qa('[data-pick]')[0].dataset.pick);
+click(q('.sheet'));                                  // zavrit vyber klepnutim vedle
+click(q('[data-act="worldpick"]'));
+click(qa('[data-act="worldset"]').find(b=>b.dataset.id==='circuit'));
+ok('zpatky do okruhu se da kdykoli', DBg().profiles[0].world==='circuit'
+   && q('.place .thumb svg stop').getAttribute('stop-color')===krajinaOkruh);
 
 console.log('--- natery ---');
 const withParts=DBg(); withParts.profiles[0].parts=200;

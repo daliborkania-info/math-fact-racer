@@ -227,7 +227,21 @@ a po dokončení zakázky je odkrytý celý. Do `items.test.js` kontrola, že se
 
 ---
 
-## Krok 4. Mapa jako svět a volba světa
+## Krok 4. Mapa jako svět a volba světa. HOTOVO, září 2026
+
+Postavené podle zadání níž, které zůstává jako záznam, proč to tak je. Co z toho
+vzniklo: `WORLDS` se čtyřmi světy, `envOf(p, tr)` jako jediné místo, které
+rozhoduje o krajině, přebíjení textů přes `w_<svet>_<klic>`, volba světa z mapy
+a mapa jako krajina s cestou mezi místy. Podrobnosti v `PROJECT-STATE.md`,
+oddíl 7c.
+
+Tři věci se proti zadání upřesnily. **Svět nabídku jezdců jen řadí, nikdy
+nefiltruje**; koupený stroj musí jít vybrat v každém světě, jinak by přepnutí
+světa vzalo dítěti to, co má, a to je proti pravidlu z oddílu 3. Palety
+ostatních světů se **generují z odstínu** přes `pal()`, protože čtyřicet pět
+ručně míchaných palet je práce, která nikomu nic nepřinese; prvních patnáct
+zůstalo ručních, jsou to barvy okruhu. A do palety se přesunulo `dark`
+i `tok`, takže prostředí samo říká, jestli je noční a co se v něm sbírá.
 
 **Proč teď.** Tratí je patnáct a s každou další rodinou z vlny A přibude jedna.
 Patnáct je hranice, u které podle `PROJECT-STATE.md`, oddíl 12b, svislý seznam

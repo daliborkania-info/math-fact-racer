@@ -7,6 +7,12 @@
 const FALLBACK_LANG = "en";
 const PARENT_VIEWS = ["setpin", "gate", "parent", "players"];
 let CUR_LANG = FALLBACK_LANG;
+/* Which world the words come from, empty for the parent section. A world
+   renames only the handful of things that read wrong in it: nobody
+   drives along a forest trail. The dictionary therefore holds just the
+   words that really differ, under `w_<world>_<key>`, and everything else
+   falls through to the plain key instead of being copied four times. */
+let CUR_WORLD = "";
 
 function detectLang(){
   const wanted = (navigator.languages || [navigator.language || ""])
@@ -16,7 +22,8 @@ function detectLang(){
 }
 function t(key){
   const dict = I18N[CUR_LANG] || I18N[FALLBACK_LANG];
-  let s = dict[key];
+  let s = CUR_WORLD ? dict["w_" + CUR_WORLD + "_" + key] : undefined;
+  if(s === undefined) s = dict[key];
   if(s === undefined) s = I18N[FALLBACK_LANG][key];
   if(s === undefined) return key;
   for(let i = 1; i < arguments.length; i++) s = s.split("{" + (i-1) + "}").join(arguments[i]);
@@ -29,9 +36,13 @@ function num(x, decimals){
 }
 function applyLang(){
   const p = P();
-  CUR_LANG = PARENT_VIEWS.indexOf(view.name) >= 0
+  const parent = PARENT_VIEWS.indexOf(view.name) >= 0;
+  CUR_LANG = parent
     ? (DB.lang || FALLBACK_LANG)
     : ((p && p.lang) || DB.lang || FALLBACK_LANG);
+  // the parent section talks about the game, not from inside it, so it
+  // keeps the plain words whatever world the child is playing in
+  CUR_WORLD = (!parent && p && p.world) ? p.world : "";
   try{ document.documentElement.lang = CUR_LANG; }catch(e){}
 }
 function langSeg(act, current){
@@ -70,6 +81,7 @@ function load(){
     seedOpened(p);
     seedShop(p);
     seedStars(p);
+    seedWorld(p);
   }
 }
 /* The workshop, added later. An older profile has none of this and must
@@ -120,6 +132,7 @@ function newProfile(name){
     curriculum: null,   // curriculum id, or null for the adaptive default
     chapter: null,      // chapter number inside that curriculum
     chapterMode: "soft",// soft keeps spaced review, hard drills the chapter only
+    world: "circuit",   // the coat the game wears; never changes difficulty
     streak: 0, lastDay: null, bestStreak: 0,
     runs: 0, totalOk: 0, totalAns: 0, msSum: 0, msN: 0,
     created: Date.now()
@@ -1300,40 +1313,160 @@ function itemSVG(p, id){
   return rideSVG(pa ? Object.assign({}, it, {c1: pa.c1, c2: pa.c2}) : it);
 }
 
-/* --- track environments --- */
-const ENVS = {
-  meadow:{hill1:"#8fd88a", hill2:"#63b862", dec:"#3d9b57", dec2:"#2c7c42"},
-  forest:{hill1:"#5fa96b", hill2:"#37804d", dec:"#225936", dec2:"#164227"},
-  canyon:{hill1:"#e08a5b", hill2:"#bd6440", dec:"#8c4224", dec2:"#67311a"},
-  peaks:{ hill1:"#a8bde0", hill2:"#7a93bb", dec:"#51658c", dec2:"#3b4d6d"},
-  city:{  hill1:"#8f7fd0", hill2:"#6455ac", dec:"#3d3280", dec2:"#2a2260"},
-  space:{ hill1:"#3a3577", hill2:"#221d4a", dec:"#4a4290", dec2:"#332d68"},
-  beach:{ hill1:"#ffe0a3", hill2:"#f2c274", dec:"#3fa8b8", dec2:"#d49a44"},
-  ocean:{ hill1:"#3f9fc4", hill2:"#256d8c", dec:"#19566f", dec2:"#0f3f52"},
-  night:{ hill1:"#33406e", hill2:"#1e2848", dec:"#3d4b7d", dec2:"#2a3560"},
-  storm:{ hill1:"#5c6790", hill2:"#3d456b", dec:"#313a5f", dec2:"#222a49"},
-  school:{hill1:"#7fd4c2", hill2:"#46a894", dec:"#2d7f6d", dec2:"#1d5c4e"},
-  clocktown:{hill1:"#f6c9d8", hill2:"#d992ad", dec:"#a85f81", dec2:"#7c4460"},
+/* --- track environments ---
+   A palette is four colours: two for the ground and two for whatever is
+   scattered on it. `dark` swaps the scenery for stars on a night sky,
+   and `tok` says what is collected there, because the thing found in a
+   place belongs to the place rather than to the track.
+   The first fifteen were picked by hand and stay exactly as they are;
+   they are the look of the circuit world. The other worlds are generated
+   from a hue, so a whole new world costs fifteen short lines instead of
+   sixty hand mixed colours. */
+function hsl(h, s, l){
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  const t3 = h < 60 ? [c,x,0] : h < 120 ? [x,c,0] : h < 180 ? [0,c,x]
+           : h < 240 ? [0,x,c] : h < 300 ? [x,0,c] : [c,0,x];
+  return "#" + t3.map(v => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
+}
+/* ground hue, scenery hue, lightness, what is collected, night or not */
+function pal(h, dh, l, tok, dark){
+  const e = {
+    hill1: hsl(h,  46, l),
+    hill2: hsl(h,  44, l - 13),
+    dec:   hsl(dh, 44, Math.max(15, l - 24)),
+    dec2:  hsl(dh, 46, Math.max(9,  l - 34)),
+    tok: tok
+  };
+  if(dark) e.dark = true;
+  return e;
+}
+const ENVS = Object.assign({
+  meadow:{hill1:"#8fd88a", hill2:"#63b862", dec:"#3d9b57", dec2:"#2c7c42", tok:"flower"},
+  forest:{hill1:"#5fa96b", hill2:"#37804d", dec:"#225936", dec2:"#164227", tok:"leaf"},
+  canyon:{hill1:"#e08a5b", hill2:"#bd6440", dec:"#8c4224", dec2:"#67311a", tok:"stone"},
+  peaks:{ hill1:"#a8bde0", hill2:"#7a93bb", dec:"#51658c", dec2:"#3b4d6d", tok:"crystal"},
+  city:{  hill1:"#8f7fd0", hill2:"#6455ac", dec:"#3d3280", dec2:"#2a2260", tok:"star", dark:true},
+  space:{ hill1:"#3a3577", hill2:"#221d4a", dec:"#4a4290", dec2:"#332d68", tok:"star", dark:true},
+  beach:{ hill1:"#ffe0a3", hill2:"#f2c274", dec:"#3fa8b8", dec2:"#d49a44", tok:"shell"},
+  ocean:{ hill1:"#3f9fc4", hill2:"#256d8c", dec:"#19566f", dec2:"#0f3f52", tok:"shell"},
+  night:{ hill1:"#33406e", hill2:"#1e2848", dec:"#3d4b7d", dec2:"#2a3560", tok:"star", dark:true},
+  storm:{ hill1:"#5c6790", hill2:"#3d456b", dec:"#313a5f", dec2:"#222a49", tok:"star", dark:true},
+  school:{hill1:"#7fd4c2", hill2:"#46a894", dec:"#2d7f6d", dec2:"#1d5c4e", tok:"star"},
+  clocktown:{hill1:"#f6c9d8", hill2:"#d992ad", dec:"#a85f81", dec2:"#7c4460", tok:"flower"},
   // deliberately darker and redder than the canyon, which is the only
   // other warm environment and would otherwise look like the same place
-  volcano:{hill1:"#c9584a", hill2:"#8f2f24", dec:"#5e1b13", dec2:"#3d0f0a"},
+  volcano:{hill1:"#c9584a", hill2:"#8f2f24", dec:"#5e1b13", dec2:"#3d0f0a", tok:"drop"},
   // olive and gold, so it reads as neither the green meadow and forest
   // nor the orange canyon nor the pale sand of the beach
-  savanna:{hill1:"#cbb457", hill2:"#a08a34", dec:"#6e5c1c", dec2:"#4d4012"},
+  savanna:{hill1:"#cbb457", hill2:"#a08a34", dec:"#6e5c1c", dec2:"#4d4012", tok:"leaf"},
   // brown stone, the one colour family nothing else uses
-  cave:{   hill1:"#9c7b5e", hill2:"#6f543c", dec:"#4a3626", dec2:"#32241a"}
-};
+  cave:{   hill1:"#9c7b5e", hill2:"#6f543c", dec:"#4a3626", dec2:"#32241a", tok:"stone"}
+}, {
+  // the trail: woods, water and open ground, walked rather than driven
+  tr_glade:  pal( 96, 130, 64, "flower"),
+  tr_pines:  pal(145, 160, 44, "leaf"),
+  tr_heath:  pal(300, 275, 55, "flower"),
+  tr_rocks:  pal(212, 220, 58, "stone"),
+  tr_village:pal( 32,  20, 60, "star"),
+  tr_burrow: pal( 25,  30, 34, "stone"),
+  tr_field:  pal( 48,  40, 62, "leaf"),
+  tr_quarry: pal( 12,  18, 46, "crystal"),
+  tr_brook:  pal(186, 200, 60, "drop"),
+  tr_lake:   pal(205, 215, 48, "shell"),
+  tr_falls:  pal(168, 185, 40, "drop"),
+  tr_orchard:pal(340, 350, 66, "flower"),
+  tr_dusk:   pal(255, 265, 28, "star", true),
+  tr_mist:   pal(215, 225, 40, "drop"),
+  tr_garden: pal(120, 100, 55, "flower"),
+  // the sky: everything above the ground, flown with a dragon
+  sk_dawn:   pal( 30, 340, 68, "star"),
+  sk_clouds: pal(200, 210, 72, "drop"),
+  sk_sunset: pal( 12, 330, 58, "star"),
+  sk_ridge:  pal(220, 235, 62, "crystal"),
+  sk_rainbow:pal(280, 200, 64, "crystal"),
+  sk_void:   pal(245, 255, 24, "star", true),
+  sk_dust:   pal( 44,  30, 66, "stone"),
+  sk_storm:  pal(230, 240, 36, "drop", true),
+  sk_breeze: pal(170, 185, 70, "leaf"),
+  sk_high:   pal(195, 205, 55, "drop"),
+  sk_ember:  pal(  8,  20, 44, "drop"),
+  sk_moon:   pal(265, 285, 44, "star"),
+  sk_night:  pal(235, 250, 22, "star", true),
+  sk_fog:    pal(210, 218, 52, "drop"),
+  sk_kite:   pal(155, 140, 60, "leaf"),
+  // the deep: under the surface, travelled by submarine
+  dp_shallow:pal(185, 170, 62, "shell"),
+  dp_kelp:   pal(150, 135, 42, "leaf"),
+  dp_reef:   pal(345,  20, 56, "shell"),
+  dp_trench: pal(220, 230, 30, "crystal", true),
+  dp_city:   pal(195, 250, 46, "crystal"),
+  dp_abyss:  pal(240, 250, 18, "star", true),
+  dp_sand:   pal( 45,  35, 64, "shell"),
+  dp_cavern: pal(200, 210, 34, "stone"),
+  dp_lagoon: pal(175, 160, 66, "drop"),
+  dp_current:pal(205, 215, 50, "drop"),
+  dp_vent:   pal( 10,  25, 38, "stone"),
+  dp_pearl:  pal(320, 300, 64, "shell"),
+  dp_midnight:pal(230, 245, 20, "star", true),
+  dp_murk:   pal(190, 200, 40, "drop"),
+  dp_garden: pal(165, 150, 56, "flower")
+});
 
-/* --- what a collection is made of ---
-   The thing collected takes its shape from the place it is found in, so
-   a collection looks like the track it belongs to: flowers in a meadow,
-   stones in a cave, stars in space. Drawn from parameters like every
-   other sprite here, in a 24 by 24 box. */
-const TOKEN_KIND = {
-  meadow:"flower", forest:"leaf",  canyon:"stone",  peaks:"crystal", city:"star",
-  space:"star",    beach:"shell",  ocean:"shell",   night:"star",    storm:"star",
-  school:"star",   clocktown:"flower", volcano:"drop", savanna:"leaf", cave:"stone"
-};
+/* --- worlds ---
+   One game in a different coat, never two games. A world changes the
+   landscape of every track, the order the racers are offered in, and a
+   handful of words. It changes **no** material, no difficulty and no
+   unlocking, and records are stored under the track id, so switching
+   worlds leaves every record standing; that has to stay true.
+   The racers listed here are only put first. Nothing a child owns ever
+   becomes unpickable, because a profile must never lose what it has. */
+const WORLDS = [
+  // the circuit is the original look, so TRACKS keeps its env as the
+  // default and this world adds nothing on top of it
+  {id:"circuit", rides:["ri_auto","ri_bugina","ri_motor","ri_mech"], env:{}},
+  {id:"trail", rides:["pet_kiki","pet_lupi","pet_mecha","pet_bimbo","pet_zub","pet_duha",
+                      "pet_puk","pet_flek","pet_sova","pet_drak","pet_hvezd","pet_noc"],
+   env:{t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
+        d1:"tr_burrow", beyond:"tr_field", round:"tr_quarry", a20:"tr_brook",
+        a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
+        weak:"tr_mist", school:"tr_garden"}},
+  {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
+   env:{t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
+        d1:"sk_void", beyond:"sk_dust", round:"sk_storm", a20:"sk_breeze",
+        a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
+        weak:"sk_fog", school:"sk_kite"}},
+  {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
+   env:{t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
+        d1:"dp_abyss", beyond:"dp_sand", round:"dp_cavern", a20:"dp_lagoon",
+        a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
+        weak:"dp_murk", school:"dp_garden"}}
+];
+const worldById = id => WORLDS.find(w => w.id === id) || WORLDS[0];
+/* The one place that decides what a track looks like. Everything that
+   draws a landscape asks here rather than reading tr.env, which is now
+   only the circuit world's default. */
+function envOf(p, tr){
+  return (worldById(p && p.world).env[tr.id]) || tr.env;
+}
+/* Older profiles, and anything pointing at a world that no longer
+   exists, land in the circuit, which is where they already were. */
+function seedWorld(p){
+  if(!p.world || !WORLDS.some(w => w.id === p.world)) p.world = WORLDS[0].id;
+}
+/* The racers this world is about, put first. This orders, it never
+   filters: a machine bought with coins stays pickable in every world. */
+function ridesOrder(p, items){
+  const pref = worldById(p && p.world).rides;
+  return items.slice().sort((a, b) => {
+    const ia = pref.indexOf(a.id), ib = pref.indexOf(b.id);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+}
 function tokenShape(kind, filled, c){
   const f = filled ? c.c1 : "#e6ebf6";
   const s = filled ? c.c2 : "#ccd6e8";
@@ -1401,8 +1534,10 @@ function trackSpec(p, tr){
   if(tr.op === "school") return null;                    // borrowed pool, would count twice
   const keys = trackKeys(p, tr);
   if(!keys.length) return null;
-  const e = ENVS[tr.env] || ENVS.meadow;
-  return {title: trackName(p, tr), keys, kind: TOKEN_KIND[tr.env] || "star", c1: e.hill1, c2: e.dec};
+  // the collection follows the world like the landscape does: what is
+  // found in a place belongs to the place, and the count never changes
+  const e = ENVS[envOf(p, tr)] || ENVS.meadow;
+  return {title: trackName(p, tr), keys, kind: e.tok || "star", c1: e.hill1, c2: e.dec};
 }
 /* The workshop keeps a collection too, and it is not a track, so it says
    here what its places are rather than being sized from trackKeys(); it
@@ -1522,7 +1657,7 @@ function atU(c, u){
 function circuitSVG(env, id){
   const e = ENVS[env] || ENVS.meadow;
   const c = circuit(id);
-  const dark = ["space","night","storm","city"].includes(env);
+  const dark = !!e.dark;
   const rnd = seedRand("dek2-" + id);
 
   // scenery only outside the tarmac: the border band and the middle of the loop
@@ -1591,13 +1726,17 @@ function circuitSVG(env, id){
   </svg>`;
 }
 
-/* --- circuit thumbnail for the map, the coloured part shows mastery --- */
+/* --- circuit thumbnail for the map, the coloured part shows mastery ---
+   The gradient ids carry the environment as well as the track, because
+   the world picker shows the same track in four landscapes at once and
+   an id repeated in one document would paint all four the first one. */
 function circuitThumb(env, id, prog){
   const e = ENVS[env] || ENVS.meadow;
   const c = circuit(id);
-  const dark = ["space","night","storm","city"].includes(env);
+  const dark = !!e.dark;
   const a = dark ? "#1a2440" : e.hill1, b = dark ? "#0f1730" : e.hill2;
   const off = (c.total * (1 - Math.max(0, Math.min(1, prog || 0)))).toFixed(1);
+  id = id + "_" + env;
   return `<svg viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
@@ -1714,37 +1853,95 @@ function viewPlayers(){
   </div>`;
 }
 
-/* ---------- track map ---------- */
+/* ---------- the map, which is a world rather than a list ----------
+   Fifteen tracks plus the workshop is past the point where a column of
+   cards reads as anything, so the places are laid out along a winding
+   road instead. The layout is computed from the same kind of seed as the
+   circuits, so a world always looks the same, and it is measured in
+   percent across and pixels down, which keeps it inside any phone.
+   The road is decoration. **Tapping a place goes straight there**; there
+   is no journey along the road to sit through, because the one study
+   found on hub structures reports a drop in felt competence and autonomy
+   when the player has to keep passing through the middle. */
 function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] || ""; }
+/* A place is 44 percent wide, so the two columns cannot touch even at
+   the far end of the wobble, and the step is half a card, so two places
+   on the same side never overlap either. Both are checked by the
+   numbers below rather than by looking at it on one phone. */
+const PLACE_STEP = 96;      // vertical distance between two neighbours
+const PLACE_H = 172;        // how tall a place card is, give or take
+function worldSpots(p, n){
+  const rnd = seedRand("svet-" + (p && p.world ? p.world : "circuit"));
+  const out = [];
+  for(let i = 0; i < n; i++){
+    const wobble = rnd() * 3;
+    const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
+    const y = 14 + i * PLACE_STEP;
+    out.push({left, y, cx: left + 22, cy: y + PLACE_H / 2});
+  }
+  return out;
+}
+/* An S bend between each pair of places. The stroke keeps its width
+   whatever the screen, because the picture is stretched sideways to the
+   width of the phone and would otherwise squash the road with it. */
+function worldRoad(spots, h){
+  if(!spots.length) return "";
+  let d = `M ${spots[0].cx.toFixed(1)} 0 L ${spots[0].cx.toFixed(1)} ${spots[0].cy.toFixed(1)}`;
+  for(let i = 1; i < spots.length; i++){
+    const a = spots[i-1], b = spots[i], m = (b.cy - a.cy) / 2;
+    d += ` C ${a.cx.toFixed(1)} ${(a.cy + m).toFixed(1)}, ${b.cx.toFixed(1)} ${(b.cy - m).toFixed(1)},`
+       + ` ${b.cx.toFixed(1)} ${b.cy.toFixed(1)}`;
+  }
+  const last = spots[spots.length - 1];
+  return d + ` L ${last.cx.toFixed(1)} ${h}`;
+}
+/* How full this place's collection is, shown on the place itself so the
+   child can see from the map where there is still something to find. */
+function placeTokens(p, spec){
+  if(!spec) return "";
+  return `<span class="tokc">&#10024; ${starCount(p, spec.keys)}/${spec.keys.length}</span>`;
+}
 function viewMap(p){
-  const cards = visibleTracks(p).map(tr => {
+  const shown = visibleTracks(p);
+  const spots = worldSpots(p, shown.length + 1);      // the workshop is a place too
+  const height = 14 + shown.length * PLACE_STEP + PLACE_H + 20;
+
+  const places = shown.map((tr, i) => {
     const u = unlockState(p, tr);
     const pr = Math.round(trackProgress(p, tr) * 100);
     const med = p.done[tr.id] || 0;
+    const at = `style="left:${spots[i].left.toFixed(1)}%;top:${spots[i].y}px"`;
+    const head = `<span class="thumb">${circuitThumb(envOf(p, tr), tr.id, u.open ? trackProgress(p, tr) : 0)}</span>
+      <span class="nm">${trackName(p, tr)}</span>
+      <span class="sub">${trackSub(p, tr)}</span>`;
+    // a locked place is still drawn, just dark: the child sees where the
+    // road goes on to, which is the whole point of a map
     if(!u.open){
-      return `<div class="track locked">
-        <span class="thumb">${circuitThumb(tr.env, tr.id, 0)}</span>
-        <span class="body">
-          <span class="nm">${trackName(p, tr)}</span>
-          <span class="sub">${trackSub(p, tr)}</span>
-          <span class="lockmsg">&#128274; ${u.why}</span>
-        </span></div>`;
+      return `<div class="place locked" ${at}>${head}
+        <span class="lockmsg">&#128274; ${u.why}</span></div>`;
     }
-    return `<button class="track" data-act="play" data-id="${tr.id}">
-      <span class="thumb">${circuitThumb(tr.env, tr.id, trackProgress(p, tr))}</span>
-      <span class="body">
-        <span class="nm">${trackName(p, tr)}</span>
-        <span class="sub">${trackSub(p, tr)}</span>
-        ${(tr.op === "mix" || tr.op === "weak") ? "" : `<span class="bar"><i style="width:${pr}%"></i></span>`}
-      </span>
-      <span class="medal">${medalEmoji(med)}</span>
+    return `<button class="place" data-act="play" data-id="${tr.id}" ${at}>${head}
+      ${(tr.op === "mix" || tr.op === "weak") ? "" : `<span class="bar"><i style="width:${pr}%"></i></span>`}
+      <span class="foot">${medalEmoji(med)}${placeTokens(p, trackSpec(p, tr))}</span>
     </button>`;
   }).join("");
+
+  // the workshop keeps its own look and its own place off the road, so it
+  // never reads as one more track in the row
+  const sp = spots[shown.length];
+  const shopPlace = `<button class="place shopplace" data-act="shop"
+      style="left:${sp.left.toFixed(1)}%;top:${sp.y}px">
+    <span class="thumb shopthumb">&#128736;</span>
+    <span class="nm">${t("shopTitle")}</span>
+    <span class="sub">${t("shopSub")}</span>
+    <span class="foot">&#9881; ${p.parts}${placeTokens(p, shopSpec())}</span>
+  </button>`;
 
   return `<div class="scr">
     <div class="topbar">
       <button class="iconbtn" data-act="players" aria-label="${t("changePlayer")}">&#8592;</button>
       <h1>${esc(p.name)}</h1>
+      <button class="iconbtn" data-act="worldpick" aria-label="${t("worldTitle")}">&#129517;</button>
       <button class="iconbtn" data-act="sound" aria-label="${t("soundOn")}">${DB.sound ? "&#128266;" : "&#128263;"}</button>
       <button class="iconbtn" data-act="gate" aria-label="${t("parentArea")}">&#9881;</button>
     </div>
@@ -1756,15 +1953,14 @@ function viewMap(p){
         <button class="chip" data-act="tokens"><span class="em">&#10024;</span> ${starsAll(p)}</button>
         <button class="chip" data-act="collection" style="margin-left:auto"><span class="em">&#127873;</span> ${t("collection")}</button>
       </div>
-      <div class="tracks">${cards}
-        <button class="track shopcard" data-act="shop">
-          <span class="thumb shopthumb">&#128736;</span>
-          <span class="body">
-            <span class="nm">${t("shopTitle")}</span>
-            <span class="sub">${t("shopSub")}</span>
-          </span>
-          <span class="medal">&#9881; ${p.parts}</span>
-        </button>
+      <div class="world" style="height:${height}px">
+        <svg class="worldroad" viewBox="0 0 100 ${height}" preserveAspectRatio="none" aria-hidden="true">
+          <path d="${worldRoad(spots, height)}" fill="none" stroke="var(--line)" stroke-width="16"
+                stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <path d="${worldRoad(spots, height)}" fill="none" stroke="var(--shell-2)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="1 22" vector-effect="non-scaling-stroke"/>
+        </svg>
+        ${places}${shopPlace}
       </div>
     </div>
   </div>`;
@@ -1835,7 +2031,7 @@ function viewGame(p){
   const hasGhost = !!(hb && hb.hist && hb.hist.length && (hb.n0 || hb.hist.length) === RUN.n0);
   return `<div class="scr game">
     <div class="stage" id="stage">
-      ${circuitSVG(tr.env, tr.id)}
+      ${circuitSVG(envOf(p, tr), tr.id)}
       <div class="vig"></div>
       <div class="carwrap rivalcar" id="rivalcar" style="${hasGhost ? "" : "display:none"}">
         <span class="spr">${itemSVG(p, p.runner)}</span>
@@ -2894,6 +3090,29 @@ document.addEventListener("click", e => {
   if(act === "sound"){ DB.sound = !DB.sound; save(); if(DB.sound) sfx.ok(); render(); return; }
   if(act === "collection"){ go("collection"); return; }
   if(act === "tokens"){ go("tokens"); return; }
+  // the world is the child's choice, not a setting hidden behind the
+  // parent code: it works through recognising yourself in it, which is
+  // the whole reason it exists
+  if(act === "worldpick"){
+    const cells = WORLDS.map(w => `
+      <button class="pickworld ${p.world === w.id ? "sel" : ""}" data-act="worldset" data-id="${w.id}">
+        <span class="thumb">${circuitThumb(w.env.t1 || trackById("t1").env, "t1", .55)}</span>
+        <span class="body">
+          <span class="nm">${t("w_" + w.id)}</span>
+          <span class="sub">${t("w_" + w.id + "s")}</span>
+        </span>
+      </button>`).join("");
+    sheet(`<h3>${t("worldTitle")}</h3>
+      <div class="muted" style="margin:2px 0 14px">${t("worldNote")}</div>
+      <div class="worldgrid">${cells}</div>`);
+    return;
+  }
+  if(act === "worldset"){
+    p.world = id; save(); sfx.coin();
+    const s = el.closest(".sheet"); if(s) s.remove();
+    render();
+    return;
+  }
   // parts are only good for paint, so spending them opens the garage at
   // the paints and stays there while the child tries colours on
   if(act === "paintshop"){ go("collection", {focus:"paintsec"}); return; }
@@ -2912,7 +3131,8 @@ document.addEventListener("click", e => {
   }
 
   if(act === "play"){
-    const owned = ALL_ITEMS.filter(it => p.owned.includes(it.id));
+    // the world puts its own racers first and hides none of the others
+    const owned = ridesOrder(p, ALL_ITEMS.filter(it => p.owned.includes(it.id)));
     const cells = owned.map(it => `
       <button class="pickitem ${p.runner === it.id ? "sel" : ""}" data-pick="${it.id}">
         <span class="pic">${itemSVG(p, it.id)}</span>
@@ -3030,6 +3250,7 @@ document.addEventListener("click", e => {
       seedOpened(DB.profiles[i]);
       seedShop(DB.profiles[i]);
       seedStars(DB.profiles[i]);
+      seedWorld(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>

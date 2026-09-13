@@ -1295,7 +1295,7 @@ vrstvě Oči, viz H4.
 `opacity`, viz H1. Duhová kačenka se proto musí posoudit v prohlížeči, ne na
 PNG, a u každé vrstvy platí totéž pro průhlednost.
 
-### H3. Vzory a hlava
+### H3. Vzory a hlava — HOTOVO 14. září 2026
 
 Deset vzorů `dp_*` a dvacet dílů na hlavu `dh_*`, tedy třicet dílů a devadesát
 textů. Nejpočetnější část celého kroku.
@@ -1344,6 +1344,25 @@ námořnictva.
 musí zůstat vidět, takže se kreslí naposledy a s nízkou krycí barvou; a to je
 právě to, co `convert` neukáže. `dh_ousi` je **čelenka s oušky, ne uši**:
 proužek čelenky musí být vidět, jinak je z kačenky zvíře a vrstva ztratí smysl.
+
+**Co se proti plánu upřesnilo.** Ceny dílů na hlavu vypsané v katalogu dávají
+314 součástek, ne 294 ze souhrnu; test si zapisuje součet vypsaných cen, stejně
+jako u H2 (120 místo 145). Vzor se **ořezává tělem a hlavou staženými o 1,5
+dovnitř**, ne jejich přesným okrajem: světlá značka až na okraji sebere obrys,
+a klasická žlutá kačenka žádný vlastní obrys nemá, jen svou barvu proti bílé
+dlaždici. Každý vzor dostává **vlásovou linku v té z bílé a černé, která tělo
+není**; ta jedna řádka je to, čím deset vzorů funguje na deseti tělech včetně
+duhového. `dp_dres` přišel o bílé pruhy, protože bílý pruh na okraji rozřízl
+kačenku vejpůl; druhým pruhem je teď barva kačenky, jak to u dresu bývá.
+`dh_kosmo` musel povyrůst na `r + 11`, aby se zobák vešel dovnitř skla, protože
+obroučka vedená přes zobák vypadá jako uříznutý zobák. `dh_helma` je kopule plus
+panel po zadní straně hlavy: helma přes celou hlavu by zakryla oko a helma jen
+na temeni vypadá jako obruč. `dh_ousi` má špičatá ouška na úzké čelence, protože
+dva kulaté disky vypadaly jako sluchátka. `duckFit()` se počítá **při každém
+kreslení**, ne jednou při načtení, aby šlo v testu pohnout `DUCK.HEAD` a ověřit,
+že se všech dvacet klobouků pohne s ní. Strojová kontrola měří oko jako kolečko
+a zobák jako klín ze tří obdélníků: obdélník, do kterého se vejdou, zakazoval
+i to, co leží vedle nich.
 
 ### H4. Oči a výbava
 

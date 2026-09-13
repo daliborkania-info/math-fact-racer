@@ -202,7 +202,12 @@ ImageMagicku: bílé bříško s `opacity=".2"` vyjde čistě bílé a vypadá j
 louže, přestože v prohlížeči je to jemný odlesk. Než se taková kresba
 posoudí, musí se průhlednost pro tu jednu kontrolu zamíchat do plné barvy
 (`fill` spočítaný jako `barva * (1-a) + bílá * a`), jinak se posuzuje něco,
-co prohlížeč nikdy neukáže. **A `convert` nekreslí `linearGradient`**,
+co prohlížeč nikdy neukáže. **A `convert` neumí `clip-path`**, což se ukázalo
+u vzorů na kačence (krok H3): ořezanou skupinu nakreslí celou, takže puntíky
+vyletí mimo tělo, a uvnitř ji naopak umí i vynechat. Ořez se proto pro tu jednu
+kontrolu složí ručně: kresba se vyrenderuje dvakrát, jednou bez ořezané skupiny
+a jednou s ní bez `clip-path`, a druhá se do první vloží přes masku
+vyrobenou z ořezových tvarů. **A `convert` nekreslí `linearGradient`**,
 vezme první zarážku a vyplní jí celou plochu, takže krajina vyjde jednolitá
 a přechod `hill1` → `hill2` v ní není vidět. Paleta se proto posuzuje tak, že
 se z SVG vyřízne podkladový obdélník, scéna se vyrenderuje s průhledným

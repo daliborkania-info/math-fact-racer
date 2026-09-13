@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,BODY_LAYER,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,duckFit,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -311,6 +311,237 @@ A.seedDuck(drziProfil);
 if(drziProfil.duckParts[0]!=='db_mint'||drziProfil.duck.body!=='db_mint') bsay('seedDuck prepsal, co uz profil mel');
 console.log('kacenciny barvy:',bBad?'chyb '+bBad:'v poradku',
   '| nejblizsi dvojice '+parTel+' '+nejblizsiTelo.toFixed(1)+' dE | vrstva stoji '+cenaTel);
+
+// 3d. vrstvy Vzor a Na hlave
+//
+// Kresbu test neuvidi, takze se na ni koukalo na obrazku: kazdy z tech
+// tricet dilu na klasicke, uhlikove, snehove a duhove kacence a k tomu
+// vsech dvacet klobouku nad vzorem, aby se videlo skladani vrstev.
+// Strojove se hlida to, co se spocitat da, a je to prave to, co by se
+// na obrazku prehledlo: ze zadny dil nevyjede z ramu, ze zadny klobouk
+// nesedne na oko ani na zobak, ze kazdy klobouk drzi na hlave, ze se
+// vzor kresli pod okem a orezany, a ze vsechny dily jdou od kotev.
+// Posledni je ta nejdulezitejsi: kdyby mel dil souradnice hlavy napsane
+// v sobe, prvni posunuti hlavy by nechalo dvacet klobouku viset ve
+// vzduchu a zadny jiny test by si toho nevsiml.
+let hBad=0;
+const hsay=m=>{hBad++;console.log('  !!  '+m);};
+const VZORY=A.DUCK_PAT, HLAVA=A.DUCK_HEAD, kacka2=A.DUCKS[0];
+
+// --- cteni kresby ---
+// plocha u tvaru, ktere ji maji, a body u cest. Ridici bod Bezieru na
+// krivce nelezi, ale krivka nevyjede z obalky svych bodu, takze co plati
+// o bodech, plati s rezervou i o care. Oblouk je jina, ta se vyduje
+// mimo sve konce, a prave obloukem se kresli kazdy klobouk, takze se
+// u ni doviraji krajni body kruhu, ktere do vysece padnou.
+const ATTR=/([a-z-]+)="([^"]*)"/g;
+const attrsOf=tag=>{const o={};let m;ATTR.lastIndex=0;while((m=ATTR.exec(tag)))o[m[1]]=m[2];return o;};
+const numsOf=s=>(String(s).match(/-?\d*\.?\d+/g)||[]).map(Number);
+function arcBox(x0,y0,r,laf,sf,x1,y1){
+  const mx=(x0+x1)/2,my=(y0+y1)/2,dx=(x1-x0)/2,dy=(y1-y0)/2,d=Math.hypot(dx,dy);
+  const h=Math.sqrt(Math.max(0,r*r-d*d)), out=[[x0,y0],[x1,y1]];
+  if(!d) return out;
+  for(const sg of [1,-1]){
+    const cx=mx+sg*h*(-dy/d), cy=my+sg*h*(dx/d);
+    const a0=Math.atan2(y0-cy,x0-cx), a1=Math.atan2(y1-cy,x1-cx);
+    let span=a1-a0;
+    if(sf){ if(span<0) span+=2*Math.PI; } else { if(span>0) span-=2*Math.PI; }
+    if((Math.abs(span)>Math.PI)!==!!laf) continue;        // druhy stred kresli jiny oblouk
+    for(let k=0;k<4;k++){
+      const a=k*Math.PI/2;
+      let t=a-a0; if(sf){ if(t<0)t+=2*Math.PI; } else { if(t>0)t-=2*Math.PI; }
+      if(Math.abs(t)<=Math.abs(span)) out.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);
+    }
+    break;
+  }
+  return out;
+}
+function pathBoxes(d,w){
+  const tok=String(d).match(/[A-Za-z]|-?\d*\.?\d+/g)||[];
+  const out=[];let i=0,cmd='',cx=0,cy=0;
+  const add=(x,y)=>out.push([x-w/2,y-w/2,x+w/2,y+w/2]);
+  while(i<tok.length){
+    if(/[A-Za-z]/.test(tok[i])){cmd=tok[i++];continue;}
+    const n=k=>{const v=[];for(let j=0;j<k;j++)v.push(+tok[i++]);return v;};
+    if(cmd==='M'||cmd==='L'){const v=n(2);add(v[0],v[1]);cx=v[0];cy=v[1];}
+    else if(cmd==='Q'){const v=n(4);add(v[0],v[1]);add(v[2],v[3]);cx=v[2];cy=v[3];}
+    else if(cmd==='C'){const v=n(6);add(v[0],v[1]);add(v[2],v[3]);add(v[4],v[5]);cx=v[4];cy=v[5];}
+    else if(cmd==='A'){const v=n(7);arcBox(cx,cy,v[0],v[3],v[4],v[5],v[6]).forEach(pt=>add(pt[0],pt[1]));cx=v[5];cy=v[6];}
+    else {hsay('neznamy prikaz v ceste: '+cmd);i++;}
+  }
+  return out;
+}
+function boxesOf(frag){
+  const out=[];
+  for(const tag of frag.match(/<[a-z]+[^>]*\/>/g)||[]){
+    const a=attrsOf(tag), w=+(a['stroke-width']||0);
+    const push=(x1,y1,x2,y2)=>out.push({b:[x1-w/2,y1-w/2,x2+w/2,y2+w/2],o:a.opacity===undefined?1:+a.opacity});
+    // kruh bez vyplne je obroucka, ne kotouc: sklo skafandru vede kolem
+    // oka, ne pres nej, takze se z nej berou body na kruznici
+    if(/^<circle/.test(tag)&&a.fill==='none'){
+      for(let k=0;k<120;k++){const b=k*Math.PI/60;
+        push(+a.cx+a.r*Math.cos(b),+a.cy+a.r*Math.sin(b),+a.cx+a.r*Math.cos(b),+a.cy+a.r*Math.sin(b));}}
+    else if(/^<circle/.test(tag)) push(+a.cx-a.r,+a.cy-a.r,+a.cx+ +a.r,+a.cy+ +a.r);
+    else if(/^<ellipse/.test(tag)) push(+a.cx-a.rx,+a.cy-a.ry,+a.cx+ +a.rx,+a.cy+ +a.ry);
+    else if(/^<rect/.test(tag)) push(+a.x,+a.y,+a.x+ +a.width,+a.y+ +a.height);
+    else if(/^<polygon/.test(tag)){const n=numsOf(a.points);
+      for(let i=0;i<n.length;i+=2) push(n[i],n[i+1],n[i],n[i+1]);}
+    else if(/^<path/.test(tag)) pathBoxes(a.d,w).forEach(b=>out.push({b,o:a.opacity===undefined?1:+a.opacity}));
+    else hsay('neznamy tvar v dilu: '+tag.slice(0,24));
+  }
+  return out;
+}
+const bbox=list=>list.reduce((r,s)=>[Math.min(r[0],s.b[0]),Math.min(r[1],s.b[1]),
+  Math.max(r[2],s.b[2]),Math.max(r[3],s.b[3])],[1e9,1e9,-1e9,-1e9]);
+
+// --- katalog ---
+if(VZORY.length!==10) hsay('vzoru uz neni deset, ale '+VZORY.length);
+if(HLAVA.length!==20) hsay('dilu na hlavu uz neni dvacet, ale '+HLAVA.length);
+if(new Set(A.DUCK_PARTS.map(x=>x.id)).size!==A.DUCK_PARTS.length) hsay('dva dily maji stejne id');
+for(const [list,layer,jm] of [[VZORY,A.PAT_LAYER,'vzor'],[HLAVA,A.HEAD_LAYER,'hlava']]){
+  for(let i=0;i<list.length;i++){
+    const x=list[i];
+    if(A.duckLayerOf(x)!==layer) hsay(x.id+' nepatri do vrstvy '+jm);
+    if(A.duckPartById(x.id)!==x) hsay(x.id+' nejde najit podle id');
+    if(typeof x.draw!=='function') hsay(x.id+' nema kresbu');
+    if(!x.cost) hsay(x.id+' je zdarma, placene vrstvy zadny dil zdarma nemaji');
+    if(i&&list[i].cost<list[i-1].cost) hsay('katalog '+jm+' neni razeny od nejlevnejsiho: '+list[i-1].id+' pred '+x.id);
+    // zadny dil nema jiny atribut nez kresbu, cenu a id; kdyby mel, mohl
+    // by na jizdu zacit mit vliv a soupeřem by prestala byt vlastni jizda
+    const navic=Object.keys(x).filter(k=>['id','cost','draw','see'].indexOf(k)<0);
+    if(navic.length) hsay(x.id+' ma atribut navic: '+navic.join(','));
+    for(const l of ['cs','en','de']) if(!A.I18N[l][x.id]) hsay(x.id+' nema jmeno v jazyce '+l);
+  }
+}
+// cena vrstvy je zapsane cislo, ne dopoctene. Plan kroku H3 pocital
+// u vzoru se 114 a u hlavy s 294; soucet vypsanych cen hlavy je 314.
+const CENA_VZOR=114, CENA_HLAVA=314;
+const cenaVzor=VZORY.reduce((s,x)=>s+x.cost,0), cenaHlava=HLAVA.reduce((s,x)=>s+x.cost,0);
+if(cenaVzor!==CENA_VZOR) hsay('vrstva Vzor stoji '+cenaVzor+', zapsano bylo '+CENA_VZOR);
+if(cenaHlava!==CENA_HLAVA) hsay('vrstva Na hlavu stoji '+cenaHlava+', zapsano bylo '+CENA_HLAVA);
+for(const spec of A.DUCK_LAYERS) for(const k of [spec.title,spec.note,spec.none])
+  if(k) for(const l of ['cs','en','de']) if(!A.I18N[l][k]) hsay('sekce garaze nema text '+k+' v jazyce '+l);
+
+// --- kresba kazdeho dilu ---
+const sed=A.duckFit();   // kde dil sedi, spoctene z kotev
+const EYE=A.DUCK.EYE, BEAK=A.DUCK.BEAK, OKO=4.4;   // oko ma 3.4 a jeste kousek kolem
+// zobak je klin, ne obdelnik, ve kterem se skryva: u koreno je vysoky
+// pres jedenact a u spicky uz jen pres sedm, a rozdil je prave to misto,
+// kde kolem nej vede sklo skafandru
+const ZOBAK=[[BEAK.x,BEAK.y-6,BEAK.x+8,BEAK.y+5.5],
+             [BEAK.x+8,BEAK.y-6,BEAK.x+14,BEAK.y+4.5],
+             [BEAK.x+14,BEAK.y-5,BEAK.x+18.5,BEAK.y+2.5]];
+const kryje=(b,x1,y1,x2,y2)=>b[0]<x2&&b[2]>x1&&b[1]<y2&&b[3]>y1;
+// oko je kolecko, ne ctverec, takze se meri vzdalenost tvaru od jeho
+// stredu; roh ctverce by zakazal i to, co lezi sikmo vedle nej
+const odOka=b=>Math.hypot(Math.max(b[0]-EYE.x,0,EYE.x-b[2]),Math.max(b[1]-EYE.y,0,EYE.y-b[3]));
+for(const part of VZORY.concat(HLAVA)){
+  const frag=part.draw(sed,'#26324c');
+  if(!frag||/NaN|undefined/.test(frag)) hsay('kresba '+part.id+' je vadna');
+  if((frag.match(/</g)||[]).length!==(frag.match(/>/g)||[]).length) hsay('rozbite tagy u '+part.id);
+  if((frag.match(/"/g)||[]).length%2) hsay('rozbite uvozovky u '+part.id);
+  // jen absolutni prikazy velkymi pismeny, aby se kresba dala precist
+  // zpatky a zkontrolovat; relativni cesta by test oslepila
+  for(const m of frag.match(/ d="[^"]*"/g)||[]) if(/[a-z]/.test(m.slice(4,-1).replace(/e-/g,'')))
+    hsay(part.id+' kresli relativni cestou, to uz nikdo nezkontroluje');
+  const shp=boxesOf(frag);
+  if(!shp.length) hsay(part.id+' nekresli nic');
+  if(HLAVA.indexOf(part)>=0){
+    const bb=bbox(shp);
+    // ram je 100 x 118 a kresba je v nem zvetsena skupinovou transformaci
+    const px=x=>50+1.08*(x-46), py=y=>63+1.08*(y-65.5);
+    if(px(bb[0])<0||px(bb[2])>100||py(bb[1])<0||py(bb[3])>118)
+      hsay(part.id+' vyjel z ramu: '+bb.map(v=>+v.toFixed(1)).join(',')+' -> '
+        +[px(bb[0]),py(bb[1]),px(bb[2]),py(bb[3])].map(v=>+v.toFixed(1)).join(','));
+    // klobouk musi drzet na hlave, ne se vznaset nad ni
+    if(!shp.some(s=>kryje(s.b,sed.x-sed.r,sed.y-sed.r,sed.x+sed.r,sed.y+sed.r)))
+      hsay(part.id+' se nedotyka hlavy');
+    for(const s of shp){
+      const naOku=odOka(s.b)<OKO;
+      const naZobaku=ZOBAK.some(z=>kryje(s.b,z[0],z[1],z[2],z[3]));
+      // skafandr je jediny dil, ktery neco prekryva, a prekryva to sklem:
+      // co je pod nim, musi zustat videt, takze smi jen pruhledny tvar
+      if((naOku||naZobaku)&&!(part.see&&s.o<=.35))
+        hsay(part.id+' sedl na '+(naOku?'oko':'zobak')+': '+s.b.map(v=>+v.toFixed(1)).join(','));
+    }
+  } else {
+    // vzor musi nekde na kacence opravdu lezet, jinak ho oriznuti sezere
+    if(!shp.some(s=>kryje(s.b,sed.B.x-sed.B.rx,sed.B.y-sed.B.ry,sed.B.x+sed.B.rx,sed.B.y+sed.B.ry)
+                 || kryje(s.b,sed.x-sed.r,sed.y-sed.r,sed.x+sed.r,sed.y+sed.r)))
+      hsay(part.id+' nelezi na kacence, oriznuti by z nej nenechalo nic');
+  }
+  if(part.see&&!frag.includes('opacity')) hsay(part.id+' se tvari jako pruhledny, ale pruhledny neni');
+  if(!part.see&&/opacity/.test(frag)) hsay(part.id+' je pruhledny, aniz by to rekl');
+}
+if(HLAVA.filter(x=>x.see).length!==1||!HLAVA.find(x=>x.see&&x.id==='dh_kosmo'))
+  hsay('pruhledny ma byt jediny dil, a to skafandr');
+
+// --- skladani vrstev ---
+// kazdy dil na kazdem tele, protoze vrstvy se skladaji a barva pod nimi
+// se meni; kresba se pri tom nesmi rozbit a dil musi byt videt
+for(const telo of A.DUCK_BODY) for(const part of VZORY.concat(HLAVA)){
+  const outfit={}; outfit[A.BODY_LAYER]=telo.id; outfit[A.duckLayerOf(part)]=part.id;
+  const svg=A.duckSVG(kacka2,outfit);
+  if(/NaN|undefined/.test(svg)) hsay('SVG problem u '+telo.id+' + '+part.id);
+  if((svg.match(/</g)||[]).length!==(svg.match(/>/g)||[]).length) hsay('rozbite tagy u '+telo.id+' + '+part.id);
+  if(svg.length<=A.duckSVG(kacka2,{[A.BODY_LAYER]:telo.id}).length) hsay(part.id+' se na '+telo.id+' vubec nepridal');
+}
+// vsechny tri vrstvy najednou drzi kazda svoje
+const troji=A.duckSVG(kacka2,{body:'db_uhel',pat:'dp_kostka',head:'dh_koruna'});
+if(troji.indexOf('clip-path')<0||troji.indexOf('#f2c13c')<0) hsay('tri vrstvy najednou se nevykreslily');
+// vrstveni vrstev: vzor lezi pod okem i pod zobakem, jinak by kacence
+// puntik sedl na oko. Klobouk je naopak az nad okem.
+const vrstveni=A.duckSVG(kacka2,{pat:'dp_puntiky',head:'dh_koruna'});
+const iVzor=vrstveni.indexOf('clip-path'), iOko=vrstveni.indexOf('#22314f'),
+      iZobak=vrstveni.indexOf('#ff9f1c'), iKlobouk=vrstveni.indexOf('#f2c13c');
+if(!(iVzor<iZobak&&iVzor<iOko)) hsay('vzor se kresli az nad okem nebo nad zobakem');
+if(!(iKlobouk>iOko)) hsay('klobouk se kresli pod oko');
+// oriznuti je telo a hlava stazene o kousek dovnitr: kdyby siahalo az
+// na okraj, svetly vzor by u snehove kacenky snedl obrys
+const cm=/<clipPath id="duckskin"><ellipse cx="[\d.]+" cy="[\d.]+" rx="([\d.]+)" ry="([\d.]+)"\/><circle cx="[\d.]+" cy="[\d.]+" r="([\d.]+)"\/><\/clipPath>/.exec(vrstveni);
+if(!cm) hsay('vzor se nekresli do oriznuti tela a hlavy');
+else if(!(+cm[1]<A.DUCK.BODY.rx&&+cm[2]<A.DUCK.BODY.ry&&+cm[3]<A.DUCK.HEAD.r))
+  hsay('oriznuti vzoru neni stazene dovnitr, obrys kacenky je v ohrozeni');
+if(A.duckSVG(kacka2,{}).indexOf('clip-path')>=0) hsay('holá kacenka si nese oriznuti vzoru, ktery nema');
+// dil z jine vrstvy ani neznamy dil kacenku nerozbije, jen se nenasadi
+if(A.duckSVG(kacka2,{pat:'dh_koruna'})!==A.duckSVG(kacka2,{}))
+  hsay('klobouk zapsany do vrstvy vzoru se presto nakreslil');
+if(A.duckSVG(kacka2,{head:'dh_neexistuje'})!==A.duckSVG(kacka2,{}))
+  hsay('neznamy dil na hlave kacenku rozbije misto toho, aby zustala holá');
+if(A.duckSVG(kacka2,{head:''})!==A.duckSVG(kacka2,{})) hsay('prazdna vrstva neni tataz jako zadna');
+
+// --- kotvy ---
+// kdyz se hlava posune, musi se s ni posunout kazdy klobouk, a kdyz se
+// posune telo i hlava, musi se posunout kazdy vzor. Tohle je jedina
+// kontrola, ktera pozna souradnici napsanou v dilu natvrdo.
+const zmer=part=>bbox(boxesOf(part.draw(A.duckFit(),'#26324c')));
+const predH=HLAVA.map(zmer), predV=VZORY.map(zmer);
+const H0=A.DUCK.HEAD, B0=A.DUCK.BODY;
+A.DUCK.HEAD={x:H0.x+7,y:H0.y-5,r:H0.r};
+HLAVA.forEach((part,i)=>{const b=zmer(part),p=predH[i];
+  if(Math.abs(b[0]-p[0]-7)>.06||Math.abs(b[1]-p[1]+5)>.06)
+    hsay(part.id+' se s hlavou neposunul, ma v sobe napsanou souradnici');});
+A.DUCK.HEAD=H0;
+A.DUCK.HEAD={x:H0.x+6,y:H0.y+4,r:H0.r};
+A.DUCK.BODY={x:B0.x+6,y:B0.y+4,rx:B0.rx,ry:B0.ry};
+VZORY.forEach((part,i)=>{const b=zmer(part),p=predV[i];
+  if(Math.abs(b[0]-p[0]-6)>.06||Math.abs(b[1]-p[1]-4)>.06)
+    hsay(part.id+' se s kacenkou neposunul, ma v sobe napsanou souradnici');});
+A.DUCK.HEAD=H0; A.DUCK.BODY=B0;
+
+// --- model ---
+// vrstvy se navzajem nemazou a koupeny dil se sundanim neztrati
+const pf={duckParts:['dp_kostka','dh_koruna'],duck:{}};
+A.wearDuckPart(pf,A.BODY_LAYER,'db_mint');
+A.wearDuckPart(pf,A.PAT_LAYER,'dp_kostka');
+A.wearDuckPart(pf,A.HEAD_LAYER,'dh_koruna');
+if(Object.keys(pf.duck).length!==3) hsay('tri vrstvy najednou se do profilu nevejdou');
+A.wearDuckPart(pf,A.HEAD_LAYER,'');
+if(pf.duck.head!==undefined||pf.duck.pat!=='dp_kostka'||pf.duck.body!=='db_mint')
+  hsay('sundani klobouku sahlo na ostatni vrstvy');
+if(!pf.duckParts.includes('dh_koruna')) hsay('sundani klobouku pripravilo dite o koupeny dil');
+console.log('vzory a hlava:',hBad?'chyb '+hBad:'v poradku',
+  '| vrstva Vzor stoji '+cenaVzor+', Na hlavu '+cenaHlava+' soucastek');
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
 const VALID=new Set();

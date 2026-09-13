@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -1263,12 +1263,16 @@ function vyskaKarty(wPx,tx,tvar){
 }
 const TVARY=['trat','zamcena','dvere','bezpruhu'];
 
-/* --- dva sloupce: vodorovne polohy zustavaji, kde byly --- */
-// Zleva doprava se telefon nehnul o pixel, protoze wobble i strany jsou
-// tytez (rozhodnuti R6). Svisly rozestup se zvetsit musel: karta je pri
-// dvouradkovem jmenu 200 az 226 px vysoka a stary krok 96 px ji nechal
-// sednout na sousedku o dva nize. Cisla nize jsou po oprave, osm mist.
-const VLEVO=[2.3,53.6,2.6,51.3,2.6,53.7,3,53.5];
+/* --- dva sloupce: zamrzle polohy --- */
+// Tenhle seznam se 13. zari 2026 **vedome zmenil**. Do te doby drzel
+// polohy, ktere telefon mel pred krokem C (rozhodnuti R6), jenze ty jely
+// hadovite: mista se stridala po stranach a druhy radek sel zprava
+// doleva. Uzivatel to zkusil s osmiletym synem a dite nepoznalo, kam
+// cesta pokracuje. Od te chvile se mapa cte jako stranka, tedy po radcich
+// zleva doprava, a to ve vsech sirkach vcetne telefonu; prvni dve mista
+// proto stoji vedle sebe v jednom radku a maji tutez vysku. Viz
+// PROJECT-STATE, oddil 9.
+const VLEVO=[0.7,52.2,0.9,50.7,0.9,52.3,1.2,52.2];
 {
   global.document.documentElement.dataset.grade='';
   appEl.clientWidth=375;
@@ -1278,10 +1282,14 @@ const VLEVO=[2.3,53.6,2.6,51.3,2.6,53.7,3,53.5];
     msay('dva sloupce se hnuly do stran: '+JSON.stringify(ted)+' misto '+JSON.stringify(VLEVO));
   const b=A.placeBox(2);
   if(b.w!==44) msay('dva sloupce zmenily sirku karty: '+b.w);
-  if(Math.abs(s[1].y-s[0].y-b.step)>0.05) msay('rozestup sousedu neodpovida kroku karty');
+  if(Math.abs(s[1].y-s[0].y)>0.05) msay('dve mista v jednom radku nestoji ve stejne vysce');
+  if(Math.abs(s[2].y-s[0].y-b.step)>0.05) msay('rozestup radku neodpovida kroku karty');
 }
 
 /* --- nic se nesmi prekryt, pro obe meritka a vsechny sirky --- */
+// polovina stopy silnice (stroke-width 16 na .worldroad) a ctyri pixely
+// vzduchu, ktere maji zbyt mezi carou a kartou
+const VZDUCH=8+4;
 const OKNA=[[360,2],[375,2],[568,2],[600,3],[768,3],[812,3],[900,4],[1024,4],[1280,4]];
 for(const rocnik of ['','1']){
   const tx=rocnik?MERITKA[rocnik]:1;
@@ -1298,6 +1306,51 @@ for(const rocnik of ['','1']){
     for(let n=8;n<=24;n++){
       const s=A.worldSpots({world:'circuit'},n,n>12?5:null,cols);
       if(s.length!==n){msay('worldSpots vratil '+s.length+' mist misto '+n);continue;}
+      // Mapa se cte jako stranka: radky jdou shora dolu a v radku roste
+      // left s poradim. Radek pozna podle toho, ze maji mista tutez
+      // vysku. Driv se jelo hadovite a osmilety syn uzivatele nepoznal,
+      // kam cesta pokracuje; tohle je kontrola proti navratu toho tvaru.
+      for(let i=1;i<n;i++){
+        if(s[i].y<s[i-1].y-0.05)
+          msay('cols '+cols+', n '+n+': misto '+i+' stoji vys nez '+(i-1));
+        else if(Math.abs(s[i].y-s[i-1].y)<0.05&&s[i].left<=s[i-1].left)
+          msay('cols '+cols+', n '+n+': v radku nejde misto '+i+' doprava od '+(i-1));
+      }
+      // Vratna cara na konci radku vede prazdnym pasem mezi radky, nikdy
+      // pres karty: ma byt vodorovna, dost dlouha na to, aby byla videt,
+      // a cela sestnactipixelova stopa silnice se musi vejit mezi spodek
+      // horniho radku a vrsek dolniho, a to jeste se ctyrmi pixely
+      // vzduchu na kazde strane. Osm plus ctyri, tedy VZDUCH nize: samo
+      // "neprekryva se" by proslo i pri dvacetipixelove mezere, ve ktere
+      // silnice viditelne lezi na kartach.
+      {
+        const vyska=Math.round(s.reduce((m,x)=>Math.max(m,x.y),0)+b.h+A.PLACE_GAP);
+        const cmds=A.worldRoad(s,vyska).match(/[MLC][^MLC]*/g)
+          .map(c=>c.slice(1).replace(/,/g,' ').trim().split(/\s+/).map(Number))
+          .map(v=>({v,konec:v.slice(-2)}));
+        const radky=s.map(x=>x.y).filter((y,i,a)=>a.indexOf(y)===i).sort((x,y)=>x-y);
+        // o kolik procent mapy se cesta na kterem konci radku vraci
+        const cesty=s.map((x,i)=>i>0&&x.left+2*(x.cx-x.left)<=s[i-1].left?s[i-1].cx-x.cx:0)
+          .filter(Boolean);
+        let cur=null,vratnych=0;
+        for(const c of cmds){
+          const p=c.konec;
+          if(cur&&c.v.length===2&&Math.abs(p[1]-cur[1])<0.01&&Math.abs(p[0]-cur[0])>0.01){
+            const siroka=Math.abs(p[0]-cur[0]),ma=cesty[vratnych]||0;
+            vratnych++;
+            const nad=radky.filter(r=>r+b.h<=p[1]+0.05).pop();
+            const pod=radky.filter(r=>r>=p[1]-0.05)[0];
+            if(nad==null||pod==null||p[1]-VZDUCH<nad+b.h||p[1]+VZDUCH>pod)
+              msay('cols '+cols+', n '+n+': vratna cara v '+p[1].toFixed(1)+' px se dotyka karet');
+            // aspon pulka navratu je rovny usek, zbytek jsou dve zatacky
+            if(siroka<ma/2-0.05)
+              msay('cols '+cols+', n '+n+': vratna cara ma '+siroka.toFixed(1)+' z '+ma.toFixed(1)+' %');
+          }
+          cur=p;
+        }
+        if(vratnych!==cesty.length)
+          msay('cols '+cols+', n '+n+': cesta ma '+vratnych+' vratnych car misto '+cesty.length);
+      }
       // obdelniky v pixelech: vodorovne z procent sirky mapy, svisle
       // z vlastni spoctene vysky, ne z te, kterou pocita mapa. Kazda
       // karta se bere jako nejvyssi tvar, protoze na kterem miste ktery

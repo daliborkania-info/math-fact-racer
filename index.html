@@ -222,9 +222,11 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
   background:var(--paper);text-align:left;box-shadow:var(--shadow-soft);
 }
 /* From three columns up the card follows the column count instead of the
-   205 px cap measured on a phone, and the road snakes across the rows.
-   The number of columns is decided in JS, because worldSpots() has to
-   know it too, and arrives here on the map itself. */
+   205 px cap measured on a phone. The places stand in rows and are read
+   left to right like a page, whatever the number of columns; the road
+   comes back to the left edge through the band between two rows. The
+   number of columns is decided in JS, because worldSpots() has to know it
+   too, and arrives here on the map itself. */
 .world[data-cols="3"] .place{width:30.3%;max-width:none}
 .world[data-cols="4"] .place{width:22%;max-width:none}
 .place:active{transform:translateY(2px)}
@@ -4575,8 +4577,11 @@ function viewPlayers(){
 
 /* ---------- the map, which is a world rather than a list ----------
    Fifteen tracks plus the workshop is past the point where a column of
-   cards reads as anything, so the places are laid out along a winding
-   road instead. The layout is computed from the same kind of seed as the
+   cards reads as anything, so the places are laid out along a road
+   instead. It runs in reading order, left to right along a row and back
+   to the left edge for the next one, because a road that snaked back on
+   every second row left an eight year old unable to say where it went.
+   The layout is computed from the same kind of seed as the
    circuits, so a world always looks the same, and it is measured in
    percent across and pixels down, which keeps it inside any phone.
    The road is decoration. **Tapping a place goes straight there**; there
@@ -4589,7 +4594,13 @@ function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] ||
    up the width follows the count. How far apart they stand vertically is
    not a constant any more: the card is as tall as its own preview and its
    own text, and the text grows with the school year. */
-const PLACE_GAP = 20;       // clear air between two cards in one column
+/* Clear air between two rows of cards. It used to be 20, which was enough
+   to keep two cards apart and nothing more; the road now comes back
+   through this band at the end of every row, and the road is drawn with
+   a 16 px stroke that does not scale. Sixteen of these thirty six pixels
+   are the road itself and ten are left clear above it and below it, so
+   the return is plainly visible and never touches a card. */
+const PLACE_GAP = 36;       // clear air between two rows, and the return lane
 const PLACE_MAX = 205;      // .place max-width, two column layout only
 const WORLD_EDGE = 28;      // .world margin: 0 14px, both sides
 /* How wide the map is drawn, in pixels. The card is a percentage of
@@ -4635,68 +4646,82 @@ function placeHeight(widthPx, tx){
 }
 /* How wide one place is, in percent of the map, and how tall in pixels.
    The percentages match the widths in the stylesheet, which is where the
-   card is actually sized. Two columns alternate sides, so the distance
-   between two neighbours is half the distance between two cards in the
-   same column; from three columns up a step is a row. */
+   card is actually sized. Places stand in rows whatever the number of
+   columns, so one step down is always one row. */
 function placeBox(cols, tx){
   const c = cols < 3 ? 2 : cols;
   const w = c === 2 ? 44 : 100 / c - 3;
   const px = c === 2 ? Math.min(mapWidth() * w / 100, PLACE_MAX) : mapWidth() * w / 100;
   const h = placeHeight(px, tx);
-  return {w, h, step: c === 2 ? (h + PLACE_GAP) / 2 : h + PLACE_GAP};
+  return {w, h, step: h + PLACE_GAP};
 }
-/* gapAt, when given, is the index where this year starts: the road takes
-   half a step more there, which is the room the year sign stands in.
-   With three or four columns the extra half step belongs to the whole
-   row, otherwise the places sharing that row would sit at two heights.
+/* Where the places stand, in reading order: left to right along a row,
+   then back to the left edge and down to the next one, the way a child
+   reads a page. It used to snake, right to left along every second row,
+   and an eight year old asked to play it could not tell where the road
+   went next; see PROJECT-STATE, section 9.
+
+   gapAt, when given, is the index where this year starts: the road takes
+   half a step more there, which is the room the year sign stands in, and
+   this year begins a row of its own, because there is no room for the
+   sign between two cards sharing a row. The cells left over at the end of
+   the row before it simply stay empty.
+
    cols defaults to two, so every caller that does not care about the
    width keeps the layout the phone was measured on. */
 function worldSpots(p, n, gapAt, cols, tx){
   const rnd = seedRand("svet-" + (p && p.world ? p.world : "circuit"));
-  const b = placeBox(cols || 2, tx);
+  const c = cols || 2;
+  const b = placeBox(c, tx);
   const out = [];
-  if((cols || 2) < 3){
-    for(let i = 0; i < n; i++){
-      const wobble = rnd() * 3;
-      const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
-      const gap = (gapAt != null && i >= gapAt) ? b.step / 2 : 0;
-      const y = +(14 + i * b.step + gap).toFixed(1);
-      out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
-    }
-    return out;
-  }
-  // the road snakes: left to right along one row, right to left along the
-  // next, so it still reads as one path rather than as a grid.
-  // This year starts on a row of its own, because the year sign stands in
-  // the half step above it and there is no room for it between two cards
-  // sharing a row; the cells left over at the end of the row before it
-  // simply stay empty.
-  const pad = gapAt == null ? 0 : (cols - gapAt % cols) % cols;
+  const pad = gapAt == null ? 0 : (c - gapAt % c) % c;
   for(let i = 0; i < n; i++){
-    const j = gapAt != null && i >= gapAt ? i + pad : i;
-    const r = Math.floor(j / cols);
-    const c = r % 2 ? cols - 1 - (j % cols) : j % cols;
-    // 0.5 to 2.5 of wobble leaves a one percent lane between two columns
-    // and keeps the last one half a percent inside the right edge
-    const left = c * (100 / cols) + 0.5 + rnd() * 2;
+    const j = (gapAt != null && i >= gapAt) ? i + pad : i;
+    const r = Math.floor(j / c);
+    // 0.5 to 2.5 of wobble leaves a lane between two columns for the road
+    // to show through and keeps the last column inside the right edge
+    const left = (j % c) * (100 / c) + 0.5 + rnd() * 2;
     const y = +(14 + r * b.step + (gapAt != null && i >= gapAt ? b.step / 2 : 0)).toFixed(1);
     out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
   }
   return out;
 }
-/* An S bend between each pair of places. The stroke keeps its width
-   whatever the screen, because the picture is stretched sideways to the
-   width of the phone and would otherwise squash the road with it. */
+/* An S bend between each pair of places, and a return lane at the end of
+   every row. The road knows nothing about worlds or columns: it is handed
+   a list of points and reads how wide and how tall a card is off the
+   points themselves, so a place that lies entirely to the left of the one
+   before it can only be the start of the next row. It is not reached by
+   cutting across the cards in between but by dropping into the clear band
+   between the two rows, running back along it and climbing in from above,
+   which is the carriage return the child has to be able to follow.
+   The stroke keeps its width whatever the screen, because the picture is
+   stretched sideways to the width of the phone and would otherwise
+   squash the road with it. */
 function worldRoad(spots, h){
   if(!spots.length) return "";
-  let d = `M ${spots[0].cx.toFixed(1)} 0 L ${spots[0].cx.toFixed(1)} ${spots[0].cy.toFixed(1)}`;
+  const f = v => v.toFixed(1);
+  let d = `M ${f(spots[0].cx)} 0 L ${f(spots[0].cx)} ${f(spots[0].cy)}`;
   for(let i = 1; i < spots.length; i++){
-    const a = spots[i-1], b = spots[i], m = (b.cy - a.cy) / 2;
-    d += ` C ${a.cx.toFixed(1)} ${(a.cy + m).toFixed(1)}, ${b.cx.toFixed(1)} ${(b.cy - m).toFixed(1)},`
-       + ` ${b.cx.toFixed(1)} ${b.cy.toFixed(1)}`;
+    const a = spots[i-1], b = spots[i];
+    if(b.left + 2 * (b.cx - b.left) <= a.left){
+      // the middle of the empty band: half a card below the centre of the
+      // row that ends here, half the air above the row that starts there
+      const band = (a.cy + (a.cy - a.y) + b.y) / 2;
+      // how far to the side the two turns reach; a quarter of the way
+      // back at most, so the straight run along the band stays the half
+      // of it that reads as a return
+      const k = Math.min(8, (a.cx - b.cx) / 4);
+      d += ` C ${f(a.cx)} ${f(band)}, ${f(a.cx)} ${f(band)}, ${f(a.cx - k)} ${f(band)}`
+         + ` L ${f(b.cx + k)} ${f(band)}`
+         + ` C ${f(b.cx)} ${f(band)}, ${f(b.cx)} ${f(band)}, ${f(b.cx)} ${f(b.cy)}`;
+      continue;
+    }
+    const m = (b.cy - a.cy) / 2;
+    d += ` C ${f(a.cx)} ${f(a.cy + m)}, ${f(b.cx)} ${f(b.cy - m)},`
+       + ` ${f(b.cx)} ${f(b.cy)}`;
   }
   const last = spots[spots.length - 1];
-  return d + ` L ${last.cx.toFixed(1)} ${h}`;
+  return d + ` L ${f(last.cx)} ${h}`;
 }
 /* How full this place's collection is, shown on the place itself so the
    child can see from the map where there is still something to find. */

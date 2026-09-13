@@ -203,9 +203,11 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
   background:var(--paper);text-align:left;box-shadow:var(--shadow-soft);
 }
 /* From three columns up the card follows the column count instead of the
-   205 px cap measured on a phone, and the road snakes across the rows.
-   The number of columns is decided in JS, because worldSpots() has to
-   know it too, and arrives here on the map itself. */
+   205 px cap measured on a phone. The places stand in rows and are read
+   left to right like a page, whatever the number of columns; the road
+   comes back to the left edge through the band between two rows. The
+   number of columns is decided in JS, because worldSpots() has to know it
+   too, and arrives here on the map itself. */
 .world[data-cols="3"] .place{width:30.3%;max-width:none}
 .world[data-cols="4"] .place{width:22%;max-width:none}
 .place:active{transform:translateY(2px)}

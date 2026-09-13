@@ -613,6 +613,25 @@ zmenšit na `10px 18%`.
 
 ### C3. Mapa podle šířky — HOTOVO 13. září 2026 (R6 podle doporučení)
 
+**C3b, oprava po hraní s dítětem (13. září 2026): řazení míst se opravilo
+z hadovitého na čtené po řádcích.** Text C3 níže popisuje boustrofedon, tedy
+lichý řádek zprava doleva, a dvousloupcové rozvržení, které se střídalo po
+stranách; obojí **už neplatí**. Uživatel mapu zkusil s osmiletým synem ve třetí
+třídě a dítě v ní nepoznalo, kudy cesta pokračuje: od dveří "Z minulých let"
+vedla přes celé okno doprava a pak se čekalo, že pojede doleva, dolů a zase
+doprava. Dneska se místa řadí tak, jak se v Evropě čte stránka, tedy zleva
+doprava a shora dolů, a to **ve všech šířkách včetně dvou sloupců na telefonu**;
+`worldSpots()` má jedinou větev bez obracení lichých řádků. Na konci řádku se
+cesta vrací prázdným pásem mezi řádky až k levému okraji: `worldRoad()` pozná
+konec řádku podle toho, že další místo leží celé vlevo od předchozího, a šířku
+i výšku karty si odečte ze samotných bodů, takže o sloupcích ani o světě pořád
+neví. Aby se návrat do pásu vešel a nedotýkal se karet, zvětšilo se `PLACE_GAP`
+z 20 na 36 px: šestnáct je stopa silnice a po deseti zbývá nad ní a pod ní.
+Zamrzlý seznam dvousloupcových poloh v `items.test.js` se tím vědomě změnil
+a je u něj poznámka proč; přibyla k němu kontrola, že v každém řádku roste
+`left` s pořadím a že vratná čára leží celá v pásu. Viz PROJECT-STATE, oddíly
+7c, 7e a 9.
+
 Proti plánu se upřesnily tři věci. Wobble `rnd() * 3` by u posledního sloupce
 vyjel na 101 %, takže od tří sloupců je wobble 0,5 až 2,5 a mezi sloupci zbývá
 procento; dva sloupce mají wobble beze změny a vracejí přesně dnešní polohy.
@@ -1142,7 +1161,9 @@ v CSS, ne v kódu, a je jí pět řádků s `--tx` v `src/styles.css` hned pod
 `--appw`.
 
 **R6. Mapa na tabletu. Rozhodnuto 13. září 2026 podle doporučení, hotovo v C3.**
-Tři sloupce na tabletu, čtyři od 900 px, hadovitě.
+Tři sloupce na tabletu, čtyři od 900 px. Hadovité řazení, se kterým se to
+udělalo, padlo týž den po hraní s dítětem; místa se čtou po řádcích zleva
+doprava, viz C3b.
 Alternativa: nechat dva sloupce a jen zvětšit karty. Doporučení: sloupce,
 protože dva sloupce na 1024 px dávají kartu 45 % široké a náhled velikosti
 poloviny obrazovky, což už není mapa.

@@ -1,7 +1,7 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 13. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C
-a první položce kroku D nového plánu
+Poslední aktualizace: 13. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
+první položce kroku D nového plánu a opravě řazení mapy (C3b)
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
 nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
@@ -80,6 +80,13 @@ nemá. Viz oddíl 7e.
 ročníku, jako trať `ops` s hlavičkou klíče `z` a čtyřmi kbelíky. Na mapě stojí
 mezi `chain` a `beyond`, tedy v pořadí učebnice, a otevírá se od celé malé
 násobilky. Proti plánu se upřesnil čtvrtý kbelík, viz oddíl 4 a `docs/PLAN.md`.
+
+**Oprava C3b je hotová** (13. září): mapa se přestala číst hadovitě. Krok C
+řadil místa boustrofedonem, tedy druhý řádek zprava doleva, a dva sloupce na
+telefonu byly tentýž had, jen užší. Uživatel to zkusil s osmiletým synem
+a dítě nepoznalo, kudy cesta pokračuje. Od téhle opravy se místa řadí tak, jak
+se čte stránka, tedy po řádcích zleva doprava, ve všech šířkách, a na konci
+řádku se cesta vrací prázdným pásem mezi řádky k levému okraji. Viz oddíl 9.
 
 **Na řadě je zbytek kroku D** (D2 až D4), tedy zbývající rodiny na číselné
 klávesnici, a dál podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
@@ -801,14 +808,18 @@ a není to tlačítko. Dílna má vlastní místo a vlastní vzhled. Co z mapy p
 letošku a co minulým letům, řeší oddíl 7d.
 
 **Rozměry jsou spočítané, ne odhadnuté.** Na telefonu je místo široké 44 procent
-a sousedi jsou po 96 pixelech, takže se dvě místa na téže straně nepřekryjou a
-dva sloupce se nedotknou ani na nejužším telefonu. `flow.test.js` to ověřuje
+a mezi dvěma sloupci zbývají čtyři procenta, takže se nedotknou ani na nejužším
+telefonu; svisle stojí řádky od sebe o výšku karty plus `PLACE_GAP`, což je na
+telefonu kolem 238 pixelů. `flow.test.js` to ověřuje
 polohami, ne pohledem, a `items.test.js` od kroku C počítá obdélníky míst pro
 dva, tři i čtyři sloupce a hlídá, že se žádné dva neprotnou a žádné nevyjede ven.
 
-**Kolik má mapa sloupců, řídí šířka okna**, viz oddíl 7e. Dva sloupce vracejí
-přesně ty polohy, které vracely před krokem C; od tří sloupců se jede hadovitě
-po řádcích a karta roste do šířky i do výšky.
+**Kolik má mapa sloupců, řídí šířka okna**, viz oddíl 7e. Místa stojí v řádcích
+a **čtou se jako stránka, tedy zleva doprava a shora dolů**, ve všech šířkách
+včetně dvou sloupců na telefonu; od tří sloupců k tomu karta roste do šířky
+i do výšky. Na konci řádku se cesta vrací prázdným pásem mezi řádky až k levému
+okraji a dalším řádkem pokračuje zase zleva. Hadovité řazení, které tu stálo od
+kroku C, osmiletý neuměl přečíst, viz oddíl 9.
 
 ## 7d. Ročník, předěl na mapě a ukázka dalšího roku
 
@@ -863,10 +874,14 @@ protože za dveřmi jsou obory prvního ročníku i most přes desítku.
 vždycky, ať jsou dveře otevřené, nebo zavřené. Není to tlačítko. Mezi místa se
 nepočítá, ale na cestě zabírá půl kroku (`placeBox().step / 2`); `worldSpots()` to
 umí přes parametr `gapAt` a milník sedí v půlce toho esíčka, což je u téhle
-křivky přesně střed obou sousedních míst. **Od tří sloupců začíná letošek
-vlastním řádkem**, protože mezi dvěma kartami v jednom řádku není pro ceduli
-místo a sedla by si na ně; buňky, které tím na konci předchozího řádku zbydou,
-zůstanou prázdné a milník stojí v tom prázdném pásu nad letoškem.
+křivky přesně střed obou sousedních míst. **Letošek začíná vlastním řádkem**,
+v každé šířce včetně dvou sloupců na telefonu, protože mezi dvěma kartami
+v jednom řádku není pro ceduli místo a sedla by si na ně; buňky, které tím na
+konci předchozího řádku zbydou, zůstanou prázdné a milník stojí v tom prázdném
+pásu nad letoškem. Ten pás je široký `PLACE_GAP` plus půl kroku, takže cedule
+má nad sebou i pod sebou přes sedmdesát pixelů volného místa, a protože střed
+obou sousedních míst vychází přesně na vratnou čáru, stojí milník na cestě,
+přesně jak má.
 
 **Co je letošní, říká `yearOf(p, tr)`**, ne `tr.grade`, a ptá se jí celá mapa.
 Vrací `"past"`, `"own"` nebo `"ahead"`. Šampionát (`mix`), slabá místa (`weak`)
@@ -948,7 +963,14 @@ vpravo pult, nápovědu, mince a Hotovo; obal tlačítka Hotovo se jmenuje `jobg
 
 **Mapa má podle šířky dva, tři nebo čtyři sloupce**, viz oddíl 7c a rozhodnutí
 R6 v `docs/PLAN.md`. `viewMap()` spočítá `cols` přes `mapCols()` a předá ho
-`worldSpots()`; šířku karty nastavuje CSS podle `data-cols` na `.world`. Změna
+`worldSpots()`; šířku karty nastavuje CSS podle `data-cols` na `.world`.
+**Pořadí míst je pro všechny šířky totéž**, tedy po řádcích zleva doprava:
+`worldSpots()` má od 13. září jedinou větev, řádek je `Math.floor(j / cols)`
+a sloupec `j % cols`, bez obracení lichých řádků. Cesta o sloupcích pořád neví;
+`worldRoad()` pozná konec řádku podle toho, že další místo leží celé vlevo od
+toho předchozího, a šířku i výšku karty si odečte ze samotných bodů, které
+dostane (`2 * (cx - left)` a `2 * (cy - y)`). Návrat je pak dvě zatáčky a rovný
+úsek uprostřed pásu mezi řádky, takže se nekreslí přes karty. Změna
 orientace mapu překreslí s odkladem 150 ms; pohled se vrátí nahoru, což je při
 otočení tabletu v pořádku.
 
@@ -964,10 +986,19 @@ Schule macht" se na jeden řádek nevejdou. Všechny tři texty mají v CSS
 `-webkit-line-clamp:2`, takže třetí řádek vzniknout nemůže. `placeBox()` počítá
 šířku z `.world`, tedy `#app` mínus 28 px okrajů, a když není co změřit, vezme
 šířku okna, která může být jen větší; krok pak vyjde s přebytkem vzduchu, nikdy
-s nedostatkem. Mezi dvěma kartami v jednom sloupci je `PLACE_GAP`, 20 px, a
-z téhož čísla se počítá i vzduch pod poslední kartou. Dva sloupce se střídají
-po stranách, takže rozestup dvou sousedů je půl kroku sloupce. Hlídá to okruh
-15 v `items.test.js`, který si výšku karty počítá nezávisle, přímo ze stylu.
+s nedostatkem. Mezi dvěma řádky je `PLACE_GAP`, **36 px**, a z téhož čísla se
+počítá i vzduch pod poslední kartou. Krok dolů je jeden řádek, tedy výška karty
+plus `PLACE_GAP`, a je stejný pro dva, tři i čtyři sloupce, protože místa stojí
+v řádcích všude. Hlídá to okruh 15 v `items.test.js`, který si výšku karty
+počítá nezávisle, přímo ze stylu.
+
+**Pás mezi řádky je vratná dráha, ne jen vzduch.** Cesta jím na konci každého
+řádku jede zpátky k levému okraji, a silnice je kreslená šestnáctipixelovou
+stopou, která se s obrazovkou nezmenšuje (`vector-effect`). Dvacet pixelů, se
+kterými se mapa spokojila do 13. září, by ji nechalo ležet na kartách; z 36 px
+je šestnáct silnice a po deseti zbývá volných nad ní a pod ní. Okruh 15 to
+hlídá se čtyřmi pixely rezervy navíc, takže se mezera nedá vrátit na dvacet,
+aniž by test spadl; samo "nepřekrývá se" by prošlo.
 
 **Co se rozvržením nemění:** číselná klávesnice zůstává jediným vstupem závodu,
 dílna nedostala nic, co by se hýbalo nebo odpočítávalo, klepnutí na místo jde
@@ -1062,9 +1093,12 @@ jen ročník s vlastní tratí, že **hlavní blok mapy má pro každý ročník
 jednu otevřenou trať**, že ukázka nabízí právě jeden rok dopředu a že šampionát
 ani rodičovská sekce nemluví o tom, co na mapě není. Od kroku C k tomu přibylo
 rozvržení mapy: obdélníky míst se pro dva, tři i čtyři sloupce při osmi až
-čtyřiadvaceti místech nesmí protnout ani vyjet přes sto procent šířky, dva
-sloupce musí vodorovně vrátit přesně ty polohy, které vracely dřív, a sedm
-šířek okna musí dát očekávaný počet sloupců a orientaci. **Výšku karty si ta
+čtyřiadvaceti místech nesmí protnout ani vyjet přes sto procent šířky, **pořadí
+musí jít po řádcích zleva doprava**, vratná čára na konci řádku musí být
+vodorovná, dost dlouhá a celá i se svou šestnáctipixelovou stopou se musí vejít
+do pásu mezi řádky, dva sloupce musí vodorovně vrátit zamrzlý seznam poloh
+(od 13. září nový, viz oddíl 9) a sedm šířek okna musí dát očekávaný počet
+sloupců a orientaci. **Výšku karty si ta
 kontrola počítá sama ze `src/styles.css`**, ne z `placeBox()`, jinak by měřila
 definici proti sobě samé a nechytila nic; jede pro měřítko 1 i 1,25, pro devět
 šířek okna, pro nejdelší skutečná jména tratí ve všech třech jazycích a pro
@@ -1245,6 +1279,24 @@ nepřekrývá" platilo z definice a devět měsíců by to tak vydrželo. Test s
 nejdelší skutečná jména tratí ve všech třech jazycích. Stejný důvod má i
 `TX_BY_GRADE` v `app.js`: kopie hodnot z CSS je v pořádku jen s testem, který
 spadne, jakmile se obě strany rozejdou.
+
+**Mapa se četla hadovitě a osmiletý v ní nepoznal, kudy dál.** Krok C rozložil
+mapu od tří sloupců do řádků a řadil je boustrofedonem, tedy první řádek zleva
+doprava, druhý zprava doleva, třetí zase zleva; dva sloupce na telefonu byly
+tentýž had, jen užší, protože se místa střídala po stranách. Uživatel to zkusil
+se synem ve třetí třídě a dítě se ztratilo: mapa začíná dveřmi "Z minulých let",
+od nich vede cesta přes celé okno doprava na první klikatelné místo a pak se
+čekalo, že dítě pojede doleva, dolů a zase doprava. Osmiletý to sám nepoznal
+a musel mu to vysvětlit rodič. **Místa se od 13. září řadí tak, jak se v Evropě
+čte, tedy zleva doprava a shora dolů, v každé šířce**, každý řádek začíná vlevo
+a cesta se na jeho konci vrací prázdným pásem mezi řádky až k levému okraji.
+Návrat je vidět jako součást cesty, vede mezerou mezi řádky a nikdy ne přes
+karty; kvůli tomu se mezera zvětšila z 20 na 36 px, viz oddíl 7e. Poučení je
+starší než tahle mapa: **pořadí, ve kterém se něco čte, není věc vkusu, a
+u dítěte, které se teprve učí číst souvislý text, se nesmí odhadovat.** Hlídá
+to okruh 15 v `items.test.js`, který chce, aby v každém řádku rostlo `left`
+s pořadím, a k tomu i to, že vratná čára je vodorovná a že se celá stopa
+silnice vejde mezi dva řádky se čtyřmi pixely rezervy.
 
 ---
 

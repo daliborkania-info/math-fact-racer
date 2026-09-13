@@ -1439,7 +1439,12 @@ a dva vyplněné laloky dva pomeranče. Strojová kontrola přibyla v okruhu 3e
 `items.test.js` a kromě rámu a kotev měří i **pořadí vrstev v hotovém SVG**,
 tedy zadní výbava, tělo, vzor, oko, oční díl, klobouk, přední výbava.
 
-### H5. Dílna ukazuje, kam součástky jdou
+### H5. Dílna ukazuje, kam součástky jdou — HOTOVO 14. září 2026
+
+Proti plánu se upřesnilo tohle: přepnutí štítku je opravdu jen změna textu, tedy
+číslo pod ním zůstává tím samým `p.parts` a žádný nový součet ani pole v profilu
+kvůli němu nevzniká, a když už není co koupit, tlačítko „utrať součástky“ se
+přestane nabízet místo aby mířilo do prázdné sekce.
 
 Tady se dořeší otevřená otázka kroku 3b.
 
@@ -1450,14 +1455,27 @@ Tady se dořeší otevřená otázka kroku 3b.
   939 součástek jsou dalších zhruba 63 plných zakázek, tedy dohromady
   s nátěry kolem devadesáti; to je řádově školní rok při dvou zakázkách
   týdně. **Podmínka pro přepnutí štítku se proto rozšíří z „všechny nátěry“
-  na „všechny nátěry a všechny díly“**, jinak nic.
+  na „všechny nátěry a všechny díly“**, jinak nic. **Hotovo:** `shelvesEmpty(p)`,
+  tedy `partsShelves(p).length === 0`; ani samotné nátěry, ani samotné díly
+  štítek nepřepnou a test to zkouší ve všech čtyřech kombinacích. Přepne se
+  štítek pod celkovým číslem na výsledku zakázky (`statPartsAll` →
+  `statPartsWork`) a věta dole v dílně (`shopPartsNote` → `shopPartsDone`);
+  číslo samo zůstává `p.parts`.
 - Tlačítko „utrať součástky“ po zakázce dnes skáče na `#paintsec`; má mířit
   tam, kde ještě něco koupitelného zbývá, tedy případně rovnou do kačenčí
   sekce. Sekce v garáži jsou od téhle chvíle řazené od nejlevnějšího dílu,
-  aby první dlaždice byla ta, na kterou dítě má.
+  aby první dlaždice byla ta, na kterou dítě má. **Hotovo:** rozhoduje o tom
+  `partsShelves(p)`, které vrací seznam sekcí, ve kterých ještě něco zbývá,
+  v pořadí, v jakém je garáž ukazuje; akce se přejmenovala z `paintshop` na
+  `spendparts`, protože už nevede jen k nátěrům. Řazení od nejlevnějšího sedělo
+  už z H2 až H4, uvnitř každé vrstvy i mezi vrstvami (0, 6, 6, 8, 8).
 - Kruhové okno nad pultem (`revealSVG`) kreslí vlastního závodníka dítěte,
   takže kačenku odkrývá samo; ověřit, že se do kruhu vejde i s kloboukem
-  a se skafandrem, protože ty jdou nad obrys hlavy.
+  a se skafandrem, protože ty jdou nad obrys hlavy. **Ověřeno na renderu:**
+  kačenka má viewBox 100 × 118, takže se do okna vejde na výšku a zbyde jí
+  po stranách; vykreslených bylo všech šestnáct kusů výbavy s nejvyššími
+  klobouky, plus skafandr, cylindr, koruna, rohy, kruh a pneumatika, a nic
+  se o rám kruhu neuřízlo.
 - **Pravidlo „součástky se nedají vyjezdit a mince se nedají vydělat v dílně“
   se nemění ani o kousek.** Kačenčí díly jsou výhradně za součástky, nikdy za
   mince, i kdyby to bylo pohodlné. Když se 939 součástek ukáže jako moc,
@@ -1465,7 +1483,11 @@ Tady se dořeší otevřená otázka kroku 3b.
   věc, která dílnu drží při životě.
 - Testy: `flow.test.js` koupí díl za součástky a ověří, že ho kačenka nese
   a že se odečetly součástky, ne mince; a že po koupení všeho štítek změní
-  význam.
+  význam. **Hotovo:** nákup dílu za součástky hlídá okruh „kačenčiny barvy“
+  z H2, nový okruh „kam součástky jdou“ přidal deset kontrol: kam míří utrata
+  ve třech stavech, čtyři kombinace nátěrů a dílů, text dílny před přepnutím
+  i po něm, štítek a tlačítko na výsledku zakázky, a že se s přepnutím do
+  dílny nedostaly stopky ani body za rychlost.
 
 **Past.** Garáž naroste zhruba na devadesát dlaždic a každá je celá kačenka,
 tedy devadesát SVG na jedné obrazovce. Komentář u sbírky nálezů říká, že celá

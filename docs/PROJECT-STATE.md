@@ -166,7 +166,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 341 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 427 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -578,11 +578,31 @@ Velikost si říká `shopSpec()` sama, protože dílna žádná trať není a `t
 by ji minulo, přesně jako ji jednou minula rodičovská heatmapa.
 
 **Součástky jsou pořád jediná měna dílny** a mají podle roadmapy, oddíl 4,
-správný tvar, tedy klíč k obsahu místo platu za výkon. Co s nimi, až budou
-všechny nátěry koupené, je rozhodnuté v `docs/PLAN.md`, krok 3b, ale zatím
-neudělané: číslo se má tehdy přestat tvářit jako peněženka a začít říkat, kolik
-práce je hotové celkem. Do doby, než někdo utratí 390 součástek, to nikoho
-netlačí.
+správný tvar, tedy klíč k obsahu místo platu za výkon. Kupují se za ně dvě věci,
+nátěry na stroje (390 součástek) a výstroj gumové kačenky (65 dílů za 934), a nic
+z toho nejde koupit za mince ani vyjezdit.
+
+**Dílna říká, kam součástky jdou, a od kroku H5 taky to, kdy už nejdou nikam.**
+Věta dole na obrazovce dílny jmenuje obojí, nátěry i kačenku, a tlačítko „utrať
+součástky“ po zakázce míří do první sekce garáže, ve které ještě něco zbývá, tedy
+nejdřív na nátěry a po posledním z nich rovnou do kačenčích vrstev; rozhoduje
+o tom `partsShelves(p)`. Je to seznam míst, nikdy počet zbývajících kusů: číslo
+„devět z pětašedesáti“ by z police na koukání udělalo cíl k honění a v dílně se
+nic honit nemá.
+
+**Až je koupené všechno, číslo přestane být peněženka.** Tohle je dořešená
+otevřená otázka kroku 3b starého plánu. Podmínka je `shelvesEmpty(p)`, tedy
+koupené **nátěry i všech 65 dílů kačenky**; ani jedna polovina sama nestačí,
+protože dítě, které má všechny nátěry, má pořád kam dalším součástkám jít. Pak
+se přepne štítek pod celkovým číslem na výsledku zakázky (`statPartsAll` →
+`statPartsWork`) a věta v dílně (`shopPartsNote` → `shopPartsDone`), tlačítko
+na utracení se přestane nabízet, protože není kam, a **nic dalšího se nemění**:
+číslo zůstává `p.parts`, žádné nové zboží ani cíl nevzniká a součástky přibývají
+dál. Datový model se kvůli tomu nehnul.
+
+Přepnutý štítek je změna textu, ne nová mechanika: v dílně se ani po něm nikde
+neměří čas a za rychlost pořád nejsou body. Hlídá to kontrola na konci okruhu
+„kam součástky jdou“ ve `flow.test.js`.
 
 **Klíče dílny začínají na `w`.** Ukládají se do stejné Leitnerovy krabičky jako
 příklady, ale žádný pool závodu je vyrobit neumí a trať "co ti nejde" je

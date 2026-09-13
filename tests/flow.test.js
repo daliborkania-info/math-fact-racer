@@ -419,8 +419,9 @@ ok('chyba zakazku prodlouzila o opravu', jev('JOB.retries')===1 && jev('JOB.item
 ok('opravena uloha odkryla dil taky, kruh je i po chybe cely',
    jev('JOB.ok')===6 && jev('JOB.marks.filter(m=>m===2).length')===1, 'vyreseno '+jev('JOB.ok')+' z 6');
 
-// soucastky jsou jen na natery, takze utrata za ne ma skocit rovnou na ne
-click(q('[data-act="paintshop"]'));
+// utrata soucastek ma skocit tam, kde jeste neco koupitelneho zbyva;
+// dokud jsou natery neuplne, jsou to natery
+click(q('[data-act="spendparts"]'));
 ok('utrata soucastek otevre garaz rovnou u nateru',
    ev('view.name')==='collection' && ev('view.focus')==='paintsec' && q('#paintsec')!==null,
    ev('view.name')+' / '+ev('view.focus'));
@@ -596,6 +597,61 @@ click(qa('[data-act="buyduck"]')[0]);
 ok('bez soucastek se dil nekoupi', DBg().profiles[0].parts===1
    && DBg().profiles[0].duckParts.length===5, DBg().profiles[0].parts+' soucastek');
 q('.sheet').remove();
+
+console.log('--- kam soucastky jdou ---');
+// Otevrena otazka kroku 3b: stitek u soucastek se ma prestat tvarit jako
+// penezenka teprve tehdy, kdyz uz neni co kupovat. Od kroku H nestaci
+// natery, protoze kacenka ma dalsich 65 dilu, takze podminka je
+// "vsechny natery A vsechny dily" a ani jedna polovina sama nestaci.
+const zaloha=w.localStorage.getItem('math-fact-racer-v1');
+const vsechnyNatery=JSON.parse(ev('JSON.stringify(PAINTS.map(x=>x.id))'));
+const vsechnyDily=JSON.parse(ev('JSON.stringify(DUCK_PARTS.map(x=>x.id))'));
+const stav=(nat,dily)=>{
+  const s=JSON.parse(zaloha);
+  s.profiles[0].paints=nat?vsechnyNatery.slice():[];
+  s.profiles[0].duckParts=dily?vsechnyDily.slice():[];
+  s.profiles[0].parts=50;
+  w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(s));
+  ev('load()');
+  return {prazdno:ev('shelvesEmpty(P())'),
+          police:JSON.parse(ev('JSON.stringify(partsShelves(P()))'))};
+};
+const nic=stav(false,false), jenNatery=stav(true,false);
+const jenDily=stav(false,true), vsechno=stav(true,true);
+ok('dokud zbyvaji natery, miri utrata soucastek na ne',
+   nic.police[0]==='paintsec' && !nic.prazdno, nic.police.join(','));
+ok('po poslednim nateru miri utrata rovnou do kacenci sekce',
+   jenNatery.police[0]==='duckbodysec' && !jenNatery.prazdno, jenNatery.police.join(','));
+ok('samotne natery stitek neprepnou', !jenNatery.prazdno);
+ok('samotne dily kacenky stitek neprepnou taky',
+   !jenDily.prazdno && jenDily.police.join(',')==='paintsec', jenDily.police.join(','));
+ok('stitek se prepne az pri naterech i vsech dilech',
+   vsechno.prazdno && vsechno.police.length===0, vsechno.police.join(','));
+// a to same, jak to uvidi dite: dilna rika, na co soucastky jsou, a kdyz
+// uz neni na co, rekne misto toho, kolik prace je hotove
+stav(false,false); ev('go("shop")');
+const dilnaDrive=txt();
+stav(true,true); ev('go("shop")');
+const dilnaPotom=txt();
+ok('dilna rika, ze soucastky jdou na natery i na kacenku',
+   /nátěry/.test(dilnaDrive) && /kačenka/.test(dilnaDrive), dilnaDrive.slice(-120));
+ok('kdyz uz neni co kupovat, mluvi dilna o hotove praci',
+   /kolik práce/.test(dilnaPotom) && !/kupují/.test(dilnaPotom), dilnaPotom.slice(-120));
+// vysledek zakazky: stitek pod celkovym cislem a nabidka jit utracet
+stav(false,false); ev('go("jobdone")');
+ok('dokud je co kupovat, je cislo penezenka a da se jit utracet',
+   q('[data-act="spendparts"]')!==null && /celkem/.test(txt()), txt().slice(0,90));
+stav(true,true); ev('go("jobdone")');
+ok('kdyz uz neni co kupovat, rika cislo hotovou praci a utrata se nenabizi',
+   q('[data-act="spendparts"]')===null && /hotová práce/.test(txt()) && !/celkem/.test(txt()),
+   txt().slice(0,90));
+// prepnuty stitek je zmena textu, nic jineho: v dilne se ani ted nikde
+// nemeri cas a nic za rychlost nepribylo
+ok('prepnuty stitek nepridal do dilny stopky ani body za rychlost',
+   (ev('go("shop")'), qa('.rail,.stage').length===0
+    && /Nikdo tu neměří čas a za rychlost nejsou body/.test(txt())), txt().slice(0,90));
+w.localStorage.setItem('math-fact-racer-v1', zaloha);
+ev('load(); go("collection")');
 
 console.log('--- rocnik a ukazka dalsiho roku ---');
 click(q('[data-act="map"]')); click(q('[data-act="players"]'));

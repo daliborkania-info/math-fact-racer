@@ -4841,6 +4841,11 @@ function moneyStr(v){ return v + " " + t("moneyUnit"); }
 const JOB_PIC = {count:"&#128295;", money:"&#128176;"};
 function viewShop(p){
   const atSchool = chapterJobIds(p);
+  // the workshop says where its parts go, because a child who cannot see
+  // that has no reason to care about them. It is a sentence and not a
+  // tally: what is left to buy is in the garage, where it can be looked
+  // at, and nothing here counts down towards it
+  const partsNote = shelvesEmpty(p) ? t("shopPartsDone") : t("shopPartsNote");
   // a job belongs to a year like a track does, and the same door at the
   // end of the map opens next year's here as well
   const peeking = PEEK === p.id;
@@ -4870,7 +4875,7 @@ function viewShop(p){
     <div class="scr-scroll">
       <div class="pad muted" style="margin:12px 0 2px">${t("shopIntro")}</div>
       <div class="jobs">${cards}</div>
-      <div class="pad muted" style="margin-top:14px">${t("shopPartsNote")}</div>
+      <div class="pad muted" style="margin-top:14px">${partsNote}</div>
     </div>
   </div>`;
 }
@@ -5021,6 +5026,13 @@ function viewJobDone(p){
   // glued every counting task into one chip.
   const miss = [...new Map(JOB.missed.map(i =>
     [i.key + "|" + (i.answer !== undefined ? i.answer : i.amount), i])).values()].slice(0, 3);
+  // the label under the total, and the one decision it carries: while
+  // anything is still for sale the number is a purse, and once nothing
+  // is it says how much work has been done instead. Nothing else about
+  // the number changes, and there is no offer to go shopping when there
+  // is nothing left to shop for
+  const shelves = partsShelves(p);
+  const totalLabel = shelves.length ? t("statPartsAll") : t("statPartsWork");
   return `<div class="scr narrow">
     <div class="scr-scroll">
       <div class="result">
@@ -5030,7 +5042,7 @@ function viewJobDone(p){
         <div class="statrow">
           <div class="stat"><div class="v">+${JOB.parts}</div><div class="l">${t("statParts")}</div></div>
           <div class="stat"><div class="v">${JOB.ok}/${JOB.items.length}</div><div class="l">${t("statSolved")}</div></div>
-          <div class="stat"><div class="v">${p.parts}</div><div class="l">${t("statPartsAll")}</div></div>
+          <div class="stat"><div class="v">${p.parts}</div><div class="l">${totalLabel}</div></div>
         </div>
         ${tokenCardHTML(p, shopSpec(p), JOB.newStars)}
         ${miss.length ? `<div class="h2" style="margin-bottom:6px">${t("jobReviewNext")}</div>
@@ -5039,7 +5051,7 @@ function viewJobDone(p){
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
           <button class="btn mint wide" data-act="jobagain">${t("jobAgain")}</button>
           <button class="btn ghost wide" data-act="shop">${t("jobBackToShop")}</button>
-          <button class="btn ghost wide" data-act="paintshop">${t("jobSpendParts")}</button>
+          ${shelves.length ? `<button class="btn ghost wide" data-act="spendparts">${t("jobSpendParts")}</button>` : ""}
         </div>
       </div>
     </div>
@@ -5183,6 +5195,34 @@ const DUCK_LAYERS = [
   {layer: EYE_LAYER,  list: DUCK_EYE,  sec: "duckeyesec",  title: "duckEyes",   note: "duckEyesNote",  none: "duckEyeNone"},
   {layer: GEAR_LAYER, list: DUCK_GEAR, sec: "duckgearsec", title: "duckGear",   note: "duckGearNote",  none: "duckGearNone"}
 ];
+/* Where parts go, and the one place that knows it. Parts buy two
+   different things now, paints for the machines and an outfit for the
+   duck, so the workshop can say what they are for and send the child
+   straight to the first section that still has something in it; the
+   sections come back in the order the garage shows them, and each of
+   them puts its cheapest part first, so the first tile the child lands
+   on is one they can afford.
+   This answers with places, never with how many are left. A line saying
+   "nine of sixty-five" would turn a shelf to browse into a target to
+   chase, and the workshop is the one room in the game with nothing to
+   chase in it. */
+function partsShelves(p){
+  const out = [];
+  if(PAINTS.some(pa => !(p.paints || []).includes(pa.id))) out.push("paintsec");
+  for(const spec of DUCK_LAYERS)
+    if(spec.list.some(part => !ownsDuckPart(p, part))) out.push(spec.sec);
+  return out;
+}
+/* What parts are for once every shelf is empty, decided long before the
+   duck existed: the number stops looking like a purse and starts saying
+   how much work has been done altogether. The condition is both shelves
+   and not just one. The paints are about twenty six pieces of work on
+   their own, the duck is another sixty three, and a child who owns every
+   paint still has somewhere for the next part to go.
+   When it does switch, only the label switches. No new goods are
+   invented, no goal is added, and parts keep coming in exactly as
+   before. */
+const shelvesEmpty = p => partsShelves(p).length === 0;
 
 /* ---------- parent code ---------- */
 function hashPin(s){
@@ -5626,9 +5666,11 @@ document.addEventListener("click", e => {
     render();
     return;
   }
-  // parts are only good for paint, so spending them opens the garage at
-  // the paints and stays there while the child tries colours on
-  if(act === "paintshop"){ go("collection", {focus:"paintsec"}); return; }
+  // spending parts opens the garage at the first section that still has
+  // something in it, so it stands at the paints while paints are left
+  // and moves on to the duck afterwards, and stays there while the child
+  // tries things on
+  if(act === "spendparts"){ go("collection", {focus: partsShelves(p)[0] || "paintsec"}); return; }
 
   if(act === "shop"){ go("shop"); return; }
   if(act === "jobstart"){ startJob(p, id); return; }

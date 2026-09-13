@@ -1065,10 +1065,19 @@ function fewestCoins(amount){
 }
 const sum = a => a.reduce((s, x) => s + x, 0);
 
+/* A job belongs to a school year like a track does. Paying with coins up
+   to fifty is second year work and a first grader can only stare at it,
+   so the workshop shows what the class has already met and nothing else.
+   Counting parts is the first year's own job: it is the one thing the
+   books spend their first three chapters on, and it is no good in a race
+   because the work is the counting, not the recalling. */
 const JOBS = [
-  {id:"money", keys:["wm1","wm2","wm3"], n:6}
+  {id:"count", keys:["wc1","wc2","wc3"], n:6, grade:1},
+  {id:"money", keys:["wm1","wm2","wm3"], n:6, grade:2}
 ];
 const jobById = id => JOBS.find(j => j.id === id) || JOBS[0];
+const jobsInGrade = p => JOBS.filter(j => !j.grade || j.grade <= gradeOf(p));
+const jobsAhead = p => JOBS.filter(j => j.grade === gradeOf(p) + 1);
 function jobStage(p, job){ return stageIndex(p, i => [job.keys[i]], job.keys.length); }
 
 /* One money task. `check` takes the coins the child put on the counter,
@@ -1110,7 +1119,74 @@ function moneyItem(key){
     check: picked => sum(picked) === amount
   };
 }
-function jobItemFromKey(key){ return moneyItem(key); }
+/* --- counting parts, the first year's job ---
+   The books open with three chapters of counting things on a picture,
+   which is exactly what a race cannot hold: the work is the counting,
+   done once, carefully, with a finger. Here the child counts what is in
+   the tray and lays out the same number of parts, so the answer is made
+   rather than typed and nothing has to be written down.
+   Three steps: up to five, up to ten, and two kinds together, which is
+   where adding starts in the first year. */
+const PART_KINDS = ["bolt", "nut", "washer"];
+function partSVG(kind, x, y, s, c){
+  const g = `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})`;
+  if(kind === "nut"){
+    return `<g transform="${g}"><path d="M0 -11 L9.5 -5.5 L9.5 5.5 L0 11 L-9.5 5.5 L-9.5 -5.5 Z"
+      fill="${c}" stroke="#7a5a1e" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="0" cy="0" r="4.4" fill="#fdf6e4" stroke="#7a5a1e" stroke-width="1.4"/></g>`;
+  }
+  if(kind === "washer"){
+    return `<g transform="${g}"><circle cx="0" cy="0" r="10" fill="${c}" stroke="#7a5a1e" stroke-width="1.6"/>
+      <circle cx="0" cy="0" r="4.2" fill="#fdf6e4" stroke="#7a5a1e" stroke-width="1.4"/></g>`;
+  }
+  return `<g transform="${g}"><rect x="-3.2" y="-2" width="6.4" height="15" rx="1.6" fill="${c}" stroke="#7a5a1e" stroke-width="1.4"/>
+    <path d="M0 -12 L8 -7.5 L8 -2 L0 2.5 L-8 -2 L-8 -7.5 Z" fill="${c}" stroke="#7a5a1e" stroke-width="1.6" stroke-linejoin="round"/></g>`;
+}
+/* A tray of things to count. They sit on a grid with a little jitter, so
+   they look tipped into the tray rather than lined up for marking, but
+   never on top of each other: a child counting with a finger must be
+   able to tell two of them apart. */
+function partsTraySVG(groups){
+  const W = 300, H = 104;
+  let g = `<rect x="2" y="2" width="${W-4}" height="${H-4}" rx="12" fill="#fff6e6" stroke="#e0c79b" stroke-width="3"/>`;
+  const all = [];
+  for(const gr of groups) for(let i = 0; i < gr.n; i++) all.push(gr);
+  const cols = Math.min(6, Math.max(3, Math.ceil(all.length / 2)));
+  const rows = Math.ceil(all.length / cols);
+  all.forEach((gr, i) => {
+    const cx = (W / (cols + 1)) * ((i % cols) + 1) + (ri(0, 6) - 3);
+    const cy = H / (rows + 1) * (Math.floor(i / cols) + 1) + (ri(0, 6) - 3);
+    g += partSVG(gr.kind, cx, cy, 1, gr.c);
+  });
+  return `<svg class="parts" viewBox="0 0 ${W} ${H}" role="img" aria-hidden="true">${g}</svg>`;
+}
+const PART_C = {bolt:"#f0c063", nut:"#cfd7e6", washer:"#e8a87c"};
+function countItem(key){
+  const groups = [];
+  let n;
+  if(key === "wc3"){
+    // two kinds in the tray, which is where the first year starts adding
+    const a = ri(1, 5), b = ri(1, Math.min(5, 10 - a));
+    const k1 = PART_KINDS[ri(0, 2)];
+    let k2 = PART_KINDS[ri(0, 2)];
+    if(k2 === k1) k2 = PART_KINDS[(PART_KINDS.indexOf(k1) + 1) % 3];
+    groups.push({kind: k1, n: a, c: PART_C[k1]}, {kind: k2, n: b, c: PART_C[k2]});
+    n = a + b;
+  } else {
+    n = key === "wc1" ? ri(1, 5) : ri(6, 10);
+    const k = PART_KINDS[ri(0, 2)];
+    groups.push({kind: k, n, c: PART_C[k]});
+  }
+  return {
+    key, kind: "count", input: "pieces", answer: n,
+    ask: key === "wc3" ? "jobCountBoth" : "jobCountAsk",
+    pic: partsTraySVG(groups),
+    solution: new Array(n).fill(1),
+    missMsg: "jobCountMiss",
+    check: picked => picked.length === n
+  };
+}
+function jobItemFromKey(key){ return key[1] === "c" ? countItem(key) : moneyItem(key); }
 /* Six tasks, the current step carrying most of them and the earlier
    steps coming back as review. Same shape as every track, so the
    workshop inherits spaced repetition rather than inventing its own. */
@@ -1721,10 +1797,10 @@ function trackSpec(p, tr){
    here what its places are rather than being sized from trackKeys(); it
    is exactly the spot where the workshop was forgotten once before, in
    the parent heat map. */
-function shopSpec(){
+function shopSpec(p){
   return {
     title: t("shopTitle"), kind: "cog", c1: "#f0c063", c2: "#b5822c",
-    keys: JOBS.reduce((acc, j) => acc.concat(j.keys), [])
+    keys: jobsInGrade(p).reduce((acc, j) => acc.concat(j.keys), [])
   };
 }
 /* Which collections are worth showing: everything the child can reach,
@@ -1739,7 +1815,7 @@ function collectionSpecs(p){
     // which is what happens if the child tried it from the peek
     if((inGrade(p, tr) && unlockState(p, tr).open) || starCount(p, spec.keys)) out.push(spec);
   }
-  out.push(shopSpec());
+  out.push(shopSpec(p));
   return out;
 }
 /* The number on the map, counted over the collections the child can
@@ -2369,7 +2445,7 @@ function viewMap(p){
     <span class="thumb shopthumb">&#128736;</span>
     <span class="nm">${t("shopTitle")}</span>
     <span class="sub">${t("shopSub")}</span>
-    <span class="foot">&#9881; ${p.parts}${placeTokens(p, shopSpec())}</span>
+    <span class="foot">&#9881; ${p.parts}${placeTokens(p, shopSpec(p))}</span>
   </button>`;
 
   /* A door at the end of the road on to what the class does next year.
@@ -2915,19 +2991,26 @@ function startJob(p, jobId){
 function jobAskText(item){ return t.apply(null, [item.ask].concat(item.askArgs || [])); }
 function moneyStr(v){ return v + " " + t("moneyUnit"); }
 
+const JOB_PIC = {count:"&#128295;", money:"&#128176;"};
 function viewShop(p){
   const atSchool = chapterJobIds(p);
-  const cards = JOBS.map(job => {
+  // a job belongs to a year like a track does, and the same door at the
+  // end of the map opens next year's here as well
+  const peeking = PEEK === p.id;
+  const shown = jobsInGrade(p).concat(peeking ? jobsAhead(p) : []);
+  const cards = shown.map(job => {
     const si = jobStage(p, job);
     const done = (p.jobRuns || {})[job.id] || 0;
     const now = atSchool.includes(job.id);
-    return `<button class="job${now ? " now" : ""}" data-act="jobstart" data-id="${job.id}">
-      <span class="jobpic">&#128176;</span>
+    const peek = (job.grade || 0) > gradeOf(p);
+    return `<button class="job${now ? " now" : ""}${peek ? " peek" : ""}" data-act="jobstart" data-id="${job.id}">
+      <span class="jobpic">${JOB_PIC[job.id] || "&#128736;"}</span>
       <span class="body">
         <span class="nm">${t("job_" + job.id)}</span>
         <span class="sub">${t("job_" + job.id + "s")}</span>
         <span class="sub">${t("jobStep", si + 1, job.keys.length)}${done ? t("jobDoneCount", done) : ""}</span>
         ${now ? `<span class="atschool">${t("jobAtSchool")}</span>` : ""}
+        ${peek ? `<span class="atschool peek">${t("peekTitle")}</span>` : ""}
       </span>
     </button>`;
   }).join("");
@@ -2960,11 +3043,11 @@ function viewJob(p){
     <div class="pips dark" style="padding:0 18px 6px">${pips}</div>
     <div class="scr-scroll">
       <div class="jobask" id="jobask">${jobAskText(item)}</div>
+      ${item.pic ? `<div class="jobpicbox">${item.pic}</div>` : ""}
       <div class="revealbox" id="reveal">${revealHTML(p)}</div>
       <div class="counter" id="counter">${counterHTML()}</div>
-      <div class="jobhint" id="jobhint">${t("jobTapCoins")}</div>
-      <div class="tray">${MONEY.map(v =>
-        `<button class="traycoin" data-coin="${v}" aria-label="${moneyStr(v)}">${coinSVG(v)}</button>`).join("")}</div>
+      <div class="jobhint" id="jobhint">${t(item.input === "pieces" ? "jobTapPieces" : "jobTapCoins")}</div>
+      ${trayHTML(item)}
       <div class="pad" style="padding-bottom:calc(18px + var(--safe-b))">
         <button class="btn mint wide" data-act="jobcheck" id="jobok">${t("jobReady")}</button>
       </div>
@@ -2983,12 +3066,27 @@ function paintReveal(){
   const el = document.getElementById("reveal");
   if(el) el.innerHTML = revealHTML(P());
 }
+/* What the child answers with. Coins have six values to choose between;
+   parts have only one, so the tray is a single big button and the whole
+   answer is how many times it is tapped. */
+function trayHTML(item){
+  if(item.input === "pieces"){
+    return `<div class="tray one"><button class="traycoin" data-coin="1" aria-label="${t("jobPiece")}">
+      <svg class="coin" viewBox="0 0 64 64" aria-hidden="true">${partSVG("bolt", 32, 30, 1.9, "#f0c063")}</svg>
+      </button></div>`;
+  }
+  return `<div class="tray">${MONEY.map(v =>
+    `<button class="traycoin" data-coin="${v}" aria-label="${moneyStr(v)}">${coinSVG(v)}</button>`).join("")}</div>`;
+}
+const pieceSVG = () => `<svg class="coin" viewBox="0 0 64 64" aria-hidden="true">${partSVG("bolt", 32, 30, 1.9, "#f0c063")}</svg>`;
 /* What lies on the counter. Tapping a coin there takes it back, so the
-   child can undo without starting over. */
+   child can undo without starting over. Parts are counted rather than
+   added up, so the chip on the end says how many, not how much. */
 function counterHTML(){
+  const pieces = (JOB.items[JOB.idx] || {}).input === "pieces";
   if(!JOB.picked.length) return `<span class="counter-empty">${t("jobEmpty")}</span>`;
-  return JOB.picked.map((v, i) => `<button class="putcoin" data-drop="${i}">${coinSVG(v)}</button>`).join("")
-    + `<span class="counter-sum">${moneyStr(sum(JOB.picked))}</span>`;
+  return JOB.picked.map((v, i) => `<button class="putcoin" data-drop="${i}">${pieces ? pieceSVG() : coinSVG(v)}</button>`).join("")
+    + `<span class="counter-sum">${pieces ? JOB.picked.length : moneyStr(sum(JOB.picked))}</span>`;
 }
 function paintCounter(){
   const c = document.getElementById("counter");
@@ -3005,7 +3103,8 @@ function jobDrop(i){
 /* Coins laid out the way the game would do it, shown after a miss so
    the child sees one right answer rather than being told to try again. */
 function solutionHTML(item){
-  return item.solution.map(v => `<span class="putcoin small">${coinSVG(v)}</span>`).join("");
+  return item.solution.map(v =>
+    `<span class="putcoin small">${item.input === "pieces" ? pieceSVG() : coinSVG(v)}</span>`).join("");
 }
 function jobCheck(){
   if(!JOB || JOB.state !== "ask") return;
@@ -3035,7 +3134,7 @@ function jobCheck(){
     JOB.missed.push(item);
     sfx.bad(); buzz([18, 60, 18]);
     if(near){ JOB.parts += 1; }
-    hint.innerHTML = `<b>${t(near ? "jobTooMany" : "jobMiss", item.solution.length)}</b>`
+    hint.innerHTML = `<b>${t(near ? "jobTooMany" : (item.missMsg || "jobMiss"), item.solution.length)}</b>`
       + `<div class="solrow">${solutionHTML(item)}</div>`;
     const tries = (item.tries || 0) + 1;
     if(tries <= 1 && JOB.items.length < JOB.job.n + 3){
@@ -3082,7 +3181,7 @@ function viewJobDone(p){
           <div class="stat"><div class="v">${JOB.ok}/${JOB.items.length}</div><div class="l">${t("statSolved")}</div></div>
           <div class="stat"><div class="v">${p.parts}</div><div class="l">${t("statPartsAll")}</div></div>
         </div>
-        ${tokenCardHTML(p, shopSpec(), JOB.newStars)}
+        ${tokenCardHTML(p, shopSpec(p), JOB.newStars)}
         ${miss.length ? `<div class="h2" style="margin-bottom:6px">${t("jobReviewNext")}</div>
           <div class="factchips">${miss.map(i =>
             `<span class="factchip">${jobAskText(i)}</span>`).join("")}</div>` : ""}
@@ -3346,7 +3445,7 @@ function heatSpecs(p){
     ({label: O_EX[b.id], keys:["o" + b.id], tip: O_EX[b.id]}))));
   push("clock", heatStrip(t("trk_clock"), 6, C_BUCKETS.map(b =>
     ({label: C_EX[b.id], keys:[b.id], tip: C_EX[b.id]}))));
-  push(null, heatStrip(t("shopTitle"), 3, JOBS.reduce((acc, j) => acc.concat(
+  push(null, heatStrip(t("shopTitle"), 3, jobsInGrade(p).reduce((acc, j) => acc.concat(
     j.keys.map(k => ({label: t("heat_" + k), keys:[k], tip: t("heat_" + k)}))), [])));
   return out;
 }

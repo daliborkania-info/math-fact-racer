@@ -53,9 +53,11 @@ const CURRICULA = [
     lang: "cs",
     grade: 1,
     chapters: [
-      {n:1,  name:"Úvodní procvičování",      src:"1. díl, s. 1–7",   pool:null},
-      {n:2,  name:"Číslo 1",                  src:"1. díl, s. 8–9",   pool:null},
-      {n:3,  name:"Čísla 1 a 2",              src:"1. díl, s. 10–15", pool:null},
+      // the first three chapters are counting things on a picture, which
+      // is workshop material: pickable, and it points at the counting job
+      {n:1,  name:"Úvodní procvičování",      src:"1. díl, s. 1–7",   pool:{shop:["count"]}},
+      {n:2,  name:"Číslo 1",                  src:"1. díl, s. 8–9",   pool:{shop:["count"]}},
+      {n:3,  name:"Čísla 1 a 2",              src:"1. díl, s. 10–15", pool:{shop:["count"]}},
       {n:4,  name:"Čísla 1 až 3",             src:"1. díl, s. 16–23", pool:{as20:{maxSum:3}}},
       {n:5,  name:"Čísla 1 až 4",             src:"1. díl, s. 24–33", pool:{as20:{maxSum:4}}},
       {n:6,  name:"Čísla 1 až 5",             src:"1. díl, s. 34–43", pool:{as20:{maxSum:5}}},

@@ -217,9 +217,10 @@ console.log('--- dilna ---');
 click(q('[data-act="map"]'));
 ok('dilna je na mape', qa('[data-act="shop"]').length===1 && /Dílna/.test(txt()));
 click(q('[data-act="shop"]'));
-ok('dilna nabizi zakazku', qa('[data-act="jobstart"]').length===1 && /Peníze/.test(txt()));
+ok('dilna nabizi zakazky obou rocniku', qa('[data-act="jobstart"]').length===2
+   && /Peníze/.test(txt()) && /Počítání dílků/.test(txt()), qa('[data-act="jobstart"]').length+' zakazek');
 const partsBefore=DBg().profiles[0].parts;
-click(q('[data-act="jobstart"]'));
+click(qa('[data-act="jobstart"]').find(b=>b.dataset.id==='money'));
 ok('zakazka ma sest uloh', qa('.pip').length===6, qa('.pip').length+' uloh');
 // obrazovka dilny je sloupec, takze rostouci rada tecek by spolkla celou
 // vysku a nad mincemi by zustal prazdny pas
@@ -322,7 +323,7 @@ ok('sbirka ma vlastni obrazovku', /Poklady/.test(txt()) && qa('.tokwrap .toks').
 ok('dilna ma sbirku, i kdyz zadna trat neni',
    ev('collectionSpecs(P()).some(s=>s.keys.indexOf("wm1")>=0)'));
 ok('sbirka dilny neni velka podle trati, ale podle kroku zakazek',
-   ev('shopSpec().keys.length')===3, ev('shopSpec().keys.length')+' mist');
+   ev('shopSpec(P()).keys.length')===6, ev('shopSpec(P()).keys.length')+' mist');
 ok('ve sbirce uz neco sviti', ev('starsAll(P())')>0, ev('starsAll(P())')+' rozsvicenych');
 // rozsvicene misto nezhasne, i kdyz uroven prikladu spadne
 const zkus=ev(`(function(){
@@ -427,6 +428,32 @@ ok('po navratu je ukazka porad rozbalena', qa('.place.peek').length===10);
 click(q('[data-act="players"]')); click(qa('[data-act="pick"]').find(b=>b.dataset.id===prvni().id));
 ok('prepnuti hrace ukazku slozilo', qa('.place.peek').length===0 && qa('.place.peekdoor').length===1);
 ok('zkousena trat na mape prvnaka nezustala', !/Rozjezd/.test(txt()));
+// dilna prvnaka: mince do padesati nedava smysl, pocitani dilku ano
+click(q('[data-act="shop"]'));
+ok('prvnak ma v dilne jen svou zakazku',
+   qa('[data-act="jobstart"]').length===1 && /Počítání dílků/.test(txt()) && !/Peníze/.test(txt()),
+   qa('[data-act="jobstart"]').length+' zakazek');
+click(q('[data-act="jobstart"]'));
+ok('pocita se to skladanim dilku, ne psanim', qa('[data-coin]').length===1 && q('.parts')!==null);
+const dilku=()=>ev('JOB.items[JOB.idx].answer');
+ok('na obrazku je tolik dilku, kolik ma byt odpoved',
+   ev('(JOB.items[JOB.idx].pic.match(/<g transform="translate/g)||[]).length')===dilku(),
+   dilku()+' dilku');
+let kn=0;
+while(ev('view.name')==='job' && kn<20){
+  while(qa('#counter [data-drop]').length) click(q('#counter [data-drop]'));
+  for(let i=0;i<dilku();i++) click(q('[data-coin]'));
+  click(q('[data-act="jobcheck"]'));
+  if(ev('view.name')==='job') click(q('[data-act="jobcheck"]'));
+  kn++;
+}
+ok('zakazka s pocitanim dosla do konce', ev('view.name')==='jobdone', 'obrazovka '+ev('view.name'));
+ok('pocitani se zapsalo do krabicky', !!prvni().facts.wc1);
+ok('prvnak dostal soucastky', prvni().parts>0, prvni().parts+' soucastek');
+ok('sbirka dilny prvnaka je jen za jeho zakazku', ev('shopSpec(P()).keys.length')===3,
+   ev('shopSpec(P()).keys.length')+' mist');
+click(q('[data-act="shop"]')); click(q('[data-act="map"]'));
+
 // rodic rocnik prepnout smi
 click(q('[data-act="gate"]'));
 d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));

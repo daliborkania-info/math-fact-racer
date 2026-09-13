@@ -375,9 +375,12 @@ migrační test.
 Dílna stojí, takže další téma je jen další záznam v `JOBS` plus generátor plus
 texty. Postup je stejný jako u peněz, viz `PROJECT-STATE.md`, oddíl 4b.
 
-1. `count_objects`, odemkne kapitoly 1 až 3 prvního ročníku, poslední díru
-   v celém prvním ročníku. Potřebuje kresbu počítaných věcí a vstupní prvek,
-   kde se klepe na předměty nebo se píše počet.
+1. `count_objects`. **HOTOVO, září 2026**, zakázka `count`: v bedýnce leží
+   šroubky, matice nebo podložky, dítě je spočítá a připraví na pult stejný
+   počet. Vstupní prvek `pieces`, tedy jedno velké tlačítko, protože dílek má
+   jen jednu hodnotu. Odemklo kapitoly 1 až 3 prvního ročníku, tedy poslední
+   díru v něm. **Zakázky od té chvíle patří do ročníku**, protože mince do
+   padesáti prvňákovi nedávají smysl; viz `PROJECT-STATE.md`, oddíl 4b.
 2. `word_problem`, slovní úlohy. Neodemkne ani jednu kapitolu, protože ty jsou
    hratelné přes počítání, ale je jich v třetí třídě plno a nikde se necvičí.
    Je to zároveň první zakázka, kde se musí řešit generování textu, ne čísel.

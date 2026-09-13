@@ -472,6 +472,15 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
 .tray{
   display:grid;grid-template-columns:repeat(6,1fr);gap:7px;padding:12px 14px 14px;
 }
+/* one kind of part instead of six values of coin: the whole answer is
+   how many times this is tapped, so it gets the room of three coins */
+.tray.one{grid-template-columns:1fr;padding:10px 26%}
+.tray.one .traycoin{height:clamp(56px,10vh,68px)}
+/* the tray of things to count, which is the question itself */
+.jobpicbox{padding:2px 18px 8px}
+.parts{display:block;width:100%;height:auto;max-height:26vh}
+.job.peek{border-style:dashed;opacity:.92}
+.atschool.peek{color:var(--grape-dark);background:#e7e9ff}
 .traycoin{height:clamp(52px,9vh,62px);border-radius:var(--r-m);background:var(--paper);
   box-shadow:0 4px 0 var(--line);display:grid;place-items:center;padding:5px}
 .traycoin:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}

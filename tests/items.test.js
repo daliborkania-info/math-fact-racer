@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,overallMastery,heatSpecs,collectionSpecs};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,overallMastery,heatSpecs,collectionSpecs};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -260,7 +260,10 @@ for(const c of A.CURRICULA){
   // volba ucebnice musi skocit na prvni hratelnou kapitolu, ne na prvni v knize
   const q=A.newProfile('S'); q.curriculum=c.id; q.chapter=ok[0].n;
   A.DB.profiles=[q]; A.DB.current=q.id;
-  if(!A.schoolReady(q)){selBad++;console.log('  !!  prvni hratelna kapitola nedela trat',c.id,ok[0].n);}
+  // hratelna kapitola bud dela trat, nebo posila do dilny; prvni rocnik
+  // zacina pocitanim predmetu, coz je zakazka, ne zavod
+  if(!A.schoolReady(q)&&!A.chapterJobs(ok[0]).length){
+    selBad++;console.log('  !!  prvni hratelna kapitola nedela ani trat, ani zakazku',c.id,ok[0].n);}
   // profil ulozeny na nehratelne kapitole se srovna dozadu, nikdy dopredu
   for(const ch of c.chapters){
     if(A.isPlayable(ch)) continue;
@@ -511,16 +514,27 @@ for(let a=1;a<=200;a++){
   if(g.reduce((s,x)=>s+x,0)!==a){shBad++;if(shBad<6)console.log('  !!  drobne nedavaji castku',a);continue;}
   if(g.length!==dp[a]){shBad++;if(shBad<6)console.log('  !!  hltavy postup neni nejmensi',a,g.length,'vs',dp[a]);}
 }
-const job=A.JOBS[0];
-for(const k of job.keys) for(let i=0;i<60;i++){
+const job=A.jobById('money');
+// kazda uloha dilny, at uz je na mince nebo na dilky, se resi skladanim
+// na pult, musi uznat svoje vlastni reseni a neuznat o kus vic
+for(const j of A.JOBS) for(const k of j.keys) for(let i=0;i<60;i++){
   const it=A.jobItemFromKey(k); shN++;
-  if(it.input!=='coins'){shBad++;if(shBad<6)console.log('  !!  uloha dilny neni na mince',k,it.input);continue;}
+  if(it.input!=='coins'&&it.input!=='pieces'){shBad++;if(shBad<6)console.log('  !!  uloha dilny neni na skladani',k,it.input);continue;}
   if(!it.solution.length){shBad++;if(shBad<6)console.log('  !!  uloha nema reseni',k);continue;}
-  if(it.solution.some(c=>!A.MONEY.includes(c))){shBad++;if(shBad<6)console.log('  !!  reseni pouzilo neexistujici minci',k,it.solution.join('+'));continue;}
   if(!it.check(it.solution)){shBad++;if(shBad<6)console.log('  !!  uloha neuznala vlastni reseni',k,it.solution.join('+'));continue;}
-  // prihodit minci navic nesmi projit ani u jedne z uloh
-  if(it.check(it.solution.concat([1]))){shBad++;if(shBad<6)console.log('  !!  uloha uznala i minci navic',k);continue;}
-  if(it.amount<1){shBad++;if(shBad<6)console.log('  !!  castka je nula nebo zaporna',k,it.amount);}
+  if(it.check(it.solution.concat([1]))){shBad++;if(shBad<6)console.log('  !!  uloha uznala i kus navic',k);continue;}
+  if(it.input==='coins'){
+    if(it.solution.some(c=>!A.MONEY.includes(c))){shBad++;if(shBad<6)console.log('  !!  reseni pouzilo neexistujici minci',k,it.solution.join('+'));continue;}
+    if(it.amount<1){shBad++;if(shBad<6)console.log('  !!  castka je nula nebo zaporna',k,it.amount);}
+  } else {
+    // pocitani dilku: obrazek musi mit tolik dilku, kolik je odpoved,
+    // jinak by dite pocitalo spravne a hra mu to spocitala za chybu
+    const nakresleno=(it.pic.match(/<g transform="translate/g)||[]).length;
+    if(nakresleno!==it.answer){shBad++;if(shBad<6)console.log('  !!  na obrazku je jiny pocet dilku, nez je odpoved',k,nakresleno,'vs',it.answer);continue;}
+    if(it.answer<1||it.answer>10){shBad++;if(shBad<6)console.log('  !!  pocet dilku mimo prvni rocnik',k,it.answer);continue;}
+    if(k==='wc1'&&it.answer>5){shBad++;if(shBad<6)console.log('  !!  prvni krok pocitani prelezl pet',it.answer);continue;}
+    if(!it.ask){shBad++;if(shBad<6)console.log('  !!  u pocitani chybi zadani slovy',k);}
+  }
 }
 // "co nejmene minci" musi rozliseni castky a poctu minci opravdu delat
 const few=A.jobItemFromKey('wm2');

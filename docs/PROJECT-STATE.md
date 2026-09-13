@@ -283,12 +283,39 @@ déle než vybavit si spoj.
 Druhý režim, postavený v září 2026. Vzniknul proto, že část učiva není fakt
 k vybavení, ale malá úvaha, a na úvahu se nesmí pouštět stopky.
 
-**Co tam je.** Karta na mapě pod tratěmi, výrazně jiná než okruhy, teplé barvy
-a ikona nářadí. Uvnitř seznam zakázek, zatím jedna, peníze.
+**Co tam je.** Vlastní místo na mapě, výrazně jiné než tratě, teplé barvy
+a ikona nářadí. Uvnitř seznam zakázek, zatím dvě.
+
+**Zakázka patří do ročníku, stejně jako trať.** Mince do padesáti jsou učivo
+druhé třídy a prvňák u nich může jen koukat, takže dílna ukazuje jen to, co
+třída už potkala, `jobsInGrade()`. Ukázka na konci cesty rozbalí i zakázky
+dalšího roku, stejně jako tratě. Sbírka dílny a její blok v heatmapě jdou
+podle téhož filtru, takže prvňák nevidí tři šedivá místa za peníze.
+
+| zakázka | ročník | kroky |
+| --- | --- | --- |
+| `count` | 1 | `wc1` do pěti, `wc2` do deseti, `wc3` dva druhy dohromady |
+| `money` | 2 | `wm1` zaplať přesně, `wm2` nejmenším počtem mincí, `wm3` kolik se vrátí |
 
 **Zakázka** je šest úloh. Aktuální krok nese většinu, dřívější se vracejí jako
 opakování, tedy stejný tvar jako u stupňovaných tratí, `focusAndReview()` sdílí
 se závodem. Zakázka se nedá prohrát ani nedojet.
+
+**Počítání dílků je zakázka prvního ročníku.** V bedýnce leží šroubky, matice
+nebo podložky, dítě je spočítá a připraví na pult stejný počet. Odpovídá se tedy
+skládáním, ne psaním, což je celý smysl dílny: práce je v tom pečlivě spočítat,
+a na to se nesmí pustit stopky. Poslední krok dá do bedýnky dva druhy dílků
+dohromady, což je přesně to, kde první ročník začíná sčítat. Učebnice tomu věnuje
+první tři kapitoly, takže jsou od téhle chvíle vybratelné a ukazují do dílny.
+
+**Vstupní prvek `pieces`.** Mince mají šest hodnot na výběr, dílek jen jeden,
+takže zásobník je jedno velké tlačítko a celá odpověď je, kolikrát se na něj
+klepne. Klepnutí na dílek na pultu ho zase odebere. Na pultu se u dílků ukazuje
+počet, u mincí částka.
+
+**Obrázek k počítání musí sedět s odpovědí.** Kdyby se rozcházely, dítě by
+spočítalo správně a hra by mu to spočítala za chybu; `items.test.js` proto počítá
+dílky přímo v nakresleném SVG a porovnává je s odpovědí.
 
 **Peníze mají tři kroky.** `wm1` zaplať přesně, `wm2` zaplať co nejmenším počtem
 mincí, `wm3` kolik se vrátí. Mince jsou 1, 2, 5, 10, 20 a 50, což jsou zároveň
@@ -702,7 +729,8 @@ trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech
 stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
 do tisíce, u kterých ověřuje i to, že každý kbelík dělá to, co slibuje, a dílnu,
 tedy že hltavé drobné jsou opravdu nejmenší, že úloha uzná své vlastní řešení
-a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas. K tomu
+a že se úloha dílny nemůže dostat do závodu ani zkreslit průměrný čas, a u
+počítání dílků, že je jich na obrázku přesně tolik, kolik je odpověď. K tomu
 sbírku, tedy že se místo rozsvítí až na úrovni 4, že po poklesu úrovně nezhasne,
 že ho rozsvítí i klíč dílny, že je sbírka trati velká jako trať a že `seedStars()`
 dopočítá starší profil; kruh v dílně, tedy počet zakrytých výsečí; a světy, tedy
@@ -872,8 +900,8 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání zaokrouhlování je 76 hratelných
-kapitol z 95, po ročnících 15/18, 43/44 a 18/33.
+dojmu. Stav po přidání počítání dílků je 79 hratelných
+kapitol z 95, po ročnících 18/18, 43/44 a 18/33; první ročník je tím celý.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
@@ -888,7 +916,6 @@ kapitol z 95, po ročnících 15/18, 43/44 a 18/33.
 | `compare_numbers` + `compare_units` | `cmp` | 2 | g3: 17, 22 |
 | `fraction_read` | `frac`, dílna | 2 | g3: 19, 32 |
 | `written_mult` | `col`, dílna | 1 | g3: 15 |
-| `count_objects` | dílna | 3 | g1: 1, 2, 3 |
 
 `finance_money` byl v téhle tabulce poslední a je hotový, viz oddíl 4b.
 `mult_beyond` s `div_beyond` byl první a je taky hotový, viz oddíl 5, trať
@@ -903,9 +930,9 @@ tím jde z 18/33 na 25/33, aniž by se sáhlo na klávesnici.
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
 teď přes `as100`. Je to prohloubení, ne odemčení, a navíc potřebuje dílnu.
 
-**Zbytek prvního ročníku čeká na `count_objects`.** Kapitoly 1 až 3 jsou
-počítání předmětů na obrázku, nic pro závod. Dílna, do které patří, už stojí,
-takže zbývá jen ten generátor a kresba počítaných věcí.
+**První ročník je celý hratelný.** Kapitoly 1 až 3 jsou počítání předmětů na
+obrázku, nic pro závod; od září 2026 je umí zakázka `count` v dílně, viz oddíl
+4b. Tím padla poslední díra prvního ročníku.
 
 **Jak se to bude dělat, je v `docs/PLAN.md`**, sedm kroků od heatmapy po pátý
 ročník, u každého konkrétní zásahy do kódu, migrace a testy.
@@ -932,8 +959,8 @@ Teprve pak nové vstupní prvky: `pad2` a `div_remainder`, `pad3` a `place_value
 **Dílna měla být až po tom všem, ale předběhla**, protože se ukázalo, že čtyři
 kapitoly nečekají na nic jiného a že bez ní nejde říct, kam patří slovní úlohy.
 Stojí, takže další témata dílny jsou od téhle chvíle jen další zakázka:
-`count_objects` pro první ročník a `word_problem` pro slovní úlohy, kterých je
-třetí ročník plný.
+`word_problem` pro slovní úlohy, kterých je třetí ročník plný. `count_objects`
+pro první ročník je hotové, viz oddíl 4b.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
 to dál. Hranice patnácti tratí, u které svislý seznam přestával být mapou, padla
@@ -1174,8 +1201,9 @@ už jsou samostatné přírůstky a pořadí mezi nimi je volné:
   a od kroku 4 je v něm navíc prostředí ve všech čtyřech světech.
 - **Krok 5, vlna B**, tedy `pad2` a dělení se zbytkem. Před ním je půl dne
   práce na víc políčkách v `tap()`, `typedText()` a `questionHTML()`.
-- **Krok 6, další zakázka do dílny**, nejspíš `count_objects`, což je poslední
-  díra v celém prvním ročníku.
+- **Krok 6, další zakázka do dílny**, tedy `word_problem`, slovní úlohy.
+  `count_objects` je hotové a první ročník je tím celý pokrytý; třetí ročník
+  je slovních úloh plný a nikde se necvičí.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.

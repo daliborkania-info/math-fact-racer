@@ -1313,3 +1313,73 @@ ročníku (4b).
 > hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
 > úkolem byl krok C (dva subagenti, C1 až C3 s C5 a pak C4 s C7), a ověř,
 > že subagenti označili hotové kroky v `docs/PLAN.md`.
+
+### Prompt pro autonomní dokončení celého plánu
+
+Varianta bez průběžných otázek: session dojede kroky A až F sama, rozhodnutí
+z oddílu 9 plánu bere podle doporučení a krok G jen připraví. Použij, když
+nechceš být u toho.
+
+> Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
+> osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
+> Tentokrát pracuješ **autonomně až do konce plánu**, bez otázek na mě.
+>
+> Tvoje role je **orchestrátor**. Přečti si celý `docs/PROJECT-STATE.md` a celý
+> `docs/PLAN.md`. **`src/app.js` ani testy nečti celé**, do zdrojů se dívej
+> jen přes grep. Každý krok zadej jednomu subagentovi přesně podle oddílu 10
+> plánu (šablona zadání, rozdělení kroků, kontrolní subagent); po jeho návratu
+> sám pusť `python3 build.py` a všech pět testů z `tests/`, prohlédni
+> `git log -1 --stat` a teprve pak zadej další krok. Po každém hotovém kroku
+> přepiš v tomhle souboru hlavičku "Kde se přestalo" jednou větou, aby šlo
+> po případném přerušení navázat.
+>
+> Pořadí a rozdělení: A; B0; R1 jako samostatný commit hned po B0; B; C ve
+> dvou subagentech (C1 až C3 s C5, pak C4 s C7); D1, D2, D3, D4 po jednom;
+> E1 ve dvou (nejdřív dvě políčka `pad2`, pak generátor dělení se zbytkem);
+> E2; E3; E4; F. Po B, po obou částech C, po každém D a po E1 pusť
+> kontrolního subagenta a jeho nálezy dej opravit dalšímu subagentovi před
+> tím, než jdeš dál. Krok G nedělej: mapy čtvrtého a pátého ročníku nejsou
+> ověřené ze stránek a k tomu potřebuješ mě; místo toho na konci sepiš do
+> `docs/PLAN.md` u kroku G, co přesně je k ověření a co se změní v datovém
+> modelu.
+>
+> Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentům
+> v zadání: R1 ano (učivo minulých let starším dětem otevřené, vlastní
+> commit, fixture), R2 rodina po dělitelích `r2` až `r10`, R3 původní klíč,
+> R4 řetězec před `beyond`, R5 měřítka 1,25 / 1,12 / 1,04 / 1,0, R6 sloupce
+> na tabletu, R7 vynulování nechá nastavení. Kde subagent narazí na něco,
+> co plán neřeší, rozhodni ve prospěch nedotknutelných principů z oddílu 3
+> a zapiš rozhodnutí do plánu k danému kroku.
+>
+> Když krok dvakrát po sobě neprojde testy nebo kontrolou, nepokračuj v něm:
+> vrať pracovní strom na poslední čistý commit (`git checkout -- . && git
+> clean -fd src tests docs`, nikdy `reset --hard` na cizí commity), označ
+> krok v plánu ODLOŽENO s důvodem a jdi na další krok, který na něm
+> nezávisí. `migration.test.js` musí být zelený po každém commitu a nikdy se
+> neopravuje škrtnutím kontroly.
+>
+> Vzhled se ověřuje na obrázku. Kresby (palety, cesty, sbírky) přes node
+> a `convert` podle oddílu 2 tohohle souboru. Rozvržení z kroku C tak, že
+> `dist/artifact.html` nahraješ do mého existujícího artefaktu "Math Fact
+> Racer" na claude.ai, který k tomu slouží, a ve vestavěném prohlížeči si ho
+> prohlédneš s emulací 375 × 812, 812 × 375, 768 × 1024, 1024 × 768
+> a 360 × 640 na mapě, v závodě, v dílně a na výsledku, pro prvňáka i pro
+> třeťáka; co nevypadá dobře, dostane subagent k opravě s popisem, co a kde.
+> Po skončení kroku C nahraj artefakt ještě jednou s hotovým stavem.
+>
+> Pravidla do každého zadání subagentovi: zdroje v `src/`, nikdy `index.html`;
+> po každé změně `python3 build.py` a testy, hlídá se `!!`; nové chování
+> patří do testů; žádná změna nesmí připravit existující profil o postup,
+> dotek datového modelu znamená další zamrazený profil ve
+> `tests/fixtures/legacy-profiles.json`; cokoli kresleného se vyrenderuje
+> a prohlédne; nedotknutelné principy z oddílu 3 se nemění; dokumentace
+> podle oddílu 8 plánu včetně označení kroku HOTOVO; kód a komentáře
+> anglicky, commit anglicky jednou větou; push ne.
+>
+> Na konci: aktualizuj celý tenhle soubor (hlavička, stav v číslech, tabulky
+> tratí a klíčů, oddíl 12, kontrolní seznam v oddílu 14 s novými čísly,
+> prompt pro další session, kde bude dalším úkolem krok G), ověř, že
+> `docs/PLAN.md` má u každého kroku HOTOVO nebo ODLOŽENO s datem, pusť
+> všech pět testů naposledy a napiš mi česky, stručně: seznam commitů
+> k pushnutí v pořadí, která rozhodnutí padla a proč, co je odložené a proč,
+> a co mám prohlédnout sám (obrazovky z kroku C, texty pro děti).

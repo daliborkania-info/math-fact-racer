@@ -1930,6 +1930,159 @@
      }
     ]
    }
+  },
+  {
+   "id": "v11-pred-prevody-jednotek",
+   "note": "zari 2026, tretak z verze pred tratí Převody, tedy pred prevady jednotek delky, hmotnosti, objemu a casu. Tisicovku uz odemcenou ma a zavodil na ni, ale zvladnuti drzi na 1/3, tedy pod branou 0,4, kterou se nova trat otevira; sama se mu tedy otevrit nesmi, presne jako to hlida v3 u trati za nasobilkou, v8 u retezce, v9 u poradi operaci a v10 u kulatych cisel. Zaokrouhlovani a retezec uz otevrene ma, protoze stovku umi, a to je spravne: brana se posuzuje podle zasluhy, ne podle stari profilu. Datovy model se nemeni, fixture je tu kvuli te brane a kvuli tomu, ze pribyla trat na mape",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "bridge",
+    "t1",
+    "clock",
+    "a100",
+    "a1000",
+    "round",
+    "chain",
+    "weak"
+   ],
+   "expectClosed": [
+    "units",
+    "beyond",
+    "tens",
+    "ops",
+    "d1",
+    "mix"
+   ],
+   "expectChapter": 24,
+   "expectWorld": "circuit",
+   "expectGrade": 3,
+   "expectStars": [
+    "a4p6"
+   ],
+   "expectNoStars": [
+    "u1",
+    "kpb1"
+   ],
+   "db": {
+    "current": "stareU",
+    "sound": true,
+    "lang": "cs",
+    "pin": "xyz742",
+    "profiles": [
+     {
+      "id": "stareU",
+      "name": "Anežka",
+      "lang": "cs",
+      "_fillFacts": "tisicovka-jen-nacata",
+      "facts": {
+       "a4p6": {
+        "lv": 5,
+        "reps": 12,
+        "ok": 12,
+        "bad": 0,
+        "best": 1300,
+        "seen": 1757000000000
+       },
+       "o1": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 4,
+        "bad": 1,
+        "best": 3900,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "a4p6": true
+      },
+      "best": {
+       "a100": {
+        "dist": 118,
+        "hist": [],
+        "n0": 20
+       },
+       "a1000": {
+        "dist": 84,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 2,
+       "a100": 3,
+       "a1000": 1,
+       "clock": 2
+      },
+      "owned": [
+       "ri_auto",
+       "ri_bugina",
+       "ri_motor",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "pet_sova"
+      ],
+      "runner": "pet_sova",
+      "xp": {
+       "pet_sova": 150
+      },
+      "coins": 265,
+      "parts": 6,
+      "paints": [
+       "pa_duha"
+      ],
+      "paint": {
+       "pet_sova": "pa_duha"
+      },
+      "jobRuns": {
+       "money": 2
+      },
+      "trackRuns": {
+       "t1": 4,
+       "clock": 3,
+       "a100": 6,
+       "a1000": 3,
+       "round": 1
+      },
+      "opened": {
+       "a3": true,
+       "a5": true,
+       "a7": true,
+       "a10": true,
+       "a15": true,
+       "a20": true,
+       "bridge": true,
+       "t1": true,
+       "clock": true,
+       "a100": true,
+       "a1000": true,
+       "round": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-3",
+      "chapter": 24,
+      "chapterMode": "soft",
+      "world": "circuit",
+      "grade": 3,
+      "streak": 3,
+      "lastDay": null,
+      "bestStreak": 5,
+      "runs": 16,
+      "totalOk": 252,
+      "totalAns": 301,
+      "msSum": 812000,
+      "msN": 284
+     }
+    ]
+   }
   }
  ]
 }

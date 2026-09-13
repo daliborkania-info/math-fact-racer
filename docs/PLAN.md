@@ -939,7 +939,30 @@ je to spíš pravidlo než počítání. `RANGE.g` `[1,1000]`, `maxLen: 4`. Tra�
 Heatmapa: čtyři dlaždice, `G_EX = {"m1":"7×10", "d1":"70:10", "m2":"3×40",
 "d2":"120:40"}`.
 
-### D3. `unit_convert` a `time_convert`, hlavička `u`, trať `units`, kapitoly 18 a 29
+### D3. `unit_convert` a `time_convert`, hlavička `u`, trať `units`, kapitoly 18 a 29 — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo jedno pravidlo, a všechno ostatní z něj plyne: **do
+tisíce zůstává i číslo v zadání**, nejen odpověď, protože třetí třída dál
+nepočítá a `3000 g` na obrazovce je číslo, které dítě nezná. Odtud plyne, že
+hmotnost má přesně čtyři otázky (`1 kg = 1000 g` a `1 t = 1000 kg` v obou
+směrech), což je přesně to, co se u hmotnosti převádí, a že se velká jednotka
+losuje nejvýš dvacetkrát, aby z týdne nevyšlo sto čtyřicet dva dní. Dlaždice
+hmotnosti v heatmapě je proto `1 kg→g`, ne `2 kg→g`, který by se nikdy
+neobjevil. Zkratky jednotek jsou natvrdo v tabulce převodů, slovní jednotky
+času jdou přes `t()` a mají ve slovníku **tři tvary** oddělené svislítkem
+(jeden, dva až čtyři, pět a víc), protože `2 dny` a `14 dní` je čeština;
+tvar vybere číslo, které u jednotky stojí, a v pokynu nad klávesnicí stojí
+vždycky prostý plurál. `questionSize()` nově měří celý řádek včetně jednotky
+za odpovědí; nejdelší zadání rodiny je převod měsíců na roky, tedy čtrnáct
+znaků česky (`240 měsíců = ? let`) a šestnáct anglicky a německy, každopádně
+`q-xlong`. `askText()` umí předat argumenty stejně jako dílna. Kontrola
+v `items.test.js` na řádku `if(/[+\-×:]/.test(it.text))` teď mezeru mezi
+číslem a jednotkou přeskakuje výslovně (`&& !it.unit`), i když dnešní zkratky
+žádný operátor neobsahují. Z palet prošly na obrázku všechny čtyři: okruh
+dostal sněžnou pláň `snowfield` (bílá je jediná barva, kterou dosud žádná
+z devadesáti šesti palet nebyla), stezka jinovatku `tr_frost` nad zeleným
+lesem, obloha mrazivé modré nebe se zasněženým obzorem `sk_snow` a hlubina
+ledovou plotnu `dp_ice`. Kontrol ve `flow.test.js` je po tomhle kroku 191.
 
 Tady je první otázka, která má u odpovědi **jednotku**, a proto potřebuje
 jeden nový údaj na položce a jednu úpravu `questionHTML()`. Položka nese

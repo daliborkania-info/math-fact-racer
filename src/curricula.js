@@ -32,6 +32,10 @@
  *   divTens  [bucket ids]         and by a round ten, and the same
  *                                 products read backwards. Two fields
  *                                 for the same reason as past the tables
+ *   units [bucket ids]            1..4, converting units by the kind of
+ *                                 measure: length, weight, volume, time.
+ *                                 One field, unlike past the tables: a
+ *                                 chapter that converts converts both ways
  *   round [bucket ids]            o1..o3, rounding: tens under a hundred,
  *                                 tens of a three digit number, hundreds
  *   chain [bucket ids]            1..3, three numbers and two signs,
@@ -169,7 +173,10 @@ const CURRICULA = [
       {n:15, name:"Písemné násobení",                     src:"7. díl, s. 36–39", pool:null},
       {n:16, name:"Dělení mimo rozsah malé násobilky",    src:"7. díl, s. 38–41", pool:{divBeyond:["1","2"]}},
       {n:17, name:"Jednotky délky, hmotnosti a objemu",   src:"7. díl, s. 40–43", pool:null},
-      {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45", pool:null},
+      // the seventh part names the units of length, weight and volume
+      // (chapter 17) but does not yet convert them, so that one stays
+      // without a pool; the clock and the calendar are converted here
+      {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45", pool:{units:["4"]}},
       {n:19, name:"Zlomky, úvodní seznámení",             src:"7. díl, s. 46–47", pool:null},
       {n:20, name:"Opakování celého pololetí",            src:"7. díl, s. 48–49", pool:{mult:ALL_TABLES, div:ALL_TABLES, as100:ALL_H}},
       {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:null},
@@ -184,7 +191,10 @@ const CURRICULA = [
       // unlike chapters 14 and 16 it asks for both fields at once
       {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39",
              pool:{multTens:ALL_G, divTens:ALL_G}},
-      {n:29, name:"Převody jednotek",                     src:"8. díl, s. 38–41", pool:null},
+      // time was converted back in chapter 18, so these pages are the
+      // other three kinds of measure
+      {n:29, name:"Převody jednotek",                     src:"8. díl, s. 38–41",
+             pool:{units:["1","2","3"]}},
       {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:{ops:ALL_Z}},
       {n:31, name:"Mimo rozsah malé násobilky do tisíce", src:"8. díl, s. 42–47",
              pool:{multBeyond:ALL_X, divBeyond:ALL_X}},

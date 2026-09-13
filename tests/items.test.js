@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -35,6 +35,7 @@ const RANGE={
   q:[0,100],       // retezec tri cisel, nikdy pod nulu a nikdy pres sto
   z:[0,1000],      // co se pocita driv, nikdy pod nulu a nikdy pres tisic
   g:[1,1000],      // kulata cisla, soucin nikdy pres tisic
+  u:[1,1000],      // prevody jednotek, odpoved vzdycky cele cislo do tisice
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -48,6 +49,7 @@ A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -59,7 +61,9 @@ for(const k of keys) for(let i=0;i<40;i++){
   }
   // zadani, ktere je aritmeticky radek, se overi spoctenim; obrazkova
   // otazka zadny takovy radek nema a overuje se jen pres check
-  if(/[+\-×:]/.test(it.text)){
+  // otazka s jednotkou neni aritmeticky radek, i kdyby v jednotce nejaky
+  // ten znak stal: "3 m" se nepocita, cely vypocet je v prevodu samotnem
+  if(/[+\-×:]/.test(it.text) && !it.unit){
     const val=eval(it.text.replace(/×/g,'*').replace(/:/g,'/'));
     if(val!==it.answer){say(k,'zadani nesedi s odpovedi: '+it.text+' je '+val+', ma byt '+it.answer);continue;}
   } else if(!it.svg && !it.ask){
@@ -171,6 +175,7 @@ A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -798,6 +803,93 @@ if(!A.poolKeys(tn28.pool).every(k=>k[0]==='g')){tnStBad++;console.log('  !!  kap
 if(A.poolKeys(tn28.pool).length!==4){tnStBad++;console.log('  !!  kapitola 28 ma mit oba kbeliky v obou smerech');}
 console.log('chyb ve stupnich kulatych cisel:',tnStBad);
 
+// 7p. prevody jednotek: kazdy kbelik prevadi to, co slibuje, a oboji smerem
+//
+// Zadani je cislo a jednotka, odpoved je cislo a jednotku nese polozka
+// vedle nej. Overuje se z textu zadani, ne z toho, co si generator
+// mysli: dvojice musi byt z kbeliku, odpoved musi vyjit jako cele cislo
+// a obe cisla, to v otazce i to v odpovedi, musi zustat do tisice,
+// protoze tretí trida dal nepocita.
+let uBad=0, uN=0;
+const usay=m=>{uBad++; if(uBad<8) console.log('  !!  '+m);};
+// slovni jednotky maji ve slovniku tri tvary oddelene svislitkem, jeden
+// pro jednu, jeden pro dve az ctyri a jeden pro pet a vic; kratke
+// jednotky se ve vsech trech jazycich pisou stejne a zadny tvar nemaji
+const uLab=(u,n)=>{const w=A.I18N.en['unit_'+u]; return w?w.split('|')[n===1?0:n<5?1:2]:u;};
+for(const b of A.U_BUCKETS){
+  const smery=new Set(), dvojice=new Set();
+  for(let i=0;i<800;i++){
+    const it=A.itemFromKey('u'+b.id); uN++;
+    if(it.maxLen!==4){usay('prevod ma mit misto na ctyri cislice: '+it.text);break;}
+    if(!it.unit){usay('odpoved nema jednotku: '+it.text);break;}
+    if(!it.ask){usay('prevod nerika slovy, co se ma udelat: '+it.text);break;}
+    const m=/^(\d+) (\S+)$/.exec(it.text);
+    if(!m){usay('zadani neni cislo a jednotka: '+it.text);break;}
+    const n=+m[1], lab=m[2];
+    if(!Number.isInteger(it.answer)||it.answer<1||it.answer>1000){
+      usay('odpoved neni cele cislo do tisice: '+it.text+' = '+it.answer);break;}
+    if(n>1000){usay('cislo v zadani prelezlo tisic: '+it.text);break;}
+    if(lab===it.unit){usay('prevadi se na tutez jednotku: '+it.text+' = ? '+it.unit);break;}
+    // dvojice a smer se poznaji ze zadani: bud se velka jednotka
+    // rozpada na male, nebo se male skladaji do velke
+    let sedi=null;
+    for(const pr of b.pairs){
+      const big=pr[0], small=pr[1], f=pr[2];
+      if(lab===uLab(big,n) && it.unit===uLab(small,n*f) && it.answer===n*f && n<=20) sedi=[pr,'dolu'];
+      else if(lab===uLab(small,n) && n%f===0 && it.unit===uLab(big,n/f) && it.answer===n/f && n/f<=20) sedi=[pr,'nahoru'];
+      if(sedi) break;
+    }
+    if(!sedi){usay('prevod neni z tohohle kbeliku: '+it.text+' = '+it.answer+' '+it.unit);break;}
+    smery.add(sedi[1]); dvojice.add(sedi[0][0]+'/'+sedi[0][1]);
+    // otazka se musi umet ukazat i s jednotkou za odpovedi
+    if(A.questionHTML(it).indexOf('<span class="unit">'+it.unit+'</span>')<0){
+      usay('jednotka se nedostala do otazky: '+it.text);break;}
+    if(A.rightAnswerText(it)!==it.text+' = '+it.answer+' '+it.unit){
+      usay('spravna odpoved se ukazuje bez jednotky: '+A.rightAnswerText(it));break;}
+  }
+  if(smery.size!==2) usay('kbelik '+b.id+' neprevadi obema smery');
+  if(dvojice.size!==b.pairs.length) usay('kbelik '+b.id+' nepouziva vsechny sve dvojice');
+}
+console.log('zkontrolovano prevodu:',uN,'| chyb:',uBad);
+
+// 7q. prevody se stupnuji a stoji na tisicovce
+let uStBad=0;
+const ug=A.newProfile('U1'); A.DB.profiles=[ug]; A.DB.current=ug.id;
+if(A.unitsStage(ug)!==0){uStBad++;console.log('  !!  zacatecnik nezacina delkou');}
+const uRun0=A.buildRun(ug,A.trackById('units'));
+if(uRun0.length!==20){uStBad++;console.log('  !!  spatna delka zavodu s prevody',uRun0.length);}
+for(const it of uRun0) if(it.key!=='u1'){uStBad++;console.log('  !!  zacatecnik dostal tezsi kbelik',it.text);break;}
+A.unitKeys(['1']).forEach(k=>ug.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.unitsStage(ug)!==1){uStBad++;console.log('  !!  po zvladnuti delky se neposunul');}
+const uRun1=A.buildRun(ug,A.trackById('units'));
+const uFocus=uRun1.filter(it=>it.key==='u2').length;
+if(uFocus<uRun1.length*0.5){uStBad++;console.log('  !!  druhy kbelik nenese zavod',uFocus+'/'+uRun1.length);}
+if(uFocus===uRun1.length){uStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+const uu=A.newProfile('U2'); A.DB.profiles=[uu]; A.DB.current=uu.id;
+if(A.unlockState(uu,A.trackById('units')).open){uStBad++;console.log('  !!  prevody jsou otevrene hned od zacatku');}
+// stoji to na tisicovce, ne na stovce: kilometr je tisic metru
+A.trackKeys(uu,A.trackById('a100')).forEach(k=>uu.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.unlockState(uu,A.trackById('units')).open){uStBad++;console.log('  !!  otevrela to stovka misto tisicovky');}
+A.trackKeys(uu,A.trackById('a1000')).forEach(k=>uu.facts[k]={lv:1,reps:4,ok:3,bad:1,best:4000,seen:Date.now()});
+if(A.unlockState(uu,A.trackById('units')).open){uStBad++;console.log('  !!  nacata tisicovka otevrela prevody prilis brzy');}
+A.trackKeys(uu,A.trackById('a1000')).forEach(k=>uu.facts[k]={lv:2,reps:6,ok:5,bad:1,best:3000,seen:Date.now()});
+if(!A.unlockState(uu,A.trackById('units')).open){uStBad++;console.log('  !!  rozjeta tisicovka neotevrela prevody');}
+// prevody se deji v oboru do tisice, takze na mape stoji hned za nim
+const uPor=A.TRACKS.map(x=>x.id);
+if(uPor.indexOf('units')!==uPor.indexOf('a1000')+1){
+  uStBad++;console.log('  !!  prevody nestoji na mape hned za tisicovkou');}
+const uCur3=A.CURRICULA.find(c=>c.id==='nns-matysek-3');
+const u18=uCur3.chapters.find(x=>x.n===18), u29=uCur3.chapters.find(x=>x.n===29);
+if(!A.isPlayable(u18)){uStBad++;console.log('  !!  kapitola 18 porad nejde vybrat');}
+if(!A.isPlayable(u29)){uStBad++;console.log('  !!  kapitola 29 porad nejde vybrat');}
+if(A.poolKeys(u18.pool).join()!=='u4'){uStBad++;console.log('  !!  kapitola 18 nema byt o nicem jinem nez o case');}
+if(A.poolKeys(u29.pool).join()!=='u1,u2,u3'){uStBad++;console.log('  !!  kapitola 29 ma mit delku, hmotnost a objem');}
+// kapitola 17 jednotky jen pojmenovava, neprevadi je, takze generator
+// nema a vybrat se nesmi dat
+if(A.isPlayable(uCur3.chapters.find(x=>x.n===17))){
+  uStBad++;console.log('  !!  kapitola 17 se da vybrat, i kdyz se v ni nic neprevadi');}
+console.log('chyb ve stupnich prevodu:',uStBad);
+
 // 7k. dlouhe zadani si rekne o mensi pismo, kratke ne
 let qhBad=0;
 const qh=k=>A.questionHTML(A.itemFromKey(k));
@@ -831,6 +923,30 @@ for(const b of ['gm1','gd1','gm2','gd2']) for(let i=0;i<600;i++){
 }
 if(tnDelsi!=='1000 : 100'){qhBad++;console.log('  !!  nejdelsi kulate cislo neni "1000 : 100", ale',tnDelsi);}
 console.log('nejdelsi zadani kulatych cisel:',tnDelsi,'('+tnDelka+' znaku)');
+// prevody jsou prvni rodina, kde na radku stoji i jednotka za odpovedi,
+// a delka se meri z celeho radku, tedy vcetne ni. Trida se proto pocita
+// ze zadani, mezery a jednotky dohromady a aspon jedna otazka musi mit
+// kratke zadani a dlouhy radek, jinak by se meritko divalo jen na
+// zadani a nikdo by si toho nevsiml.
+let uDelka=0, uDelsi='', uJenJednotka=0;
+const trida=h=>/q-xlong/.test(h)?'q-xlong':/q-long/.test(h)?'q-long':'';
+const chce=n=>n>=13?'q-xlong':n>=9?'q-long':'';
+for(const b of ['u1','u2','u3','u4']) for(let i=0;i<3000;i++){
+  const it=A.itemFromKey(b), h=A.questionHTML(it);
+  const radek=String(it.text).length+String(it.unit).length+1;
+  if(radek>uDelka){uDelka=radek; uDelsi=it.text+' = ? '+it.unit;}
+  if(trida(h)!==chce(radek)){
+    qhBad++;console.log('  !!  prevod dostal spatnou velikost pisma',it.text+' = ? '+it.unit,trida(h)||'plna');break;}
+  if(String(it.text).length<9&&trida(h)) uJenJednotka++;
+}
+if(!uJenJednotka){qhBad++;console.log('  !!  jednotka se do delky radku nepocita, nic se o ni nezmensilo');}
+// nejdelsi radek rodiny je prevod mesicu na roky, sestnact znaku
+// v anglictine ("240 months = ? years") i v nemcine ("240 Monate = ?
+// Jahre"), v cestine ctrnact ("240 mesicu = ? let"); tak jako tak je to
+// nejmensi pismo a proti "500 - (40 + 30)" v poradi operaci to neni nic
+if(uDelka!==16||!/^\d+ months = \? years$/.test(uDelsi)){
+  qhBad++;console.log('  !!  nejdelsi prevod neni mesice na roky o sestnacti znacich, ale',uDelsi,uDelka);}
+console.log('nejdelsi radek prevodu:',uDelsi,'('+uDelka+' znaku)');
 if(/q-long|q-xlong/.test(qh('m7x8'))){qhBad++;console.log('  !!  kratka otazka si zbytecne zmensila pismo');}
 if(/q-long|q-xlong/.test(qh('xm4'))){qhBad++;console.log('  !!  trojciferne nasobeni se zmensilo, i kdyz se veslo');}
 if(/q-long|q-xlong/.test(qh('c1'))){qhBad++;console.log('  !!  obrazkova otazka se meri jako text');}

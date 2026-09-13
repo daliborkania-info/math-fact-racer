@@ -376,6 +376,12 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
   padding:0 14px;font-family:var(--font-display);font-size:calc(40px * var(--tx));font-variant-numeric:tabular-nums;
   transition:background .15s,border-color .15s,transform .15s;
 }
+/* The unit of the answer, standing behind the box the way a child would
+   write it in an exercise book. Smaller than the number, because the
+   number is what is being worked out and the unit only says what it is
+   counted in; it still grows with the year like every other line a child
+   reads. */
+.question .unit{font-size:calc(26px * var(--tx));color:var(--ink-soft);letter-spacing:0}
 .answerbox.filled{border-style:solid;border-color:var(--grape)}
 .answerbox.ok{background:#d9f8e8;border-color:var(--mint);color:var(--mint-dark)}
 .answerbox.bad{background:var(--berry-soft);border-color:var(--berry);color:#b3325a;animation:shake .4s}
@@ -687,6 +693,7 @@ html[data-o="wide"] .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1
   .question.q-long{font-size:calc(var(--tx) * clamp(26px,7.2vw,36px))}
   .question.q-xlong{font-size:calc(var(--tx) * clamp(21px,5.6vw,30px))}
   .answerbox{height:52px;font-size:calc(34px * var(--tx));min-width:calc(92px * var(--tx))}
+  .question .unit{font-size:calc(22px * var(--tx))}
   /* A short screen is where the keypad and the question fight over the
      same pixels. The key still grows with its digit, but from a lower
      floor: at 44 px the first year's keypad is the height everybody

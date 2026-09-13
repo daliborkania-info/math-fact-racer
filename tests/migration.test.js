@@ -40,6 +40,16 @@ function fillFacts(tag){
     for(const h of ['xm','xd']) for(const i of ['1','2','3','4'])
       out[h+i]={lv:1,reps:3,ok:2,bad:1,best:4200,seen:1757000000000};
   }
+  if(tag==='tisicovka-jen-nacata'){
+    // cela stovka na urovni 4, tedy zaslouzene otevrena tisicovka, ale
+    // sama tisicovka je jen nacata: dvanact klicu na urovni 1 dela
+    // zvladnuti 1/3, tedy pod branou 0,4, kterou se otevira trat
+    // Převody. Nova verze ji tedy nesmi otevrit sama.
+    for(const b of ['h1','h2','h3','h4','h5']) for(const h of ['p','n'])
+      out[h+b]={lv:4,reps:7,ok:7,bad:0,best:2600,seen:1757000000000};
+    for(const b of ['b1','b2','b3','b4','b5','b6']) for(const h of ['kp','kn'])
+      out[h+b]={lv:1,reps:3,ok:2,bad:1,best:5200,seen:1757000000000};
+  }
   if(tag==='a20-stare-klice-na-uroven-2'){
     // obor do dvaceti tak, jak vypadal pred pridanim desitkovych spoju:
     // oba scitance do deseti. Uroven 2 dela zvladnuti 2/3, tedy tesne

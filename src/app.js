@@ -356,6 +356,37 @@ const G_BUCKETS = [
 ];
 const tensKeys = ids => ids.map(b => "gm" + b).concat(ids.map(b => "gd" + b));
 
+/* Converting units, one bucket per kind of measure. The seventh part
+   introduces length, weight and volume (chapter 17) and then the clock
+   and the calendar (chapter 18), and the eighth part converts them
+   (chapter 29), so time is a bucket of its own and the other three are
+   one each.
+   Every pair is written big unit, small unit, how many of the small
+   ones go into the big one, and both directions come out of the same
+   pair: the generator either multiplies or divides by that number.
+   Only conversions the books actually ask for are here; a metre into
+   millimetres is arithmetically fine and pedagogically nowhere. */
+const U_BUCKETS = [
+  {id:"1", pairs:[["m","cm",100], ["km","m",1000], ["dm","cm",10], ["cm","mm",10]]},
+  {id:"2", pairs:[["kg","g",1000], ["t","kg",1000]]},
+  {id:"3", pairs:[["l","dl",10], ["l","ml",1000], ["hl","l",100]]},
+  {id:"4", pairs:[["h","min",60], ["min","s",60], ["day","h",24],
+                  ["week","day",7], ["year","month",12]]}
+];
+const unitKeys = ids => ids.map(b => "u" + b);
+/* The short units are written the same way in Czech, English and German,
+   so they stand in the table above as they are. The spoken ones do not,
+   and Czech needs three forms of each: one day, two to four days, five
+   and more days. The dictionary holds all three separated by bars and
+   the number picks one; English and German split the same way and
+   simply repeat their plural. */
+const U_WORDS = ["day", "week", "month", "year"];
+function unitLabel(u, n){
+  if(U_WORDS.indexOf(u) < 0) return u;
+  const forms = t("unit_" + u).split("|");
+  return forms[n === 1 ? 0 : n < 5 ? 1 : 2] || forms[forms.length - 1];
+}
+
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
   {id:"c1", mins:[0]},                            // whole hours
@@ -444,6 +475,10 @@ const TRACKS = [
   {id:"tens", op:"tens",                                  env:"mulberry", grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
+  // the units are chapters 18 and 29, but the conversions themselves
+  // live in the thousand (1 km is 1000 m), so the road puts them where
+  // the child can already count that far, which is right after it
+  {id:"units",op:"units",                                 env:"snowfield",grade:3},
   {id:"mix",  op:"mix",                                   env:"night",    grade:2},
   {id:"weak", op:"weak",                                  env:"storm",    grade:1},
   {id:"school", op:"school",                              env:"school"}
@@ -539,6 +574,9 @@ function poolKeys(spec){
   // the two are kept apart here for the same reason as past the tables
   if(spec.multTens) out.push(...spec.multTens.map(b => "gm" + b));
   if(spec.divTens)  out.push(...spec.divTens.map(b => "gd" + b));
+  // one field, not two: a chapter that converts converts both ways, and
+  // the bucket is the kind of measure rather than the direction
+  if(spec.units) out.push(...unitKeys(spec.units));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.ops) out.push(...opsKeys(spec.ops));
@@ -582,7 +620,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxoqzg";
+const FAMILY_HEADS = "pnckxoqzgu";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -630,6 +668,7 @@ function trackKeys(p, tr){
   if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
   if(tr.op === "tens")  return tensKeys(G_BUCKETS.map(b => b.id));
+  if(tr.op === "units") return unitKeys(U_BUCKETS.map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.map(b => b.id));
   if(tr.op === "ops")   return opsKeys(Z_BUCKETS.map(b => b.id));
@@ -659,6 +698,9 @@ function beyondStage(p){ return stageIndex(p, i => beyondKeys([X_BUCKETS[i].id])
 // bucket multiplies and divides together, so the two rise and fall as
 // one step
 function tensStage(p){ return stageIndex(p, i => tensKeys([G_BUCKETS[i].id]), G_BUCKETS.length); }
+// which kind of measure is being converted: length, then weight, then
+// volume, then time, which is the order the books take them in
+function unitsStage(p){ return stageIndex(p, i => unitKeys([U_BUCKETS[i].id]), U_BUCKETS.length); }
 // how far the rounding has got: tens under a hundred, then tens of a
 // three digit number, then hundreds
 function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
@@ -681,6 +723,7 @@ function reachedKeys(p, tr){
   if(tr.op === "as1000") return as1000Keys(K_BUCKETS.slice(0, as1000Stage(p) + 1).map(b => b.id));
   if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
   if(tr.op === "tens") return tensKeys(G_BUCKETS.slice(0, tensStage(p) + 1).map(b => b.id));
+  if(tr.op === "units") return unitKeys(U_BUCKETS.slice(0, unitsStage(p) + 1).map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.slice(0, chainStage(p) + 1).map(b => b.id));
   if(tr.op === "ops") return opsKeys(Z_BUCKETS.slice(0, opsStage(p) + 1).map(b => b.id));
@@ -800,6 +843,11 @@ function unlockState(p, tr){
     // having finished the first year's ranges
     case "a100": return (m("bridge") >= .6 || many("bridge")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_bridge"))};
     case "a1000": return (m("a100") >= .6 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
+    // a kilometre is a thousand metres and a kilo a thousand grams, so
+    // the conversions are the thousand wearing a unit; the gate is lower
+    // than the others because the counting itself is already there and
+    // what is new is only the unit
+    case "units": return (m("a1000") >= .4 || many("a1000")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a1000"))};
     case "mix":  return (unlockState(p, trackById("t5")).open)
                  ? {open:true} : {open:false, why: t("lockOpen", t("trk_t5"))};
     case "weak": return Object.keys(p.facts).length >= 15
@@ -849,6 +897,7 @@ function rawItem(key){
   if(head === "k") return thousandItem(key);
   if(head === "x") return beyondItem(key);
   if(head === "g") return tensItem(key);
+  if(head === "u") return unitItem(key);
   if(head === "o") return roundItem(key);
   if(head === "q") return chainItem(key);
   if(head === "z") return opsItem(key);
@@ -974,6 +1023,44 @@ function tensItem(key){
   const byRound = b === "1" || Math.random() < .5;
   return {key, kind:"divten", maxLen:4,
           text:(x * r) + " : " + (byRound ? r : x), answer: byRound ? x : r};
+}
+
+/* Converting units, the first question whose answer wears a unit. The
+   line reads "3 m = ? cm": the value with its unit is the question, the
+   unit of the answer stands after the answer box, and above the keypad
+   `ask` says in words what to do with it. The unit is one more thing
+   the item says about itself, exactly like the sign of a rounding
+   question; nothing outside here has to know that units exist.
+   Built by construction, like the thousand and the chain: the count of
+   the bigger unit is drawn from a range that cannot produce anything
+   but a whole number, and both the number in the question and the
+   answer stay inside a thousand, which is the range a third year
+   counts in. Twenty of the bigger unit is the ceiling on top of that,
+   so a week never turns into a hundred and forty two days.
+   A range that cannot be drawn from throws, bucket named: a made up
+   fallback conversion would go on handing the child something the
+   bucket never promised without a word. */
+function unitItem(key){
+  const b = U_BUCKETS.find(x => x.id === key.slice(1)) || U_BUCKETS[0];
+  const pair = b.pairs[ri(0, b.pairs.length - 1)];
+  const big = pair[0], small = pair[1], f = pair[2];
+  const top = Math.min(20, Math.floor(1000 / f));
+  if(top < 1) throw new Error("unit bucket " + b.id + ": " + big + " does not fit into " + small);
+  const v = ri(1, top);
+  /* Both ways round from the same pair. The label of the answer agrees
+     with the answer, which is known here; the one in the instruction is
+     the plain plural, because "convert into five days" is not what the
+     instruction says whatever the number turns out to be. */
+  if(Math.random() < .5) return {
+    key, kind:"unit", maxLen:4, answer: v * f,
+    text: v + " " + unitLabel(big, v), unit: unitLabel(small, v * f),
+    ask:"unitAsk", askArgs:[unitLabel(small, 2)]
+  };
+  return {
+    key, kind:"unit", maxLen:4, answer: v,
+    text: (v * f) + " " + unitLabel(small, v * f), unit: unitLabel(big, v),
+    ask:"unitAsk", askArgs:[unitLabel(big, 2)]
+  };
 }
 
 /* Rounding is the first question that is not an equation. The line
@@ -1349,6 +1436,10 @@ function buildRun(p, tr){
     const gi = tensStage(p);
     const review = tensKeys(G_BUCKETS.slice(0, gi).map(b => b.id));
     keys = focusAndReview(p, tensKeys([G_BUCKETS[gi].id]), review, n, 2);
+  } else if(tr.op === "units"){
+    const ui = unitsStage(p);
+    const review = unitKeys(U_BUCKETS.slice(0, ui).map(b => b.id));
+    keys = focusAndReview(p, unitKeys([U_BUCKETS[ui].id]), review, n, 2);
   } else if(tr.op === "round"){
     const oi = roundStage(p);
     const review = roundKeys(O_BUCKETS.slice(0, oi).map(b => b.id));
@@ -1410,7 +1501,10 @@ function buildRun(p, tr){
   // a bucket key is a whole family, so two neighbours drawn from the
   // same bucket can still come out as the very same question; reroll
   // rather than ask it twice in a row
-  const face = it => it.disp || it.text;
+  // the unit belongs to the face of the question as much as the number
+  // does: "1 l" into decilitres and "1 l" into millilitres are two
+  // questions, and without it one of them would be rerolled as a repeat
+  const face = it => (it.disp || it.text) + (it.unit ? " " + it.unit : "");
   for(let i = 1; i < out.length; i++){
     for(let g = 0; g < 8 && face(out[i]) === face(out[i-1]); g++) out[i] = itemFromKey(out[i].key);
   }
@@ -1680,7 +1774,11 @@ function thresholds(p, item){
   // putting a nought back is a rule rather than a piece of arithmetic,
   // so it needs a little longer than a plain fact and nowhere near as
   // long as splitting a number apart does
+  // a conversion is read, decided and only then counted: the child has
+  // to work out which way round the unit goes before a single number is
+  // multiplied, which is longer than any one step of arithmetic here
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "unit" ? 2.2
                : item.kind === "multten" || item.kind === "divten" ? 1.8
                : item.kind === "ops" ? 2.4
                : item.kind === "chain" ? 2.0
@@ -1983,6 +2081,12 @@ const ENVS = Object.assign({
   // brown stone, the one colour family nothing else uses
   cave:{   hill1:"#9c7b5e", hill2:"#6f543c", dec:"#4a3626", dec2:"#32241a", tok:"stone"}
 }, {
+  // A snowfield for the circuit. Every one of the ninety six places so
+  // far is a colour; white is the one thing none of them is, and at this
+  // lightness nothing else comes close, so a thumbnail of it cannot be
+  // taken for anywhere else in the game. The blue grey drifts beside the
+  // road keep it from reading as blank paper.
+  snowfield: pal(205, 215, 90, "crystal", {sat:32, l2:74}),
   // The first year's ranges, a coastline that walks along beside the
   // beach the twenty track already had: the child goes from the dunes
   // down to the water and along it, and crossing the ten is the pier.
@@ -2043,6 +2147,10 @@ const ENVS = Object.assign({
   // that is not a ground colour; the heath and the orchard do the same,
   // and this one is the blue of the three
   tr_bells:  pal(232, 118, 56, "flower", {h2:118, l2:46, sat:34}),
+  // a frosted morning: the rime makes the top of the slope and the wood
+  // floor stays green underneath, the same trick as the heath and the
+  // bluebells, except this one is pale where all of those are strong
+  tr_frost:  pal(198, 130, 84, "crystal", {h2:120, l2:52, sat:28}),
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
@@ -2075,6 +2183,10 @@ const ENVS = Object.assign({
   // daytime sky here, and the horizon is rose rather than the gold the
   // sunset and the ember already use
   sk_afterglow: pal(240, 330, 40, "flower", {h2:330, l2:66}),
+  // a bright winter sky: the deepest, cleanest blue of all of them over
+  // a horizon of snow. The fog has the same two ends of the wheel but
+  // all the colour washed out of it, so the two cannot be confused
+  sk_snow:   pal(210, 200, 46, "crystal", {h2:195, l2:92, sat:60}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
   dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
@@ -2108,7 +2220,11 @@ const ENVS = Object.assign({
   // a bed of purple urchins: the water stays blue and the floor takes
   // the one colour the deep has not used, between the pearl bank's pink
   // and the sunken city's indigo
-  dp_urchins:pal(202, 288, 58, "crystal", {h2:288, l2:44})
+  dp_urchins:pal(202, 288, 58, "crystal", {h2:288, l2:44}),
+  // under the ice: the water is the darkest of all of them and the floor
+  // the palest, which is the widest gap between the two ends anywhere in
+  // the deep and is what makes it read as light coming through ice
+  dp_ice:    pal(204, 206, 34, "crystal", {h2:200, l2:84, sat:40})
 });
 
 /* --- worlds ---
@@ -2129,7 +2245,7 @@ const WORLDS = [
         a20:"tr_brook", bridge:"tr_log",
         t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
         d1:"tr_burrow", chain:"tr_reeds", ops:"tr_hollow", beyond:"tr_field",
-        tens:"tr_bells", round:"tr_quarry",
+        tens:"tr_bells", round:"tr_quarry", units:"tr_frost",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
@@ -2137,7 +2253,7 @@ const WORLDS = [
         a20:"sk_breeze", bridge:"sk_arch",
         t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
         d1:"sk_void", chain:"sk_haze", ops:"sk_gate", beyond:"sk_dust",
-        tens:"sk_afterglow", round:"sk_storm",
+        tens:"sk_afterglow", round:"sk_storm", units:"sk_snow",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
@@ -2145,7 +2261,7 @@ const WORLDS = [
         a20:"dp_lagoon", bridge:"dp_arch",
         t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
         d1:"dp_abyss", chain:"dp_shoal", ops:"dp_weed", beyond:"dp_sand",
-        tens:"dp_urchins", round:"dp_cavern",
+        tens:"dp_urchins", round:"dp_cavern", units:"dp_ice",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -3215,17 +3331,24 @@ function relOf(item){ return item && item.rel ? t(item.rel) : "="; }
    through at six characters, which is what it was tried with first.
    The rest of the row, the sign before the box and the box itself, is
    the same width whatever the question, so it does not need counting.
-   A picture question carries no such line at all. */
+   A picture question carries no such line at all.
+   A unit after the answer box is part of that line too, plus the space
+   in front of it, because it is drawn in the row and takes up room in
+   it; measuring only the question would let "240 měsíců = ? let" call
+   itself a short line. */
 function questionSize(item){
   if(!item || item.svg || !item.text) return "";
-  const n = String(item.text).length;
+  const n = String(item.text).length + (item.unit ? String(item.unit).length + 1 : 0);
   return n >= 13 ? " q-xlong" : n >= 9 ? " q-long" : "";
 }
 function questionHTML(item){
   const inner = !item ? `<span id="qtext"></span>`
     : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
     : `<span id="qtext">${item.text}</span><span>${relOf(item)}</span>`;
-  return `<div class="question${questionSize(item)}" id="qbox">${inner}<span class="answerbox" id="abox">?</span></div>`;
+  // the unit of the answer stands behind the box, where the child would
+  // write it in an exercise book
+  const unit = item && item.unit ? `<span class="unit">${item.unit}</span>` : "";
+  return `<div class="question${questionSize(item)}" id="qbox">${inner}<span class="answerbox" id="abox">?</span>${unit}</div>`;
 }
 /* The answering surface belongs to the question, not to the screen, so
    a race may mix families that are answered differently. Only the
@@ -3242,7 +3365,7 @@ function keypadHTML(item){
 }
 /* Some questions need a word of framing before the child answers, for
    instance whether the dial means morning or evening. */
-function askText(item){ return item && item.ask ? t(item.ask) : ""; }
+function askText(item){ return item && item.ask ? t.apply(null, [item.ask].concat(item.askArgs || [])) : ""; }
 /* What the child sees in the answer box while typing. A time is keyed as
    plain digits and gets its colon as soon as the reading is unambiguous. */
 function typedText(item, typed){
@@ -3449,10 +3572,11 @@ function showCombo(n){
 }
 
 /* Showing the right answer. A time is shown as a time, not as the whole
-   number the keypad turned it into. */
+   number the keypad turned it into, and an answer that wears a unit is
+   shown with it: "3 m = 300 cm", the way the whole line reads. */
 function rightAnswerText(item){
   if(item.kind === "clock") return t("clockIs", item.disp);
-  return item.text + " " + relOf(item) + " " + item.answer;
+  return item.text + " " + relOf(item) + " " + item.answer + (item.unit ? " " + item.unit : "");
 }
 /* The two mistakes a child actually makes on a dial are reading the hour
    hand one hour ahead once it has passed the half, and reading the hands
@@ -4106,6 +4230,9 @@ const X_EX = {"1":"12×3", "2":"17×5", "3":"34×6", "4":"213×3"};
 // second half from the first would print the wrong example
 const G_EX = {m1:"7×10", d1:"70:10", m2:"3×40", d2:"120:40"};
 const O_EX = {"1":"47→50", "2":"347→350", "3":"347→300"};
+// one example per kind of measure; the arrow says which way round it is
+// being read, and every one of them is asked both ways
+const U_EX = {"1":"3 m→cm", "2":"1 kg→g", "3":"4 l→dl", "4":"2 h→min"};
 const Q_EX = {"1":"7+5-3", "2":"30+40-20", "3":"47+5-3"};
 const Z_EX = {"1":"4+3×5", "2":"(4+3)×5", "3":"300+7×8", "4":"500-(40+30)"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
@@ -4160,6 +4287,10 @@ function heatSpecs(p){
     ({label: Z_EX[b.id], keys:["z" + b.id], tip: Z_EX[b.id]}))));
   push("a1000", heatStrip(t("trk_a1000"), 6,
     bucketTiles(K_EX, id => "kp" + id, id => "kn" + id)));
+  // converting units is the thousand wearing a unit, so it stands right
+  // under it, the same way the two tracks stand on the map
+  push("units", heatStrip(t("trk_units"), 4, U_BUCKETS.map(b =>
+    ({label: U_EX[b.id], keys:["u" + b.id], tip: U_EX[b.id]}))));
   push("round", heatStrip(t("trk_round"), 3, O_BUCKETS.map(b =>
     ({label: O_EX[b.id], keys:["o" + b.id], tip: O_EX[b.id]}))));
   push("clock", heatStrip(t("trk_clock"), 6, C_BUCKETS.map(b =>

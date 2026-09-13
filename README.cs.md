@@ -31,7 +31,7 @@ Trati se odemykají podle toho, jak dítě zvládá tu předchozí. Rodič můž
 
 ### Nebo podle toho, kde je zrovna třída
 
-V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady pětadevadesát kapitol, z nichž hra umí procvičit třiaosmdesát. Zbylé jsou v seznamu vidět, ale nejdou vybrat, aby bylo poznat, kde třída je.
+V rodičovské sekci se dá vybrat učebnice a kapitola, ve které třída je. Na mapě pak přibude trať **Co máte ve škole**, která procvičuje přesně to učivo. Zatím jsou v aplikaci Matýskova matematika pro první, druhý a třetí ročník, dohromady pětadevadesát kapitol, z nichž hra umí procvičit pětaosmdesát. Zbylé jsou v seznamu vidět, ale nejdou vybrat, aby bylo poznat, kde třída je.
 
 Nastavuje se zvlášť pro každého hráče, takže sourozenci mohou mít různé učebnice. Volně znamená, že zhruba sedmdesát procent příkladů je z nastavené kapitoly a zbytek se vrací z dřívějšího učiva, aby se neztratilo. Výchozí stav je bez učebnice, kdy si hra vybírá učivo sama podle toho, co dítěti nejde.
 

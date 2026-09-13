@@ -58,8 +58,8 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `place_value` | rozklad trojciferného čísla na stovky, desítky, jednotky | `pad3` | 100 až 999 | nové |
 | `add_sub_1000` | sčítání a odčítání do tisíce, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku | `pad` | 0 až 1000 | hotovo |
 | `time_elapsed` | kolik minut nebo hodin uplynulo | `pad` | do 24 h | nové |
-| `time_convert` | převody jednotek času | `pad` | dny, týdny, měsíce, roky | nové |
-| `unit_convert` | převody jednotek délky, hmotnosti a objemu | `pad` | celá čísla | nové |
+| `time_convert` | převody jednotek času | `pad` | sekundy až roky, do 1000 | hotovo |
+| `unit_convert` | převody jednotek délky, hmotnosti a objemu | `pad` | celá čísla do 1000 | hotovo |
 | `parity` | sudé nebo liché | `pick` | 0 až 1000 | nové |
 | `digit_count` | jednociferné, dvojciferné, trojciferné | `pick` | 0 až 1000 | nové |
 | `number_pattern` | doplnění dalšího členu číselné řady, aritmetické i geometrické | `pad` | 0 až 1000 | nové |
@@ -156,6 +156,21 @@ Součin se staví konstrukcí rozsahů a nikdy nepřeleze tisíc; celý tisíc d
 je, protože `10 × 100` a `1000 : 100` jsou příklady, na kterých kapitola stojí.
 V prvním kbelíku se dělí jen deseti nebo stem, aby nevzniklo `230 : 23`, tedy
 dělení dvojciferným číslem, které hra nikde neučí.
+
+**`unit_convert` a `time_convert`, hotovo.** Jedna trať `units` a jedna rodina
+klíčů `u`, čtyři kbelíky podle druhu veličiny: délka, hmotnost, objem, čas.
+Každý kbelík převádí oběma směry, `3 m = 300 cm` i `300 cm = 3 m`, takže se
+z jednoho poměru počítá nahoru i dolů. Je to první rodina, kde odpověď nese
+jednotku: položka ji říká sama přes pole `unit`, otázka ji ukáže za odpovídacím
+políčkem a nad klávesnicí stojí slovy, na co se převádí. Zkratky (`cm`, `kg`,
+`hl`, `min`) se ve všech třech jazycích píšou stejně a stojí přímo v tabulce
+převodů; slovní jednotky času (den, týden, měsíc, rok) jdou přes slovník a mají
+v něm tři tvary, protože čeština počítá jinak jeden, dva až čtyři a pět a víc.
+Obě čísla, to v zadání i odpověď, zůstávají celá a do tisíce, protože tam
+třetí třída počítá; z toho plyne, že hmotnost má jen čtyři otázky, `1 kg = 1000 g`
+a `1 t = 1000 kg` v obou směrech, což je přesně to, co učebnice u hmotnosti
+převádí. Počet převáděných velkých jednotek je nejvýš dvacet, aby z týdne
+nevyšlo sto čtyřicet dva dní.
 
 **`times_more_less`.** Pozor na rozdíl mezi "o kolik" a "kolikrát". Je to
 nejčastější zdroj chyb v celé třetí třídě a stojí za samostatné téma, i když

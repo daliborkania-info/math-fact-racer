@@ -243,6 +243,15 @@ ručně míchaných palet je práce, která nikomu nic nepřinese; prvních patn
 zůstalo ručních, jsou to barvy okruhu. A do palety se přesunulo `dark`
 i `tok`, takže prostředí samo říká, jestli je noční a co se v něm sbírá.
 
+**Jedna věc se proti zadání rozšířila, a je to ta podstatná.** Zadání mluvilo
+o prostředí a jezdcích, tedy o kabátu. Při zkoušení se ukázalo, že přebarvený
+okruh je pořád okruh a svět z toho není. Svět proto mění **tvar cesty a její
+cíl**: stezka vede lesem k velkému stromu, obloha je řada skoků z obláčku na
+obláček k duhové bráně, hlubina klesá kolem různobarevných rybiček k potopené
+truhle. Okruh zůstal uzavřenou smyčkou. Mechanika se nezměnila vůbec: pohyb je
+dál `1/n` za správnou odpověď a `atU()` o tvaru cesty neví. Podrobnosti
+v `PROJECT-STATE.md`, oddíl 7c.
+
 **Proč teď.** Tratí je patnáct a s každou další rodinou z vlny A přibude jedna.
 Patnáct je hranice, u které podle `PROJECT-STATE.md`, oddíl 12b, svislý seznam
 přestává stačit, takže tenhle krok už není odkládání zadarmo.

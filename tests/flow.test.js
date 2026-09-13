@@ -336,8 +336,8 @@ ok('nabidka ma vsechny ctyri svety', qa('[data-act="worldset"]').length===4 && /
 // ctyri nahledy teze trati v jednom dokumentu: kdyby mely stejne id
 // prechodu, vykreslily by se vsechny barvou toho prvniho
 ok('kazdy svet se v nabidce ukazuje svou barvou',
-   new Set(qa(".pickworld .thumb svg linearGradient[id^='tg_'] stop[offset='0']").map(s=>s.getAttribute('stop-color'))).size===4,
-   new Set(qa(".pickworld .thumb svg linearGradient[id^='tg_'] stop[offset='0']").map(s=>s.getAttribute('stop-color'))).size+' ruznych');
+   new Set(qa(".pickworld .thumb svg linearGradient[id^='grd_'] stop[offset='0']").map(s=>s.getAttribute('stop-color'))).size===4,
+   new Set(qa(".pickworld .thumb svg linearGradient[id^='grd_'] stop[offset='0']").map(s=>s.getAttribute('stop-color'))).size+' ruznych');
 click(qa('[data-act="worldset"]').find(b=>b.dataset.id==='trail'));
 ok('svet se ulozil do profilu', DBg().profiles[0].world==='trail', DBg().profiles[0].world);
 ok('krajina se zmenila', q('.place .thumb svg stop').getAttribute('stop-color')!==krajinaOkruh);
@@ -347,10 +347,32 @@ ok('ucivo se nezmenilo', ev('trackKeys(P(), trackById("t1")).length')===34,
    ev('trackKeys(P(), trackById("t1")).length')+' prikladu');
 click(q('[data-act="play"]'));
 ok('ve stezce se jde, ne jede', /Jdeme/.test(d.body.textContent) && /S kým půjdeš/.test(d.body.textContent));
+ok('trat uz neni okruh, ale cesta se zastavkami',
+   ev('route("trail","t1").closed')===false && ev('route("trail","t1").stops.length')>=6,
+   ev('route("trail","t1").stops.length')+' zastavek');
+ok('okruh zustal uzavrenou smyckou', ev('route("circuit","t1").closed')===true);
 ok('vsichni koupeni zavodnici jsou porad k vyberu', qa('[data-pick]').length===7,
    qa('[data-pick]').length+' zavodniku');
 ok('svet dal sve zavodniky dopredu', qa('[data-pick]')[0].dataset.pick.slice(0,4)==='pet_',
    qa('[data-pick]')[0].dataset.pick);
+// a zavod v jinem svete musi dojet stejne jako v okruhu
+click(q('[data-go]'));
+await wait(200);
+ok('cesta ve stezce se kresli a zavodnik po ni jde',
+   q('#trail')!==null && d.getElementById('mycar').style.left!=='', d.getElementById('mycar').style.left);
+let sn=0; while(inRace()&&sn<40){ type(answer()); sn++; await wait(640); }
+await wait(1500);
+ok('zavod ve stezce dojel ke stromu', /Došel jsi až ke stromu|medaile/.test(txt()), txt().slice(0,50));
+// rekord patri trati, ne svetu: jinak by prepnuti kabatu zaradilo dite
+// na start a duch vlastni nejlepsi jizdy by zmizel
+ok('rekord se ulozil pod trat, ne pod svet',
+   ev('Object.keys(P().best).every(k=>TRACKS.some(t=>t.id===k))')===true
+   && ev('!!P().best.t1')===true, ev('Object.keys(P().best).join(",")'));
+click(q('[data-act="map"]'));
+click(q('[data-act="worldpick"]'));
+click(qa('[data-act="worldset"]').find(b=>b.dataset.id==='sky'));
+click(q('[data-act="play"]'));
+ok('na obloze se leti', /Letíme/.test(d.body.textContent));
 click(q('.sheet'));                                  // zavrit vyber klepnutim vedle
 click(q('[data-act="worldpick"]'));
 click(qa('[data-act="worldset"]').find(b=>b.dataset.id==='circuit'));

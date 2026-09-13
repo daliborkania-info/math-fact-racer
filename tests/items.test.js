@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,atU,circuitThumb,circuitSVG,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -123,7 +123,7 @@ console.log('sampionat respektuje stupne:',mixBad?'ne':'ano');
 let svgBad=0;
 A.PETS.forEach(x=>[1,2,3].forEach(s=>{const v=A.petSVG(x,s); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id,s);}}));
 A.RIDES.forEach(x=>{const v=A.rideSVG(x); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id);}});
-Object.keys(A.ENVS).forEach(e=>{const v=A.circuitSVG(e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  ENV problem',e);}});
+Object.keys(A.ENVS).forEach(e=>{const v=A.sceneSVG('circuit',e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  ENV problem',e);}});
 console.log('vadnych SVG:',svgBad);
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
@@ -626,7 +626,7 @@ for(const k of Object.keys(A.ENVS)){
   for(const c of ['hill1','hill2','dec','dec2'])
     if(!/^#[0-9a-f]{6}$/i.test(e[c]||'')) wsay('paleta '+k+' nema barvu '+c+': '+e[c]);
   if(!e.tok) wsay('paleta '+k+' nerika, co se v ni sbira');
-  if(/NaN|undefined/.test(A.circuitThumb(k,'t1',.5))) wsay('vadny nahled okruhu v prostredi '+k);
+  if(/NaN|undefined/.test(A.sceneThumb('circuit',k,'t1',.5))) wsay('vadny nahled okruhu v prostredi '+k);
 }
 // neznamy svet spadne na okruh, at uz z ulozeneho profilu, nebo preklepem
 const sw={world:'neexistuje'}; A.seedWorld(sw);
@@ -672,6 +672,75 @@ for(const w of A.WORLDS){
   if(ord.length!==own.length) wsay('svet '+w.id+' schoval koupeneho jezdce');
 }
 console.log('svetu:',A.WORLDS.length,'| palet:',Object.keys(A.ENVS).length,'| chyb:',wBad);
+
+// 13b. tvar cesty
+//
+// Svet nemeni jen barvy, ale i to, kudy se jde: okruh je uzavrena smycka,
+// ostatni svety jsou cesta z jedne strany na druhou, zakoncena cilem.
+// Hlida se hlavne to, co by rozbilo pohyb: cesta musi mit delku, musi
+// zacinat a koncit tam, kde ma, a musi byt pro kazdou trat jina, jinak
+// jsou nahledy na mape k nicemu.
+let rBad=0;
+const rsay=m=>{rBad++; if(rBad<10) console.log('  !!  '+m);};
+const vsechnyTrati=A.TRACKS.map(t=>t.id);
+for(const w of A.WORLDS){
+  const tvary=new Set(), delky=[];
+  for(const id of vsechnyTrati){
+    const r=A.route(w.id,id);
+    if(!(r.total>80)){rsay('cesta '+w.id+'/'+id+' nema delku: '+r.total);continue;}
+    if(r.samples.length<20){rsay('cesta '+w.id+'/'+id+' ma prilis malo bodu');continue;}
+    // krajni body musi sedet s tim, co vraci atU
+    const a=A.atU(r,0), b=A.atU(r,1);
+    const konec=r.samples[r.samples.length-1];
+    if(Math.hypot(b.x-konec.x,b.y-konec.y)>1){rsay('konec cesty nesedi se vzorky '+w.id+'/'+id);continue;}
+    // vsechno se musi vejit do sceny, jinak by zavodnik vyjel z obrazku
+    for(const s of r.samples) if(s.x<0||s.x>400||s.y<0||s.y>205){
+      rsay('cesta '+w.id+'/'+id+' vyjizdi ze sceny');break;}
+    if(w.id==='circuit'){
+      if(!r.closed) rsay('okruh prestal byt uzavreny');
+      if(Math.hypot(a.x-b.x,a.y-b.y)>1) rsay('okruh nekonci tam, kde zacal');
+      if(r.stops.length) rsay('okruh ma mit cil ve startu, ne zastavky');
+    } else {
+      if(r.closed) rsay('cesta ve svete '+w.id+' se uzavrela do smycky');
+      if(b.x-a.x<180) rsay('cesta ve svete '+w.id+'/'+id+' nevede na druhou stranu');
+      if(r.stops.length<6) rsay('cesta '+w.id+'/'+id+' ma malo zastavek: '+r.stops.length);
+      // posledni zastavka je cil a nesmi ji zaclanet predposledni
+      const st=r.stops, mezera=st[st.length-1].x-st[st.length-2].x;
+      if(mezera<46) rsay('cil ve svete '+w.id+'/'+id+' stoji na posledni zastavce: '+mezera.toFixed(0));
+      if(w.id==='sky' && b.y>=a.y) rsay('obloha nestoupa vzhuru');
+      if(w.id==='deep' && b.y<=a.y) rsay('hlubina neklesa dolu');
+    }
+    tvary.add(r.d);
+    const ys=r.samples.map(s=>s.y);
+    delky.push({vyska:Math.max(...ys)-Math.min(...ys), zastavek:r.stops.length});
+  }
+  // patnact trati ve stejnem svete nesmi vypadat stejne, jinak nahled na
+  // mape nerika, na kterou trat dite klepe. Delka cesty je na to spatne
+  // meritko, protoze vsechny vedou pres celou scenu; pozna se to na tom,
+  // jak vysoko se cesta vlni a kolik ma zastavek
+  if(tvary.size!==vsechnyTrati.length) rsay('svet '+w.id+' ma jen '+tvary.size+' ruznych tvaru z '+vsechnyTrati.length);
+  const vysky=delky.map(x=>x.vyska), rozptyl=Math.max(...vysky)-Math.min(...vysky);
+  if(rozptyl<25) rsay('cesty ve svete '+w.id+' se vlni skoro stejne, rozptyl '+rozptyl.toFixed(0));
+  if(w.id!=='circuit' && new Set(delky.map(x=>x.zastavek)).size<3)
+    rsay('cesty ve svete '+w.id+' maji porad stejny pocet zastavek');
+  // dvakrat po sobe musi vyjit tataz cesta, jinak by se trat menila pod rukama
+  if(A.route(w.id,'t1').d!==A.route(w.id,'t1').d) rsay('cesta ve svete '+w.id+' neni pokazde stejna');
+}
+// tvar se lisi i mezi svety, ne jen barvou
+if(A.route('sky','t1').d===A.route('deep','t1').d) rsay('obloha a hlubina maji tutez cestu');
+if(A.route('circuit','t1').d===A.route('trail','t1').d) rsay('okruh a stezka maji tutez cestu');
+// scena kazdeho sveta musi mit to, co svetu slibuje
+const scena=(w,id)=>A.sceneSVG(w,A.envOf({world:w},A.trackById(id)),id,{prog:.5});
+if(!/id="trail"/.test(scena('sky','t1'))) rsay('scene chybi cara postupu, po ktere se hybe zavodnik');
+if(!/id="circuit"/.test(scena('deep','t1'))) rsay('scene chybi id, podle ktereho se rozsvecuji znacky');
+if(/id="circuit"/.test(A.sceneThumb('deep','dp_shallow','t1',.4))) rsay('nahled si bere id sceny, budou dve stejna v dokumentu');
+for(const [w,znak] of [['sky','<circle cx="52" cy="36"'],['deep','stroke="#18253f"']]){
+  // obloha ma slunce, hlubina rybicky s okem
+  if(w==='sky' && !scena(w,'t1').includes(znak)) rsay('obloze chybi slunce');
+}
+if(!/f0c063|8a5a2b|a76f36/.test(scena('deep','t1'))) rsay('v hlubine chybi truhla na konci');
+if(!scena('sky','t1').includes('#ff6b6b')) rsay('na obloze chybi duhova brana nebo start');
+console.log('zkontrolovano cest:',A.WORLDS.length*vsechnyTrati.length,'| chyb:',rBad);
 
 // 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
 let trBad=0;

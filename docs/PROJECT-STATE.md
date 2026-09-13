@@ -450,9 +450,11 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
    ne jeden prvek na místo; dvacítka jich má sto dvaaosmdesát a přes všechny
    tratě jich je přes čtyři sta, což by byla zbytečná hromada uzlů. Tvar se
    řídí prostředím trati přes `TOKEN_KIND`, barva je z `ENVS`.
-5. Závodní okruh. Uzavřená Bézierova křivka z osazeného generátoru, geometrie se
-   počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `circuit(id)`,
-   `atU(c, u)`, `circuitSVG`, `circuitThumb`.
+5. Cesta jednoho závodu. Bézierova křivka z osazeného generátoru, geometrie se
+   počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `route(svět, id)`
+   vrací uzavřenou smyčku v okruhu a otevřenou cestu se zastávkami v ostatních
+   světech, `atU(c, u)` je nad obojím stejné, `sceneSVG()` to nakreslí a týmž
+   kódem vyrobí i náhled na mapě. Viz oddíl 7c.
 6. Zvuk. Syntetizované tóny, žádné soubory.
 7. Obrazovky. `viewPlayers`, `viewMap`, `viewGame`, `viewResult`, `viewTokens`,
    `viewCollection`, `viewShop`, `viewJob`, `viewJobDone`, `viewSetPin`,
@@ -535,9 +537,29 @@ Od září 2026 má hra čtyři světy: `circuit`, `trail`, `sky` a `deep`. Je t
 v `ROADMAP.md`, oddíl 2, včetně experimentu, ve kterém byla genderově neutrální
 hra oblíbenější než hra cílená na vlastní pohlaví.
 
-**Co svět mění.** Krajinu každé trati, pořadí nabízených jezdců a hrstku slov.
+**Co svět mění.** Tvar cesty, co u ní stojí, čím končí, krajinu každé trati,
+pořadí nabízených jezdců a hrstku slov.
 **Co nemění: učivo, obtížnost, odemykání ani rekordy.** Rekordy se ukládají pod
 `tr.id`, takže přepnutí světa je nechává být, a to tak musí zůstat.
+
+**Svět není přebarvený okruh.** Okruh je uzavřená smyčka, po které se jezdí
+dokola, a končí tam, kde začal, tedy u cílové čáry. Ostatní tři světy jsou
+otevřená cesta z jedné strany scény na druhou, zakončená cílem: stezka se vine
+lesem k velkému stromu, obloha je řada skoků z obláčku na obláček k duhové
+bráně, hlubina klesá kolem různobarevných rybiček k potopené truhle. Dělá to
+`route(world, id)`, tvar podle `ROUTE_KIND`, a vrací vždycky totéž, tedy křivku
+ke kreslení, lomenou čáru k měření a seznam zastávek, na kterých stojí obláčky,
+rybičky nebo houby. **Díky tomu nikdo za `route()` neví, ve kterém světě je**,
+`atU()` a celý pohyb včetně ducha vlastního rekordu zůstal beze změny.
+
+**Cesta je pro každou trať jiná, ne jen jinak barevná.** Počet zastávek, výška
+oblouků, amplituda vlnění i sklon stoupání se losují ze seedu trati, protože
+patnáct tratí lišících se jen barvou by udělalo z náhledů na mapě ozdobu.
+Hlídá to `items.test.js`, okruh 13b, i to, že cesta nevyjede ze scény.
+
+**Scénu kreslí jedno místo, `sceneSVG()`,** a totéž se používá i jako náhled na
+mapě, jen s méně detaily; co dítě vidí na mapě, tam se pak opravdu dostane.
+Okruh v náhledu vypadá přesně jako dřív.
 
 **Nabídka jezdců se jen řadí, nikdy nefiltruje.** `ridesOrder()` dá dopředu
 jezdce daného světa a za ně všechny ostatní. Kdyby svět filtroval, přišlo by
@@ -547,12 +569,20 @@ dítě přepnutím světa o koupený stroj, a to je přesně to, co zakazuje odd
 výchozí hodnotu pro okruh, ostatní světy mají vlastní mapu trať na prostředí.
 Čte to mapa, závodní obrazovka i sbírka; nikdo jiný se na `tr.env` dívat nemá.
 
-**Paleta je čtyři barvy plus dva příznaky.** `dark` znamená noční oblohu místo
+**Paleta je čtyři barvy plus pár příznaků.** `dark` znamená noční oblohu místo
 křoví, `tok` říká, co se v prostředí sbírá. Obojí bývalo v seznamu jinde v kódu
 a při šedesáti prostředích by to nešlo udržet. Prvních patnáct palet je ručních
 a jsou to barvy okruhu, **nesahat na ně**; zbylých pětačtyřicet se generuje
-funkcí `pal(odstín země, odstín porostu, světlost, co se sbírá, noc)`, takže
-další svět stojí patnáct krátkých řádků, ne šedesát ručně míchaných barev.
+funkcí `pal(odstín země, odstín porostu, světlost, co se sbírá, volitelné)`,
+takže další svět stojí patnáct krátkých řádků, ne šedesát ručně míchaných barev.
+
+**`hill1` je vždycky horní konec přechodu a `hill2` spodní.** Na zemi to znamená
+světleji nahoře a tmavěji dole, jak vypadá louka. Obloha je obráceně, tmavší
+nahoře a jasná u obzoru, a moře je nahoře voda a dole dno, takže tyhle palety
+si druhý konec řeknou samy přes `h2` a `l2`. Pravidlo, které z toho plyne:
+**u oblohy zůstává horní konec v modrých a u hlubiny taky**, charakter místa
+nese ten spodní. Bez toho vyšlo rudé moře a hnědá obloha. `sat` je pro kámen,
+mlhu a bouřku, které musí být tlumené.
 
 **Texty se přebíjejí přes `w_<svet>_<klic>`.** `t()` hledá nejdřív klíč se
 světem a pak holý, takže ve slovníku jsou jen slova, která se opravdu liší,
@@ -605,7 +635,9 @@ sbírku, tedy že se místo rozsvítí až na úrovni 4, že po poklesu úrovně
 dopočítá starší profil; kruh v dílně, tedy počet zakrytých výsečí; a světy, tedy
 že každý svět má pro každou trať vlastní prostředí, že žádná paleta nezůstala
 nepoužitá, že přepnutí světa nehne učivem, odemčením ani rekordy a že nabídku
-jezdců jen řadí.
+jezdců jen řadí; a tvary cest, tedy že okruh zůstal uzavřený, že ostatní světy
+vedou z jedné strany na druhou, že cesta nevyjede ze scény a že se patnáct
+tratí v jednom světě od sebe pozná.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou

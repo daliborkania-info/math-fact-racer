@@ -880,7 +880,67 @@ což je skoro jistě nezáměr.
 
 ---
 
-## 10. Co se v žádném kroku nesmí stát
+## 10. Jak s plánem pracovat: hlavní session řídí, subagenti implementují
+
+`src/app.js` má skoro čtyři tisíce řádků, `i18n.js` devět set, testy další
+dva a půl tisíce. Session, která si to všechno načte a pak implementuje tři
+kroky za sebou, dojede s plným kontextem uprostřed třetího. Proto se pracuje
+ve dvou rolích.
+
+**Hlavní session je orchestrátor.** Přečte `PROJECT-STATE.md` a tenhle plán,
+nic víc; do `src/` se dívá jen přes `grep`, když potřebuje ověřit konkrétní
+místo. Každý krok plánu (A, B0, B, C1 až C3 s C5, C4 s C7, D1, D2, ...) zadá
+**jednomu subagentovi** (`Agent`, typ `general-purpose`, stejná pracovní
+složka, bez worktree, kroky jdou za sebou, protože všechny sahají do
+`app.js`). Po návratu subagenta orchestrátor **sám** pustí `python3 build.py`
+a `node tests/items.test.js | grep '  !!  '`, u kroků, které se dotkly
+obrazovek nebo profilu, i `flow.test.js` a `migration.test.js`, podívá se na
+`git log -1 --stat` a `git diff HEAD~1 --stat`, a teprve pak zadá další krok.
+Když subagent hlásí něco, co se rozchází s plánem, orchestrátor to rozhodne,
+případně se zeptá uživatele; subagent plán nemění.
+
+**Subagent dostane soběstačné zadání**, protože nevidí konverzaci. Šablona:
+
+> Pracuješ v repozitáři `~/Dokumenty/Kladska/math-fact-racer` (v shellu
+> `/sessions/<session>/mnt/math-fact-racer`). Přečti si `docs/PROJECT-STATE.md`
+> oddíly 2, 3, 7 a 14 a `docs/PLAN.md` oddíl **<krok>** celý; ostatní oddíly
+> plánu nečti. Ze `src/app.js` čti jen funkce, které krok jmenuje, najdi je
+> přes grep. Implementuj přesně to, co krok říká, nic navíc a nic z jiných
+> kroků. Zdroje v `src/`, nikdy `index.html`. Po každé změně `python3 build.py`
+> a `node tests/items.test.js | grep '  !!  '`; před commitem všech pět testů
+> z `tests/`, čisté je bez `!!`. Nové chování má vlastní kontrolu v testu.
+> Když kreslíš nebo měníš vzhled, vyrenderuj si to (postup v PROJECT-STATE,
+> oddíl 2). Aktualizuj dokumentaci podle oddílu 8 plánu a krok označ v plánu
+> HOTOVO s datem. Commit jeden, anglická věta o tom, co se pro dítě nebo
+> rodiče změnilo; push nedělej. Kód a komentáře anglicky. Nedotknutelné
+> principy z PROJECT-STATE oddíl 3 neměň. Rozhodnutí z oddílu 9 plánu ber
+> takto: **<co orchestrátor rozhodl>**. Na konci odpověz nejvýš třiceti
+> řádky: hash commitu, co se změnilo po souborech, výsledky testů, která
+> čísla v testech se posunula a kam, co se proti plánu upřesnilo a proč, co
+> zbylo nedodělané.
+
+**Co orchestrátor dělá sám a co ne.** Sám: řízení pořadí, spouštění testů po
+návratu, kontrola, že commit obsahuje testy i dokumentaci, aktualizace
+promptu pro další session v `PROJECT-STATE.md` oddíl 14 na konci práce,
+odpověď uživateli. Nedělá: čtení celého `app.js`, psaní kódu, ladění testů;
+když subagent selže, dostane další subagent zadání s popisem, co selhalo,
+místo aby orchestrátor opravoval sám.
+
+**Kontrolní subagent** po velkých krocích (B, C, každá rodina z D): typ
+`general-purpose`, zadání "přečti diff `git diff <před>..<po>`, oddíl kroku
+v plánu a oddíl 3 PROJECT-STATE, hledej rozpor s plánem, zapomenuté body
+kontrolního seznamu z oddílu 14, změnu datového modelu bez fixture, text
+v dětské části s učitelským žargonem; nic neopravuj, vrať seznam nálezů".
+Nálezy jdou dalšímu implementačnímu subagentovi.
+
+**Rozdělení kroků na subagenty:** A jeden; B0 jeden; B jeden (B1 až B7 patří
+k sobě, rodina se nedá půlit); C dva, první C1 až C3 a C5, druhý C4 a C7;
+D1, D2, D3, D4 po jednom; E1 dva, nejdřív dvě políčka bez generátoru, pak
+generátor po rozhodnutí R2; F jeden; G až po ověření map.
+
+---
+
+## 11. Co se v žádném kroku nesmí stát
 
 Beze změny proti předchozímu plánu; hlídají to testy a `PROJECT-STATE.md`,
 oddíl 3.

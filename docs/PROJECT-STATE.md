@@ -1276,37 +1276,40 @@ ročníku (4b).
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
 >
-> Přečti si celý `docs/PROJECT-STATE.md` kvůli stavu a mechanice, pak celý
-> `docs/PLAN.md` kvůli tomu, co se dělá dál, v jakém pořadí a kde v kódu se
-> sahá, a `src/app.js` kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když
-> potřebuješ vědět, proč je něco navržené tak, jak je. Mapy učiva jsou
-> v `docs/kurikulum/`, na generátor se bez nich nepouštěj.
+> Tvoje role je **orchestrátor**, ne programátor. Přečti si celý
+> `docs/PROJECT-STATE.md` kvůli stavu a mechanice a celý `docs/PLAN.md` kvůli
+> tomu, co se dělá, v jakém pořadí a kde v kódu se sahá. **`src/app.js` ani
+> testy nečti celé**, šetři si kontext; do zdrojů se dívej jen přes grep, když
+> potřebuješ něco ověřit. Implementaci každého kroku zadej jednomu subagentovi
+> podle oddílu 10 plánu, kde je šablona zadání i rozdělení kroků; subagent
+> si zdroje přečte sám. Po návratu subagenta sám pusť `python3 build.py`
+> a `node tests/items.test.js | grep '  !!  '`, u kroků sahajících na
+> obrazovky nebo profil i `flow.test.js` a `migration.test.js`, prohlédni
+> `git log -1 --stat`, a teprve pak zadej další krok. Po kroku B pusť
+> kontrolního subagenta podle oddílu 10. Když subagent hlásí rozpor s plánem,
+> rozhodni podle plánu, nebo se zeptej mě.
 >
 > Dneska chci v tomhle pořadí, každý krok jako vlastní commit: krok A celý
 > (opravy z revize), krok B0 (dřívější ročníky na mapě složené za dveře,
 > milník s třídou před letošním blokem), a pokud zbude čas, krok B, tedy
 > `chain_3`, kapitolu 11 třetího ročníku, řetězec tří členů typu 7 + 5 - 3,
-> hlavička klíče `q`, tři kbelíky podle oboru. U B jdi přesně podle oddílů B1
-> až B7 plánu a podle kontrolního seznamu pro novou rodinu v oddílu 14 tohohle
-> souboru; nepřeskoč `grade` v `TRACKS`, prostředí ve všech čtyřech světech,
-> násobitel v `thresholds()`, blok v `heatSpecs()` ani zalamování dlouhé
-> otázky z B7. Rozhodnutí z oddílu 9 plánu, která se kroků týkají (R4 poloha
-> řetězce na mapě, R7 vynulování postupu), ber podle doporučení, pokud ti
-> neřeknu jinak; R1 (žebřík minulých let) zatím nedělej.
+> hlavička klíče `q`, tři kbelíky podle oboru, přesně podle oddílů B1 až B7
+> a kontrolního seznamu pro novou rodinu v oddílu 14 tohohle souboru.
+> Rozhodnutí z oddílu 9 plánu, která se kroků týkají (R4 poloha řetězce na
+> mapě, R7 vynulování postupu), ber podle doporučení a řekni to subagentovi
+> v zadání; R1 (žebřík minulých let) zatím nedělej.
 >
-> Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
-> build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu;
-> `items.test.js` je vteřina a pouští se po každé změně, `flow.test.js`
-> a `i18n.test.js` jsou minuta a pouští se před commitem. Nové chování patří
-> do testů, ne jen do kódu. Žádná změna nesmí připravit existující profil
-> o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
-> model, přidej do `tests/fixtures/legacy-profiles.json` další zamrazený profil.
+> Pravidla, která patří do každého zadání subagentovi: zdroje se editují
+> v `src/`, nikdy `index.html`; po každé změně `python3 build.py` a testy
+> z `tests/`, hlídá se `!!` ve výstupu; nové chování patří do testů; žádná
+> změna nesmí připravit existující profil o postup, hlídá to
+> `tests/migration.test.js`, a dotek datového modelu znamená další zamrazený
+> profil v `tests/fixtures/legacy-profiles.json`; cokoli kresleného se
+> vyrenderuje a prohlédne; nedotknutelné principy z oddílu 3 se nemění; kód
+> a komentáře anglicky, commit anglicky jednou větou; push ne.
 >
-> Když něco kreslíš nebo měníš vzhled, vyrenderuj si to a podívej se na to;
-> minule se tím chytila hnědá obloha, rudé moře a fialová louka.
->
-> Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
-> principy z oddílu 3 neměň bez mého pokynu. Push dělám sám, jen commituj
-> a řekni mi, co poslat. Na konci označ hotové kroky v `docs/PLAN.md` a
-> aktualizuj tenhle soubor včetně promptu pro další session, kde bude
-> dalším úkolem krok C.
+> Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
+> které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
+> hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
+> úkolem byl krok C (dva subagenti, C1 až C3 s C5 a pak C4 s C7), a ověř,
+> že subagenti označili hotové kroky v `docs/PLAN.md`.

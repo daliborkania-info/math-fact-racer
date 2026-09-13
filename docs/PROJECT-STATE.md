@@ -1,30 +1,30 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 12. září 2026, po světech a mapě
+Poslední aktualizace: 13. září 2026, po ročnících a rozdělení prvního ročníku
 
-**Opravená chyba, na kterou se přišlo hraním:** prvňák dostával hned v prvním
-týdnu 20 - 10, protože celý první ročník byl jedna trať s jedním velkým prvním
-stupněm. Od teď je to šest oborů podle učebnice a přechod přes desítku je až
-druhá třída; viz oddíl 4.
+**Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
+nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
+a trať `beyond`, `rounding_10` s `rounding_100` a trať `round`), celý **krok 3**
+(sbírky vázané na Leitnerovu krabičku, včetně dílny) a celý **krok 4** (čtyři
+světy a mapa jako krajina). K tomu dvě věci, které v plánu nebyly a přišly ze
+zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalšího roku,
+a rozdělení prvního ročníku na šest číselných oborů.
 
-**Novinka nad rámec plánu:** mapa se od teď skládá podle **ročníku**, do kterého
-dítě chodí, a učivo dalšího roku je za dílnou pod tlačítkem na ukázku. Je to
-`docs/PLAN.md`, krok 4c, a oddíl 7d níž.
+**Stav v číslech.** Jedenadvacet tratí ve čtyřech světech, 84 palet prostředí,
+dvě zakázky v dílně, 79 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
+třetí 18/33), tři jazyky, pět testových souborů.
 
-**Kde se přestalo a kudy dál:** hotová je **dílna**, druhý režim bez stopek
-a bez bodů za rychlost, zatím s jednou zakázkou, penězi. Hotový je **krok 1
-z `docs/PLAN.md`**, tedy rodičovská heatmapa nad všemi rodinami a vážený
-souhrn, **první dvě položky kroku 2**, tedy `mult_beyond` s `div_beyond`
-a trať `beyond`, a `rounding_10` s `rounding_100` a trať `round`, celý
-**krok 3**, tedy sbírky vázané na Leitnerovu krabičku, a celý **krok 4**, tedy
-čtyři světy a mapa jako krajina s cestou mezi místy.
+**Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
+okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
+ne jen barvy, a mapa přestala být svislým seznamem (krok 4). Ročník, podle
+kterého se skládá mapa, s ukázkou dalšího roku za dílnou (4c). První ročník
+rozložený na šest oborů podle učebnice, protože prvňák dostával 20 - 10, a
+přechod přes desítku přesunutý do druhé třídy (4d). Zakázky dílny dostaly ročník
+a přibylo počítání dílků pro prvňáky, čímž je první ročník pokrytý celý.
 
-**Mapa už na hranici není.** Byl to důvod, proč krok 4 nešlo odkládat: patnáct
-tratí ve svislém seznamu přestávalo být mapa. Od teď je to krajina a další trať
-do ní jen přibude jako další místo.
-
-Na řadě je **zbytek vlny A z kroku 2**, tedy `chain_3`, kapitola 11, a dál podle
-oddílu 12b. Hotový prompt je na konci, v oddílu 14.
+**Na řadě je zbytek vlny A z kroku 2**, tedy `chain_3`, kapitola 11 třetího
+ročníku, a dál podle oddílu 12b. Nic nepřestavuje a nic neblokuje. Hotový prompt
+je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -62,14 +62,14 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 242 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 322 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
 tests/fixtures/           zamrazené profily starších verzí, jen se přidávají
 docs/PROJECT-STATE.md     tenhle soubor
 docs/ROADMAP.md           produktový plán, včetně rešerší o motivaci a inkluzi
-docs/PLAN.md              implementační plán, sedm kroků, co se kde mění
+docs/PLAN.md              implementační plán, sedm kroků plus 4c a 4d, co se kde mění
 docs/kurikulum/           mapy učiva a katalog témat, zdroj pro src/curricula.js
 docs/support-qr.png|svg   QR platba pro dobrovolný příspěvek
 tools/make-qr.py          generátor toho QR kódu
@@ -84,6 +84,14 @@ dist/artifact.html        build bez obalu html/head/body, negitovaný
 Po každé změně ve `src/` je nutné spustit `python3 build.py`. Editovat přímo
 `index.html` je chyba, přepíše se. Pořadí vkládání je styly, `i18n.js`,
 `curricula.js`, `app.js`, takže `app.js` vidí `I18N` i `CURRICULA` jako globály.
+
+**Kresbu si jde prohlédnout, aniž by se otevírala hra.** Zdroje se dají načíst
+do node se zaslepeným `document`, jak to dělá `tests/items.test.js`, zavolat
+`sceneSVG()`, `sceneThumb()`, `tokenSVG()` nebo `partsTraySVG()`, výsledek uložit
+do souboru a převést na obrázek přes `convert`. Tímhle se chytila hnědá obloha,
+rudé moře i fialová louka, a žádný test by je nenašel. Pozor, `convert`
+ignoruje `stroke-dashoffset`, takže čára postupu vypadá vždycky dojetá až do
+konce; v prohlížeči je to správně.
 
 ---
 
@@ -514,7 +522,8 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
    místo a `tokenGridSVG()` pro celou sbírku. **Celá sbírka je jedna kresba**,
    ne jeden prvek na místo; dvacítka jich má sto dvaaosmdesát a přes všechny
    tratě jich je přes čtyři sta, což by byla zbytečná hromada uzlů. Tvar se
-   řídí prostředím trati přes `TOKEN_KIND`, barva je z `ENVS`.
+   řídí prostředím trati, každá paleta v `ENVS` si přes `tok` řekne, co se v ní
+   sbírá, a barvu dá taky.
 5. Cesta jednoho závodu. Bézierova křivka z osazeného generátoru, geometrie se
    počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `route(svět, id)`
    vrací uzavřenou smyčku v okruhu a otevřenou cestu se zastávkami v ostatních
@@ -619,7 +628,7 @@ rybičky nebo houby. **Díky tomu nikdo za `route()` neví, ve kterém světě j
 
 **Cesta je pro každou trať jiná, ne jen jinak barevná.** Počet zastávek, výška
 oblouků, amplituda vlnění i sklon stoupání se losují ze seedu trati, protože
-patnáct tratí lišících se jen barvou by udělalo z náhledů na mapě ozdobu.
+jedenadvacet tratí lišících se jen barvou by udělalo z náhledů na mapě ozdobu.
 Hlídá to `items.test.js`, okruh 13b, i to, že cesta nevyjede ze scény.
 
 **Scénu kreslí jedno místo, `sceneSVG()`,** a totéž se používá i jako náhled na
@@ -800,6 +809,33 @@ a nátěry byly až úplně dole, takže je dítě muselo hledat rolováním. Ob
 teď umí `view.focus` a otevře se rovnou u nátěrů; výběr stroje nebo zvířete
 focus zruší, aby to zpátky dolů neskákalo.
 
+Prvňák dostával hned v prvním týdnu 20 - 10. Celý první ročník byl jedna trať
+a její první stupeň bylo "všechno do deseti bez přechodu", do čehož spadne
+i 10 + 10. Opraveno rozdělením na šest číselných oborů podle učebnice, viz
+oddíl 4. **Nová rodina pro nejmladší děti se musí měřit tím, co je v učebnici
+na prvních stránkách, ne tím, co se vejde do jednoho pravidla.**
+
+Prvňák dostával v dílně placení mincemi do padesáti. Zakázky neměly ročník,
+takže dílna ukazovala všem všechno. Opraveno polem `grade` v `JOBS`.
+
+Všechny čtyři náhledy v nabídce světů vypadaly stejně. Náhled okruhu měl id
+barevného přechodu jen podle trati, a čtyři náhledy téže trati v jednom
+dokumentu tak sdílely první definici. Id teď nese i prostředí.
+
+Obloha vycházela hnědá, moře u útesu rudé a louka svítivě fialová. Palety se
+generovaly z jednoho odstínu pro oba konce přechodu. Horní konec u oblohy
+a hlubiny teď zůstává v modrých a charakter místa nese spodní, a na kámen
+a mlhu je tlumená sytost. **Bylo to vidět až na vyrenderovaném obrázku, ne
+v kódu a ne v testech.**
+
+Čtvrtinové značky na trati vypadaly na úzké cestičce jako odhozené papírky.
+Byly dělané přes šestatřicet pixelů širokou silnici okruhu; teď se zmenšují
+podle šířky cesty.
+
+V nejmenším oboru padaly dvě stejné otázky za sebou. Ochrana proti tomu koukala
+jen na souseda, což při čtyřech příkladech na dvacet otázek nestačí; teď hledá
+dál ve frontě.
+
 Volba kapitoly bez generátoru nedělala nic. Šla vybrat, poznámka "zatím neumíme"
 se v nabídce usekla a rodič si nastavil kapitolu, se kterou se nestalo nic.
 Mezikrok s tichým návratem na dřívější kapitolu byl taky špatně, protože
@@ -862,7 +898,7 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 76 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 79 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
@@ -1165,25 +1201,43 @@ správy.
 
 ### Kontrolní seznam pro každou novou rodinu
 
-Tohle projela tisícovka a sedělo to do puntíku. V `src/app.js`: písmeno hlavičky
-klíče do `FAMILY_HEADS`, definice kbelíků nebo stupňů, generátor, větev
-v `rawItem()`, `poolKeys()`, `trackKeys()`, `reachedKeys()` pokud má stupně,
-vlastní `*Stage()` přes `stageIndex()`, větev v `buildRun()` přes
-`focusAndReview()`, záznam v `TRACKS` včetně **ročníku**, bez kterého se trať
-neobjeví nikomu na mapě, záznam v `ENVS` **a prostředí ve všech třech
-zbylých světech ve `WORLDS`**, jinak bude nová trať ve stezce, na obloze
-i v hlubině vypadat jako v okruhu; paleta si rovnou řekne přes `tok`, co se v ní
-sbírá. Dál větev v `unlockState()`,
-násobitel v `thresholds()` a `maxLen` na položce, pokud odpověď přeleze tři
-číslice, a blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí. Dál kapitoly
-v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech třech jazycích
-v `src/i18n.js`.
+Projela tudy tisícovka, za násobilkou i zaokrouhlování a sedělo to do puntíku.
+Od kroku 4 a 4c v něm přibyly dva body, prostředí ve čtyřech světech a ročník.
 
-V `tests/items.test.js`: export nových symbolů v `module.exports` na konci
-skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do
-množiny `VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co
-slibuje. V `tests/flow.test.js` sedí natvrdo počet okruhů na mapě a počet
-zamčených kapitol, obojí je potřeba posunout.
+**V `src/app.js`:**
+
+1. písmeno hlavičky klíče do `FAMILY_HEADS`
+2. definice kbelíků nebo stupňů a generátor, větev v `rawItem()`
+3. `poolKeys()`, `trackKeys()`, a `reachedKeys()`, pokud má rodina stupně
+4. vlastní `*Stage()` přes `stageIndex()`, pokud má stupně
+5. větev v `buildRun()`, vždycky přes `focusAndReview()`, nikdy vlastní poměr
+6. záznam v `TRACKS` **včetně `grade`**, bez něj se trať neobjeví na mapě nikomu
+7. paleta v `ENVS` a **prostředí ve všech třech zbylých světech ve `WORLDS`**,
+   jinak bude nová trať ve stezce, na obloze i v hlubině vypadat jako v okruhu;
+   paleta si přes `tok` řekne, co se v ní sbírá, a přes `dark`, jestli je noční
+8. větev v `unlockState()`, a rozmyslet, jestli je trať vstupní branou ročníku
+   (ty jsou otevřené vždycky), nebo visí na zvládnutí předchozí
+9. násobitel v `thresholds()`, jinak bude mít dítě samé pomalé odpovědi
+10. `maxLen` na položce, pokud odpověď přeleze tři číslice
+11. blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí
+
+**Dál:** kapitoly v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech
+třech jazycích v `src/i18n.js`.
+
+**V `tests/items.test.js`:** export nových symbolů v `module.exports` na konci
+skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do množiny
+`VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co slibuje.
+
+**V `tests/flow.test.js` sedí natvrdo tahle čísla** a každá nová trať je posune:
+počet různých cest na mapě (20), počet míst na mapě (21), délka mapy prvňáka (8),
+počet tratí v ukázce druhého ročníku (10), délka mapy druháka (18) a počet
+zamčených kapitol třetí třídy (15 z 33).
+
+**Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
+`grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v
+`jobItemFromKey()`, texty `job_*`, `heat_w*` a zadání úlohy ve třech jazycích,
+a pokud potřebuje jiný vstupní prvek než mince a dílky, větev v `trayHTML()`,
+`counterHTML()` a `solutionHTML()`.
 
 ### Prompt pro nejbližší krok
 
@@ -1192,37 +1246,50 @@ v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
 s dnešním úkolem.
 
 **Kde přesně stojíme.** Kroky 1, 3 a 4 jsou hotové, tedy všechno, co něco
-přestavuje. Z kroku 2, vlny A, jsou hotové dvě položky ze sedmi. Zbytek plánu
-už jsou samostatné přírůstky a pořadí mezi nimi je volné:
+přestavuje, a k tomu 4c a 4d, které v plánu nebyly. Z kroku 2, vlny A, jsou
+hotové dvě položky ze sedmi. Zbytek plánu už jsou samostatné přírůstky a pořadí
+mezi nimi je volné:
 
 - **Zbytek vlny A**, tedy `chain_3`, pak `order_of_ops`, `mult_div_10_100`
   s `mult_round`, `unit_convert` s `time_convert` a nakonec `missing_operand`
-  s `inverse_check`. Kontrolní seznam pro novou rodinu je nad tímhle promptem
-  a od kroku 4 je v něm navíc prostředí ve všech čtyřech světech.
+  s `inverse_check`. Sedm zamčených kapitol třetí třídy, nic nového na vstupu.
 - **Krok 5, vlna B**, tedy `pad2` a dělení se zbytkem. Před ním je půl dne
   práce na víc políčkách v `tap()`, `typedText()` a `questionHTML()`.
-- **Krok 6, další zakázka do dílny**, tedy `word_problem`, slovní úlohy.
-  `count_objects` je hotové a první ročník je tím celý pokrytý; třetí ročník
-  je slovních úloh plný a nikde se necvičí.
+- **Krok 6, další zakázka do dílny**, tedy `word_problem`, slovní úlohy. Je to
+  první zakázka, kde se generuje text, ne čísla.
+- **Krok 7, čtvrtý a pátý ročník.** Mapy v `docs/` existují, ale jen z obsahů,
+  takže je před zapnutím potřeba ověřit; do té doby je čtvrtý ročník v aplikaci
+  jen `grade: 4`, tedy "všechno", a ukázka dalšího roku se u něj neukazuje.
+
+**Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
+nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se
+skládá podle ročníku a ukázka dalšího roku se nikam nezapisuje (7d), první ročník
+je žebřík šesti oborů bez přechodu přes desítku (4) a zakázka v dílně patří do
+ročníku (4b).
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
-> osmiletého syna, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
+> osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
 >
 > Přečti si celý `docs/PROJECT-STATE.md` kvůli stavu a mechanice, pak
 > `docs/PLAN.md` kvůli tomu, co se dělá dál a v jakém pořadí, a `src/app.js`
 > kvůli kódu. `docs/ROADMAP.md` čti jen tehdy, když potřebuješ vědět, proč je
-> něco navržené tak, jak je; jsou tam odkazy na studie.
+> něco navržené tak, jak je; jsou tam odkazy na studie. Mapy učiva jsou
+> v `docs/kurikulum/`, na generátor se bez nich nepouštěj.
 >
 > Dneska chci `chain_3` z kroku 2, tedy třetí položku vlny A, kapitolu 11
-> třetího ročníku. Hlavička klíče `q`, kbelíky podle oboru. Drž se kontrolního
-> seznamu pro novou rodinu z oddílu 14, hlavně násobitele v `thresholds()`,
-> bloku v `heatSpecs()` a prostředí ve všech čtyřech světech.
+> třetího ročníku, tedy řetězec tří členů typu 7 + 5 - 3. Hlavička klíče `q`,
+> kbelíky podle oboru. Jdi podle kontrolního seznamu pro novou rodinu z oddílu
+> 14 a nepřeskoč `grade` v `TRACKS`, prostředí ve všech čtyřech světech,
+> násobitel v `thresholds()` ani blok v `heatSpecs()`.
 >
 > Zdroje se editují v `src/`, nikdy ne `index.html`. Po každé změně `python3
 > build.py` a pak testy z `tests/`, hlídá se výskyt `!!` ve výstupu. Nové
 > chování patří do testů, ne jen do kódu. Žádná změna nesmí připravit existující
 > profil o postup, hlídá to `tests/migration.test.js`, a pokud sáhneš na datový
 > model, přidej do `tests/fixtures/legacy-profiles.json` další zamrazený profil.
+>
+> Když něco kreslíš nebo měníš vzhled, vyrenderuj si to a podívej se na to;
+> minule se tím chytila hnědá obloha, rudé moře a fialová louka.
 >
 > Piš mi česky, kód a komentáře anglicky, stručně a bez vaty. Nedotknutelné
 > principy z oddílu 3 neměň bez mého pokynu. Push dělám sám, jen commituj

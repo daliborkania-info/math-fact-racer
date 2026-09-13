@@ -11,7 +11,12 @@ zjištění je odkaz. Kde přímý důkaz není, je to napsané.
 
 ## 1. Stav
 
-Patnáct tratí, 76 hratelných kapitol z 95, jedna zakázka v dílně, tři jazyky.
+Jedenadvacet tratí ve čtyřech světech, 79 hratelných kapitol z 95, dvě zakázky
+v dílně, tři jazyky. První ročník je pokrytý celý, druhý skoro celý.
+
+Oddíly 2 až 4 níž jsou z rešerše z 12. září 2026 a jsou pořád platné, jen už
+nejsou návrhem: volba světa, sbírky vázané na krabičku i mapa jako svět stojí,
+viz `PLAN.md`, kroky 3 a 4.
 Podrobně v `PROJECT-STATE.md`, oddíly 5 a 11.
 
 ## 2. Aby hra chytla i děti, které závodění neláká

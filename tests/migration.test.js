@@ -120,9 +120,12 @@ for(const c of FX.cases){
   if(c.expectGrade){
     ok('profil dostal rocnik, ktery mu nic nebere', after.profiles[0].grade===c.expectGrade,
        'rocnik '+after.profiles[0].grade);
+    // na mape je to, co patri do rocniku; co je z vyssiho, doskoci dite
+    // pres ukazku na konci cesty, takze se to nepocita za ztratu
     const vidi=JSON.parse(w.eval('JSON.stringify(visibleTracks(P()).map(t=>t.id))'));
-    const chybi=(c.expectOpen||[]).filter(id=>!vidi.includes(id));
-    ok('vsechny jeho trati zustaly na mape', chybi.length===0,
+    const patri=JSON.parse(w.eval('JSON.stringify(TRACKS.filter(t=>inGrade(P(),t)).map(t=>t.id))'));
+    const chybi=(c.expectOpen||[]).filter(id=>patri.includes(id) && !vidi.includes(id));
+    ok('vsechny jeho trati z jeho rocniku zustaly na mape', chybi.length===0,
        chybi.length?'z mapy zmizelo '+chybi.join(','):vidi.length+' trati na mape');
   }
 

@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,overallMastery,heatSpecs,collectionSpecs};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,overallMastery,heatSpecs,collectionSpecs};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -111,10 +111,13 @@ for(const t of A.TRACKS){
 let mixBad=0;
 const mixp=A.newProfile('M'); A.DB.profiles=[mixp]; A.DB.current=mixp.id;
 mixp.autoUnlock=false;                                   // vsechno otevrene
-const first20=new Set(A.stageKeys(0));
+// obory do dvaceti uz nejsou stupne jedne trati, ale samostatne trati,
+// takze je hlida odemykani; stupnovane trati ale platí dal
+const firstBridge=new Set(A.stageKeys(0));
+const crossing=k=>{const m=/^[as](\d+)p(\d+)$/.exec(k); return m && A.crossesTen(+m[1],+m[2]);};
 for(const it of A.buildRun(mixp,A.trackById('mix'))){
   if(it.kind==='clock'&&it.key!=='c1'){mixBad++;console.log('  !!  sampionat dal zacatecnikovi cas',it.disp);break;}
-  if(/^[as]/.test(it.key)&&!first20.has(it.key)){mixBad++;console.log('  !!  sampionat dal zacatecnikovi',it.text);break;}
+  if(crossing(it.key)&&!firstBridge.has(it.key)){mixBad++;console.log('  !!  sampionat dal zacatecnikovi tezsi most',it.text);break;}
   if(/^k/.test(it.key)&&it.key.slice(2)!=='b1'){mixBad++;console.log('  !!  sampionat dal zacatecnikovi krok do tisice',it.text);break;}
 }
 console.log('sampionat respektuje stupne:',mixBad?'ne':'ano');
@@ -185,32 +188,66 @@ if(A.visibleTracks(q0).some(t=>t.id==='school')){runBad++;console.log('  !!  tra
 if(A.buildRun(q0,A.trackById('school')).length!==20){runBad++;console.log('  !!  nouzovy zavod nema 20 otazek');}
 console.log('chyb v zavodech podle kapitoly:',runBad);
 
-// 6. stupne prechodu pres desitku pokryji cely obor a radi se od lehciho
+// 6. obory prvniho rocniku a mosty pres desitku
+//
+// Obory a mosty musi dohromady pokryt cely obor do dvaceti a nesmi se
+// prekryvat, jinak by nekterý priklad nemel svoje misto na mape.
+// Prvni rocnik je zebrik oboru, kazdy obor je vlastni trat; prechod pres
+// desitku je az druhy rocnik a ma vlastni trat se ctyrmi mosty.
 let stBad=0;
 const all20=new Set();
 A.ADD.forEach(f=>{all20.add(A.ak(f.a,f.b)); all20.add(A.sk(f.a,f.b));});
 const covered=new Set(); let overlap=0;
-A.E_STAGES.forEach((st,i)=>{
-  const ks=A.stageKeys(i);
-  if(!ks.length){stBad++;console.log('  !!  prazdny stupen',st.id);}
+A.BANDS.forEach(b=>{
+  const ks=A.bandKeys(b.id);
+  if(ks.length<4){stBad++;console.log('  !!  obor',b.id,'ma prilis malo prikladu:',ks.length);}
   for(const k of ks){ if(covered.has(k)) overlap++; covered.add(k); }
 });
-if(overlap){stBad++;console.log('  !!  stupne se prekryvaji o',overlap,'klicu');}
-if(covered.size!==all20.size){stBad++;console.log('  !!  stupne nepokryly cely obor',covered.size,'z',all20.size);}
-// zacatecnik dostane jen prechod bez desitky
-const beg=A.newProfile('Z'); A.DB.profiles=[beg]; A.DB.current=beg.id;
-if(A.as20Stage(beg)!==0){stBad++;console.log('  !!  zacatecnik nezacina prvnim stupnem');}
-const first=new Set(A.stageKeys(0));
-const run0=A.buildRun(beg,A.trackById('a20'));
-for(const it of run0) if(!first.has(it.key)){stBad++;console.log('  !!  zacatecnik dostal prechod pres desitku',it.text);break;}
-// po zvladnuti prvniho stupne se posune dal a starsi se vraci jako opakovani
-A.stageKeys(0).forEach(k=>beg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
-if(A.as20Stage(beg)!==1){stBad++;console.log('  !!  po zvladnuti prvniho stupne se neposunul');}
-const run1=A.buildRun(beg,A.trackById('a20'));
-const inFocus=run1.filter(it=>new Set(A.stageKeys(1)).has(it.key)).length;
-if(inFocus<run1.length*0.5){stBad++;console.log('  !!  druhy stupen nenese zavod',inFocus+'/'+run1.length);}
-if(inFocus===run1.length){stBad++;console.log('  !!  chybi opakovani drivejsiho uciva');}
-console.log('chyb ve stupnich do dvaceti:',stBad);
+A.E_STAGES.forEach((st,i)=>{
+  const ks=A.stageKeys(i);
+  if(!ks.length){stBad++;console.log('  !!  prazdny most',st.id);}
+  for(const k of ks){ if(covered.has(k)) overlap++; covered.add(k); }
+});
+if(overlap){stBad++;console.log('  !!  obory a mosty se prekryvaji o',overlap,'klicu');}
+if(covered.size!==all20.size){stBad++;console.log('  !!  obory a mosty nepokryly cely obor',covered.size,'z',all20.size);}
+// v oborech prvniho rocniku nesmi byt ani jeden prechod pres desitku
+for(const b of A.BANDS) for(const k of A.bandKeys(b.id)){
+  const m=/^[as](\d+)p(\d+)$/.exec(k);
+  if(m && A.crossesTen(+m[1],+m[2])){stBad++;console.log('  !!  obor',b.id,'pustil prechod pres desitku',k);break;}
+}
+// a soucet musi sedet do oboru, tedy zadne 20 - 10 hned v prvnim tydnu
+for(const b of A.BANDS) for(const k of A.bandKeys(b.id)){
+  const m=/^[as](\d+)p(\d+)$/.exec(k), soucet=+m[1]+ +m[2];
+  if(soucet<b.lo||soucet>b.hi){stBad++;console.log('  !!  obor',b.id,'ma priklad mimo rozsah',k);break;}
+}
+// zacatecnik dostane opravdu jen soucty do tri
+const beg=A.newProfile('Z',1); A.DB.profiles=[beg]; A.DB.current=beg.id;
+const prvni=new Set(A.bandKeys('a3'));
+for(const it of A.buildRun(beg,A.trackById('a3')))
+  if(!prvni.has(it.key)){stBad++;console.log('  !!  zacatecnik dostal priklad mimo prvni obor',it.text);break;}
+for(const it of A.buildRun(beg,A.trackById('a3')))
+  if(it.answer>3||it.answer<0){stBad++;console.log('  !!  zacatecnik dostal vysledek mimo tri',it.text,it.answer);break;}
+// a dalsi obory ma zamcene, dokud ten prvni nezvladne
+if(A.unlockState(beg,A.trackById('a5')).open){stBad++;console.log('  !!  druhy obor je otevreny hned');}
+A.bandKeys('a3').forEach(k=>beg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
+if(!A.unlockState(beg,A.trackById('a5')).open){stBad++;console.log('  !!  zvladnuty prvni obor neotevrel druhy');}
+// druhy obor nese zavod a prvni se vraci jako opakovani
+const run1=A.buildRun(beg,A.trackById('a5'));
+const inFocus=run1.filter(it=>new Set(A.bandKeys('a5')).has(it.key)).length;
+if(inFocus<run1.length*0.5){stBad++;console.log('  !!  druhy obor nenese zavod',inFocus+'/'+run1.length);}
+if(inFocus===run1.length){stBad++;console.log('  !!  chybi opakovani prvniho oboru');}
+// mosty: zacatecnik zacina devitkou a po zvladnuti se posune
+const br=A.newProfile('B',2); A.DB.profiles=[br]; A.DB.current=br.id;
+if(A.bridgeStage(br)!==0){stBad++;console.log('  !!  zacatecnik nezacina prvnim mostem');}
+const bfirst=new Set(A.stageKeys(0));
+for(const it of A.buildRun(br,A.trackById('bridge')))
+  if(!bfirst.has(it.key)){stBad++;console.log('  !!  zacatecnik dostal tezsi most',it.text);break;}
+A.stageKeys(0).forEach(k=>br.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
+if(A.bridgeStage(br)!==1){stBad++;console.log('  !!  po zvladnuti prvniho mostu se neposunul');}
+// most je otevreny od zacatku druhe tridy, nema cekat na cely prvni rocnik
+if(!A.unlockState(A.newProfile('B2',2),A.trackById('bridge')).open){
+  stBad++;console.log('  !!  most na druhaka ceka za celym prvnim rocnikem');}
+console.log('chyb v oborech a mostech:',stBad);
 
 // 7. neumime-li kapitolu, nesmi jit vybrat, a ulozeny profil se srovna
 let selBad=0, offered=0, blocked=0;
@@ -254,11 +291,14 @@ for(const f of teens.slice(0,8)) for(let i=0;i<20;i++){
     if(val!==it.answer||it.answer<0||it.answer>20){teenBad++;console.log('  !!  spatny spoj do dvaceti',k,it.text,it.answer);break;}
   }
 }
-// stupne: prvni je do desiti, druhy jsou desitky, teprve pak mosty
-const st0=new Set(A.stageKeys(0)), st1=new Set(A.stageKeys(1));
-if(!st0.has(A.ak(3,4))||st0.has(A.ak(4,13))){teenBad++;console.log('  !!  prvni stupen neni obor do desiti');}
-if(!st1.has(A.ak(4,13))||st1.has(A.ak(8,5))){teenBad++;console.log('  !!  druhy stupen nejsou desitky bez prechodu');}
-if(A.E_STAGES.length!==6){teenBad++;console.log('  !!  stupnu neni sest',A.E_STAGES.length);}
+// obory: prvni je do tri, desitkove spoje jsou az v patnactce a dvacitce
+const b3=new Set(A.bandKeys('a3')), b15=new Set(A.bandKeys('a15')), b20=new Set(A.bandKeys('a20'));
+if(!b3.has(A.ak(1,2))||b3.has(A.ak(3,4))){teenBad++;console.log('  !!  prvni obor neni obor do tri');}
+if(b3.has(A.sk(10,10))){teenBad++;console.log('  !!  prvni obor pustil 20 - 10');}
+if(!b15.has(A.ak(3,12))||b15.has(A.ak(6,13))){teenBad++;console.log('  !!  patnactka nesedi');}
+if(!b20.has(A.ak(6,13))||!b20.has(A.sk(10,10))){teenBad++;console.log('  !!  dvacitka nesedi');}
+if(A.E_STAGES.length!==4){teenBad++;console.log('  !!  mostu nejsou ctyri',A.E_STAGES.length);}
+if(A.BANDS.length!==6){teenBad++;console.log('  !!  oboru neni sest',A.BANDS.length);}
 // kapitola prvniho rocniku musi dat desitkove spoje a zadny prechod
 const ch15=A.CURRICULA.find(c=>c.id==='nns-matysek-1').chapters.find(c=>c.n===15);
 const k15=A.poolKeys(ch15.pool);
@@ -277,9 +317,9 @@ console.log('chyb v oboru do dvaceti bez prechodu:',teenBad);
 let opBad=0;
 const op=A.newProfile('O');
 A.DB.profiles=[op]; A.DB.current=op.id;
-A.trackKeys(op,A.trackById('a20')).forEach(k=>op.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
+A.trackKeys(op,A.trackById('bridge')).forEach(k=>op.facts[k]={lv:5,reps:9,ok:9,bad:0,best:900,seen:Date.now()});
 A.rememberUnlocks(op);
-if(!op.opened.a100){opBad++;console.log('  !!  zvladnuta dvacitka neotevrela stovku');}
+if(!op.opened.a100){opBad++;console.log('  !!  zvladnuty prechod pres desitku neotevrel stovku');}
 op.facts={};                                  // pribylo ucivo, zvladnuti spadlo na nulu
 if(!A.unlockState(op,A.trackById('a100')).open){opBad++;console.log('  !!  otevrena trat se zase zavrela');}
 op.force.a100=false;                          // rodic ji ale zavrit smi

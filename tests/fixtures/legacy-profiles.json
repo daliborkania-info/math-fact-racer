@@ -1220,6 +1220,153 @@
      }
     ]
    }
+  },
+  {
+   "id": "v7-pred-obory",
+   "note": "zari 2026, prvnak z verze, kde byl cely prvni rocnik v jedine trati a20 otevrene vsem. Po rozdeleni na obory do 3, 5, 7, 10, 15 a 20 mu musi zustat otevreny cely zebrik, jinak by najednou stal pred zamcenou dvacitkou, na ktere vcera zavodil",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "t1",
+    "clock",
+    "school"
+   ],
+   "expectClosed": [
+    "t2",
+    "a100",
+    "a1000"
+   ],
+   "expectChapter": 15,
+   "expectWorld": "trail",
+   "expectGrade": 1,
+   "expectStars": [
+    "a3p4",
+    "m2x3"
+   ],
+   "expectNoStars": [
+    "s2p3",
+    "a4p13",
+    "a5p9"
+   ],
+   "db": {
+    "current": "poldA",
+    "sound": true,
+    "lang": "cs",
+    "pin": "jkl012",
+    "profiles": [
+     {
+      "id": "poldA",
+      "name": "Kubik",
+      "lang": "cs",
+      "facts": {
+       "a3p4": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 2200,
+        "seen": 1757000000000
+       },
+       "s2p3": {
+        "lv": 3,
+        "reps": 7,
+        "ok": 6,
+        "bad": 1,
+        "best": 2600,
+        "seen": 1757000000000
+       },
+       "a4p13": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 3,
+        "bad": 2,
+        "best": 3800,
+        "seen": 1757000000000
+       },
+       "a5p9": {
+        "lv": 3,
+        "reps": 8,
+        "ok": 6,
+        "bad": 2,
+        "best": 3100,
+        "seen": 1757000000000
+       },
+       "m2x3": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 1900,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "a3p4": true,
+       "m2x3": true
+      },
+      "best": {
+       "a20": {
+        "dist": 108,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "a20": 2
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha"
+      ],
+      "runner": "pet_lupi",
+      "xp": {
+       "pet_lupi": 54
+      },
+      "coins": 96,
+      "parts": 8,
+      "paints": [],
+      "paint": {},
+      "jobRuns": {
+       "money": 1
+      },
+      "trackRuns": {
+       "a20": 5,
+       "t1": 1
+      },
+      "opened": {
+       "a20": true,
+       "t1": true,
+       "clock": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 15,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-1",
+      "chapter": 15,
+      "chapterMode": "soft",
+      "world": "trail",
+      "grade": 1,
+      "streak": 2,
+      "lastDay": null,
+      "bestStreak": 3,
+      "runs": 6,
+      "totalOk": 88,
+      "totalAns": 104,
+      "msSum": 280000,
+      "msN": 100,
+      "created": 1757500000000
+     }
+    ]
+   }
   }
  ]
 }

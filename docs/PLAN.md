@@ -333,6 +333,24 @@ bylo přeřazení do vyššího ročníku.
 
 ---
 
+## Krok 4d. První ročník po oborech. HOTOVO, září 2026
+
+Přišlo z hraní: prvňák dostal hned v prvním týdnu 20 - 10. Celý první ročník
+byl jedna trať `a20` a její první stupeň byl "všechno do deseti bez přechodu",
+do čehož spadne i 10 + 10. Učebnice postupuje po číselných oborech, jedno číslo
+za druhým, a mapa to teď kopíruje: **šest oborů, každý vlastní místo na mapě**,
+do 3, do 5, do 7, do 10, do 15 a do 20, všechny bez přechodu přes desítku.
+**Přechod přes desítku je vlastní trať a patří do druhé třídy**, protože ho
+učebnice bere až ve čtvrtém dílu; stovka teď stojí na něm, ne na posledním
+oboru. Podrobnosti v `PROJECT-STATE.md`, oddíl 4.
+
+**Na co si dát pozor.** Stará dvacítka byla otevřená všem, takže migrace musí
+celý žebřík otevřít každému, kdo už hrál; pozná se to podle toho, že profil
+nemá zapsaný nejmenší obor. A nejmenší obor má čtyři příklady, takže se
+v závodě opakují; proto se míchání ptá dál do fronty, ne jen na souseda.
+
+---
+
 ## Krok 5. Vlna B, nové vstupní prvky
 
 Pořadí a rozbor jsou v `PROJECT-STATE.md`, oddíly 12b a 12c bod B.

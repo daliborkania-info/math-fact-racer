@@ -91,6 +91,7 @@ function load(){
     seedStars(p);
     seedWorld(p);
     seedGrade(p);
+    seedBands(p);
   }
 }
 /* The workshop, added later. An older profile has none of this and must
@@ -190,22 +191,41 @@ for(let teen=11; teen<=19; teen++) for(let d=1; d<=9-(teen%10); d++) ADD.push({a
    not count as crossing one. */
 const crossesTen = (a,b) => (a % 10) + (b % 10) > 10;
 
-/* Crossing the ten is not one skill but five, and they are not equally
+/* The first year is not one skill and not one track. The books add one
+   number at a time and practise everything inside the range they have
+   reached: to three, to five, to seven, to ten, then the teens without
+   ever leaving the ten, first to fifteen and then to twenty. A child in
+   the first weeks has no business meeting 20 - 10, and putting the whole
+   of the first year behind one door did exactly that.
+   Each range is therefore a place of its own, and it holds only the
+   facts it introduces; everything earlier comes back as review through
+   the Leitner box, the same shape as every other track here.
+   The ranges are read off the first year map in docs/kurikulum. */
+const BANDS = [
+  {id:"a3",  lo:2,  hi:3},
+  {id:"a5",  lo:4,  hi:5},
+  {id:"a7",  lo:6,  hi:7},
+  {id:"a10", lo:8,  hi:10},
+  {id:"a15", lo:11, hi:15},
+  {id:"a20", lo:16, hi:20}
+];
+const inBand = (b, f) => !crossesTen(f.a, f.b) && (f.a + f.b) >= b.lo && (f.a + f.b) <= b.hi;
+function bandKeys(id){
+  const b = BANDS.find(x => x.id === id) || BANDS[0];
+  const out = [];
+  for(const f of ADD) if(inBand(b, f)) out.push(ak(f.a,f.b), sk(f.a,f.b));
+  return out;
+}
+
+/* Crossing the ten is not one skill but four, and they are not equally
    hard. Making ten from a nine is the easiest bridge and gets taught
    first, then eight, then seven, then the rest. The order is lifted from
-   Matyskova matematika part four, which devotes a whole chapter to each,
-   and it applies whether or not a curriculum is selected: a child new to
-   the track meets sums below ten before anything crosses it.
+   Matyskova matematika part four, which devotes a whole chapter to each.
    A fact belongs to the stage of its larger addend, which is the chapter
-   where the book first teaches it.
-   Ahead of all the bridges sits the whole of the first grade: the teens
-   with the ten parked in front and nothing crossing it. It is easier
-   than any bridge and the books teach it a year earlier, so it is the
-   second stage, not the last. */
+   where the book first teaches it. The whole of it is second year work,
+   which is why it is a track of its own and not the tail of the first
+   year's ladder. */
 const E_STAGES = [
-  // adding to a whole ten never needs regrouping, so it belongs with the easy ones
-  {id:"e1", has:(a,b) => Math.max(a,b) <= 10 && !crossesTen(a,b)},
-  {id:"e2", has:(a,b) => Math.max(a,b) > 10  && !crossesTen(a,b)},
   {id:"e3", has:(a,b) => crossesTen(a,b) && Math.max(a,b) === 9},
   {id:"e4", has:(a,b) => crossesTen(a,b) && Math.max(a,b) === 8},
   {id:"e5", has:(a,b) => crossesTen(a,b) && Math.max(a,b) === 7},
@@ -316,19 +336,28 @@ function stageKeys(i){
    the tables. A track without a grade belongs to no particular year:
    the trouble spots are useful from the first week, and the school track
    follows whatever chapter the parent picked. */
+/* The order here is the order of the road on the map, so it runs the way
+   the school years do: the first year's ranges, then crossing the ten,
+   then the tables and the hundred, then the third year. */
 const TRACKS = [
+  {id:"a3",   op:"band",                                  env:"dunes",    grade:1},
+  {id:"a5",   op:"band",                                  env:"shore",    grade:1},
+  {id:"a7",   op:"band",                                  env:"palms",    grade:1},
+  {id:"a10",  op:"band",                                  env:"bay",      grade:1},
+  {id:"a15",  op:"band",                                  env:"cliffs",   grade:1},
+  {id:"a20",  op:"band",                                  env:"beach",    grade:1},
+  {id:"bridge",op:"bridge",                               env:"pier",     grade:2},
   {id:"t1",   op:"mult",  tables:[1,2,5,10],              env:"meadow",   grade:2},
   {id:"t2",   op:"mult",  tables:[3,4],                   env:"forest",   grade:2},
   {id:"t3",   op:"mult",  tables:[6,7],                   env:"canyon",   grade:2},
   {id:"t4",   op:"mult",  tables:[8,9],                   env:"peaks",    grade:2},
   {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city",     grade:2},
   {id:"d1",   op:"div",                                   env:"space",    grade:2},
+  {id:"a100", op:"as100",                                 env:"ocean",    grade:2},
+  {id:"clock",op:"clock",                                 env:"clocktown",grade:2},
   {id:"beyond",op:"beyond",                               env:"savanna",  grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
-  {id:"a20",  op:"as20",                                  env:"beach",    grade:1},
-  {id:"a100", op:"as100",                                 env:"ocean",    grade:2},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
-  {id:"clock",op:"clock",                                 env:"clocktown",grade:2},
   {id:"mix",  op:"mix",                                   env:"night",    grade:2},
   {id:"weak", op:"weak",                                  env:"storm",    grade:1},
   {id:"school", op:"school",                              env:"school"}
@@ -476,7 +505,12 @@ function trackKeys(p, tr){
   if(tr.op === "school") return schoolPool(p);
   if(tr.op === "mult") return multFactsFor(tr.tables).map(f => mk(f.a,f.b));
   if(tr.op === "div")  return MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
-  if(tr.op === "as20") return ADD.map(f => ak(f.a,f.b)).concat(ADD.map(f => sk(f.a,f.b)));
+  if(tr.op === "band") return bandKeys(tr.id);
+  if(tr.op === "bridge"){
+    const out = [];
+    for(let i = 0; i < E_STAGES.length; i++) out.push(...stageKeys(i));
+    return out;
+  }
   if(tr.op === "as100")return H_BUCKETS.map(b => "p"+b.id).concat(H_BUCKETS.map(b => "n"+b.id));
   if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
@@ -494,7 +528,7 @@ function stageIndex(p, keysAt, count){
   return count - 1;
 }
 // which bridge over ten is being built
-function as20Stage(p){ return stageIndex(p, stageKeys, E_STAGES.length); }
+function bridgeStage(p){ return stageIndex(p, stageKeys, E_STAGES.length); }
 // how finely the child can already read a dial
 function clockStage(p){ return stageIndex(p, i => [C_BUCKETS[i].id], C_BUCKETS.length); }
 // which step into the thousand is being taken; plus and minus of one
@@ -511,9 +545,9 @@ function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), 
    has to respect that, otherwise it hands out material that the track
    itself would refuse to. */
 function reachedKeys(p, tr){
-  if(tr.op === "as20"){
+  if(tr.op === "bridge"){
     const out = [];
-    for(let i = 0; i <= as20Stage(p); i++) out.push(...stageKeys(i));
+    for(let i = 0; i <= bridgeStage(p); i++) out.push(...stageKeys(i));
     return out;
   }
   if(tr.op === "clock") return C_BUCKETS.slice(0, clockStage(p) + 1).map(b => b.id);
@@ -554,6 +588,26 @@ function seedLegacyGates(p){
   const was20 = before.map(f => ak(f.a,f.b)).concat(before.map(f => sk(f.a,f.b)));
   if(mastery(p, was20) >= .6) p.opened.a100 = true;
 }
+/* One time migration, September 2026. The twenty track used to be one
+   door holding the whole of the first year and the bridges over ten; it
+   is now a ladder of ranges plus a bridge track of its own. Anyone who
+   could already race there keeps every range, because all of them are
+   easier than what that one door used to serve, and the bridges are
+   open to everybody anyway.
+   Safe to delete once no device can still be running the older build. */
+function seedBands(p){
+  p.opened = p.opened || {};
+  // the smallest range is open to everyone and every render of the map
+  // writes that down, so a profile that has it has already been through
+  // here and there is nothing to do
+  if(p.opened.a3) return;
+  // a profile with any history at all predates the split, and the old
+  // twenty track was open to everybody, so it keeps the whole ladder;
+  // one created just now has no history and walks it from the bottom
+  const played = (p.runs || 0) > 0 || Object.keys(p.facts || {}).length > 0;
+  if(!played) return;
+  for(const b of BANDS) p.opened[b.id] = true;
+}
 /* Called on every render of the map, so the moment a track opens it is
    written down and stays written down. */
 function rememberUnlocks(p){
@@ -573,10 +627,20 @@ function unlockState(p, tr){
   const m = id => mastery(p, trackKeys(p, trackById(id)));
   // safety valve: after ten races the next track opens regardless, so nobody gets stuck
   const many = id => ((p.trackRuns || {})[id] || 0) >= 10;
+  // each school year has one door that is open from the start, so a
+  // child does not have to walk through last year's ladder to reach
+  // what the class is doing now: the smallest range for the first year,
+  // crossing the ten and the first table for the second
   switch(tr.id){
     // telling the time does not build on any of the arithmetic, so it
     // never waits for it
-    case "t1": case "a20": case "clock": case "school": return {open:true};
+    case "t1": case "a3": case "bridge": case "clock": case "school": return {open:true};
+    // the first year is a ladder of ranges, one number at a time
+    case "a5":  return (m("a3")  >= .7 || many("a3"))  ? {open:true} : {open:false, why: t("lockFinish", t("trk_a3"))};
+    case "a7":  return (m("a5")  >= .7 || many("a5"))  ? {open:true} : {open:false, why: t("lockFinish", t("trk_a5"))};
+    case "a10": return (m("a7")  >= .7 || many("a7"))  ? {open:true} : {open:false, why: t("lockFinish", t("trk_a7"))};
+    case "a15": return (m("a10") >= .7 || many("a10")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a10"))};
+    case "a20": return (m("a15") >= .7 || many("a15")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a15"))};
     case "t2": return (m("t1") >= .7 || many("t1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t1"))};
     case "t3": return (m("t2") >= .7 || many("t2")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t2"))};
     case "t4": return (m("t3") >= .7 || many("t3")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t3"))};
@@ -590,7 +654,9 @@ function unlockState(p, tr){
     // opens earlier than the thousand does, and its own first bucket
     // keeps the child on two digit numbers until they are solid
     case "round": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
-    case "a100": return (m("a20") >= .6 || many("a20")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a20"))};
+    // the hundred is built on being able to cross a ten, not merely on
+    // having finished the first year's ranges
+    case "a100": return (m("bridge") >= .6 || many("bridge")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_bridge"))};
     case "a1000": return (m("a100") >= .6 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     case "mix":  return (unlockState(p, trackById("t5")).open)
                  ? {open:true} : {open:false, why: t("lockOpen", t("trk_t5"))};
@@ -888,8 +954,17 @@ function buildRun(p, tr){
   } else if(tr.op === "div"){
     const all = MULT.filter(f => f.a > 1).map(f => dk(f.a,f.b));
     keys = sampleKeys(p, all, n, 5);
-  } else if(tr.op === "as20"){
-    const si = as20Stage(p);
+  } else if(tr.op === "band"){
+    // the range being learned carries the race and everything below it
+    // comes back as review, exactly like the multiplication tracks
+    const earlier = [];
+    for(const b of BANDS){
+      if(b.id === tr.id) break;
+      earlier.push(...bandKeys(b.id));
+    }
+    keys = focusAndReview(p, bandKeys(tr.id), earlier, n, 5);
+  } else if(tr.op === "bridge"){
+    const si = bridgeStage(p);
     const review = [];
     for(let i = 0; i < si; i++) review.push(...stageKeys(i));
     keys = focusAndReview(p, stageKeys(si), review, n, 5);
@@ -930,8 +1005,18 @@ function buildRun(p, tr){
   if(!keys || !keys.length) keys = sampleKeys(p, multFactsFor([1,2,5,10]).map(f => mk(f.a,f.b)), n, 5);
   // shuffle, but never leave the same fact twice in a row
   for(let i = keys.length-1; i > 0; i--){ const j = ri(0,i); [keys[i],keys[j]] = [keys[j],keys[i]]; }
+  // A neighbour swap is not enough once a pool is tiny: the first range
+  // of the first year holds four facts and twenty questions, so the pass
+  // has to look further down the queue for something different rather
+  // than only at the next one.
   for(let i = 1; i < keys.length; i++){
-    if(keys[i] === keys[i-1] && i+1 < keys.length){ [keys[i],keys[i+1]] = [keys[i+1],keys[i]]; }
+    if(keys[i] !== keys[i-1]) continue;
+    for(let j = i + 1; j < keys.length; j++){
+      if(keys[j] === keys[i-1]) continue;
+      if(j + 1 < keys.length && keys[j+1] === keys[i]) continue;
+      [keys[i], keys[j]] = [keys[j], keys[i]];
+      break;
+    }
   }
   const out = keys.slice(0, n).map(itemFromKey);
   // a bucket key is a whole family, so two neighbours drawn from the
@@ -1421,10 +1506,25 @@ const ENVS = Object.assign({
   // brown stone, the one colour family nothing else uses
   cave:{   hill1:"#9c7b5e", hill2:"#6f543c", dec:"#4a3626", dec2:"#32241a", tok:"stone"}
 }, {
+  // The first year's ranges, a coastline that walks along beside the
+  // beach the twenty track already had: the child goes from the dunes
+  // down to the water and along it, and crossing the ten is the pier.
+  dunes:  pal( 46,  90, 72, "shell"),
+  shore:  pal( 38, 190, 76, "shell"),
+  palms:  pal(105, 150, 58, "leaf"),
+  bay:    pal(186, 200, 64, "drop"),
+  cliffs: pal( 28,  95, 56, "stone"),
+  pier:   pal(205, 215, 54, "crystal"),
   // The trail: woods, water and open ground, walked rather than driven.
   // The ground stays in the colours ground comes in; where a place is
   // genuinely another colour, the heather and the blossom, it sits above
   // green rather than turning the whole field purple.
+  tr_moss:    pal(112, 130, 68, "flower"),
+  tr_ferns:   pal(128, 145, 58, "leaf"),
+  tr_birch:   pal( 88, 110, 72, "leaf"),
+  tr_clearing:pal(100, 125, 62, "flower"),
+  tr_creek:   pal(174, 190, 62, "drop"),
+  tr_log:     pal( 35,  95, 52, "stone"),
   tr_glade:  pal( 96, 130, 64, "flower"),
   tr_pines:  pal(145, 160, 44, "leaf"),
   tr_heath:  pal(288, 120, 58, "flower", {h2:120, l2:44, sat:32}),
@@ -1443,6 +1543,12 @@ const ENVS = Object.assign({
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
+  sk_meadowair:pal(198, 210, 62, "drop",  {h2:110, l2:78}),
+  sk_hilltop:  pal(202, 215, 58, "star",  {h2:150, l2:80}),
+  sk_updraft:  pal(208, 220, 60, "leaf",  {h2: 60, l2:82}),
+  sk_first:    pal(196, 205, 64, "drop",  {h2:190, l2:84}),
+  sk_flock:    pal(214, 225, 54, "star",  {h2:220, l2:80}),
+  sk_arch:     pal(226, 300, 52, "crystal", {h2:280, l2:80}),
   sk_dawn:   pal(205, 285, 64, "star",    {h2: 38, l2:86}),
   sk_clouds: pal(206, 210, 58, "drop",    {h2:200, l2:83}),
   sk_sunset: pal(258, 330, 46, "star",    {h2: 18, l2:74}),
@@ -1460,6 +1566,12 @@ const ENVS = Object.assign({
   sk_kite:   pal(200, 140, 52, "leaf",    {h2:150, l2:79}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
+  dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
+  dp_tide:   pal(196, 170, 66, "drop",    {h2:190, l2:50}),
+  dp_grass:  pal(180, 150, 60, "leaf",    {h2:155, l2:40}),
+  dp_coral:  pal(194,  10, 62, "shell",   {h2: 10, l2:52}),
+  dp_drift:  pal(200, 205, 58, "drop",    {h2:205, l2:42}),
+  dp_arch:   pal(206, 250, 54, "crystal", {h2:245, l2:36}),
   dp_shallow:pal(190, 165, 62, "shell",   {h2:185, l2:44}),
   dp_kelp:   pal(185, 140, 52, "leaf",    {h2:148, l2:32}),
   dp_reef:   pal(192,   5, 56, "shell",   {h2:345, l2:40}),
@@ -1491,18 +1603,24 @@ const WORLDS = [
   {id:"circuit", rides:["ri_auto","ri_bugina","ri_motor","ri_mech"], env:{}},
   {id:"trail", rides:["pet_kiki","pet_lupi","pet_mecha","pet_bimbo","pet_zub","pet_duha",
                       "pet_puk","pet_flek","pet_sova","pet_drak","pet_hvezd","pet_noc"],
-   env:{t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
-        d1:"tr_burrow", beyond:"tr_field", round:"tr_quarry", a20:"tr_brook",
+   env:{a3:"tr_moss", a5:"tr_ferns", a7:"tr_birch", a10:"tr_clearing", a15:"tr_creek",
+        a20:"tr_brook", bridge:"tr_log",
+        t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
+        d1:"tr_burrow", beyond:"tr_field", round:"tr_quarry",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
-   env:{t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
-        d1:"sk_void", beyond:"sk_dust", round:"sk_storm", a20:"sk_breeze",
+   env:{a3:"sk_meadowair", a5:"sk_hilltop", a7:"sk_updraft", a10:"sk_first", a15:"sk_flock",
+        a20:"sk_breeze", bridge:"sk_arch",
+        t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
+        d1:"sk_void", beyond:"sk_dust", round:"sk_storm",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
-   env:{t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
-        d1:"dp_abyss", beyond:"dp_sand", round:"dp_cavern", a20:"dp_lagoon",
+   env:{a3:"dp_pool", a5:"dp_tide", a7:"dp_grass", a10:"dp_coral", a15:"dp_drift",
+        a20:"dp_lagoon", bridge:"dp_arch",
+        t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
+        d1:"dp_abyss", beyond:"dp_sand", round:"dp_cavern",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -3179,7 +3297,8 @@ function heatStrip(title, cols, tiles){ return {title, kind:"strip", cols, tiles
    its example is derived rather than written down twice. */
 const HEAT_10 = [1,2,3,4,5,6,7,8,9,10];
 const HEAT_9  = [2,3,4,5,6,7,8,9,10];
-const E_EX = ["3+4", "13+4", "9+5", "8+6", "7+5", "6+5"];
+const E_EX = ["9+5", "8+6", "7+5", "6+5"];
+const B_EX = {a3:"1+2", a5:"2+3", a7:"3+4", a10:"4+6", a15:"12+3", a20:"13+6"};
 const H_EX = {h1:"34+5", h2:"37+6", h3:"30+40", h4:"23+41", h5:"25+47"};
 const K_EX = {b1:"300+200", b2:"342+5", b3:"347+6", b4:"320+40", b5:"342+25", b6:"372+45"};
 const C_EX = {c1:"7:00", c2:"7:30", c3:"7:15", c4:"7:20", c5:"7:23", c6:"19:45"};
@@ -3213,7 +3332,11 @@ function heatSpecs(p){
     ({label: X_EX[b.id], keys:["xm" + b.id], tip: X_EX[b.id]}))
     .concat(X_BUCKETS.map(b =>
     ({label: divEx(X_EX[b.id]), keys:["xd" + b.id], tip: divEx(X_EX[b.id])})))));
-  push("a20", heatStrip(t("trk_a20"), 6, E_STAGES.map((st, i) =>
+  // the first year is one block of six ranges rather than six blocks of
+  // one, because a parent reads it as one ladder
+  push("a3", heatStrip(t("heatBands"), 6, BANDS.map(b =>
+    ({label: B_EX[b.id], keys: bandKeys(b.id), tip: B_EX[b.id] + " / " + minusEx(B_EX[b.id])}))));
+  push("bridge", heatStrip(t("trk_bridge"), 4, E_STAGES.map((st, i) =>
     ({label: E_EX[i], keys: stageKeys(i), tip: E_EX[i] + " / " + minusEx(E_EX[i])}))));
   push("a100", heatStrip(t("trk_a100"), 5,
     bucketTiles(H_EX, id => "p" + id, id => "n" + id)));
@@ -3623,6 +3746,7 @@ document.addEventListener("click", e => {
       seedStars(DB.profiles[i]);
       seedWorld(DB.profiles[i]);
       seedGrade(DB.profiles[i]);
+      seedBands(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>

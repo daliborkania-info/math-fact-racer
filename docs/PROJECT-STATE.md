@@ -2,6 +2,11 @@
 
 Poslední aktualizace: 12. září 2026, po světech a mapě
 
+**Opravená chyba, na kterou se přišlo hraním:** prvňák dostával hned v prvním
+týdnu 20 - 10, protože celý první ročník byl jedna trať s jedním velkým prvním
+stupněm. Od teď je to šest oborů podle učebnice a přechod přes desítku je až
+druhá třída; viz oddíl 4.
+
 **Novinka nad rámec plánu:** mapa se od teď skládá podle **ročníku**, do kterého
 dítě chodí, a učivo dalšího roku je za dílnou pod tlačítkem na ukázku. Je to
 `docs/PLAN.md`, krok 4c, a oddíl 7d níž.
@@ -206,20 +211,40 @@ u dlouho neviděných a u těch, kde je víc chyb než úspěchů. Neviděné ma
 3,2 a je jich na závod omezený počet. U násobilkových tratí je zhruba sedmdesát
 procent otázek z ohniska trati a třicet z dřívějších. Šampionát bere jen to, co
 by daná trať právě teď sama nabídla, viz `reachedKeys()`; u stupňovaných tratí,
-tedy dvacítky a hodin, tím nemůže podstrčit stupeň, na který dítě ještě nedošlo.
+tedy mostů, hodin a tisícovky, tím nemůže podstrčit stupeň, na který dítě ještě
+nedošlo, a u oborů prvního ročníku to hlídá odemykání a filtr ročníku.
 
-**Stupně přechodu přes desítku.** Trať do dvaceti není jeden pytel příkladů,
-má šest stupňů: `e1` obor do deseti a desítka jako sčítanec, `e2` desítkové
-spoje bez přechodu, tedy 13 + 4, `e3` přechod přes devítku, `e4` přes osmičku,
-`e5` přes sedmičku, `e6` zbytek. Přechod se pozná podle jednotek,
-`(a % 10) + (b % 10) > 10`, takže doplnění do celé desítky se za přechod
-nepočítá. Příklad patří do stupně svého většího sčítance. Pořadí mostů je převzaté ze čtvrtého dílu Matýskovy matematiky, který
-každému věnuje celou kapitolu, desítkové spoje jsou před nimi, protože je
-učebnice bere o rok dřív. Platí i bez zvolené učebnice. Závod nese
-aktuální stupeň ze sedmdesáti procent, zbytek je opakování už zvládnutých
-stupňů, tedy stejný tvar jako u násobilkových tratí. Díky tomu začátečník
-potká jen součty do deseti. Aktuální stupeň hledá `as20Stage()` jako první,
-kde zvládnutí nedosáhlo 0,7.
+**Obory prvního ročníku.** Celý první ročník býval jedna trať a to byla chyba:
+její první stupeň bylo "všechno do deseti bez přechodu", takže prvňák hned
+v prvním týdnu dostal 10 + 10 a 20 - 10. Učebnice postupuje jinak, přidává jedno
+číslo za druhým a procvičuje uvnitř dosaženého oboru. Od září 2026 to mapa
+kopíruje: **šest oborů, každý vlastní trať**, `BANDS` v `src/app.js`.
+
+| trať | součet | příkladů | odpovídá |
+| --- | --- | --- | --- |
+| a3 | 2 až 3 | 4 | 1. díl, kapitoly 4 a 5 |
+| a5 | 4 až 5 | 8 | 1. díl, kapitoly 6 až 8 |
+| a7 | 6 až 7 | 12 | 2. díl, kapitoly 9 a 10 |
+| a10 | 8 až 10 | 26 | 2. díl, kapitoly 11 až 14 |
+| a15 | 11 až 15 | 30 | 3. díl, kapitoly 15 a 16 |
+| a20 | 16 až 20 | 62 | 3. díl, kapitoly 17 a 18 |
+
+Obor drží **jen to, co sám zavádí**; dřívější se vrací jako opakování přes
+`focusAndReview()`, stejně jako u násobilkových tratí. V žádném oboru není
+přechod přes desítku. Obory se odemykají jeden po druhém, `a3` je otevřený
+vždycky, takže prvňák má na začátku jedno místo a pět zamčených před sebou.
+
+**Mosty přes desítku jsou vlastní trať a je to druhý ročník.** `bridge`, čtyři
+mosty: `e3` přes devítku, `e4` přes osmičku, `e5` přes sedmičku, `e6` zbytek.
+Pořadí je převzaté ze čtvrtého dílu Matýskovy matematiky, který každému věnuje
+celou kapitolu, a ten díl je druhá třída; proto přechod v prvním ročníku není.
+Přechod se pozná podle jednotek, `(a % 10) + (b % 10) > 10`, takže doplnění do
+celé desítky se za přechod nepočítá. Příklad patří k mostu svého většího
+sčítance. Závod nese aktuální most ze sedmdesáti procent, zbytek je opakování,
+tedy stejný tvar jako všude jinde. Aktuální most hledá `bridgeStage()` jako
+první, kde zvládnutí nedosáhlo 0,7. **Most je otevřený od začátku druhé třídy**,
+aby druhák nemusel projít celý žebřík prvního ročníku, než se k němu dostane.
+Na mostě pak stojí stovka, ne na posledním oboru.
 
 **Kbelíky přesnosti u hodin.** Trať hodin má stejný tvar jako stupně přechodu
 přes desítku, jen kbelíky jdou po přesnosti čtení: `c1` celé hodiny, `c2` půl,
@@ -322,8 +347,9 @@ se do průměrné doby odpovědi.
 
 ## 5. Trati
 
-Patnáct tratí, každá má vlastní generovaný okruh a vlastní prostředí v každém
-ze čtyř světů; okruh je na světě nezávislý, mění se jen krajina kolem něj.
+Jedenadvacet tratí, každá má vlastní generovanou cestu a vlastní prostředí
+v každém ze čtyř světů; tvar cesty je na trati, ne na světě, mění se s ním
+krajina kolem ní a to, čím cesta končí.
 
 | id | ročník | obsah |
 | --- | --- | --- |
@@ -335,7 +361,8 @@ ze čtyř světů; okruh je na světě nezávislý, mění se jen krajina kolem 
 | d1 | 2 | dělení |
 | beyond | 3 | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
 | round | 3 | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
-| a20 | 1 | sčítání a odčítání do 20, šest stupňů podle přechodu přes desítku |
+| a3, a5, a7, a10, a15, a20 | 1 | šest oborů prvního ročníku, sčítání a odčítání bez přechodu přes desítku, viz oddíl 4 |
+| bridge | 2 | sčítání a odčítání s přechodem přes desítku, čtyři mosty |
 | a100 | 2 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
 | a1000 | 3 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
 | clock | 2 | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
@@ -625,6 +652,10 @@ podle něj mapa**: jsou na ní tratě letošního ročníku a všech dřívějš
 Rozhoduje `inGrade(p, tr)` a ročník trati je v `TRACKS`, odečtený z map
 učebnic, viz tabulka v oddílu 5.
 
+**První ročník je žebřík šesti oborů**, ne jedna trať, viz oddíl 4. Prvňák tak
+na mapě nezačíná u jednoho velkého místa, ale u nejmenšího oboru a pět dalších
+vidí před sebou.
+
 **Dřívější ročník se nikdy neschovává** a žádné tlačítko zpátky není. Učivo
 minulého roku prostě zůstává na mapě, protože se k němu stejně vrací
 Leitnerova krabička a dítě ho potřebuje dál.
@@ -687,6 +718,9 @@ a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou 
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
 zakázku v dílně a hlídá, že se kruh odkrývá po jednom dílu za vyřešenou úlohu,
 že opravená úloha odkrývá taky a že je na konci kruh celý i po chybě.
+`items.test.js` navíc hlídá, že obory a mosty dohromady pokryjí celý obor do
+dvaceti a nepřekrývají se, že v oboru není jediný přechod přes desítku a že
+prvňákův první závod nevyleze nad tři.
 `flow.test.js` navíc projde celý ročníkový tok: založí prvňáka, ověří, že má
 krátkou mapu, rozbalí ukázku, spustí z ní trať a zkontroluje, že se ročník
 nezměnil a že přepnutí hráče ukázku složí.

@@ -42,21 +42,22 @@ ok('po vyberu tridy uz tlacitko jde', !q('[data-go]').hasAttribute('disabled'));
 click(q('[data-go]'));
 ok('rocnik se ulozil do profilu', DBg().profiles[0].grade===3, 'grade '+DBg().profiles[0].grade);
 ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
-ok('mapa ma 14 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===14,
+ok('mapa ma 20 ruznych cest', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===20,
    new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size+' okruhu');
 ok('trat hodin je na mape a odemcena od zacatku', /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
 // mapa uz neni svisly seznam: mista lezi podel cesty a zamcene je vidět taky
-ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===15 && qa('.worldroad path').length>0,
+ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===21 && qa('.worldroad path').length>0,
    qa('.world .place').length+' mist');
 ok('kazde misto ma svou polohu v mape', qa('.place').every(el=>/left:/.test(el.getAttribute('style')||'')));
 ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky a sedmičky/.test(txt()),
    qa('.place.locked').length+' zamcenych');
 ok('zamcene misto neni tlacitko', qa('.place.locked').every(el=>el.tagName!=='BUTTON'));
 ok('dilna je vlastni misto mimo rady trati', qa('.place.shopplace[data-act="shop"]').length===1);
-ok('misto ukazuje, kolik uz je ve sbirce', /0\/34/.test(txt()));
+ok('misto ukazuje, kolik uz je ve sbirce', /0\/4\b/.test(txt()));
 
 console.log('--- zavod s chybami ---');
-click(q('[data-act="play"]'));
+// naschval nasobilka, ne prvni misto v rade: souhrn nize se porovnava s ni
+click(qa('[data-act="play"]').find(b=>b.dataset.id==='t1'));
 ok('vyber zavodnika pred zavodem', qa('[data-pick]').length===6);
 click(qa('[data-pick]').find(b=>b.dataset.pick==='pet_kiki'));
 ok('vyber se ulozil', DBg().profiles[0].runner==='pet_kiki');
@@ -79,7 +80,7 @@ ok('vysledkova obrazovka', /medaile|Kolo dojeto/.test(txt()), txt().slice(0,60))
 ok('bez zargonu spoj', !/spoj/i.test(txt()));
 
 console.log('--- rekord a souper ---');
-click(q('[data-act="map"]')); click(q('[data-act="play"]')); click(q('[data-go]'));
+click(q('[data-act="map"]')); click(qa('[data-act="play"]').find(b=>b.dataset.id==='t1')); click(q('[data-go]'));
 await wait(300);
 ok('souper se zobrazuje', d.getElementById('rivalcar').style.display!=='none');
 // v zavodni liste tecky naopak rostou, aby vyplnily sirku mezi krizkem a poctem
@@ -298,7 +299,7 @@ d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));
 // kazda rodina, kterou ma dite v krabicce, musi mit v rodicovske sekci vlastni blok
 const chybi=ev(`(function(){
   const p=P();
-  const head={m:"heatMult",d:"trk_d1",a:"trk_a20",s:"trk_a20",p:"trk_a100",n:"trk_a100",
+  const head={m:"heatMult",d:"trk_d1",a:"heatBands",s:"heatBands",p:"trk_a100",n:"trk_a100",
               k:"trk_a1000",c:"trk_clock",w:"shopTitle"};
   const want=new Set(Object.keys(p.facts).filter(k=>p.facts[k].reps>0).map(k=>t(head[k[0]])));
   const have=new Set(heatSpecs(p).map(s=>s.title));
@@ -406,13 +407,13 @@ const prvni=()=>DBg().profiles.find(x=>x.name==='Prvňák');
 ok('prvnak ma na mape jen ucivo sveho rocniku',
    /Do dvaceti/.test(txt()) && !/Rozjezd|Hodiny|Do tisíce/.test(txt()), txt().slice(0,90));
 const mistPrvnak=qa('.place:not(.peekdoor)').length;
-ok('mapa prvnaka je kratka', mistPrvnak===3, mistPrvnak+' mist vcetne dilny');
+ok('mapa prvnaka je kratka', mistPrvnak===8, mistPrvnak+' mist vcetne dilny');
 ok('na konci cesty je tlacitko na priste', qa('.place.peekdoor').length===1 && /Co tě čeká příští rok/.test(txt()));
 ok('dilna je na mape i prvnakovi', qa('[data-act="shop"]').length===1);
 // ukazka rozbali dalsi rocnik, ale profil nechava na miste
 click(q('[data-act="peek"]'));
 const ukazka=qa('.place.peek');
-ok('ukazka rozbalila tratě dalsiho rocniku', ukazka.length===9, ukazka.length+' trati');
+ok('ukazka rozbalila tratě dalsiho rocniku', ukazka.length===10, ukazka.length+' trati');
 ok('ukazka ukazuje druhou tridu, ne tretí', /Rozjezd/.test(txt()) && !/Do tisíce/.test(txt()));
 ok('tratě z ukazky jdou spustit', ukazka.every(el=>el.tagName==='BUTTON' && el.dataset.act==='play'));
 ok('rocnik v profilu se nezmenil', prvni().grade===1, 'grade '+prvni().grade);
@@ -421,7 +422,7 @@ ok('o ukazce neni v ulozenych datech ani slovo', !/peek/i.test(JSON.stringify(DB
 click(ukazka.find(el=>el.dataset.id==='t1')); click(q('[data-go]'));
 ok('trat z ukazky se rozjela', ev('RUN && RUN.t.id')==='t1');
 click(q('[data-act="quit"]')); click(q('[data-yes]'));
-ok('po navratu je ukazka porad rozbalena', qa('.place.peek').length===9);
+ok('po navratu je ukazka porad rozbalena', qa('.place.peek').length===10);
 // prepnuti hrace ji slozi zpatky, stejne jako zavreni hry
 click(q('[data-act="players"]')); click(qa('[data-act="pick"]').find(b=>b.dataset.id===prvni().id));
 ok('prepnuti hrace ukazku slozilo', qa('.place.peek').length===0 && qa('.place.peekdoor').length===1);
@@ -433,7 +434,7 @@ ok('rodic ma prepinac rocniku', qa('[data-act="gradeset"]').length===4 && /Ročn
 click(qa('[data-act="gradeset"]').find(b=>b.dataset.gr==='2'));
 ok('rocnik prepnut', prvni().grade===2);
 click(q('[data-act="map"]'));
-ok('mapa druhaka je delsi', qa('.place:not(.peekdoor)').length===12 && /Rozjezd/.test(txt()),
+ok('mapa druhaka je delsi', qa('.place:not(.peekdoor)').length===18 && /Rozjezd/.test(txt()),
    qa('.place:not(.peekdoor)').length+' mist');
 ok('druhak vidi ukazku treti tridy', /Do tisíce/.test((click(q('[data-act="peek"]')), txt())));
 

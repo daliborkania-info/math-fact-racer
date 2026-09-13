@@ -47,7 +47,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `inverse_check` | zkouška správnosti jako obrácená operace | `pad` | podle nosného tématu | nové |
 | `rounding_10` | zaokrouhlování na desítky, dvojciferná i trojciferná | `pad` | 0 až 1000 | hotovo |
 | `rounding_100` | zaokrouhlování na stovky | `pad` | 0 až 1000 | hotovo |
-| `chain_3` | řetězec tří čísel, sčítání a odčítání | `pad` | 0 až 100 | nové |
+| `chain_3` | řetězec tří čísel, sčítání a odčítání, tři kbelíky podle oboru | `pad` | 0 až 100 | hotovo |
 | `order_of_ops` | pořadí operací bez závorek a se závorkami | `pad` | 0 až 1000 | nové |
 | `mult_beyond` | násobení mimo rozsah malé násobilky, 12 × 3, čtyři kbelíky podle toho, co se rozkládá | `pad` | do 1000 | hotovo |
 | `div_beyond` | dělení mimo rozsah malé násobilky, 56 : 4, totéž sezení pozpátku | `pad` | do 1000 | hotovo |

@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -26,6 +26,7 @@ const RANGE={
   k:[0,1000],      // plus a minus do tisice, vcetne kulateho tisice
   x:[11,999],      // za nasobilkou, soucin i vracene cislo
   o:[10,1000],     // zaokrouhleni, nejmensi desitka az kulaty tisic
+  q:[0,100],       // retezec tri cisel, nikdy pod nulu a nikdy pres sto
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -36,6 +37,7 @@ A.H_BUCKETS.forEach(b=>{keys.push('p'+b.id); keys.push('n'+b.id);});
 A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -156,6 +158,7 @@ A.H_BUCKETS.forEach(b=>{VALID.add('p'+b.id); VALID.add('n'+b.id);});
 A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -499,6 +502,90 @@ A.trackKeys(og,A.trackById('a100')).forEach((k,i)=>og.facts[k]={lv:i%2?2:1,reps:
 if(!A.unlockState(og,A.trackById('round')).open){oStBad++;console.log('  !!  rozjeta stovka neotevrela zaokrouhlovani');}
 if(A.unlockState(og,A.trackById('a1000')).open){oStBad++;console.log('  !!  zaokrouhlovani se ma otevirat driv nez tisic, ne spolu s nim');}
 console.log('chyb ve stupnich zaokrouhlovani:',oStBad);
+
+// 7i. retezce: kazdy kbelik dela to, co slibuje, a po ceste se nikdy
+// neobjevi zaporne cislo. Mezivysledek se pocita zvlast, protoze prave
+// on je to, co dite drzi v hlave.
+let qBad=0, qN=0;
+const qsay=m=>{qBad++; if(qBad<8) console.log('  !!  '+m);};
+const znam=new Set();
+for(const b of A.Q_BUCKETS){
+  for(let i=0;i<300;i++){
+    const it=A.itemFromKey('q'+b.id); qN++;
+    const m=String(it.text).match(/^(\d+) ([+-]) (\d+) ([+-]) (\d+)$/);
+    if(!m){qsay('zadani neni tri cisla a dve znamenka: '+it.text);break;}
+    const a=+m[1], y=+m[3], z=+m[5], s1=m[2], s2=m[4];
+    znam.add(s1+s2);
+    const mid=s1==='+'?a+y:a-y;
+    const res=s2==='+'?mid+z:mid-z;
+    if(res!==it.answer){qsay('vysledek nesedi: '+it.text+' je '+res+', vraceno '+it.answer);break;}
+    if(mid<0||res<0){qsay('po ceste se objevilo zaporne cislo: '+it.text);break;}
+    if(b.id==='1'){
+      if([a,y,z].some(v=>v<1||v>9)){qsay('v prvnim kbeliku neni vsechno jednociferne: '+it.text);break;}
+      if(mid<1||mid>19){qsay('mezivysledek mimo dvacitku: '+it.text+' -> '+mid);break;}
+      if(res>20){qsay('vysledek prelezl dvacet: '+it.text);break;}
+    } else if(b.id==='2'){
+      if([a,y,z].some(v=>v%10!==0||v<10||v>90)){qsay('druhy kbelik neni cele desitky: '+it.text);break;}
+      if(mid<10||mid>100){qsay('mezivysledek mimo stovku: '+it.text+' -> '+mid);break;}
+    } else {
+      if(a<10||a>99||a%10===0){qsay('prvni clen neni dvojciferny a nekulaty: '+it.text);break;}
+      if(y>9&&z>9){qsay('treti kbelik nema ani jeden jednociferny clen: '+it.text);break;}
+      if([y,z].some(v=>v>9&&(v%10!==0||v>50))){qsay('druhy nebo treti clen neni jednociferny ani cela desitka: '+it.text);break;}
+      if(mid>100||res>100){qsay('treti kbelik prelezl stovku: '+it.text);break;}
+    }
+  }
+}
+if(znam.size!==4){qsay('nektery vzor znamenek se vubec neobjevil: '+[...znam].join(' '));}
+// Ctyri vzory se losuji rovnomerne, kazdy tedy ma mit kolem ctvrtiny.
+// Kdyz se nejaky vzor nepodari dostavit a losuje se znovu, jeho podil
+// klesne, a presne to se uz jednou stalo: "++" ve druhem kbeliku melo
+// o tretinu min nez ostatni. Hranice je volna, patnact procent, aby
+// spadla jen na skutecny vypadek, ne na nahodu ve vzorku.
+const QN=1200, QMIN=0.15;
+for(const b of A.Q_BUCKETS){
+  const c={'++':0,'+-':0,'-+':0,'--':0};
+  for(let i=0;i<QN;i++){
+    const m=String(A.itemFromKey('q'+b.id).text).match(/^\d+ ([+-]) \d+ ([+-]) \d+$/);
+    if(m) c[m[1]+m[2]]++;
+  }
+  for(const p of Object.keys(c))
+    if(c[p] < QN*QMIN) qsay('vzor '+p+' je v kbeliku q'+b.id+' vzacny: '+c[p]+' z '+QN);
+}
+console.log('zkontrolovano retezcu:',qN,'| chyb:',qBad,'| vzoru znamenek:',znam.size);
+
+// 7j. retezec se stupnuje a stoji na stovce, stejne jako zaokrouhlovani
+let qStBad=0;
+const tq1=A.newProfile('Q1'); A.DB.profiles=[tq1]; A.DB.current=tq1.id;
+if(A.chainStage(tq1)!==0){qStBad++;console.log('  !!  zacatecnik nezacina dvacitkou');}
+const qRun0=A.buildRun(tq1,A.trackById('chain'));
+for(const it of qRun0) if(it.key!=='q1'){qStBad++;console.log('  !!  zacatecnik dostal tezsi kbelik',it.text);break;}
+A.chainKeys(['1']).forEach(k=>tq1.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.chainStage(tq1)!==1){qStBad++;console.log('  !!  po zvladnuti prvniho kbeliku se neposunul');}
+const qRun1=A.buildRun(tq1,A.trackById('chain'));
+const qFocus=qRun1.filter(it=>it.key==='q2').length;
+if(qFocus<qRun1.length*0.5){qStBad++;console.log('  !!  druhy kbelik nenese zavod',qFocus+'/'+qRun1.length);}
+if(qFocus===qRun1.length){qStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+const qg=A.newProfile('Q2'); A.DB.profiles=[qg]; A.DB.current=qg.id;
+if(A.unlockState(qg,A.trackById('chain')).open){qStBad++;console.log('  !!  retezec je otevreny hned od zacatku');}
+A.trackKeys(qg,A.trackById('a100')).forEach((k,i)=>qg.facts[k]={lv:i%2?2:1,reps:9,ok:7,bad:2,best:4000,seen:Date.now()});
+if(!A.unlockState(qg,A.trackById('chain')).open){qStBad++;console.log('  !!  rozjeta stovka neotevrela retezec');}
+// retezec je kapitola 11, tedy pred nasobenim mimo malou nasobilku;
+// na mape tomu ma odpovidat poradi
+const poradi=A.TRACKS.map(x=>x.id);
+if(poradi.indexOf('chain')>poradi.indexOf('beyond')){qStBad++;console.log('  !!  retezec stoji na mape az za nasobenim mimo nasobilku');}
+console.log('chyb ve stupnich retezce:',qStBad);
+
+// 7k. dlouhe zadani si rekne o mensi pismo, kratke ne
+let qhBad=0;
+const qh=k=>A.questionHTML(A.itemFromKey(k));
+// vsechny tri kbeliky retezce jsou delsi nez jeden spoj, takze zadny
+// z nich nesmi zustat v plne velikosti, at padne jakakoli trojice
+for(const b of ['q1','q2','q3']) for(let i=0;i<200;i++)
+  if(!/q-long|q-xlong/.test(qh(b))){qhBad++;console.log('  !!  retezec si nerekl o mensi pismo',b);break;}
+if(/q-long|q-xlong/.test(qh('m7x8'))){qhBad++;console.log('  !!  kratka otazka si zbytecne zmensila pismo');}
+if(/q-long|q-xlong/.test(qh('xm4'))){qhBad++;console.log('  !!  trojciferne nasobeni se zmensilo, i kdyz se veslo');}
+if(/q-long|q-xlong/.test(qh('c1'))){qhBad++;console.log('  !!  obrazkova otazka se meri jako text');}
+console.log('chyb v delce otazky:',qhBad);
 
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;

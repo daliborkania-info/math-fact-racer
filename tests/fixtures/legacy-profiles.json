@@ -1367,6 +1367,237 @@
      }
     ]
    }
+  },
+  {
+   "id": "v8-pred-retezcem",
+   "note": "zari 2026, tretak z verze pred retezcem tri cisel. Stovku ma rozjetou, ale pod polovinou, takze se mu nova trat nesmi sama otevrit bez zasluhy, presne jako to hlida v3 u trati za nasobilkou. Datovy model se nemeni, fixture je tu kvuli te brane",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "bridge",
+    "t1",
+    "t2",
+    "a100",
+    "clock"
+   ],
+   "expectClosed": [
+    "chain",
+    "round",
+    "beyond",
+    "a1000"
+   ],
+   "expectChapter": 10,
+   "expectWorld": "sky",
+   "expectGrade": 3,
+   "expectStars": [
+    "m2x3",
+    "m3x4",
+    "m5x6"
+   ],
+   "expectNoStars": [
+    "ph1",
+    "nh3"
+   ],
+   "db": {
+    "current": "stareQ",
+    "sound": true,
+    "lang": "cs",
+    "pin": "mno345",
+    "profiles": [
+     {
+      "id": "stareQ",
+      "name": "Terka",
+      "lang": "cs",
+      "facts": {
+       "ph1": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "nh1": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "ph2": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "nh2": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "ph3": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "nh3": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "ph4": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "nh4": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "ph5": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "nh5": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3600,
+        "seen": 1757000000000
+       },
+       "m2x3": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 2100,
+        "seen": 1757000000000
+       },
+       "m3x4": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 2100,
+        "seen": 1757000000000
+       },
+       "m5x6": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 2100,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "m2x3": true,
+       "m3x4": true,
+       "m5x6": true
+      },
+      "best": {
+       "a100": {
+        "dist": 112,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "a100": 2
+      },
+      "owned": [
+       "ri_auto",
+       "ri_bugina",
+       "ri_motor",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "ri_letad"
+      ],
+      "runner": "ri_letad",
+      "xp": {
+       "ri_letad": 72
+      },
+      "coins": 134,
+      "parts": 11,
+      "paints": [
+       "pa_neon"
+      ],
+      "paint": {
+       "ri_letad": "pa_neon"
+      },
+      "jobRuns": {
+       "money": 2
+      },
+      "trackRuns": {
+       "a100": 4,
+       "t1": 3,
+       "t2": 1,
+       "a20": 2,
+       "bridge": 2
+      },
+      "opened": {
+       "a100": true,
+       "t1": true,
+       "t2": true,
+       "a20": true,
+       "bridge": true,
+       "clock": true,
+       "a3": true,
+       "a5": true,
+       "a7": true,
+       "a10": true,
+       "a15": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-3",
+      "chapter": 10,
+      "chapterMode": "soft",
+      "world": "sky",
+      "grade": 3,
+      "streak": 3,
+      "lastDay": null,
+      "bestStreak": 4,
+      "runs": 12,
+      "totalOk": 196,
+      "totalAns": 232,
+      "msSum": 640000,
+      "msN": 220,
+      "created": 1757400000000
+     }
+    ]
+   }
   }
  ]
 }

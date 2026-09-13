@@ -10,9 +10,9 @@ světy a mapa jako krajina). K tomu dvě věci, které v plánu nebyly a přišl
 zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalšího roku,
 a rozdělení prvního ročníku na šest číselných oborů.
 
-**Stav v číslech.** Jedenadvacet tratí ve čtyřech světech, 84 palet prostředí,
-dvě zakázky v dílně, 79 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 18/33), tři jazyky, pět testových souborů.
+**Stav v číslech.** Dvaadvacet tratí ve čtyřech světech, 88 palet prostředí,
+dvě zakázky v dílně, 80 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
+třetí 19/33), tři jazyky, pět testových souborů.
 
 **Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
 okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
@@ -41,8 +41,17 @@ srovnaná (`dvh` až za `vh`, strop výšky spodního listu, mrtvé selektory pr
 nízké displeje). Při tom se ukázalo, že `flow.test.js` a `names.test.js`
 padaly na zastaralém kroku a poslední kontroly nedobíhaly; opravené je to taky.
 
-**Na řadě je krok B0, pak krok B**, tedy `chain_3`, kapitola 11 třetího
-ročníku, pak krok C, responzivita a písmo podle ročníku, a dál podle
+**Krok B0 je hotový** (13. září): dřívější ročníky jsou na mapě složené za
+dveřmi, nad letošním blokem stojí milník s ročníkem a nic z toho se nezapisuje
+do profilu.
+
+**Krok B je hotový** (13. září): řetězec tří čísel se dvěma znaménky, kapitola
+11 třetího ročníku, jako trať `chain` s hlavičkou klíče `q` a třemi kbelíky.
+Na mapě stojí před `beyond`, tedy v pořadí učebnice. K tomu přibylo, že dlouhé
+zadání si samo řekne o menší písmo, protože `47 + 5 - 3 = ?` se v plné velikosti
+na telefon nevejde.
+
+**Na řadě je krok C**, responzivita a písmo podle ročníku, a dál podle
 `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
@@ -231,7 +240,8 @@ závodů a z příkladů dané trati v krabičce.
 
 **Odemykání.** Prahy zvládnutí: t2 od 0,7 na t1, t3 od 0,7 na t2, t4 od 0,7 na
 t3, t5 od 0,65 na t4, dělení od 0,55 celé násobilky, do stovky od 0,6 na do
-dvaceti, do tisíce od 0,6 na do stovky. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
+dvaceti, do tisíce od 0,6 na do stovky, zaokrouhlování a řetězec od 0,5 na
+stovce. Pojistka: po deseti dojetých závodech na jedné trati se další otevře
 tak jako tak. Rodič může každou trať přebít ručně. Trať `school` je vždy otevřená.
 
 **Výběr příkladů.** Váha podle úrovně `[7, 8, 6.5, 3.4, 1.6, 0.8]`, zvýšená
@@ -299,9 +309,23 @@ oba směry. Aktuální kbelík hledá `as1000Stage()`. Součet nikdy nepřeleze 
 a generátor si to hlídá konstrukcí rozsahů, ne ořezáním přetečení; kdyby ořezával,
 podstrčil by dítěti lehčí příklad a nikde by to nebylo vidět.
 
+**Řetězec tří čísel.** `chain`, kapitola 11 třetího ročníku. Tři členy a dvě
+znaménka, například `7 + 5 - 3`, tři kbelíky podle oboru: `q1` tři jednociferná
+čísla do dvaceti, `q2` celé desítky do sta, `q3` dvojciferné číslo s
+jednociferným a s desítkami do sta. Stejný tvar jako ostatní stupňované tratě,
+aktuální kbelík nese sedmdesát procent závodu a dřívější se vracejí jako
+opakování, hledá ho `chainStage()`. Vzor znamének se losuje ze čtyř možností
+rovnoměrně a trojice se staví konstrukcí rozsahů, ne ořezem; když vzor nemá kam
+jít, například `2 - 1 - ?`, losuje se znovu. **Mezivýsledek nikdy neklesne pod
+nulu** a zůstane v oboru kbelíku, takže se dítě cestou k výsledku nepotká se
+záporným číslem. Na mapě stojí **před** `beyond`, protože kapitola 11 je
+v knize dřív než kapitola 14 a cesta jde v pořadí učebnice; pořadí třetího
+ročníku je `chain`, `beyond`, `round`, `a1000`.
+
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
 je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u počítání do
-tisíce 2,2, u zaokrouhlování 2,0, u hodin 2,4, protože přečíst ciferník a
+tisíce 2,2, u zaokrouhlování 2,0, u řetězce taky 2,0, protože jsou to dvě
+operace místo jedné, u hodin 2,4, protože přečíst ciferník a
 naťukat čtyři číslice trvá déle než vybavit si spoj, a za násobilkou 2,6,
 protože rozložit číslo a vynásobit obě půlky je víc práce než jeden přechod.
 Všechno je na jednom místě, `thresholds()`.
@@ -404,7 +428,7 @@ se do průměrné doby odpovědi.
 
 ## 5. Trati
 
-Jedenadvacet tratí, každá má vlastní generovanou cestu a vlastní prostředí
+Dvaadvacet tratí, každá má vlastní generovanou cestu a vlastní prostředí
 v každém ze čtyř světů; tvar cesty je na trati, ne na světě, mění se s ním
 krajina kolem ní a to, čím cesta končí.
 
@@ -416,6 +440,7 @@ krajina kolem ní a to, čím cesta končí.
 | t4 | 2 | násobilka 8, 9 |
 | t5 | 2 | celá malá násobilka |
 | d1 | 2 | dělení |
+| chain | 3 | řetězec tří čísel se dvěma znaménky, tři kbelíky podle oboru |
 | beyond | 3 | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
 | round | 3 | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
 | a3, a5, a7, a10, a15, a20 | 1 | šest oborů prvního ročníku, sčítání a odčítání bez přechodu přes desítku, viz oddíl 4 |
@@ -438,12 +463,14 @@ V rodičovské sekci nemá přepínač odemknutí, řídí ji volba kapitoly.
 Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sčítání do 20,
 `s{a}p{b}` odčítání do 20, `p{bucket}` a `n{bucket}` do stovky, `kp{bucket}`
 a `kn{bucket}` do tisíce, `xm{bucket}` a `xd{bucket}` za násobilkou,
-`o1` až `o3` zaokrouhlování, `c1` až `c6` hodiny. Kanonicky vždy `a <= b`,
+`o1` až `o3` zaokrouhlování, `q{bucket}` řetězec tří čísel, `c1` až `c6`
+hodiny. Kanonicky vždy `a <= b`,
 komutativita se sbaluje. U dvacítky smí být
 druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
 nepotřebují na obor do dvaceti bez přechodu jedinou výjimku.
 
-Klíč začínající písmenem z `FAMILY_HEADS`, dnes `p`, `n`, `c`, `k`, `x` a `o`,
+Klíč začínající písmenem z `FAMILY_HEADS`, dnes `p`, `n`, `c`, `k`, `x`, `o`
+a `q`,
 není jeden příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`.
 Proto se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegeneruje
 otázku, která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor
@@ -578,10 +605,17 @@ stejně jako u hodin.
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
 způsobilo chybu. Rozbalovací nabídka potřebuje `change`, ne `click`, takže
 nové `<select>` musí mít obsluhu v tom druhém posluchači. A otázka není vždycky
-řádek textu: `questionHTML()` skládá celý řádek včetně rovnítka nebo ciferníku
-a mezi otázkami se přepisuje celý `#qbox`, takže `#abox` se po každé otázce
-musí najít znovu. Nikdy nesahej na `#qtext` přes `textContent`, pokud může
-nést obrázek. A čtvrtá: CSS třída `.keypad` je odpovídací plocha, `.keypad-pad`
+řádek textu: `questionHTML()` vrací **celý prvek `#qbox`** včetně rovnítka nebo
+ciferníku, odpovídacího políčka a třídy podle délky zadání, a mezi otázkami se
+ten prvek vyměňuje přes `outerHTML`, takže `#abox` se po každé otázce musí najít
+znovu. Nikdy nesahej na `#qtext` přes `textContent`, pokud může nést obrázek.
+**Dlouhé zadání si samo řekne o menší písmo.** `questionSize()` měří řádek tak,
+jak se kreslí, tedy **včetně mezer**, a dá `#qbox` třídu `q-long` od devíti
+znaků a `q-xlong` od třinácti; `47 + 5 - 3 = ?` se v plné velikosti na 375 px
+telefon nevejde. Mezery se počítají schválně: bez nich má právě tenhle příklad
+šest znaků a propadl by. Dnes to potkává celý řetězec a první stupeň tisícovky,
+tedy `300 + 200`, což jsou opravdu nejširší řádky ve hře. Řádek se navíc smí
+zalomit, takže `= ?` spadne na druhý řádek dřív, než by se cokoli uřízlo. A čtvrtá: CSS třída `.keypad` je odpovídací plocha, `.keypad-pad`
 je konkrétní rozvržení číselné klávesnice. Jméno `pad3` je v katalogu témat
 vyhrazené pro vstupní prvek se třemi políčky, takže se na rozvržení používat
 nesmí, i když jsou to zrovna tři sloupce.
@@ -799,7 +833,7 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá šestnáct okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá devatenáct okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
 stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
@@ -1001,12 +1035,12 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 79 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 80 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
-`as100`, `as1000`, `multBeyond`, `divBeyond`, `round` a `clock`, a `poolKeys()` to
-překládá na klíče příkladů. Násobení a dělení za násobilkou jsou dvě pole,
+`as100`, `as1000`, `multBeyond`, `divBeyond`, `round`, `clock` a `chain`,
+a `poolKeys()` to překládá na klíče příkladů. Násobení a dělení za násobilkou jsou dvě pole,
 a ne jedno jako u stovky, protože je učebnice učí jako dvě samostatné
 kapitoly a kapitola 14 má umět chtít jen násobení. Nikdy do kurikula
 nepiš klíče přímo. `poolSize()` počítá kbelík do sta za čtyři, ne za jeden,
@@ -1039,14 +1073,13 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání počítání dílků je 79 hratelných
-kapitol z 95, po ročnících 18/18, 43/44 a 18/33; první ročník je tím celý.
+dojmu. Stav po přidání řetězce tří čísel je 80 hratelných
+kapitol z 95, po ročnících 18/18, 43/44 a 19/33; první ročník je tím celý.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
 | `unit_convert` + `time_convert` | `pad` | 2 | g3: 18, 29 |
 | `order_of_ops` | `pad` | 2 | g3: 13, 30 |
-| `chain_3` | `pad` | 1 | g3: 11 |
 | `mult_div_10_100` + `mult_round` | `pad` | 1 | g3: 28 |
 | `missing_operand` + `inverse_check` | `pad` | 1 | g3: 5 |
 | `div_remainder` | `pad2` | 1 | g3: 27 |
@@ -1059,11 +1092,11 @@ kapitol z 95, po ročnících 18/18, 43/44 a 18/33; první ročník je tím cel�
 `finance_money` byl v téhle tabulce poslední a je hotový, viz oddíl 4b.
 `mult_beyond` s `div_beyond` byl první a je taky hotový, viz oddíl 5, trať
 `beyond`; odemkl kapitoly 14, 16 a 31. `rounding_10` s `rounding_100` byl druhý,
-trať `round`, kapitoly 7 a 26.
+trať `round`, kapitoly 7 a 26. `chain_3` byl třetí, trať `chain`, kapitola 11.
 
-**Hlavní zjištění.** Sedm z patnácti zbylých zamčených kapitol třetí třídy
+**Hlavní zjištění.** Šest ze čtrnácti zbylých zamčených kapitol třetí třídy
 nepotřebuje na vstupu vůbec nic nového, stačí generátory na `pad`. Třetí třída
-tím jde z 18/33 na 25/33, aniž by se sáhlo na klávesnici.
+tím jde z 19/33 na 25/33, aniž by se sáhlo na klávesnici.
 
 **`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
@@ -1086,8 +1119,8 @@ přidat nesmí. Vzniklo to z rešerše, u každého zjištění je odkaz na stud
 Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`. `add_sub_1000`
 je z toho hotový, byla to páteř osmého dílu a architektonicky
 jen další sada kbelíků vedle `add_sub_100`. Hotové je i `mult_beyond`
-a `div_beyond`, první položka vlny A, a `rounding_10` s `rounding_100`, druhá.
-Dál `chain_3`, `order_of_ops`, `mult_div_10_100`
+a `div_beyond`, první položka vlny A, `rounding_10` s `rounding_100`, druhá,
+a `chain_3`, třetí. Dál `order_of_ops`, `mult_div_10_100`
 a `mult_round`, `unit_convert` a `time_convert`, nakonec `missing_operand`
 a `inverse_check`, protože to nejsou samostatné rodiny, ale modifikátory
 existujících, a to je jiný typ zásahu do `itemFromKey`.
@@ -1129,7 +1162,7 @@ okruhy v `items.test.js`. Nic z bodů A až D se neukázalo jako skrytý blokát
 
 `thresholds()` je ruční výraz, kde má každá rodina svůj násobitel prahů,
 zatím 2,6 za násobilkou, 2,4 pro hodiny, 2,2 pro počítání do tisíce, 2,0 pro
-zaokrouhlování a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
+zaokrouhlování i pro řetězec a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
 prahy pro jednociferné vybavování a děti budou mít samé pomalé odpovědi.
 Tohle je jediná věc, na kterou se v téhle vlně dá zapomenout tiše.
 
@@ -1327,16 +1360,21 @@ Od kroku 4 a 4c v něm přibyly dva body, prostředí ve čtyřech světech a ro
 **Dál:** kapitoly v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech
 třech jazycích v `src/i18n.js`.
 
+**Délku otázky řešit nemusíš**, `questionSize()` ji měří sama a dlouhý řádek
+dostane menší písmo; od řetězce tří čísel to platí pro každou rodinu. Co stojí
+za kontrolu na obrázku, je jen to, jestli se nejdelší zadání té rodiny opravdu
+vejde na 360 px.
+
 **V `tests/items.test.js`:** export nových symbolů v `module.exports` na konci
 skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do množiny
 `VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co slibuje.
 
 **V `tests/flow.test.js` sedí natvrdo tahle čísla** a každá nová trať je posune.
 Od kroku B0 se měří zvlášť složená a rozbalená mapa, viz oddíl 7d: třeťák má
-složeno 5 různých cest a 7 míst a rozbaleno 20 cest a 22 míst, druhák má
+složeno 6 různých cest a 8 míst a rozbaleno 21 cest a 23 míst, druhák má
 složeno 13 míst a rozbaleno 19, prvňák má 8 a dveře zpátky nemá, čtvrťák vidí
-celou mapu, tedy 21 míst a žádné dveře ani milník. Dál sedí počet tratí
-v ukázce druhého ročníku (10) a počet zamčených kapitol třetí třídy (15 z 33).
+celou mapu, tedy 22 míst a žádné dveře ani milník. Dál sedí počet tratí
+v ukázce druhého ročníku (10) a počet zamčených kapitol třetí třídy (14 z 33).
 
 **Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
 `grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v
@@ -1351,11 +1389,11 @@ v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
 s dnešním úkolem.
 
 **Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
-a 4d. Z vlny A jsou hotové dvě položky ze sedmi. Revize ze 13. září sepsala
-`docs/PLAN.md` verze 2 s kroky A až G; nejbližší jsou A (opravy z revize,
-hodina), B (`chain_3`, jedna session) a C (responzivita a písmo podle ročníku,
-jedna až dvě session). Oddíl 9 plánu má sedm rozhodnutí, která má udělat
-uživatel; než padnou, dělá se to, co na nich nezávisí.
+a 4d. Z vlny A jsou hotové tři položky ze sedmi. Revize ze 13. září sepsala
+`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0 a B, nejbližší je
+C (responzivita a písmo podle ročníku, jedna až dvě session). Oddíl 9 plánu má
+sedm rozhodnutí, která má udělat uživatel; než padnou, dělá se to, co na nich
+nezávisí.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se

@@ -44,10 +44,15 @@ ok('rocnik se ulozil do profilu', DBg().profiles[0].grade===3, 'grade '+DBg().pr
 ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
 // mapa treťáka zacina tam, kde je letos trida: minule roky jsou slozene za
 // dvermi, takze cest i mist je jen tolik, kolik patri do treti tridy
-// (beyond, round, a1000, mix, weak) plus dilna a dvere zpatky
+// (chain, beyond, round, a1000, mix, weak) plus dilna a dvere zpatky
 const cesty=()=>new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size;
-ok('slozena mapa treťáka ma 5 ruznych cest', cesty()===5, cesty()+' okruhu');
-ok('slozena mapa ma 7 mist', qa('.world .place').length===7, qa('.world .place').length+' mist');
+ok('slozena mapa treťáka ma 6 ruznych cest', cesty()===6, cesty()+' okruhu');
+ok('slozena mapa ma 8 mist', qa('.world .place').length===8, qa('.world .place').length+' mist');
+// retezec je kapitola 11, tedy na ceste pred nasobenim mimo nasobilku
+const mista=()=>qa('.world .place .nm').map(e=>e.textContent);
+ok('retezec stoji na mape pred tratí za nasobilkou',
+   mista().indexOf('Řetězec')>=0 && mista().indexOf('Řetězec')<mista().indexOf('Za násobilkou'),
+   mista().join(', '));
 ok('dvere do minulych let jsou od druhe tridy',
    qa('.place.backdoor[data-act="back"]').length===1 && /Z minulých let/.test(txt()));
 ok('predel nese letosni rocnik', qa('.milestone').length===1 && /3\. třída/.test(q('.milestone').textContent),
@@ -55,14 +60,14 @@ ok('predel nese letosni rocnik', qa('.milestone').length===1 && /3\. třída/.te
 ok('minule roky jsou slozene, ne jen tmave', !/Hodiny/.test(txt()));
 const predRozbalenim=JSON.stringify(DBg());
 click(q('[data-act="back"]'));
-ok('rozbaleni ukazalo minule roky', cesty()===20, cesty()+' okruhu');
+ok('rozbaleni ukazalo minule roky', cesty()===21, cesty()+' okruhu');
 ok('trat hodin je na mape a odemcena od zacatku', /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
 ok('minule roky jsou plne, ne carkovane jako ukazka', qa('.place.past').length===15 && qa('.place.peek').length===0,
    qa('.place.past').length+' trati z minulych let');
 ok('o rozbaleni neni v ulozenych datech ani slovo', JSON.stringify(DBg())===predRozbalenim);
 ok('predel je videt i s rozbalenou mapou', qa('.milestone').length===1);
 // mapa uz neni svisly seznam: mista lezi podel cesty a zamcene je vidět taky
-ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===22 && qa('.worldroad path').length>0,
+ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===23 && qa('.worldroad path').length>0,
    qa('.world .place').length+' mist');
 ok('kazde misto ma svou polohu v mape', qa('.place').every(el=>/left:/.test(el.getAttribute('style')||'')));
 ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky a sedmičky/.test(txt()),
@@ -153,7 +158,8 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===15, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===14, zamcene().length+' zamcenych z 33');
+ok('scitani a odcitani vice cisel se da vybrat', !zamcene().includes(11));
 ok('deleni se zbytkem a zlomky jsou mezi zamcenymi', zamcene().includes(27) && zamcene().includes(32));
 // nasobeni a deleni mimo malou nasobilku uz umime, takze jeho tri kapitoly zamcene byt nesmi
 ok('mimo rozsah male nasobilky se da vybrat',
@@ -549,7 +555,7 @@ click(qa('[data-gr]').find(b=>b.dataset.gr==='4')); click(q('[data-go]'));
 ok('ctvrtak nema dvere zpatky ani predel',
    qa('.place.backdoor').length===0 && qa('.milestone').length===0);
 ok('ctvrtak vidi celou mapu jako driv',
-   qa('.place').length===21 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
+   qa('.place').length===22 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
    qa('.place').length+' mist');
 ok('ctvrtak nema ani dvere dopredu, nic dalsiho neni', qa('.place.peekdoor').length===0);
 

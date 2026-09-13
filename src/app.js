@@ -303,6 +303,21 @@ const O_BUCKETS = [
 ];
 const roundKeys = ids => ids.map(b => "o" + b);
 
+/* Three numbers and two signs, the first question with more than one
+   step. The book takes it in the seventh part, still under a hundred,
+   right after the buckets within a hundred, so the ranges follow those:
+   within twenty, whole tens, and the mixed hundred. Every intermediate
+   result stays inside the bucket's range and above zero, so the child
+   never meets a negative number on the way to the answer. */
+const Q_BUCKETS = [
+  {id:"1", label:"three one digit numbers within twenty"},   // 7 + 5 - 3
+  {id:"2", label:"whole tens within a hundred"},             // 30 + 40 - 20
+  {id:"3", label:"two digit, one digit and tens within a hundred"}  // 47 + 5 - 3
+];
+const chainKeys = ids => ids.map(b => "q" + b);
+// the four patterns a pair of signs can take, drawn evenly
+const Q_SIGNS = ["++", "+-", "-+", "--"];
+
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
   {id:"c1", mins:[0]},                            // whole hours
@@ -355,6 +370,10 @@ const TRACKS = [
   {id:"d1",   op:"div",                                   env:"space",    grade:2},
   {id:"a100", op:"as100",                                 env:"ocean",    grade:2},
   {id:"clock",op:"clock",                                 env:"clocktown",grade:2},
+  // the chain of three numbers is chapter 11 and multiplying past the
+  // tables is chapter 14, so on the map it comes first: the road runs in
+  // the order of the book
+  {id:"chain", op:"chain",                                env:"marsh",    grade:3},
   {id:"beyond",op:"beyond",                               env:"savanna",  grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
@@ -444,6 +463,7 @@ function poolKeys(spec){
   if(spec.multBeyond) out.push(...spec.multBeyond.map(b => "xm" + b));
   if(spec.divBeyond)  out.push(...spec.divBeyond.map(b => "xd" + b));
   if(spec.round) out.push(...spec.round);
+  if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.clock) out.push(...spec.clock);
   return [...new Set(out)];
 }
@@ -484,7 +504,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxo";
+const FAMILY_HEADS = "pnckxoq";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -532,6 +552,7 @@ function trackKeys(p, tr){
   if(tr.op === "as1000")return as1000Keys(K_BUCKETS.map(b => b.id));
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
+  if(tr.op === "chain") return chainKeys(Q_BUCKETS.map(b => b.id));
   if(tr.op === "clock") return clockKeys();
   return [];
 }
@@ -557,6 +578,8 @@ function beyondStage(p){ return stageIndex(p, i => beyondKeys([X_BUCKETS[i].id])
 // how far the rounding has got: tens under a hundred, then tens of a
 // three digit number, then hundreds
 function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
+// which range the chain of three numbers is being practised in
+function chainStage(p){ return stageIndex(p, i => chainKeys([Q_BUCKETS[i].id]), Q_BUCKETS.length); }
 /* What a track would actually serve right now. A staged track holds
    back the levels the child has not reached yet, and the championship
    has to respect that, otherwise it hands out material that the track
@@ -571,6 +594,7 @@ function reachedKeys(p, tr){
   if(tr.op === "as1000") return as1000Keys(K_BUCKETS.slice(0, as1000Stage(p) + 1).map(b => b.id));
   if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
+  if(tr.op === "chain") return chainKeys(Q_BUCKETS.slice(0, chainStage(p) + 1).map(b => b.id));
   return trackKeys(p, tr);
 }
 function trackProgress(p, tr){
@@ -671,6 +695,10 @@ function unlockState(p, tr){
     // opens earlier than the thousand does, and its own first bucket
     // keeps the child on two digit numbers until they are solid
     case "round": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
+    // adding and taking away in one breath is the chapter right after the
+    // buckets within a hundred, so it stands on the hundred exactly as
+    // rounding does
+    case "chain": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     // the hundred is built on being able to cross a ten, not merely on
     // having finished the first year's ranges
     case "a100": return (m("bridge") >= .6 || many("bridge")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_bridge"))};
@@ -724,6 +752,7 @@ function rawItem(key){
   if(head === "k") return thousandItem(key);
   if(head === "x") return beyondItem(key);
   if(head === "o") return roundItem(key);
+  if(head === "q") return chainItem(key);
   if(head === "c") return clockItem(key);
   return {key, text:"1 + 1", answer:2, kind:"add"};
 }
@@ -824,6 +853,88 @@ function roundItem(key){
     key, kind:"round", text: String(n), rel:"relRound", ask: b.ask, maxLen: 4,
     answer: Math.round(n / b.to) * b.to
   };
+}
+
+/* A chain of three numbers and two signs, the first question that takes
+   more than one step. The triple is built by construction, exactly like
+   the thousand and the material past the tables: when a pattern has
+   nowhere left to go, for instance 2 - 1 - ?, the signs are drawn again
+   rather than a term being trimmed, because a quiet correction would
+   hand the child an easier line than the bucket promised and nothing
+   would ever say so.
+   The ranges below are cut so that every one of the four sign patterns
+   can be finished in every bucket, so the loop here finishes on the
+   first draw and the four patterns turn up equally often. The ceiling is
+   set where no honest run can reach it and running into it throws, name
+   of the bucket included: a bucket that cannot serve a pattern any more
+   is a broken generator, and a made up fallback triple would go on
+   handing the child lines the bucket never promised without a word.
+   Every intermediate result stays inside the bucket's range and at or
+   above zero, so a negative number never turns up on the way to an
+   answer the child is meant to reach in one breath. */
+function chainItem(key){
+  const b = key.slice(1);
+  let got = null;
+  for(let i = 0; i < 10000 && !got; i++) got = chainTriple(b, Q_SIGNS[ri(0, Q_SIGNS.length - 1)]);
+  if(!got) throw new Error("chainItem: no triple for bucket " + key + " after 10000 draws");
+  const [a, s1, y, s2, z] = got;
+  const mid = s1 === "+" ? a + y : a - y;
+  return {
+    key, kind:"chain",
+    text: a + " " + s1 + " " + y + " " + s2 + " " + z,
+    answer: s2 === "+" ? mid + z : mid - z
+  };
+}
+/* One attempt at a triple for a bucket and a pair of signs, or null when
+   that pattern cannot be finished inside the bucket. No bucket has such
+   a pattern today: the ranges are cut so that all four always finish,
+   which is what keeps the four of them equally common. A new bucket that
+   cannot promise that returns null here and the caller draws again. */
+function chainTriple(b, sg){
+  const s1 = sg[0], s2 = sg[1];
+  if(b === "1"){                                  // 7 + 5 - 3, crossing a ten is allowed here
+    // Both the first and the second term are single digits, so the
+    // middle lands somewhere in 1 to 18 and never needs a ceiling of its
+    // own: even 9 + 9 leaves room for a third term inside twenty.
+    const a = ri(2,9);
+    const y = s1 === "+" ? ri(1, Math.min(9, 19 - a)) : ri(1, a - 1);
+    const mid = s1 === "+" ? a + y : a - y;
+    const z = s2 === "+" ? ri(1, Math.min(9, 20 - mid)) : ri(1, Math.min(9, mid));
+    return [a, s1, y, s2, z];
+  }
+  if(b === "2"){                                  // 30 + 40 - 20, counted in whole tens
+    // Counted in tens, so every term is 1 to 9 and the middle 1 to 10.
+    // A plus at the end needs a ten left over, so the middle is held at
+    // nine by the ranges that build it, not by throwing the finished
+    // draw away: throwing it away is what used to make "++" turn up
+    // a third less often than the other three patterns.
+    const top = s2 === "+" ? 9 : 10;               // the most the middle may be
+    const at = s1 === "+" ? ri(1, top - 1) : ri(2,9);
+    const yt = s1 === "+" ? ri(1, top - at) : ri(1, at - 1);
+    const mt = s1 === "+" ? at + yt : at - yt;
+    const zt = s2 === "+" ? ri(1, 10 - mt) : ri(1, Math.min(9, mt));
+    return [at*10, s1, yt*10, s2, zt*10];
+  }
+  // 47 + 5 - 3: a two digit number that is not round, then a single
+  // digit or a whole ten. At least one of the two has to be a single
+  // digit, otherwise the line would be whole tens and that is the
+  // bucket above.
+  // Which of the two is the ten is settled first, because the room the
+  // second term may take depends on what the third one still needs: ten
+  // for a whole ten, one for a single digit. With that subtracted up
+  // front, every range here is non-empty for all four sign patterns, so
+  // no pattern is ever drawn again and none of them goes rare.
+  const a = ri(1,8)*10 + ri(1,9);
+  const tenAt = ri(0,2);                          // 0 neither, 1 the second term, 2 the third
+  const zRoom = tenAt === 2 ? 10 : 1;             // what the third term needs at the least
+  const term = (isTen, room) => isTen
+    ? ri(1, Math.min(5, Math.floor(room / 10))) * 10
+    : ri(1, Math.min(9, room));
+  const y = term(tenAt === 1, s1 === "+" ? (s2 === "+" ? 100 - zRoom : 100) - a
+                                         : a - (s2 === "+" ? 0 : zRoom));
+  const mid = s1 === "+" ? a + y : a - y;
+  const z = term(tenAt === 2, s2 === "+" ? 100 - mid : mid);
+  return [a, s1, y, s2, z];
 }
 
 /* The answer is the time as a digital watch shows it, typed on the same
@@ -1000,6 +1111,10 @@ function buildRun(p, tr){
     const oi = roundStage(p);
     const review = roundKeys(O_BUCKETS.slice(0, oi).map(b => b.id));
     keys = focusAndReview(p, roundKeys([O_BUCKETS[oi].id]), review, n, 2);
+  } else if(tr.op === "chain"){
+    const qi = chainStage(p);
+    const review = chainKeys(Q_BUCKETS.slice(0, qi).map(b => b.id));
+    keys = focusAndReview(p, chainKeys([Q_BUCKETS[qi].id]), review, n, 2);
   } else if(tr.op === "clock"){
     const ci = clockStage(p);
     keys = focusAndReview(p, [C_BUCKETS[ci].id], C_BUCKETS.slice(0, ci).map(b => b.id), n, 1);
@@ -1309,7 +1424,11 @@ function thresholds(p, item){
   // than carrying once in a sum, so past the tables gets the longest
   // allowance of all; without this the child would score slow answers
   // for doing exactly what the book teaches
+  // a chain is two operations where every other family has one, so it
+  // gets twice the allowance of a plain sum; forgetting this is the one
+  // thing in a new family that goes wrong quietly
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "chain" ? 2.0
                : item.kind === "round" ? 2.0
                : item.kind === "clock" ? 2.4
                : (item.kind === "add1000" || item.kind === "sub1000") ? 2.2
@@ -1612,6 +1731,11 @@ const ENVS = Object.assign({
   // The first year's ranges, a coastline that walks along beside the
   // beach the twenty track already had: the child goes from the dunes
   // down to the water and along it, and crossing the ten is the pier.
+  // A marsh for the circuit: a deep blue green, the one colour family
+  // none of the fifteen hand mixed circuit places and none of the
+  // coastline uses. Darker than the school track's mint on purpose, or
+  // the two would read as the same place on a thumbnail.
+  marsh:  pal(170, 150, 52, "drop"),
   dunes:  pal( 46,  90, 72, "shell"),
   shore:  pal( 38, 190, 76, "shell"),
   palms:  pal(105, 150, 58, "leaf"),
@@ -1643,6 +1767,7 @@ const ENVS = Object.assign({
   tr_dusk:   pal(255, 265, 28, "star",   {dark:1}),
   tr_mist:   pal(215, 225, 44, "drop",   {sat:16}),
   tr_garden: pal(120, 100, 55, "flower"),
+  tr_reeds:  pal(150, 130, 58, "leaf"),
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
@@ -1667,6 +1792,7 @@ const ENVS = Object.assign({
   sk_night:  pal(236, 250, 14, "star",    {h2:242, l2:27, dark:1}),
   sk_fog:    pal(212, 218, 58, "drop",    {h2:216, l2:81, sat:22}),
   sk_kite:   pal(200, 140, 52, "leaf",    {h2:150, l2:79}),
+  sk_haze:   pal(204, 170, 60, "drop",    {h2:160, l2:82}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
   dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
@@ -1689,7 +1815,11 @@ const ENVS = Object.assign({
   dp_pearl:  pal(200, 310, 58, "shell",   {h2:320, l2:48}),
   dp_midnight:pal(230, 245, 18, "star",   {h2:240, l2: 9, dark:1}),
   dp_murk:   pal(190, 200, 42, "drop",    {h2:196, l2:26, sat:20}),
-  dp_garden: pal(185, 145, 56, "flower",  {h2:150, l2:40})
+  dp_garden: pal(185, 145, 56, "flower",  {h2:150, l2:40}),
+  // a shallow: the floor is close enough to the surface that the water
+  // still colours it, so it is a muted green blue rather than the grass
+  // green the first draft gave it, which read as a lawn under water
+  dp_shoal:  pal(188, 150, 62, "shell",   {h2:158, l2:52, sat:38})
 });
 
 /* --- worlds ---
@@ -1709,21 +1839,21 @@ const WORLDS = [
    env:{a3:"tr_moss", a5:"tr_ferns", a7:"tr_birch", a10:"tr_clearing", a15:"tr_creek",
         a20:"tr_brook", bridge:"tr_log",
         t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
-        d1:"tr_burrow", beyond:"tr_field", round:"tr_quarry",
+        d1:"tr_burrow", chain:"tr_reeds", beyond:"tr_field", round:"tr_quarry",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
    env:{a3:"sk_meadowair", a5:"sk_hilltop", a7:"sk_updraft", a10:"sk_first", a15:"sk_flock",
         a20:"sk_breeze", bridge:"sk_arch",
         t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
-        d1:"sk_void", beyond:"sk_dust", round:"sk_storm",
+        d1:"sk_void", chain:"sk_haze", beyond:"sk_dust", round:"sk_storm",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
    env:{a3:"dp_pool", a5:"dp_tide", a7:"dp_grass", a10:"dp_coral", a15:"dp_drift",
         a20:"dp_lagoon", bridge:"dp_arch",
         t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
-        d1:"dp_abyss", beyond:"dp_sand", round:"dp_cavern",
+        d1:"dp_abyss", chain:"dp_shoal", beyond:"dp_sand", round:"dp_cavern",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -2612,10 +2742,27 @@ const TARGET = 100;
    and the sign for that differs by country, so a family may name a
    translated one instead. */
 function relOf(item){ return item && item.rel ? t(item.rel) : "="; }
+/* A chain of three numbers is a longer line than anything the game drew
+   before it, and "47 + 5 - 3 = ?" at the full size runs off a 375 px
+   phone, so the row says how long it is and the stylesheet steps the
+   letters down.
+   Measured on the line as it is drawn, spaces included, because a space
+   between a number and a sign takes up as much room as a digit does.
+   Counting only the digits and signs would let this very example
+   through at six characters, which is what it was tried with first.
+   The rest of the row, the sign before the box and the box itself, is
+   the same width whatever the question, so it does not need counting.
+   A picture question carries no such line at all. */
+function questionSize(item){
+  if(!item || item.svg || !item.text) return "";
+  const n = String(item.text).length;
+  return n >= 13 ? " q-xlong" : n >= 9 ? " q-long" : "";
+}
 function questionHTML(item){
-  if(!item) return `<span id="qtext"></span><span class="answerbox" id="abox">?</span>`;
-  if(item.svg) return `<span id="qtext" class="qsvg">${item.svg}</span><span class="answerbox" id="abox">?</span>`;
-  return `<span id="qtext">${item.text}</span><span>${relOf(item)}</span><span class="answerbox" id="abox">?</span>`;
+  const inner = !item ? `<span id="qtext"></span>`
+    : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
+    : `<span id="qtext">${item.text}</span><span>${relOf(item)}</span>`;
+  return `<div class="question${questionSize(item)}" id="qbox">${inner}<span class="answerbox" id="abox">?</span></div>`;
 }
 /* The answering surface belongs to the question, not to the screen, so
    a race may mix families that are answered differently. Only the
@@ -2675,7 +2822,7 @@ function viewGame(p){
       <span class="gap" id="gap">${hasGhost ? t("gapEven") : t("gapFirst")}</span>
     </div>
     <div class="qzone">
-      <div class="question" id="qbox">${questionHTML(RUN.items[RUN.idx])}</div>
+      ${questionHTML(RUN.items[RUN.idx])}
       <div class="hintline" id="hint">${askText(RUN.items[RUN.idx])}</div>
     </div>
     ${keypadHTML(RUN.items[RUN.idx])}
@@ -2942,9 +3089,10 @@ function submit(){
     const next = RUN.items[RUN.idx];
     const qb = document.getElementById("qbox");
     if(!qb) return;
-    // the row is rebuilt because the next question may be a different
-    // shape, so the answer box has to be looked up again
-    qb.innerHTML = questionHTML(next);
+    // the whole row is rebuilt because the next question may be a
+    // different shape and a different length, so the answer box has to
+    // be looked up again afterwards
+    qb.outerHTML = questionHTML(next);
     hint.innerHTML = askText(next);
     // a race may mix families answered on different things; swap the
     // answering surface only when it actually changes, so the keys do
@@ -3491,6 +3639,7 @@ const K_EX = {b1:"300+200", b2:"342+5", b3:"347+6", b4:"320+40", b5:"342+25", b6
 const C_EX = {c1:"7:00", c2:"7:30", c3:"7:15", c4:"7:20", c5:"7:23", c6:"19:45"};
 const X_EX = {"1":"12×3", "2":"17×5", "3":"34×6", "4":"213×3"};
 const O_EX = {"1":"47→50", "2":"347→350", "3":"347→300"};
+const Q_EX = {"1":"7+5-3", "2":"30+40-20", "3":"47+5-3"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
 const divEx = ex => { const [a,b] = ex.split("×").map(Number); return (a*b) + ":" + b; };
 const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
@@ -3527,6 +3676,10 @@ function heatSpecs(p){
     ({label: E_EX[i], keys: stageKeys(i), tip: E_EX[i] + " / " + minusEx(E_EX[i])}))));
   push("a100", heatStrip(t("trk_a100"), 5,
     bucketTiles(H_EX, id => "p" + id, id => "n" + id)));
+  // the chain of three numbers is still material within a hundred, so it
+  // sits right under the hundred and the parent reads the two together
+  push("chain", heatStrip(t("trk_chain"), 3, Q_BUCKETS.map(b =>
+    ({label: Q_EX[b.id], keys:["q" + b.id], tip: Q_EX[b.id]}))));
   push("a1000", heatStrip(t("trk_a1000"), 6,
     bucketTiles(K_EX, id => "kp" + id, id => "kn" + id)));
   push("round", heatStrip(t("trk_round"), 3, O_BUCKETS.map(b =>

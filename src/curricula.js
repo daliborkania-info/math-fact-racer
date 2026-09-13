@@ -30,6 +30,8 @@
  *                                 book teaches them as separate chapters
  *   round [bucket ids]            o1..o3, rounding: tens under a hundred,
  *                                 tens of a three digit number, hundreds
+ *   chain [bucket ids]            1..3, three numbers and two signs,
+ *                                 within twenty, whole tens, the hundred
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
  *   shop  [job ids]               workshop jobs, for material that is
@@ -147,7 +149,7 @@ const CURRICULA = [
       {n:8,  name:"Dvojciferná bez přechodu",             src:"7. díl, s. 16–19", pool:{as100:["h1","h4"]}},
       {n:9,  name:"Sčítání do celých desítek",            src:"7. díl, s. 20–23", pool:{as100:["h2","h3"]}},
       {n:10, name:"S přechodem přes základ 10",           src:"7. díl, s. 24–27", pool:{as100:["h2","h5"]}},
-      {n:11, name:"Sčítání a odčítání více čísel",        src:"7. díl, s. 28–29", pool:null},
+      {n:11, name:"Sčítání a odčítání více čísel",        src:"7. díl, s. 28–29", pool:{chain:["1","2","3"]}},
       {n:12, name:"Opakování do sta",                     src:"7. díl, s. 30–31", pool:{as100:ALL_H}},
       {n:13, name:"Početní operace se závorkami",         src:"7. díl, s. 32–34", pool:null},
       // the seventh part stays inside a hundred, so only the first two

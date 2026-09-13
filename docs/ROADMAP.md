@@ -11,7 +11,7 @@ zjištění je odkaz. Kde přímý důkaz není, je to napsané.
 
 ## 1. Stav
 
-Jedenadvacet tratí ve čtyřech světech, 79 hratelných kapitol z 95, dvě zakázky
+Dvaadvacet tratí ve čtyřech světech, 80 hratelných kapitol z 95, dvě zakázky
 v dílně, tři jazyky. První ročník je pokrytý celý, druhý skoro celý.
 
 Oddíly 2 až 4 níž jsou z rešerše z 12. září 2026 a jsou pořád platné, jen už

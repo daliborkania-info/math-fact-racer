@@ -281,7 +281,14 @@ input{font-family:inherit}
 .question{
   font-family:var(--font-display);font-size:clamp(38px,12vw,54px);line-height:1;
   letter-spacing:1px;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:12px;
+  flex-wrap:wrap;justify-content:center;row-gap:6px;
 }
+/* A chain of three numbers is a longer line than a single fact, so the
+   letters step down rather than the row running off the side of a
+   phone; the answer box is allowed to wrap onto a second row as well.
+   Nothing is ever cut off: when it will not fit, it moves. */
+.question.q-long{font-size:clamp(30px,8.6vw,44px)}
+.question.q-xlong{font-size:clamp(24px,6.6vw,36px)}
 .answerbox{
   min-width:104px;height:60px;border-radius:var(--r-m);background:var(--paper);
   border:3px dashed var(--line);display:flex;align-items:center;justify-content:center;
@@ -517,7 +524,13 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
   /* a cap, not a fixed height: a fixed one overrode the aspect ratio and
      left dark bars beside the scene */
   .stage{max-height:148px}
+  /* the long lines have to be repeated here, class for class: a bare
+     `.question` is one class deep and loses to the two class rules for
+     `.q-long` and `.q-xlong` above, so without these a short screen
+     would step every question down except the ones that need it most */
   .question{font-size:clamp(32px,10vw,44px)}
+  .question.q-long{font-size:clamp(26px,7.2vw,36px)}
+  .question.q-xlong{font-size:clamp(21px,5.6vw,30px)}
   .answerbox{height:52px;font-size:34px;min-width:92px}
 }
 @media (prefers-reduced-motion: reduce){

@@ -87,13 +87,15 @@ Z osmého dílu jsou hotové kapitoly 23, 24 a 25, tedy páteř celého oboru do
 tisíce. Odemkl je generátor `add_sub_1000` a jezdí se na vlastní trati `a1000`,
 která má šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku.
 
-V září 2026 přibyly dvě rodiny z vlny A. `mult_beyond` s `div_beyond` otevřely
+V září 2026 přibyly tři rodiny z vlny A. `mult_beyond` s `div_beyond` otevřely
 kapitoly 14, 16 a 31 a jezdí se na trati `beyond`, `rounding_10`
-s `rounding_100` otevřely kapitoly 7 a 26 a jezdí se na trati `round`.
-Celkem je to osmnáct kapitol z třiatřiceti.
+s `rounding_100` otevřely kapitoly 7 a 26 a jezdí se na trati `round`,
+a `chain_3` otevřel kapitolu 11 a jezdí se na trati `chain`, která má tři
+kbelíky podle oboru a na mapě stojí hned za stovkou, tedy v pořadí učebnice
+před `beyond`. Celkem je to devatenáct kapitol z třiatřiceti.
 
-Zamčené zůstávají kapitoly 5, 6, 11, 13, 15, 17, 18, 19, 21, 22, 27, 28, 29, 30
-a 32. Sedm z nich nepotřebuje na vstupu nic nového, stačí další generátory
+Zamčené zůstávají kapitoly 5, 6, 13, 15, 17, 18, 19, 21, 22, 27, 28, 29, 30
+a 32. Šest z nich nepotřebuje na vstupu nic nového, stačí další generátory
 na číselnou klávesnici; pořadí je v `PROJECT-STATE.md`, oddíl 12b.
 
 ## Pilot

@@ -22,9 +22,9 @@ anglicky jako jedna věta, která říká, co se pro dítě nebo rodiče změnil
 
 ## 0. Kde stojíme a co se v revizi zjistilo
 
-**Stav.** Jedenadvacet tratí ve čtyřech světech, 84 palet, dvě zakázky v dílně,
-79 hratelných kapitol z 95, pět testových souborů. Všech pět testů prochází,
-`flow.test.js` 148 kontrol, `migration.test.js` 84, `i18n` 322 klíčů ve třech
+**Stav.** Dvaadvacet tratí ve čtyřech světech, 88 palet, dvě zakázky v dílně,
+80 hratelných kapitol z 95, pět testových souborů. Všech pět testů prochází,
+`flow.test.js` 172 kontrol, `migration.test.js` 84, `i18n` 322 klíčů ve třech
 jazycích bez děr. Jedna kontrola je nestabilní, viz A1.
 
 **Revize kódu nenašla nic, co by rozbíjelo mechaniku.** Pohyb, body, krabička,
@@ -62,7 +62,7 @@ nejvíc kapitol za nejmíň práce (zbytek vlny A).
 | --- | --- | --- | --- |
 | A | opravy z revize | hodina | ne |
 | B0 | předěl ročníků na mapě, minulé roky složené | půl session | ne |
-| B | `chain_3`, trať `chain` | jedna session | ne |
+| B | `chain_3`, trať `chain` — hotovo | jedna session | ne |
 | C | responzivita a písmo podle ročníku | jedna až dvě session | ne |
 | D | zbytek vlny A, čtyři rodiny na `pad` | čtyři session | ne |
 | E | vlna B, nové vstupní prvky, začíná `pad2` | tři až čtyři session | `pad2` možná ano |
@@ -270,7 +270,26 @@ Commit: `Fold the earlier years away so the map starts where the class is`.
 
 ---
 
-## Krok B. `chain_3`, trať `chain`
+## Krok B. `chain_3`, trať `chain` — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo tohle: dvě ze čtyř navržených palet se na obrázku
+neosvědčily a musely se posunout, mokřad okruhu z `pal(160, 140, 60, "drop")`
+na `pal(170, 150, 52, "drop")`, protože ve světlejší verzi vypadal jako
+trať podle školy, a mělčina v hlubině z `{h2:130, l2:44}` na
+`pal(188, 150, 62, "shell", {h2:158, l2:52, sat:38})`, protože zelené dno
+vypadalo jako trávník pod vodou; stezka a obloha vyšly podle návrhu. `questionHTML()`
+se kvůli B7 změnilo tak, že vrací **celý prvek `#qbox`** i s třídou délky, ne
+jen jeho vnitřek, protože třída patří na něj a mezi otázkami se teď vyměňuje
+přes `outerHTML`; délku měří nová `questionSize()` a platí pro všechny rodiny,
+takže krok D už ji řešit nemusí. Hranice délky se přitom musely posunout:
+počítá se řádek **včetně mezer** a prahy jsou 9 a 13 znaků, protože `47 + 5 - 3`
+má bez mezer jen šest znaků, tedy přesně ten příklad, kvůli kterému celé B7
+vzniklo, by se navrženým pravidlem nezmenšil. Na drawn řádku to vyjde nastejno:
+`(300 + 60) : 4` z kroku D1 je pořád `q-xlong`, existující rodiny se nehnuly
+kromě prvního stupně tisícovky (`300 + 200`), který je stejně široký jako
+řetězec a zmenšit se měl taky. A `flow.test.js` posunula i mapa čtvrťáka,
+která má o jedno místo víc, tedy 22; v oddílu 14 `PROJECT-STATE.md` to číslo
+bylo, jen o něm plán nemluvil. Kontrol ve `flow.test.js` je po tomhle kroku 172.
 
 Třetí položka vlny A, kapitola 11 třetího ročníku, sedmý díl, strany 28 a 29,
 "Sčítání a odčítání více čísel". Řetězec tří členů se dvěma znaménky, například
@@ -305,6 +324,14 @@ rovnoměrně. Pro každý kbelík:
 aby výsledek ležel v 0 až 20 a člen byl 1 až 9. Přechod přes desítku je
 dovolený, je to třetí třída. Pokud pro zvolený vzor nejde třetí člen vybrat
 (například `2 - 1 - ?`), losuje se vzor znovu, nikdy se neořezává.
+
+(Upřesnilo se: mezivýsledek `q1` vychází 1 až 18, ne 1 až 19, protože oba
+první členy jsou jednociferné a druhý je nejvýš 9; kontrola na dvacítku v téhle
+větvi byla mrtvá a je pryč. A "losuje se vzor znovu" je pojistka, ne provozní
+cesta: rozsahy ve všech třech kbelících jsou vedené tak, aby se každý ze čtyř
+vzorů vždycky dostavěl, protože přelosování posouvalo distribuci, `++` mělo
+v `q2` o třetinu míň. Vyčerpaný strop losování je vyhozená výjimka, ne náhradní
+příklad.)
 
 `q2`: členy jsou celé desítky 10 až 90, mezivýsledek 10 až 100, výsledek 0 až
 100.
@@ -411,9 +438,10 @@ při 45 px na 375 px širokém telefonu měří zhruba 400 px, takže přeteče.
 čeká `order_of_ops` s `(12 + 8) × 3`, který je ještě delší. Řešení je na dvou
 místech a dělá se tady, protože tady je první rodina, která to potřebuje:
 
-`questionHTML()` doplní na `.question` třídu podle délky zadání bez mezer:
-do 6 znaků nic, 7 až 10 znaků `q-long`, 11 a víc `q-xlong`. Vykresluje se do
-`#qbox`, takže třída se přidává na něj, ne na vnitřní `span`.
+`questionHTML()` doplní na `.question` třídu podle délky zadání. Vykresluje se do
+`#qbox`, takže třída se přidává na něj, ne na vnitřní `span`. (Při
+implementaci se ukázalo, že se musí počítat i mezery, viz poznámka HOTOVO
+nahoře: prahy jsou 9 a 13 znaků včetně mezer, ne 7 a 11 bez nich.)
 
 `styles.css`: `.question{flex-wrap:wrap;justify-content:center;row-gap:6px}`,
 aby `= [?]` směl spadnout na druhý řádek, a `.question.q-long{font-size:

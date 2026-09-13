@@ -129,6 +129,18 @@ cs: {
   again: "Ještě jednou",
   backToMap: "Zpátky na mapu",
 
+  /* rocnik a ukazka dalsiho roku */
+  gradeAsk: "Do které třídy chodíš?",
+  grade1: "1.", grade2: "2.", grade3: "3.", grade4: "4. a výš",
+  secGrade: "Ročník",
+  gradeLabel: "Do které třídy dítě chodí",
+  gradeNote: "Podle ročníku se skládá mapa: jsou na ní tratě, které se probírají letos a dřív. Nic z dřívějška nemizí. Učivo dalšího ročníku je na konci cesty za dílnou pod tlačítkem na ukázku a dá se zkusit, ale mapu to nepřepne; po zavření hry se zase schová.",
+  peekTitle: "Co tě čeká příští rok",
+  peekSub: "jen na ukázku, můžeš si to zkusit",
+  peekOpenSub: "zkus si, co se budeš učit. Po zavření hry se to zase schová.",
+  peekShow: "Ukázat",
+  peekHide: "Schovat",
+
   /* svety */
   worldTitle: "Kde se to hraje",
   worldNote: "Mění se jen krajina a to, s čím se vydáš na trať. Příklady, obtížnost i rekordy zůstávají úplně stejné, takže se dá kdykoli přepnout zpátky.",
@@ -395,6 +407,17 @@ en: {
   again: "Race again",
   backToMap: "Back to the map",
 
+  gradeAsk: "Which year are you in?",
+  grade1: "1st", grade2: "2nd", grade3: "3rd", grade4: "4th and up",
+  secGrade: "School year",
+  gradeLabel: "Which year the child is in",
+  gradeNote: "The map is built from the year: it holds the tracks taught this year and earlier. Nothing from earlier years disappears. Next year's material sits at the end of the road behind the workshop as a look ahead and can be tried, but it does not move the map on; closing the game folds it away again.",
+  peekTitle: "What's coming next year",
+  peekSub: "just a look, you can try it",
+  peekOpenSub: "try what you will be learning. Closing the game folds it away.",
+  peekShow: "Show me",
+  peekHide: "Hide",
+
   worldTitle: "Where it all happens",
   worldNote: "Only the landscape changes, and what you set off with. The sums, the difficulty and your records stay exactly the same, so you can switch back whenever you like.",
   w_circuit: "Circuit",  w_circuits: "race track and machines",
@@ -655,6 +678,17 @@ de: {
   reviewNext: "Die nehmen wir uns noch mal vor",
   again: "Noch eine Runde",
   backToMap: "Zurück zur Karte",
+
+  gradeAsk: "In welcher Klasse bist du?",
+  grade1: "1.", grade2: "2.", grade3: "3.", grade4: "4. und höher",
+  secGrade: "Klassenstufe",
+  gradeLabel: "In welcher Klasse das Kind ist",
+  gradeNote: "Die Karte richtet sich nach der Klassenstufe: Sie zeigt die Strecken aus diesem und den früheren Schuljahren. Nichts aus früheren Jahren verschwindet. Der Stoff des nächsten Jahres liegt am Ende des Weges hinter der Werkstatt als Vorschau und darf ausprobiert werden, schaltet die Karte aber nicht weiter; beim Schließen des Spiels klappt er wieder zu.",
+  peekTitle: "Was nächstes Jahr kommt",
+  peekSub: "nur zum Anschauen, ausprobieren geht",
+  peekOpenSub: "probier aus, was du lernen wirst. Beim Schließen klappt es wieder zu.",
+  peekShow: "Zeig mir das",
+  peekHide: "Zuklappen",
 
   worldTitle: "Wo gespielt wird",
   worldNote: "Es ändern sich nur die Landschaft und das, womit du losziehst. Aufgaben, Schwierigkeit und Rekorde bleiben genau gleich, du kannst also jederzeit zurückwechseln.",

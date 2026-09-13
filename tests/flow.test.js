@@ -34,7 +34,13 @@ ok('kod ulozen jako hash', DBg().pin && !/1234/.test(JSON.stringify(DBg())), DBg
 console.log('--- zalozeni hrace ---');
 click(q('[data-act="newplayer"]'));
 ok('pri zakladani se avatar nevybira', qa('[data-pick]').length===0);
-d.querySelector('#nm').value='Kuba'; click(q('[data-go]'));
+ok('pri zakladani se vybira trida', qa('[data-gr]').length===4);
+ok('bez vybrane tridy nejde pokracovat', q('[data-go]').hasAttribute('disabled'));
+d.querySelector('#nm').value='Kuba';
+click(qa('[data-gr]').find(b=>b.dataset.gr==='3'));
+ok('po vyberu tridy uz tlacitko jde', !q('[data-go]').hasAttribute('disabled'));
+click(q('[data-go]'));
+ok('rocnik se ulozil do profilu', DBg().profiles[0].grade===3, 'grade '+DBg().profiles[0].grade);
 ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
 ok('mapa ma 14 ruznych okruhu', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===14,
    new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size+' okruhu');
@@ -392,9 +398,49 @@ ok('nater stal soucastky, ne mince', DBg().profiles[0].parts===170, DBg().profil
 click(qa('[data-act="usepaint"]')[0]);
 ok('nater jde zase sundat', Object.keys(DBg().profiles[0].paint).length===0);
 
+console.log('--- rocnik a ukazka dalsiho roku ---');
+click(q('[data-act="map"]')); click(q('[data-act="players"]'));
+click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Prvňák';
+click(qa('[data-gr]').find(b=>b.dataset.gr==='1')); click(q('[data-go]'));
+const prvni=()=>DBg().profiles.find(x=>x.name==='Prvňák');
+ok('prvnak ma na mape jen ucivo sveho rocniku',
+   /Do dvaceti/.test(txt()) && !/Rozjezd|Hodiny|Do tisíce/.test(txt()), txt().slice(0,90));
+const mistPrvnak=qa('.place:not(.peekdoor)').length;
+ok('mapa prvnaka je kratka', mistPrvnak===3, mistPrvnak+' mist vcetne dilny');
+ok('na konci cesty je tlacitko na priste', qa('.place.peekdoor').length===1 && /Co tě čeká příští rok/.test(txt()));
+ok('dilna je na mape i prvnakovi', qa('[data-act="shop"]').length===1);
+// ukazka rozbali dalsi rocnik, ale profil nechava na miste
+click(q('[data-act="peek"]'));
+const ukazka=qa('.place.peek');
+ok('ukazka rozbalila tratě dalsiho rocniku', ukazka.length===9, ukazka.length+' trati');
+ok('ukazka ukazuje druhou tridu, ne tretí', /Rozjezd/.test(txt()) && !/Do tisíce/.test(txt()));
+ok('tratě z ukazky jdou spustit', ukazka.every(el=>el.tagName==='BUTTON' && el.dataset.act==='play'));
+ok('rocnik v profilu se nezmenil', prvni().grade===1, 'grade '+prvni().grade);
+ok('o ukazce neni v ulozenych datech ani slovo', !/peek/i.test(JSON.stringify(DBg())));
+// zavod z ukazky se opravdu spusti
+click(ukazka.find(el=>el.dataset.id==='t1')); click(q('[data-go]'));
+ok('trat z ukazky se rozjela', ev('RUN && RUN.t.id')==='t1');
+click(q('[data-act="quit"]')); click(q('[data-yes]'));
+ok('po navratu je ukazka porad rozbalena', qa('.place.peek').length===9);
+// prepnuti hrace ji slozi zpatky, stejne jako zavreni hry
+click(q('[data-act="players"]')); click(qa('[data-act="pick"]').find(b=>b.dataset.id===prvni().id));
+ok('prepnuti hrace ukazku slozilo', qa('.place.peek').length===0 && qa('.place.peekdoor').length===1);
+ok('zkousena trat na mape prvnaka nezustala', !/Rozjezd/.test(txt()));
+// rodic rocnik prepnout smi
+click(q('[data-act="gate"]'));
+d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));
+ok('rodic ma prepinac rocniku', qa('[data-act="gradeset"]').length===4 && /Ročník/.test(txt()));
+click(qa('[data-act="gradeset"]').find(b=>b.dataset.gr==='2'));
+ok('rocnik prepnut', prvni().grade===2);
+click(q('[data-act="map"]'));
+ok('mapa druhaka je delsi', qa('.place:not(.peekdoor)').length===12 && /Rozjezd/.test(txt()),
+   qa('.place:not(.peekdoor)').length+' mist');
+ok('druhak vidi ukazku treti tridy', /Do tisíce/.test((click(q('[data-act="peek"]')), txt())));
+
 console.log('--- druhy hrac ---');
 click(q('[data-act="map"]')); click(q('[data-act="players"]'));
-click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Anička'; click(q('[data-go]'));
+click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Anička';
+click(qa('[data-gr]').find(b=>b.dataset.gr==='2')); click(q('[data-go]'));
 ok('druhy profil ma vlastni postup', DBg().profiles.length===2 && DBg().profiles[1].coins===0);
 click(q('[data-act="play"]')); click(q('[data-go]'));
 ok('kratsi zavod dle nastaveni prvniho hrace se neprenasi', qa('.pip').length===20, qa('.pip').length+' otazek');

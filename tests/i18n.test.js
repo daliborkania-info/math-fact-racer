@@ -15,7 +15,7 @@ const app=fs.readFileSync(path.join(ROOT, 'src', 'app.js'),'utf8');
 const used=new Set([...app.matchAll(/\bt\("([a-zA-Z0-9_]+)"/g)].map(m=>m[1]));
 // klice skladane za behu, napriklad t("trk_" + tr.id), se v kodu objevi
 // jen jako prefix a ve slovniku samy o sobe nejsou
-const dyn=['trk_','res','legend','job_','heat_','w_'];
+const dyn=['trk_','res','legend','job_','heat_','w_','grade'];
 const missing=[...used].filter(k=>I18N.en[k]===undefined && !dyn.includes(k));
 console.log('\npouzitych klicu v kodu:', used.size, '| bez prekladu:', missing.length?missing.join(', '):'zadny');
 
@@ -38,7 +38,9 @@ async function play(lang){
   await wait(30);
   click(qa('[data-act="parentlang"]').find(b=>b.dataset.lang===lang));
   d.getElementById('pin1').value='1234'; click(q('[data-act="savepin"]'));
-  click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Sam'; click(q('[data-go]'));
+  click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Sam';
+  click(qa('[data-gr]').find(b=>b.dataset.gr==='3'));            // bez tridy se dal nejde
+  click(q('[data-go]'));
   const map=txt();
   click(q('[data-act="play"]')); click(q('[data-go]'));
   let n=0;

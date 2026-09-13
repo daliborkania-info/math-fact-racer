@@ -20,7 +20,10 @@
   "              sbirce; expectNoStars naopak ty, ktere se rozsvitit",
   "              nesmi, protoze v krabicce nedosahly urovne ctyri",
   "expectWorld = svet, ve kterem profil po nacteni skonci; starsi profil",
-  "              patri do okruhu, protoze tam uz byl"
+  "              patri do okruhu, protoze tam uz byl",
+  "expectGrade = rocnik, ve kterem profil po nacteni skonci; starsi",
+  "              profil zadny nema a dostane nejvyssi, protoze nizsi by",
+  "              mu vzal trati, ktere uz na mape vidi"
  ],
  "cases": [
   {
@@ -1031,6 +1034,189 @@
       "msSum": 1210000,
       "msN": 441,
       "created": 1757300000000
+     }
+    ]
+   }
+  },
+  {
+   "id": "v6-pred-rocniky",
+   "note": "zari 2026, profil ze verze se svety, ale jeste bez rocniku: nezna grade. Musi dostat nejvyssi rocnik, aby na mape zustalo vsechno, co uz videl, vcetne tisicovky a zaokrouhlovani",
+   "expectOpen": [
+    "t1",
+    "t2",
+    "t3",
+    "d1",
+    "a20",
+    "a100",
+    "a1000",
+    "round",
+    "clock",
+    "weak"
+   ],
+   "expectClosed": [
+    "t4",
+    "t5",
+    "beyond",
+    "mix"
+   ],
+   "expectChapter": null,
+   "expectWorld": "deep",
+   "expectGrade": 4,
+   "expectStars": [
+    "m7x8",
+    "m2x2",
+    "kpb2"
+   ],
+   "expectNoStars": [
+    "a3p4",
+    "o2",
+    "wm3"
+   ],
+   "db": {
+    "current": "pold9",
+    "sound": true,
+    "lang": "cs",
+    "pin": "ghi789",
+    "profiles": [
+     {
+      "id": "pold9",
+      "name": "Ela",
+      "lang": "cs",
+      "facts": {
+       "m7x8": {
+        "lv": 4,
+        "reps": 10,
+        "ok": 9,
+        "bad": 1,
+        "best": 2100,
+        "seen": 1757000000000
+       },
+       "m2x2": {
+        "lv": 5,
+        "reps": 12,
+        "ok": 11,
+        "bad": 1,
+        "best": 1500,
+        "seen": 1757000000000
+       },
+       "a3p4": {
+        "lv": 3,
+        "reps": 7,
+        "ok": 6,
+        "bad": 1,
+        "best": 2400,
+        "seen": 1757000000000
+       },
+       "kpb2": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 5100,
+        "seen": 1757000000000
+       },
+       "o2": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 3,
+        "bad": 2,
+        "best": 5400,
+        "seen": 1757000000000
+       },
+       "wm3": {
+        "lv": 3,
+        "reps": 6,
+        "ok": 5,
+        "bad": 1,
+        "best": null,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "m7x8": true,
+       "m2x2": true,
+       "kpb2": true
+      },
+      "best": {
+       "t1": {
+        "dist": 132,
+        "hist": [],
+        "n0": 20
+       },
+       "a1000": {
+        "dist": 91,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 3,
+       "a20": 3,
+       "a100": 2,
+       "a1000": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "pet_hvezd"
+      ],
+      "runner": "pet_hvezd",
+      "xp": {
+       "pet_hvezd": 210
+      },
+      "coins": 340,
+      "parts": 63,
+      "paints": [
+       "pa_grape"
+      ],
+      "paint": {},
+      "jobRuns": {
+       "money": 7
+      },
+      "trackRuns": {
+       "t1": 9,
+       "t2": 5,
+       "t3": 3,
+       "a20": 8,
+       "a100": 6,
+       "a1000": 2,
+       "round": 1,
+       "clock": 4,
+       "d1": 2
+      },
+      "opened": {
+       "t1": true,
+       "t2": true,
+       "t3": true,
+       "d1": true,
+       "a20": true,
+       "a100": true,
+       "a1000": true,
+       "round": true,
+       "clock": true,
+       "weak": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": null,
+      "chapter": null,
+      "chapterMode": "soft",
+      "world": "deep",
+      "streak": 4,
+      "lastDay": null,
+      "bestStreak": 12,
+      "runs": 40,
+      "totalOk": 690,
+      "totalAns": 760,
+      "msSum": 2100000,
+      "msN": 742,
+      "created": 1757400000000
      }
     ]
    }

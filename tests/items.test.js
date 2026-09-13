@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,as20Stage,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,overallMastery,heatSpecs,collectionSpecs};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -741,6 +741,65 @@ for(const [w,znak] of [['sky','<circle cx="52" cy="36"'],['deep','stroke="#18253
 if(!/f0c063|8a5a2b|a76f36/.test(scena('deep','t1'))) rsay('v hlubine chybi truhla na konci');
 if(!scena('sky','t1').includes('#ff6b6b')) rsay('na obloze chybi duhova brana nebo start');
 console.log('zkontrolovano cest:',A.WORLDS.length*vsechnyTrati.length,'| chyb:',rBad);
+
+// 14. rocniky
+//
+// Mapa se sklada podle toho, do ktere tridy dite chodi: je na ni ucivo
+// letosniho rocniku a vsech drivejsich. Drivejsi se nikdy neschovava,
+// zpatky se totiz vraci pres krabicku a neni k nemu zadne tlacitko.
+// Starsi profil zadny rocnik nema a musi dostat nejvyssi, jinak by mu
+// nova verze vzala trati, ktere uz vidi.
+let gBad=0;
+const gsay=m=>{gBad++; if(gBad<10) console.log('  !!  '+m);};
+// kazda trat s ucivem patri do nejakeho rocniku
+for(const tr of A.TRACKS){
+  const bezRocniku = tr.op==='school' || tr.op==='mix' || tr.op==='weak';
+  if(!tr.grade && !bezRocniku) gsay('trat '+tr.id+' nepatri do zadneho rocniku');
+  if(tr.grade && (tr.grade<1||tr.grade>3)) gsay('trat '+tr.id+' ma rocnik mimo rozsah: '+tr.grade);
+}
+// starsi profil bez rocniku vidi porad vsechno
+const gp={};
+A.seedGrade(gp);
+if(gp.grade!==A.MAX_GRADE) gsay('profil bez rocniku nedostal nejvyssi');
+for(const tr of A.TRACKS) if(!A.inGrade(gp,tr)) gsay('starsimu profilu zmizela trat '+tr.id);
+// a nesmysly se srovnaji
+for(const spatny of [0,-1,9,'druha',null]){ const q={grade:spatny}; A.seedGrade(q);
+  if(q.grade!==A.MAX_GRADE) gsay('nesmyslny rocnik se nesrovnal: '+spatny); }
+// prvnak vidi dvacitku, ne nasobilku; tretak vidi obojí
+const rk1=A.newProfile('G1',1), rk2=A.newProfile('G2',2), rk3=A.newProfile('G3',3);
+if(rk1.grade!==1||rk3.grade!==3) gsay('novy profil si nepamatoval rocnik');
+const vidi=(p)=>A.visibleTracks(p).map(t=>t.id);
+if(!vidi(rk1).includes('a20')) gsay('prvnak nevidi do dvaceti');
+if(vidi(rk1).includes('t1')) gsay('prvnak vidi nasobilku');
+if(vidi(rk1).includes('a1000')) gsay('prvnak vidi tisicovku');
+if(!vidi(rk2).includes('t1')||!vidi(rk2).includes('a20')) gsay('druhak nevidi nasobilku nebo dvacitku');
+if(vidi(rk2).includes('a1000')) gsay('druhak vidi tisicovku');
+if(!vidi(rk3).includes('a1000')||!vidi(rk3).includes('a20')) gsay('tretak neco ztratil');
+// drivejsi rocnik se nikdy neschovava
+for(const p of [rk2,rk3]) for(const tr of A.TRACKS) if(tr.grade && tr.grade<p.grade && !A.inGrade(p,tr))
+  gsay('rocnik '+p.grade+' schoval drivejsi trat '+tr.id);
+// ukazka nabizi prave jeden dalsi rocnik, nikdy vic a nikdy zpatky
+for(const p of [rk1,rk2,rk3]){
+  const ah=A.peekTracks(p);
+  for(const tr of ah) if(tr.grade!==p.grade+1) gsay('ukazka nabidla rocnik '+tr.grade+' misto '+(p.grade+1));
+  if(p.grade<3 && !ah.length) gsay('rocnik '+p.grade+' nema co ukazat');
+}
+if(A.peekTracks({grade:A.MAX_GRADE}).length) gsay('nejvyssi rocnik ma co ukazovat, ale nic dalsiho neni');
+if(A.peekTracks(A.newProfile('G4',4)).length) gsay('ctvrtak dostal ukazku, ktera neexistuje');
+// sampionat nesmi podstrcit ucivo, ktere na mape jeste neni
+A.DB.profiles=[rk1]; A.DB.current=rk1.id;
+rk1.autoUnlock=false;                                   // vsechno odemcene, at je videt filtr
+const vyssi=new Set();
+for(const tr of A.TRACKS) if(tr.grade>1) A.trackKeys(rk1,tr).forEach(k=>vyssi.add(k));
+for(const it of A.buildRun(rk1,A.trackById('mix')))
+  if(vyssi.has(it.key)){gsay('sampionat dal prvnakovi ucivo vyssiho rocniku: '+it.key);break;}
+// rodicovska sekce a souhrn taky nemluvi o tom, co dite nema na mape
+if(A.heatSpecs(rk1).some(sp=>sp.title===A.I18N.cs.trk_a1000)) gsay('heatmapa prvnakovi ukazuje tisicovku');
+if(A.collectionSpecs(rk1).some(sp=>sp.title===A.I18N.cs.trk_a1000)) gsay('sbirka prvnakovi ukazuje tisicovku');
+// ale co uz ma rozsviceno, o to neprijde ani mimo rocnik
+rk1.stars={kpb1:true};
+if(!A.collectionSpecs(rk1).some(sp=>sp.keys.indexOf('kpb1')>=0)) gsay('rozsvicena sbirka mimo rocnik zmizela');
+console.log('rocniku:',A.MAX_GRADE,'| chyb:',gBad);
 
 // 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
 let trBad=0;

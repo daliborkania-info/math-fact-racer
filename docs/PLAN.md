@@ -313,6 +313,26 @@ přepisují zbytečně.
 
 ---
 
+## Krok 4c. Ročník a ukázka dalšího roku. HOTOVO, září 2026
+
+Nebylo v plánu, přišlo ze zadání hned po kroku 4 a patří k němu: mapa už je
+krajina, takže dávalo smysl rovnou říct, kolik té krajiny se má rozložit.
+
+**Co to dělá.** Profil má `grade`, tedy třídu. Na mapě je učivo letošního
+ročníku a všech dřívějších. Ročník se vybírá při zakládání hráče a rodič ho
+může kdykoli změnit. Za dílnou je na konci cesty tlačítko, které rozbalí
+následující ročník na ukázku: dá se z něj rovnou hrát, ale ročník v profilu se
+nemění a po zavření hry je zase složeno. Dřívější ročník se nenabízí, protože
+z mapy nikdy nezmizel. Podrobnosti v `PROJECT-STATE.md`, oddíl 7d.
+
+**Na co si dát pozor u dalších změn.** Ročník nesmí nikomu ubrat mapu: starší
+profil žádný nemá a dostane nejvyšší. Filtr se musí uplatnit i v šampionátu,
+v rodičovské heatmapě a v souhrnu, jinak by hra mluvila o učivu, které dítě
+na mapě nevidí. A ukázka nesmí nic zapsat do profilu, jinak by z nahlédnutí
+bylo přeřazení do vyššího ročníku.
+
+---
+
 ## Krok 5. Vlna B, nové vstupní prvky
 
 Pořadí a rozbor jsou v `PROJECT-STATE.md`, oddíly 12b a 12c bod B.

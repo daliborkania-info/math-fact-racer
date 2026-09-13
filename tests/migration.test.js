@@ -115,6 +115,17 @@ for(const c of FX.cases){
     ok('zadny svet neschoval koupeneho zavodnika', vsude===true);
   }
 
+  // rocnik: starsi profil zadny nema a musi dostat nejvyssi, jinak by mu
+  // filtr mapy vzal trati, ktere uz vidi
+  if(c.expectGrade){
+    ok('profil dostal rocnik, ktery mu nic nebere', after.profiles[0].grade===c.expectGrade,
+       'rocnik '+after.profiles[0].grade);
+    const vidi=JSON.parse(w.eval('JSON.stringify(visibleTracks(P()).map(t=>t.id))'));
+    const chybi=(c.expectOpen||[]).filter(id=>!vidi.includes(id));
+    ok('vsechny jeho trati zustaly na mape', chybi.length===0,
+       chybi.length?'z mapy zmizelo '+chybi.join(','):vidi.length+' trati na mape');
+  }
+
   if(c.expectChapter!==null){
     const ch=after.profiles[0].chapter;
     ok('kapitola se srovnala jen dozadu', ch===c.expectChapter,

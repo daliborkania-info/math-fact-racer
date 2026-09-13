@@ -191,6 +191,13 @@ input{font-family:inherit}
 .place .foot{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;
   color:var(--ink-soft);min-height:16px}
 .place .tokc{margin-left:auto;font-size:11px;color:var(--ink-faint);white-space:nowrap}
+/* The door to next year, and what lies behind it. Dashed, because it is
+   a look ahead rather than part of the road: nothing here is counted as
+   the child's own yet and none of it stays open after the game closes. */
+.place.peekdoor{background:linear-gradient(160deg,#eef0ff,#e2e6ff);border-color:#c3c9f5;border-style:dashed}
+.place.peekdoor .foot{color:var(--grape-dark)}
+.peekthumb{display:grid;place-items:center;font-size:32px;background:#d8ddff !important}
+.place.peek{border-style:dashed;opacity:.9}
 .place.locked{filter:grayscale(.85);opacity:.6}
 .place.locked .lockmsg{font-size:11px;color:var(--ink-soft);font-weight:700;line-height:1.25}
 
@@ -637,6 +644,18 @@ cs: {
   again: "Ještě jednou",
   backToMap: "Zpátky na mapu",
 
+  /* rocnik a ukazka dalsiho roku */
+  gradeAsk: "Do které třídy chodíš?",
+  grade1: "1.", grade2: "2.", grade3: "3.", grade4: "4. a výš",
+  secGrade: "Ročník",
+  gradeLabel: "Do které třídy dítě chodí",
+  gradeNote: "Podle ročníku se skládá mapa: jsou na ní tratě, které se probírají letos a dřív. Nic z dřívějška nemizí. Učivo dalšího ročníku je na konci cesty za dílnou pod tlačítkem na ukázku a dá se zkusit, ale mapu to nepřepne; po zavření hry se zase schová.",
+  peekTitle: "Co tě čeká příští rok",
+  peekSub: "jen na ukázku, můžeš si to zkusit",
+  peekOpenSub: "zkus si, co se budeš učit. Po zavření hry se to zase schová.",
+  peekShow: "Ukázat",
+  peekHide: "Schovat",
+
   /* svety */
   worldTitle: "Kde se to hraje",
   worldNote: "Mění se jen krajina a to, s čím se vydáš na trať. Příklady, obtížnost i rekordy zůstávají úplně stejné, takže se dá kdykoli přepnout zpátky.",
@@ -903,6 +922,17 @@ en: {
   again: "Race again",
   backToMap: "Back to the map",
 
+  gradeAsk: "Which year are you in?",
+  grade1: "1st", grade2: "2nd", grade3: "3rd", grade4: "4th and up",
+  secGrade: "School year",
+  gradeLabel: "Which year the child is in",
+  gradeNote: "The map is built from the year: it holds the tracks taught this year and earlier. Nothing from earlier years disappears. Next year's material sits at the end of the road behind the workshop as a look ahead and can be tried, but it does not move the map on; closing the game folds it away again.",
+  peekTitle: "What's coming next year",
+  peekSub: "just a look, you can try it",
+  peekOpenSub: "try what you will be learning. Closing the game folds it away.",
+  peekShow: "Show me",
+  peekHide: "Hide",
+
   worldTitle: "Where it all happens",
   worldNote: "Only the landscape changes, and what you set off with. The sums, the difficulty and your records stay exactly the same, so you can switch back whenever you like.",
   w_circuit: "Circuit",  w_circuits: "race track and machines",
@@ -1163,6 +1193,17 @@ de: {
   reviewNext: "Die nehmen wir uns noch mal vor",
   again: "Noch eine Runde",
   backToMap: "Zurück zur Karte",
+
+  gradeAsk: "In welcher Klasse bist du?",
+  grade1: "1.", grade2: "2.", grade3: "3.", grade4: "4. und höher",
+  secGrade: "Klassenstufe",
+  gradeLabel: "In welcher Klasse das Kind ist",
+  gradeNote: "Die Karte richtet sich nach der Klassenstufe: Sie zeigt die Strecken aus diesem und den früheren Schuljahren. Nichts aus früheren Jahren verschwindet. Der Stoff des nächsten Jahres liegt am Ende des Weges hinter der Werkstatt als Vorschau und darf ausprobiert werden, schaltet die Karte aber nicht weiter; beim Schließen des Spiels klappt er wieder zu.",
+  peekTitle: "Was nächstes Jahr kommt",
+  peekSub: "nur zum Anschauen, ausprobieren geht",
+  peekOpenSub: "probier aus, was du lernen wirst. Beim Schließen klappt es wieder zu.",
+  peekShow: "Zeig mir das",
+  peekHide: "Zuklappen",
 
   worldTitle: "Wo gespielt wird",
   worldNote: "Es ändern sich nur die Landschaft und das, womit du losziehst. Aufgaben, Schwierigkeit und Rekorde bleiben genau gleich, du kannst also jederzeit zurückwechseln.",
@@ -1533,6 +1574,14 @@ function applyLang(){
   CUR_WORLD = (!parent && p && p.world) ? p.world : "";
   try{ document.documentElement.lang = CUR_LANG; }catch(e){}
 }
+/* The school year picker, the same control in the new player sheet and
+   in the parent section. Nothing before the first year and nothing past
+   the fourth: the game has no material for either. */
+function gradeSeg(act, current){
+  return `<div class="seg">` + [1,2,3,4].map(function(g){
+    return `<button class="${current === g ? "on" : ""}" data-act="${act}" data-gr="${g}">${t("grade" + g)}</button>`;
+  }).join("") + `</div>`;
+}
 function langSeg(act, current){
   return `<div class="seg">` + LANGS.map(function(l){
     return `<button class="${current === l[0] ? "on" : ""}" data-act="${act}" data-lang="${l[0]}">${l[1]}</button>`;
@@ -1570,6 +1619,7 @@ function load(){
     seedShop(p);
     seedStars(p);
     seedWorld(p);
+    seedGrade(p);
   }
 }
 /* The workshop, added later. An older profile has none of this and must
@@ -1594,7 +1644,11 @@ function save(){
 }
 function P(){ return DB.profiles.find(p => p.id === DB.current) || null; }
 
-function newProfile(name){
+/* A new profile is told which school year the child is in, because that
+   is what decides how much of the map is laid out in front of them. An
+   older profile, and an imported backup from before this existed, has no
+   year and gets the top one, which is what it was already seeing. */
+function newProfile(name, grade){
   return {
     id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     name: name,
@@ -1621,6 +1675,7 @@ function newProfile(name){
     chapter: null,      // chapter number inside that curriculum
     chapterMode: "soft",// soft keeps spaced review, hard drills the chapter only
     world: "circuit",   // the coat the game wears; never changes difficulty
+    grade: (grade >= 1 && grade <= MAX_GRADE) ? grade : MAX_GRADE,
     streak: 0, lastDay: null, bestStreak: 0,
     runs: 0, totalOk: 0, totalAns: 0, msSum: 0, msN: 0,
     created: Date.now()
@@ -1783,24 +1838,53 @@ function stageKeys(i){
   return out;
 }
 
+/* `grade` is the school year in which a track's material is taught, read
+   off the curriculum maps: the first year is the whole of adding within
+   twenty, the second brings the times table, division, the hundred and
+   the clock, and the third the thousand, rounding and everything past
+   the tables. A track without a grade belongs to no particular year:
+   the trouble spots are useful from the first week, and the school track
+   follows whatever chapter the parent picked. */
 const TRACKS = [
-  {id:"t1",   op:"mult",  tables:[1,2,5,10],              env:"meadow"},
-  {id:"t2",   op:"mult",  tables:[3,4],                   env:"forest"},
-  {id:"t3",   op:"mult",  tables:[6,7],                   env:"canyon"},
-  {id:"t4",   op:"mult",  tables:[8,9],                   env:"peaks"},
-  {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city"},
-  {id:"d1",   op:"div",                                   env:"space"},
-  {id:"beyond",op:"beyond",                               env:"savanna"},
-  {id:"round", op:"round",                                env:"cave"},
-  {id:"a20",  op:"as20",                                  env:"beach"},
-  {id:"a100", op:"as100",                                 env:"ocean"},
-  {id:"a1000",op:"as1000",                                env:"volcano"},
-  {id:"clock",op:"clock",                                 env:"clocktown"},
-  {id:"mix",  op:"mix",                                   env:"night"},
-  {id:"weak", op:"weak",                                  env:"storm"},
+  {id:"t1",   op:"mult",  tables:[1,2,5,10],              env:"meadow",   grade:2},
+  {id:"t2",   op:"mult",  tables:[3,4],                   env:"forest",   grade:2},
+  {id:"t3",   op:"mult",  tables:[6,7],                   env:"canyon",   grade:2},
+  {id:"t4",   op:"mult",  tables:[8,9],                   env:"peaks",    grade:2},
+  {id:"t5",   op:"mult",  tables:[1,2,3,4,5,6,7,8,9,10],  env:"city",     grade:2},
+  {id:"d1",   op:"div",                                   env:"space",    grade:2},
+  {id:"beyond",op:"beyond",                               env:"savanna",  grade:3},
+  {id:"round", op:"round",                                env:"cave",     grade:3},
+  {id:"a20",  op:"as20",                                  env:"beach",    grade:1},
+  {id:"a100", op:"as100",                                 env:"ocean",    grade:2},
+  {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
+  {id:"clock",op:"clock",                                 env:"clocktown",grade:2},
+  {id:"mix",  op:"mix",                                   env:"night",    grade:2},
+  {id:"weak", op:"weak",                                  env:"storm",    grade:1},
   {id:"school", op:"school",                              env:"school"}
 ];
 const trackById = id => TRACKS.find(x => x.id === id);
+
+/* Which school year the child is in. Four means the fourth and up, so
+   the whole catalogue; the game has no fourth year material yet, and a
+   child that far along should see everything rather than a locked door.
+   An older profile has no year recorded and gets the top one, because
+   the alternative would be hiding tracks it can already see today, and
+   nothing may take away what a profile already has. */
+const MAX_GRADE = 4;
+function seedGrade(p){
+  if(typeof p.grade !== "number" || p.grade < 1 || p.grade > MAX_GRADE) p.grade = MAX_GRADE;
+}
+const gradeOf = p => (p && p.grade) || MAX_GRADE;
+/* Is this track part of what the class is doing this year or earlier?
+   Earlier years stay on the map on purpose: the child keeps the material
+   it has already met, and there is no going-back button to look for. */
+function inGrade(p, tr){ return !tr.grade || tr.grade <= gradeOf(p); }
+/* What next year holds. Only the next one: a taste of what is coming is
+   an invitation, a list of everything left is a wall. */
+function peekTracks(p){
+  const next = gradeOf(p) + 1;
+  return next > MAX_GRADE ? [] : TRACKS.filter(tr => tr.grade === next);
+}
 
 /* --- curriculum: the sequence layer, see src/curricula.js ---
    A chapter names a pool of fact keys. Everything else about the race
@@ -1898,7 +1982,7 @@ function schoolReady(p){ return poolSize(schoolPool(p)) >= 4; }
    so on the card rather than leaving the parent to guess. */
 function chapterJobIds(p){ return chapterJobs(chapterOf(p)); }
 function visibleTracks(p){
-  const rest = TRACKS.filter(tr => tr.op !== "school");
+  const rest = TRACKS.filter(tr => tr.op !== "school" && inGrade(p, tr));
   return schoolReady(p) ? [trackById("school")].concat(rest) : rest;
 }
 function trackName(p, tr){ return t("trk_" + tr.id); }
@@ -2360,7 +2444,9 @@ function buildRun(p, tr){
     const all = [];
     for(const other of TRACKS){
       if(other.op === "mix" || other.op === "weak") continue;
-      if(unlockState(p, other).open) all.push(...reachedKeys(p, other));
+      // what the class has not got to yet is not in the championship
+      // either, the same way a staged track holds back its later steps
+      if(inGrade(p, other) && unlockState(p, other).open) all.push(...reachedKeys(p, other));
     }
     keys = sampleKeys(p, [...new Set(all)], n, 3);
   } else { // weak
@@ -3060,7 +3146,9 @@ function collectionSpecs(p){
   for(const tr of TRACKS){
     const spec = trackSpec(p, tr);
     if(!spec) continue;
-    if(unlockState(p, tr).open || starCount(p, spec.keys)) out.push(spec);
+    // next year's collection shows up only once something in it is lit,
+    // which is what happens if the child tried it from the peek
+    if((inGrade(p, tr) && unlockState(p, tr).open) || starCount(p, spec.keys)) out.push(spec);
   }
   out.push(shopSpec());
   return out;
@@ -3655,14 +3743,19 @@ function placeTokens(p, spec){
 }
 function viewMap(p){
   const shown = visibleTracks(p);
-  const spots = worldSpots(p, shown.length + 1);      // the workshop is a place too
-  const height = 14 + shown.length * PLACE_STEP + PLACE_H + 20;
+  const ahead = peekTracks(p);
+  const peeking = PEEK === p.id && ahead.length > 0;
+  // the road: this year's tracks, then the workshop, then the door to
+  // next year, and behind it next year's places once it is opened
+  const total = shown.length + 1 + (ahead.length ? 1 : 0) + (peeking ? ahead.length : 0);
+  const spots = worldSpots(p, total);
+  const height = 14 + (total - 1) * PLACE_STEP + PLACE_H + 20;
 
-  const places = shown.map((tr, i) => {
-    const u = unlockState(p, tr);
+  const placeHTML = (tr, spot, peek) => {
+    const u = peek ? {open: true} : unlockState(p, tr);
     const pr = Math.round(trackProgress(p, tr) * 100);
     const med = p.done[tr.id] || 0;
-    const at = `style="left:${spots[i].left.toFixed(1)}%;top:${spots[i].y}px"`;
+    const at = `style="left:${spot.left.toFixed(1)}%;top:${spot.y}px"`;
     const head = `<span class="thumb">${sceneThumb(p.world, envOf(p, tr), tr.id, u.open ? trackProgress(p, tr) : 0)}</span>
       <span class="nm">${trackName(p, tr)}</span>
       <span class="sub">${trackSub(p, tr)}</span>`;
@@ -3672,11 +3765,12 @@ function viewMap(p){
       return `<div class="place locked" ${at}>${head}
         <span class="lockmsg">&#128274; ${u.why}</span></div>`;
     }
-    return `<button class="place" data-act="play" data-id="${tr.id}" ${at}>${head}
+    return `<button class="place${peek ? " peek" : ""}" data-act="play" data-id="${tr.id}" ${at}>${head}
       ${(tr.op === "mix" || tr.op === "weak") ? "" : `<span class="bar"><i style="width:${pr}%"></i></span>`}
       <span class="foot">${medalEmoji(med)}${placeTokens(p, trackSpec(p, tr))}</span>
     </button>`;
-  }).join("");
+  };
+  const places = shown.map((tr, i) => placeHTML(tr, spots[i], false)).join("");
 
   // the workshop keeps its own look and its own place off the road, so it
   // never reads as one more track in the row
@@ -3688,6 +3782,27 @@ function viewMap(p){
     <span class="sub">${t("shopSub")}</span>
     <span class="foot">&#9881; ${p.parts}${placeTokens(p, shopSpec())}</span>
   </button>`;
+
+  /* A door at the end of the road on to what the class does next year.
+     Opening it lays the rest of the road out and lets the child try any
+     of it, and it is forgotten the moment the game is closed: it is a
+     look ahead, not a promotion, and the year in the profile is the
+     parent's to set. There is no door the other way, because everything
+     from earlier years is simply still on the map. */
+  let peekPlace = "";
+  if(ahead.length){
+    const ps = spots[shown.length + 1];
+    peekPlace = `<button class="place peekdoor" data-act="peek"
+        style="left:${ps.left.toFixed(1)}%;top:${ps.y}px">
+      <span class="thumb peekthumb">${peeking ? "&#128275;" : "&#128064;"}</span>
+      <span class="nm">${t("peekTitle")}</span>
+      <span class="sub">${peeking ? t("peekOpenSub") : t("peekSub")}</span>
+      <span class="foot">${peeking ? t("peekHide") : t("peekShow")}</span>
+    </button>`;
+    if(peeking){
+      peekPlace += ahead.map((tr, i) => placeHTML(tr, spots[shown.length + 2 + i], true)).join("");
+    }
+  }
 
   return `<div class="scr">
     <div class="topbar">
@@ -3712,11 +3827,17 @@ function viewMap(p){
           <path d="${worldRoad(spots, height)}" fill="none" stroke="var(--shell-2)" stroke-width="10"
                 stroke-linecap="round" stroke-dasharray="1 22" vector-effect="non-scaling-stroke"/>
         </svg>
-        ${places}${shopPlace}
+        ${places}${shopPlace}${peekPlace}
       </div>
     </div>
   </div>`;
 }
+
+/* Who is currently looking ahead at next year. Deliberately a variable
+   and not a field in the profile: closing the game forgets it, and the
+   next start has the road folded back to this year. It holds a profile
+   id, so switching player folds it away as well. */
+let PEEK = null;
 
 /* ---------- race screen ---------- */
 let RUN = null;
@@ -4607,7 +4728,8 @@ const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
 function heatSpecs(p){
   const out = [];
   const push = (trackId, spec) => {
-    const reachable = !trackId || unlockState(p, trackById(trackId)).open;
+    const tr = trackId && trackById(trackId);
+    const reachable = !tr || (inGrade(p, tr) && unlockState(p, tr).open);
     if(reachable || spec.tiles.some(x => x.keys && heatCell(p, x.keys).has)) out.push(spec);
   };
   push("t1", heatGrid(t("heatMult"), HEAT_10,
@@ -4645,7 +4767,7 @@ function overallMastery(p){
   let s = 0, w = 0;
   for(const tr of TRACKS){
     if(tr.op === "mix" || tr.op === "weak" || tr.op === "school") continue;
-    if(!unlockState(p, tr).open) continue;
+    if(!inGrade(p, tr) || !unlockState(p, tr).open) continue;
     const keys = trackKeys(p, tr), n = poolSize(keys);
     if(!n) continue;
     s += mastery(p, keys) * n; w += n;
@@ -4695,6 +4817,13 @@ function viewParent(p){
           ${t("heatNote", num(SPEED[p.speedMode || "normal"].fast / 1000, 1))}
           ${t("heatTileNote")}
         </div>
+      </div>
+
+      <div class="h2">${t("secGrade")}</div>
+      <div class="card">
+        <div class="muted" style="margin-bottom:8px">${t("gradeLabel")}</div>
+        ${gradeSeg("gradeset", gradeOf(p))}
+        <div class="muted" style="margin-top:10px">${t("gradeNote")}</div>
       </div>
 
       <div class="h2">${t("secCurriculum")}</div>
@@ -4811,22 +4940,38 @@ document.addEventListener("click", e => {
   const act = el.dataset.act, id = el.dataset.id, p = P();
 
   if(act === "newplayer"){
+    // the school year is asked for here rather than left to a default,
+    // because it decides how much of the map is laid out, and a wrong
+    // guess would either bury a first grader in material or hide half
+    // the game from a third grader
+    let picked = 0;
     const d = sheet(`<h3>${t("namePrompt")}</h3>
       <div class="muted" style="margin-top:4px">${t("nameNote")}</div>
       <input class="field" id="nm" maxlength="14" placeholder="${t("namePlaceholder")}" style="margin:14px 0 16px">
-      <button class="btn wide" data-go>${t("nameGo")}</button>`);
-    const inp = d.querySelector("#nm");
+      <div class="tiny" style="margin-bottom:8px">${t("gradeAsk")}</div>
+      ${gradeSeg("newgrade", 0)}
+      <button class="btn wide" data-go disabled style="margin-top:18px">${t("nameGo")}</button>`);
+    const inp = d.querySelector("#nm"), go2 = d.querySelector("[data-go]");
     setTimeout(() => inp.focus(), 60);
+    d.querySelectorAll("[data-gr]").forEach(b => b.onclick = () => {
+      picked = +b.dataset.gr;
+      d.querySelectorAll("[data-gr]").forEach(x => x.classList.toggle("on", x === b));
+      go2.removeAttribute("disabled");
+    });
     const create = () => {
+      if(!picked) return;
       const nm = (inp.value || t("defaultName")).trim().slice(0, 14) || t("defaultName");
-      const np = newProfile(nm);
+      const np = newProfile(nm, picked);
       DB.profiles.push(np); DB.current = np.id; save(); d.remove(); go("map");
     };
-    d.querySelector("[data-go]").onclick = create;
+    go2.onclick = create;
     inp.onkeydown = ev => { if(ev.key === "Enter") create(); };
     return;
   }
-  if(act === "pick"){ DB.current = id; save(); go("map"); return; }
+  if(act === "pick"){ DB.current = id; PEEK = null; save(); go("map"); return; }
+  // looking ahead is a toggle and nothing is written down: the year in
+  // the profile stays where the parent put it
+  if(act === "peek"){ PEEK = (PEEK === p.id) ? null : p.id; sfx.coin(); render(); return; }
   if(act === "delplayer"){
     e.stopPropagation();
     const who = DB.profiles.find(x => x.id === id);
@@ -4979,6 +5124,9 @@ document.addEventListener("click", e => {
   if(act === "childlang"){
     p.lang = el.dataset.lang; save(); render(); return;
   }
+  // moving the year down takes tracks off the map, which only a parent
+  // may do, exactly like closing a track by hand
+  if(act === "gradeset"){ p.grade = +el.dataset.gr; PEEK = null; save(); render(); return; }
   if(act === "chaptermode"){ p.chapterMode = el.dataset.cm; save(); render(); return; }
   if(act === "autounlock"){ p.autoUnlock = !p.autoUnlock; save(); render(); return; }
   if(act === "force"){
@@ -5003,6 +5151,7 @@ document.addEventListener("click", e => {
       seedShop(DB.profiles[i]);
       seedStars(DB.profiles[i]);
       seedWorld(DB.profiles[i]);
+      seedGrade(DB.profiles[i]);
       save(); render();
     }catch(err){
       sheet(`<h3>${t("importErrTitle")}</h3><div class="muted">${t("importErrText")}</div>

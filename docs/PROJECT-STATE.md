@@ -2,6 +2,10 @@
 
 Poslední aktualizace: 12. září 2026, po světech a mapě
 
+**Novinka nad rámec plánu:** mapa se od teď skládá podle **ročníku**, do kterého
+dítě chodí, a učivo dalšího roku je za dílnou pod tlačítkem na ukázku. Je to
+`docs/PLAN.md`, krok 4c, a oddíl 7d níž.
+
 **Kde se přestalo a kudy dál:** hotová je **dílna**, druhý režim bez stopek
 a bez bodů za rychlost, zatím s jednou zakázkou, penězi. Hotový je **krok 1
 z `docs/PLAN.md`**, tedy rodičovská heatmapa nad všemi rodinami a vážený
@@ -129,7 +133,9 @@ libovolný starší profil a nesmí po ní zmizet ani zmenšit se nic z tohohle:
   Je to pole `stars`, ne pohled do krabičky, právě proto; viz oddíl 6.
 - jméno, jazyk, kód rodiče a volba učebnice
 - **přístup, který dítě už mělo.** Odemčená trať se sama nezavře, vybraná
-  kapitola se sama nepřepne dopředu.
+  kapitola se sama nepřepne dopředu a **ročník nové verze nesmí nikomu ubrat
+  mapu**: starší profil žádný ročník nemá a dostane nejvyšší, tedy všechno.
+  Snížit ročník smí jen rodič, stejně jako zavřít trať.
 
 Když nová verze přidá učivo do existující trati, klesne tím její zvládnutí,
 protože se zvětší jmenovatel. To smí snížit ukazatel na mapě, ale nesmí zavřít
@@ -319,23 +325,27 @@ se do průměrné doby odpovědi.
 Patnáct tratí, každá má vlastní generovaný okruh a vlastní prostředí v každém
 ze čtyř světů; okruh je na světě nezávislý, mění se jen krajina kolem něj.
 
-| id | obsah |
-| --- | --- |
-| t1 | násobilka 1, 2, 5, 10 |
-| t2 | násobilka 3, 4 |
-| t3 | násobilka 6, 7 |
-| t4 | násobilka 8, 9 |
-| t5 | celá malá násobilka |
-| d1 | dělení |
-| beyond | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
-| round | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
-| a20 | sčítání a odčítání do 20, šest stupňů podle přechodu přes desítku |
-| a100 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
-| a1000 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
-| clock | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
-| mix | vše odemčené dohromady |
-| weak | jen příklady s nejnižší úrovní |
-| school | učivo vybrané kapitoly učebnice, viz oddíl 11 |
+| id | ročník | obsah |
+| --- | --- | --- |
+| t1 | 2 | násobilka 1, 2, 5, 10 |
+| t2 | 2 | násobilka 3, 4 |
+| t3 | 2 | násobilka 6, 7 |
+| t4 | 2 | násobilka 8, 9 |
+| t5 | 2 | celá malá násobilka |
+| d1 | 2 | dělení |
+| beyond | 3 | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
+| round | 3 | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
+| a20 | 1 | sčítání a odčítání do 20, šest stupňů podle přechodu přes desítku |
+| a100 | 2 | sčítání a odčítání do 100, pět obtížnostních kbelíků |
+| a1000 | 3 | sčítání a odčítání do 1000, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku |
+| clock | 2 | čtení hodin, šest kbelíků přesnosti, otevřená od začátku |
+| mix | 2 | vše odemčené dohromady |
+| weak | 1 | jen příklady s nejnižší úrovní |
+| school | - | učivo vybrané kapitoly učebnice, viz oddíl 11 |
+
+Ročník je rok, ve kterém se učivo trati probírá, odečtený z map učebnic. Mapa
+ukazuje letošní ročník a všechny dřívější; co je dál, je za dílnou pod ukázkou.
+Podrobnosti v oddílu 7d.
 
 Trať `school` se na mapě objeví jen tehdy, když je v profilu zvolená učebnice
 a kapitola, a jde vždy na první místo. Nese název kapitoly jako podtitulek.
@@ -394,6 +404,7 @@ profil = {
   chapter: null,                         // číslo kapitoly uvnitř toho kurikula
   chapterMode: "soft",                   // soft | hard
   world: "circuit",                      // kabat hry, nikdy ne obtiznost
+  grade: 2,                              // do ktere tridy dite chodi, 1 az 4
   streak, lastDay, bestStreak, runs, totalOk, totalAns, msSum, msN
 }
 ```
@@ -404,7 +415,7 @@ jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
 pokud je nemá, `normalizeChapter()` srovná kapitolu, `seedOpened()` doplní
 seznam otevřených tratí, `seedShop()` prázdnou dílnu, `seedStars()` sbírku
-a `seedWorld()` svět. Nové migrace patří do `load()`, a pokud se týkají
+`seedWorld()` svět a `seedGrade()` ročník. Nové migrace patří do `load()`, a pokud se týkají
 profilu jako celku, taky do větve `import`.
 
 **Sbírka je vlastní pole, ne pohled do krabičky.** Místo se rozsvítí ve chvíli,
@@ -607,6 +618,37 @@ jsou po 96 pixelech, takže se dvě místa na téže straně nepřekryjou a dva 
 se nedotknou ani na nejužším telefonu. `flow.test.js` to ověřuje polohami, ne
 pohledem.
 
+## 7d. Ročník a ukázka dalšího roku
+
+Od září 2026 má profil `grade`, tedy třídu, do které dítě chodí. **Skládá se
+podle něj mapa**: jsou na ní tratě letošního ročníku a všech dřívějších.
+Rozhoduje `inGrade(p, tr)` a ročník trati je v `TRACKS`, odečtený z map
+učebnic, viz tabulka v oddílu 5.
+
+**Dřívější ročník se nikdy neschovává** a žádné tlačítko zpátky není. Učivo
+minulého roku prostě zůstává na mapě, protože se k němu stejně vrací
+Leitnerova krabička a dítě ho potřebuje dál.
+
+**Ročník se vybírá při zakládání hráče** a nedá se přeskočit; předvolba by byla
+tichý odhad, který buď zavalí prvňáka, nebo schová půlku hry třeťákovi. Rodič
+ho pak může kdykoli změnit v rodičovské sekci, oddíl Ročník.
+
+**Za dílnou je na konci cesty dveře na příští rok.** Klepnutí rozbalí tratě
+následujícího ročníku, dají se rovnou zkusit, ale **nic se tím nepřepíná**:
+`PEEK` je proměnná, ne pole v profilu, takže zavření hry i přepnutí hráče
+ji složí zpátky. Nabízí se vždycky jen jeden rok dopředu; seznam všeho, co
+zbývá, není pozvánka, ale zeď.
+
+**Filtr platí i jinde než na mapě.** Šampionát nesmí podstrčit učivo, které
+na mapě ještě není, rodičovská heatmapa a souhrn mluví jen o tom, co dítě
+opravdu má, a sbírka mimo ročník se ukáže jen tehdy, když už v ní něco svítí,
+což se stane po zkoušce z ukázky.
+
+**Starší profil žádný ročník nemá.** `seedGrade()` mu dá nejvyšší, tedy celou
+mapu, protože cokoli nižšího by mu vzalo tratě, které už vidí. Čtyřka znamená
+čtvrtou třídu a výš, tedy všechno; čtvrtý ročník v aplikaci zatím není, takže
+čtvrťák nemá co ukazovat dopředu a dveře na příští rok se mu neobjeví.
+
 ## 8. Testy
 
 V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
@@ -637,12 +679,17 @@ dopočítá starší profil; kruh v dílně, tedy počet zakrytých výsečí; a
 nepoužitá, že přepnutí světa nehne učivem, odemčením ani rekordy a že nabídku
 jezdců jen řadí; a tvary cest, tedy že okruh zůstal uzavřený, že ostatní světy
 vedou z jedné strany na druhou, že cesta nevyjede ze scény a že se patnáct
-tratí v jednom světě od sebe pozná.
+tratí v jednom světě od sebe pozná; a ročníky, tedy že prvňák nevidí násobilku,
+že dřívější ročník nikdy nezmizí, že ukázka nabízí právě jeden rok dopředu
+a že šampionát ani rodičovská sekce nemluví o tom, co na mapě není.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
 zakázku v dílně a hlídá, že se kruh odkrývá po jednom dílu za vyřešenou úlohu,
 že opravená úloha odkrývá taky a že je na konci kruh celý i po chybě.
+`flow.test.js` navíc projde celý ročníkový tok: založí prvňáka, ověří, že má
+krátkou mapu, rozbalí ukázku, spustí z ní trať a zkontroluje, že se ročník
+nezměnil a že přepnutí hráče ukázku složí.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
 `tests/fixtures/legacy-profiles.json` a jen se přidávají, nikdy neupravují.
@@ -1061,7 +1108,8 @@ Tohle projela tisícovka a sedělo to do puntíku. V `src/app.js`: písmeno hlav
 klíče do `FAMILY_HEADS`, definice kbelíků nebo stupňů, generátor, větev
 v `rawItem()`, `poolKeys()`, `trackKeys()`, `reachedKeys()` pokud má stupně,
 vlastní `*Stage()` přes `stageIndex()`, větev v `buildRun()` přes
-`focusAndReview()`, záznam v `TRACKS` a `ENVS` **a prostředí ve všech třech
+`focusAndReview()`, záznam v `TRACKS` včetně **ročníku**, bez kterého se trať
+neobjeví nikomu na mapě, záznam v `ENVS` **a prostředí ve všech třech
 zbylých světech ve `WORLDS`**, jinak bude nová trať ve stezce, na obloze
 i v hlubině vypadat jako v okruhu; paleta si rovnou řekne přes `tok`, co se v ní
 sbírá. Dál větev v `unlockState()`,

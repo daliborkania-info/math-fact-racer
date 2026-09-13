@@ -172,6 +172,13 @@ input{font-family:inherit}
 .place .foot{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;
   color:var(--ink-soft);min-height:16px}
 .place .tokc{margin-left:auto;font-size:11px;color:var(--ink-faint);white-space:nowrap}
+/* The door to next year, and what lies behind it. Dashed, because it is
+   a look ahead rather than part of the road: nothing here is counted as
+   the child's own yet and none of it stays open after the game closes. */
+.place.peekdoor{background:linear-gradient(160deg,#eef0ff,#e2e6ff);border-color:#c3c9f5;border-style:dashed}
+.place.peekdoor .foot{color:var(--grape-dark)}
+.peekthumb{display:grid;place-items:center;font-size:32px;background:#d8ddff !important}
+.place.peek{border-style:dashed;opacity:.9}
 .place.locked{filter:grayscale(.85);opacity:.6}
 .place.locked .lockmsg{font-size:11px;color:var(--ink-soft);font-weight:700;line-height:1.25}
 

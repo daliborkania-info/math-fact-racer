@@ -872,7 +872,11 @@ přešlo z `.keypad` na `.keypad-pad`, jak říká PROJECT-STATE, oddíl 7.
 
 ---
 
-## Krok D. Zbytek vlny A, rodiny na klávesnici
+## Krok D. Zbytek vlny A, rodiny na klávesnici — HOTOVO 13. září 2026
+
+Všechny čtyři položky jsou hotové a s nimi celá vlna A. Proti plánu se
+upřesnilo, že poslední z nich není rodina, ale varianta, takže kontrolní
+seznam pro novou rodinu se na ni nevztahoval; podrobnosti u D4.
 
 Čtyři položky, každá vlastní session, pořadí podle `PROJECT-STATE.md`, oddíl
 12b. Každá jde po kontrolním seznamu z oddílu 14 plus B7 (délka otázky) a
@@ -993,7 +997,26 @@ generátoru, mapa u ní `unit_convert` neuvádí. Násobitel prahů 2,2. `RANGE.
 Heatmapa: čtyři dlaždice `U_EX = {"1":"3 m→cm", "2":"2 kg→g", "3":"4 l→dl",
 "4":"2 h→min"}`.
 
-### D4. `missing_operand` a `inverse_check`, kapitola 5
+### D4. `missing_operand` a `inverse_check`, kapitola 5 — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo jedno místo, měření délky řádku: `questionSize()`
+pro `layout:"lead"` **žádný příplatek nedostal**, i když to tak na první
+pohled vypadá. Obě rozvržení kreslí právě jedno odpovídací políčko, takže se
+políčko vykrátí; liší se jen tím, že běžný řádek kreslí znaménko mimo měřený
+text, kdežto vedoucí řádek si znaménko i výsledek nese uvnitř. Spočítáno
+prostě, `× 7 = 42` zůstane o znak pod menším písmem a na 375px telefonu měří
+316 px, a `- 23 = 58` na menší písmo dosáhne při 341 px, což je pár pixelů
+přes. Prostý počet znaků je tedy správná hranice, na znak přesně. K tomu:
+znak `▢` se nakonec nikde nekreslí, protože prázdné políčko v zadání **je**
+`#abox`, tedy skutečný prvek s přerušovaným rámečkem a otazníkem, jako
+v každé jiné rodině; `▢` v tomhle plánu je zápis toho políčka, ne text hry,
+a nechat ho v kódu by znamenalo znak, který na některých písmech Androidu
+vyjde jako prázdný obdélníček. Násobitel prahů 1,6 **násobí** násobitel
+rodiny, ne že ho nahrazuje, takže chybějící člen do sta má 1,9 × 1,6.
+Kapitola 5 dostala vedle `variant` i `as100:ALL_H, mult:ALL_TABLES` podle
+plánu; opakování z dřívějších kapitol jede přes tutéž variantu, jen hodiny
+z kapitoly 4 zůstávají obrázkem, protože v obrázkové otázce není co skrýt.
+Kontrol ve `flow.test.js` je po tomhle kroku 196.
 
 Není to rodina, ale **varianta** nad existujícími klíči, přesně jak říká
 `PLAN-2026-09-12.md`. Klíč se nemění, takže se nemění ani krabička ani
@@ -1188,7 +1211,8 @@ za dveřmi; R1 by to spravila, ale nic na ní nestojí.
 plánu) proti vyčíslitelným `r{dělenec}x{dělitel}` (`TEMATA.md`). Doporučení:
 rodina po dělitelích, důvody v E1.
 
-**R3. Chybějící člen pod původním klíčem.** `missing_operand` zapisuje do
+**R3. Rozhodnuto 13. září 2026 podle doporučení, hotovo v D4.**
+**Chybějící člen pod původním klíčem.** `missing_operand` zapisuje do
 krabičky pod klíč původního příkladu (`m6x7`), takže `6 × 7` a `▢ × 7 = 42`
 sdílí úroveň. Alternativa je vlastní hlavička a vlastní klíče, tedy druhá
 krabička pro totéž učivo a druhá sbírka. Doporučení: původní klíč, jak stálo

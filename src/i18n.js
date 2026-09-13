@@ -263,6 +263,7 @@ cs: {
   roundAsk10: "Zaokrouhli na desítky.",
   roundAsk100: "Zaokrouhli na stovky.",
   unitAsk: "Převeď na {0}.",
+  missAsk: "Které číslo chybí?",
   // jeden, dva až čtyři, pět a víc; formu vybere číslo před jednotkou
   unit_day: "den|dny|dní",
   unit_week: "týden|týdny|týdnů",
@@ -568,6 +569,7 @@ en: {
   roundAsk100: "Round to the nearest hundred.",
   relRound: "\u2248",
   unitAsk: "Convert to {0}.",
+  missAsk: "Which number is missing?",
   // one, two to four, five and more: Czech needs all three, English
   // repeats its plural and loses nothing by saying so out loud
   unit_day: "day|days|days",
@@ -871,6 +873,7 @@ de: {
   roundAsk10: "Runde auf Zehner.",
   roundAsk100: "Runde auf Hunderter.",
   unitAsk: "Rechne in {0} um.",
+  missAsk: "Welche Zahl fehlt?",
   // eins, zwei bis vier, fünf und mehr: Tschechisch braucht alle drei,
   // Deutsch wiederholt einfach seinen Plural
   unit_day: "Tag|Tage|Tage",

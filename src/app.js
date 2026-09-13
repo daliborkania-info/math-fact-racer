@@ -861,13 +861,51 @@ function unlockState(p, tr){
    on (`input`) and whether a given answer is right (`check`). The whole
    catalogue so far is one whole number typed on the number pad, so that
    is the default and only a family that needs something else has to say
-   so. Nothing outside here may assume the answer is a number. */
-function itemFromKey(key){
-  const it = rawItem(key);
+   so. Nothing outside here may assume the answer is a number.
+
+   `opts.variant` asks for the same fact in a different shape. A variant
+   is not a family: it borrows the key, so nothing downstream has to
+   learn about it. */
+function itemFromKey(key, opts){
+  let it = rawItem(key);
+  if(opts && opts.variant === "missing") it = missingItem(it);
   if(!it.input)  it.input  = "pad";
   if(!it.maxLen) it.maxLen = 3;
   if(!it.check)  it.check  = typed => parseInt(typed, 10) === it.answer;
   return it;
+}
+/* The missing operand, which is also how a sum is checked in an exercise
+   book. "Work out 45 - 18, then check 27 + 18" and "▢ - 18 = 27" are the
+   same question once the answer is typed on a keypad, so inverse_check
+   folds in here rather than getting a shape of its own.
+
+   The key does not change. `6 × 7` and `▢ × 7 = 42` are one fact in the
+   Leitner box, one place in the collection and one tile in the parent
+   heatmap, because they are one thing the child either knows or does
+   not; a second key would be a second box for the same learning and it
+   would start at level zero.
+
+   Only a plain arithmetic line has a first operand to hide, so a dial, a
+   rounded number, a conversion carrying a unit and a chain of three
+   numbers are handed back untouched. That matters: a race built from a
+   chapter runs the variant over its review questions too, and the review
+   of a chapter about checking sums may well be a clock face. */
+const MISSING_HEADS = "mapkxdsn";
+function missingItem(it){
+  if(!it || it.svg || it.rel || it.unit || !MISSING_HEADS.includes(it.key[0])) return it;
+  const parts = /^(\d+) (.+)$/.exec(String(it.text));
+  if(!parts) return it;
+  const hidden = Number(parts[1]);
+  return Object.assign({}, it, {
+    // what is left of the line once the first number is gone, with the
+    // result written out: the box takes the place of the number
+    text: parts[2] + " " + relOf(it) + " " + it.answer,
+    answer: hidden,
+    layout: "lead",
+    variant: "missing",
+    ask: "missAsk",
+    maxLen: Math.max(it.maxLen || 3, String(hidden).length)
+  });
 }
 function rawItem(key){
   const head = key[0];
@@ -1397,12 +1435,17 @@ function focusAndReview(p, focus, review, n, maxNew){
 function buildRun(p, tr){
   const n = p.qCount || 20;
   let keys;
+  // a chapter may ask for its material in a different shape; no track of
+  // its own does, so the championship and the trouble spots never see one
+  let opts = null;
   if(tr.op === "school"){
     // The chapter sets the focus. In the soft mode the rest of the race
     // still comes from earlier chapters, because dropping spaced review
     // would break the strongest part of the design.
     const focus = schoolPool(p);
     const cur = curriculumById(p.curriculum);
+    const ch = chapterOf(p);
+    if(ch && ch.pool && ch.pool.variant) opts = {variant: ch.pool.variant};
     if((p.chapterMode || "soft") === "hard" || !cur || !focus.length){
       keys = sampleKeys(p, focus, n, 6);
     } else {
@@ -1514,7 +1557,7 @@ function buildRun(p, tr){
     for(let k = i - 2; k >= 0 && j < 0; k--) if(fits(i, k)) j = k;
     if(j >= 0) [keys[i], keys[j]] = [keys[j], keys[i]];
   }
-  const out = keys.slice(0, n).map(itemFromKey);
+  const out = keys.slice(0, n).map(k => itemFromKey(k, opts));
   // a bucket key is a whole family, so two neighbours drawn from the
   // same bucket can still come out as the very same question; reroll
   // rather than ask it twice in a row
@@ -1523,7 +1566,7 @@ function buildRun(p, tr){
   // questions, and without it one of them would be rerolled as a repeat
   const face = it => (it.disp || it.text) + (it.unit ? " " + it.unit : "");
   for(let i = 1; i < out.length; i++){
-    for(let g = 0; g < 8 && face(out[i]) === face(out[i-1]); g++) out[i] = itemFromKey(out[i].key);
+    for(let g = 0; g < 8 && face(out[i]) === face(out[i-1]); g++) out[i] = itemFromKey(out[i].key, opts);
   }
   return out;
 }
@@ -1803,7 +1846,11 @@ function thresholds(p, item){
                : item.kind === "clock" ? 2.4
                : (item.kind === "add1000" || item.kind === "sub1000") ? 2.2
                : (item.kind === "add100" || item.kind === "sub100") ? 1.9 : 1;
-  return { fast: s.fast * slower, super: s.super * slower };
+  // a missing operand is the same fact read backwards, and reading it
+  // backwards takes longer than recalling it forwards whatever the fact
+  // is, so this multiplies the family allowance rather than replacing it
+  const back = item.variant === "missing" ? 1.6 : 1;
+  return { fast: s.fast * slower * back, super: s.super * slower * back };
 }
 /* `ms` is null for workshop tasks, which are not timed at all. Such an
    answer counts towards accuracy and moves the Leitner level, but never
@@ -3365,20 +3412,36 @@ function relOf(item){ return item && item.rel ? t(item.rel) : "="; }
    A unit after the answer box is part of that line too, plus the space
    in front of it, because it is drawn in the row and takes up room in
    it; measuring only the question would let "240 měsíců = ? let" call
-   itself a short line. */
+   itself a short line.
+   The lead layout needs no allowance of its own and that is worth
+   writing down, because it looks as though it should. Both layouts draw
+   exactly one answer box, so the box cancels out; what differs is that
+   the usual row draws a sign outside the counted text while a lead row
+   carries its sign and its result inside it. Counted plainly, "× 7 = 42"
+   lands one short of the small size and measures 316 px drawn on a
+   375 px phone, and "- 23 = 58" lands on it at 341 px, which is a pixel
+   or two past the room there is. So the plain count is already the right
+   line, one character either way. */
 function questionSize(item){
   if(!item || item.svg || !item.text) return "";
   const n = String(item.text).length + (item.unit ? String(item.unit).length + 1 : 0);
   return n >= 13 ? " q-xlong" : n >= 9 ? " q-long" : "";
 }
 function questionHTML(item){
-  const inner = !item ? `<span id="qtext"></span>`
-    : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
-    : `<span id="qtext">${item.text}</span><span>${relOf(item)}</span>`;
+  const box = `<span class="answerbox" id="abox">?</span>`;
   // the unit of the answer stands behind the box, where the child would
   // write it in an exercise book
   const unit = item && item.unit ? `<span class="unit">${item.unit}</span>` : "";
-  return `<div class="question${questionSize(item)}" id="qbox">${inner}<span class="answerbox" id="abox">?</span>${unit}</div>`;
+  // the second shape of the row, after the picture: the box comes first
+  // and the rest of the line follows it, so the child reads "▢ × 7 = 42"
+  // in the order it is written in the book
+  if(item && item.layout === "lead"){
+    return `<div class="question${questionSize(item)}" id="qbox">${box}<span id="qtext">${item.text}</span>${unit}</div>`;
+  }
+  const inner = !item ? `<span id="qtext"></span>`
+    : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
+    : `<span id="qtext">${item.text}</span><span>${relOf(item)}</span>`;
+  return `<div class="question${questionSize(item)}" id="qbox">${inner}${box}${unit}</div>`;
 }
 /* The answering surface belongs to the question, not to the screen, so
    a race may mix families that are answered differently. Only the
@@ -3603,9 +3666,13 @@ function showCombo(n){
 
 /* Showing the right answer. A time is shown as a time, not as the whole
    number the keypad turned it into, and an answer that wears a unit is
-   shown with it: "3 m = 300 cm", the way the whole line reads. */
+   shown with it: "3 m = 300 cm", the way the whole line reads.
+   A line whose box stands in front reads back with the box filled in,
+   "6 × 7 = 42", because that is the whole sum the child was after; the
+   equals sign and the result are already part of the line. */
 function rightAnswerText(item){
   if(item.kind === "clock") return t("clockIs", item.disp);
+  if(item.layout === "lead") return item.answer + " " + item.text;
   return item.text + " " + relOf(item) + " " + item.answer + (item.unit ? " " + item.unit : "");
 }
 /* The two mistakes a child actually makes on a dial are reading the hour

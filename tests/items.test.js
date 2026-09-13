@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -952,6 +952,98 @@ if(/q-long|q-xlong/.test(qh('m7x8'))){qhBad++;console.log('  !!  kratka otazka s
 if(/q-long|q-xlong/.test(qh('xm4'))){qhBad++;console.log('  !!  trojciferne nasobeni se zmensilo, i kdyz se veslo');}
 if(/q-long|q-xlong/.test(qh('c1'))){qhBad++;console.log('  !!  obrazkova otazka se meri jako text');}
 console.log('chyb v delce otazky:',qhBad);
+
+// 7l. chybejici clen: tataz otazka pozpatku a pod tymz klicem
+//
+// Neni to rodina, ale varianta, takze se nekontroluje generator, ale to,
+// co se od varianty ceka: ze uzna spravny clen a neuzna sousedni, ze klic
+// zustal beze zmeny, ze se pise do krabicky pod nej a ze se varianta
+// nedostane nikam, kde se o ni nezadalo.
+let mvBad=0, mvN=0, mvDelka=0, mvDelsi='';
+const MV={variant:'missing'};
+const mv=k=>A.itemFromKey(k,MV);
+for(const k of ['m6x7','m3x8','m1x9','d6x7','d2x9','a3p4','s3p4','ph1','ph5','nh1','nh5','kpb1','knb3','xm1','xd2'])
+for(let i=0;i<60;i++){
+  const it=mv(k); mvN++;
+  if(it.key!==k){mvBad++;console.log('  !!  varianta zmenila klic',k,'->',it.key);break;}
+  if(it.layout!=='lead'){mvBad++;console.log('  !!  chybejici clen nema policko vpredu',k,it.text);break;}
+  if(it.variant!=='missing'){mvBad++;console.log('  !!  varianta o sobe nerekla',k);break;}
+  if(!it.ask){mvBad++;console.log('  !!  chybejici clen neni receny slovy',k,it.text);break;}
+  // doplneny radek musi vyjit: "6 × 7 = 42"
+  const cely=A.rightAnswerText(it), pul=cely.split(' = ');
+  if(pul.length!==2||eval(pul[0].replace(/×/g,'*').replace(/:/g,'/'))!==Number(pul[1])){
+    mvBad++;console.log('  !!  doplneny radek nevychazi',cely);break;}
+  if(pul[0].indexOf(String(it.answer))!==0){
+    mvBad++;console.log('  !!  odpoved nepatri na misto policka',cely,it.answer);break;}
+  // uzna svuj clen a neuzna sousedni na obe strany
+  if(!it.check(String(it.answer))){mvBad++;console.log('  !!  varianta neuznala spravny clen',cely);break;}
+  if(it.check(String(it.answer+1))||it.check(String(it.answer-1))){
+    mvBad++;console.log('  !!  varianta uznala i sousedni clen',cely);break;}
+  if(String(it.answer).length>it.maxLen){
+    mvBad++;console.log('  !!  clen se nevejde do policka',it.answer,it.maxLen);break;}
+  // radek se meri jako kazdy jiny, jen ma jiny tvar: policko stoji vpredu
+  const h=A.questionHTML(it);
+  if(h.indexOf('id="abox"')>h.indexOf('id="qtext"')){
+    mvBad++;console.log('  !!  policko nestoji pred zbytkem radku',it.text);break;}
+  const n=String(it.text).length;
+  if(trida(h)!==chce(n)){mvBad++;console.log('  !!  chybejici clen dostal spatnou velikost pisma',it.text,trida(h)||'plna');break;}
+  if(n>mvDelka){mvDelka=n; mvDelsi=it.text;}
+}
+// kratky nasobilkovy radek se vejde v plne velikosti, delsi do sta uz ne
+if(/q-long|q-xlong/.test(A.questionHTML(mv('m6x7')))){
+  mvBad++;console.log('  !!  chybejici cinitel si zbytecne zmensil pismo');}
+if(!/q-long/.test(A.questionHTML(mv('nh5')))){
+  mvBad++;console.log('  !!  chybejici mensenec do sta si nerekl o mensi pismo');}
+// rodina, ktera prvni cislo nema co skryt, zustava presne jak byla
+for(const k of ['o1','q1','z1','u1','gm1','c1']){
+  const it=mv(k), plain=A.itemFromKey(k);
+  if(it.layout||it.variant){mvBad++;console.log('  !!  varianta sahla na rodinu, ktera do ni nepatri',k,it.text);}
+  if(it.ask!==plain.ask){mvBad++;console.log('  !!  varianta prepsala zadani cizi rodiny',k);}
+}
+console.log('zkontrolovano chybejicich clenu:',mvN,'| nejdelsi radek:',mvDelsi,'('+mvDelka+' znaku) | chyb:',mvBad);
+
+// 7m. varianta jede pres skolni trat a pres kapitolu, nikam jinam
+let mvTrBad=0;
+const mp=A.newProfile('M'); A.DB.profiles=[mp]; A.DB.current=mp.id;
+mp.grade=3; mp.curriculum='nns-matysek-3'; mp.chapter=5;
+const kap5=A.CURRICULA.find(c=>c.id==='nns-matysek-3').chapters.find(x=>x.n===5);
+if(!A.isPlayable(kap5)){mvTrBad++;console.log('  !!  zkouska spravnosti porad nejde vybrat');}
+if(kap5.pool.variant!=='missing'){mvTrBad++;console.log('  !!  kapitola 5 si o variantu nerekla');}
+// klice kapitoly jsou tytez, ktere uz hra zna; varianta je nepridava
+const kap5k=A.poolKeys(kap5.pool);
+if(kap5k.some(k=>!keys.includes(k))){
+  mvTrBad++;console.log('  !!  kapitola 5 zavedla novy klic',kap5k.filter(k=>!keys.includes(k)).join(' '));}
+const mrun=A.buildRun(mp,A.trackById('school'));
+if(mrun.length!==20){mvTrBad++;console.log('  !!  spatna delka zavodu podle kapitoly 5',mrun.length);}
+// opakovani z drivejsich kapitol jde pres tutez variantu, jen obrazkova
+// otazka (hodiny z kapitoly 4) zustava obrazkem
+const mimo=mrun.filter(x=>x.variant!=='missing');
+if(mimo.some(x=>!x.svg)){
+  mvTrBad++;console.log('  !!  zavod podle kapitoly 5 nese i primou otazku',(mimo.find(x=>!x.svg)||{}).text);}
+if(mrun.filter(x=>x.variant==='missing').length<10){
+  mvTrBad++;console.log('  !!  chybejicich clenu je v zavodu malo',mrun.filter(x=>x.variant==='missing').length);}
+// sampionat bere jen to, co by trat sama nabidla, a zadna trat variantu
+// nenabizi; "co ti nejde" cerpa z krabicky, tedy taky ne
+const mixRun=A.buildRun(mp,A.trackById('mix'));
+if(mixRun.some(x=>x.variant)){mvTrBad++;console.log('  !!  varianta se dostala do sampionatu');}
+for(const it of mrun) A.record(mp,it,true,1500);
+const weakRun=A.buildRun(mp,A.trackById('weak'));
+if(weakRun.some(x=>x.variant)){mvTrBad++;console.log('  !!  varianta se dostala do trati co ti nejde');}
+if(!weakRun.length){mvTrBad++;console.log('  !!  trat co ti nejde nic nenabidla');}
+// krabicka: varianta pise pod puvodni klic, takze "6 × 7" a "▢ × 7 = 42"
+// jsou jeden a tyz priklad a uroven se deli
+const mq=A.newProfile('Q'); A.DB.profiles=[mq]; A.DB.current=mq.id;
+A.record(mq,A.itemFromKey('m6x7'),true,1000);
+A.record(mq,mv('m6x7'),true,1000);
+const mkeys=Object.keys(mq.facts);
+if(mkeys.length!==1||mkeys[0]!=='m6x7'){
+  mvTrBad++;console.log('  !!  varianta si zalozila vlastni klic v krabicce',mkeys.join(' '));}
+if(mq.facts.m6x7.reps!==2){mvTrBad++;console.log('  !!  oba tvary se nescitaji do jednoho prikladu',mq.facts.m6x7.reps);}
+// hledani chybejiciho clenu je obracena operace, takze dostane vic casu
+const thPlain=A.thresholds(mq,A.itemFromKey('m6x7')), thMiss=A.thresholds(mq,mv('m6x7'));
+if(Math.abs(thMiss.fast/thPlain.fast-1.6)>0.001){
+  mvTrBad++;console.log('  !!  chybejici clen nema nasobitel prahu 1,6',thMiss.fast/thPlain.fast);}
+console.log('chyb v zapojeni chybejiciho clenu:',mvTrBad);
 
 // 7b. hodiny se stupnuji stejne jako prechod pres desitku
 let clStBad=0;

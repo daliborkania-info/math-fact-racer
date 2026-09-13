@@ -45,6 +45,12 @@
  *                                 a hundred and then inside a thousand
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
+ *   variant "missing"             not a pool but a shape: the chapter
+ *                                 asks for its material with the first
+ *                                 number hidden, "▢ × 7 = 42". The keys
+ *                                 stay exactly as they are, so this is
+ *                                 the same learning asked backwards and
+ *                                 not a second set of facts
  *   shop  [job ids]               workshop jobs, for material that is
  *                                 reasoning rather than recall. A chapter
  *                                 with only these is pickable but puts no
@@ -155,7 +161,10 @@ const CURRICULA = [
       {n:2,  name:"Opakování, násobilka 1, 2, 3, 4, 10",  src:"7. díl, s. 6–7",   pool:{mult:[1,2,3,4,10], div:[1,2,3,4,10]}},
       {n:3,  name:"Opakování, násobilka 5, 6, 7, 8, 9",   src:"7. díl, s. 8–9",   pool:{mult:[5,6,7,8,9], div:[5,6,7,8,9]}},
       {n:4,  name:"Hodiny a určování času",               src:"7. díl, s. 10–11", pool:{clock:ALL_C}},
-      {n:5,  name:"Zkouška správnosti",                   src:"7. díl, s. 12–13", pool:null},
+      // checking a sum is the sum read backwards, so this chapter takes
+      // the material of the four before it and hides the first number
+      {n:5,  name:"Zkouška správnosti",                   src:"7. díl, s. 12–13",
+             pool:{variant:"missing", as100:ALL_H, mult:ALL_TABLES}},
       {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:null},
       // the seventh part is still under a hundred, so only two digit numbers
       {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:{round:["o1"]}},

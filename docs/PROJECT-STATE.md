@@ -1,7 +1,7 @@
 # Stav projektu a předávací dokument
 
 Poslední aktualizace: 13. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
-prvních třech položkách kroku D nového plánu, opravě řazení mapy (C3b) a opravě
+**celém kroku D** nového plánu, opravě řazení mapy (C3b) a opravě
 nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
@@ -13,8 +13,8 @@ zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalš�
 a rozdělení prvního ročníku na šest číselných oborů.
 
 **Stav v číslech.** Pětadvacet tratí ve čtyřech světech, 100 palet prostředí,
-dvě zakázky v dílně, 85 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 24/33), tři jazyky, šest testových souborů.
+dvě zakázky v dílně, 86 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
+třetí 25/33), tři jazyky, šest testových souborů.
 
 **Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
 okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
@@ -118,8 +118,17 @@ z oboru kbelíku, takže vzniká i `(45 - 17) : 4`, a neznámý kbelík padá
 v `opsItem()` i `tensItem()` hlasitě. Název kapitoly na dětské mapě je
 učitelský žargon; je to starší věc a leží jako R9 v oddílu 9 `docs/PLAN.md`.
 
-**Na řadě je poslední položka kroku D** (D4), tedy doplňování chybějícího členu
-nad existujícími klíči, a dál podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
+**Krok D4 je hotový** (13. září), a s ním **celý krok D a celá vlna A**:
+doplňování chybějícího členu, kapitola 5 třetího ročníku, "Zkouška
+správnosti". Není to rodina, ale **varianta** nad existujícími klíči, tedy
+`6 × 7` položené pozpátku jako `▢ × 7 = 42`. Klíč se nemění, takže se nemění
+ani krabička, ani sbírka, ani heatmapa, vlastní trať nevzniká a jede se přes
+školní trať a přes kapitolu. `inverse_check` se do varianty skládá, protože
+zkouška v sešitě je na klávesnici tatáž otázka. Proti plánu se upřesnilo
+měření délky řádku, viz oddíl 7 a `docs/PLAN.md`.
+
+**Na řadě je krok E**, tedy nové vstupní prvky, počínaje `pad2` a dělením se
+zbytkem, a dál podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -624,6 +633,10 @@ Proto se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegener
 otázku, která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor
 přidá písmeno do `FAMILY_HEADS`, nic víc.
 
+**Varianta žádný klíč nepřidává.** Doplňování chybějícího členu se ptá na tytéž
+klíče, jen obráceně, takže v žádném seznamu klíčů nestojí a v `FAMILY_HEADS`
+nemá co dělat; viz oddíl 7.
+
 Rodina do tisíce nese znaménko uvnitř klíče, tedy jedna hlavička `k` místo
 dvojice písmen jako u stovky. Bylo to vědomé šetření: míst v abecedě je
 šestadvacet a plánovaných generátorů kolem dvaceti. Rodina za násobilkou
@@ -766,6 +779,32 @@ položce**, `unit`, ne výjimka rozesetá po kódu: `questionHTML()` ho vykresl�
 délky řádku. Kdo jednotku nemá, nepozná, že existuje. Tvar jednotky vybírá
 generátor podle čísla, které u ní stojí, takže na položku se ukládá hotový text,
 ne klíč; jazyk se uprostřed závodu nemění.
+
+**Otázka smí být položená pozpátku, a není to nová rodina.** `itemFromKey(key,
+opts)` bere druhý parametr; `opts.variant === "missing"` nechá generátor
+pracovat beze změny a pak výsledek obalí: schová první číslo řádku a dopíše
+výsledek, tedy z `6 × 7` udělá `▢ × 7 = 42` s odpovědí 6. **Klíč se nemění**,
+takže krabička, sbírka i rodičovská heatmapa vidí jeden příklad, ne dva; kdyby
+si varianta založila vlastní hlavičku, byla by to druhá krabička na totéž
+učivo a začínala by na nule. Variantu si vyžádá **kapitola**, polem `variant`
+v `pool`, a předává ji jediné místo, větev `school` v `buildRun()`; žádná trať
+o ní neví, takže se nedostane ani do šampionátu, ani do trati "co ti nejde".
+Obalit jde jen prostý početní řádek, proto `MISSING_HEADS`: ciferník,
+zaokrouhlení, převod s jednotkou a řetězec tří čísel projdou nedotčené, což je
+potřeba, protože závod podle kapitoly pouští variantu i na opakování
+z dřívějších kapitol. Násobitel prahů 1,6 **násobí** násobitel rodiny.
+
+**Řádek otázky má dva tvary, ne jeden.** Vedle běžného `zadání = [políčko]`
+existuje `layout:"lead"`, kde políčko stojí vlevo a zbytek řádku za ním,
+`[políčko] × 7 = 42`. Je to druhé rozvržení po obrázku a kreslí ho totéž
+`questionHTML()`. Příplatek na délku **nedostalo a nemá ho dostat**: obě
+rozvržení kreslí právě jedno políčko, takže se políčko vykrátí, a vedoucí řádek
+si navíc nese znaménko i výsledek uvnitř měřeného textu, kdežto běžný je kreslí
+mimo něj. Prostý počet znaků tedy sedí na znak přesně. `rightAnswerText()`
+takový řádek přečte s doplněným políčkem, tedy `6 × 7 = 42`. Žádný znak pro
+prázdné políčko se nekreslí; políčko **je** `#abox`, skutečný prvek
+s přerušovaným rámečkem a otazníkem, takže na řádku není nic, co by záviselo na
+jazyku nebo na tom, jestli písmo telefonu zná `▢`.
 
 **Pozor na čtyři pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
@@ -1505,12 +1544,15 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 85 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 86 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
-`as100`, `as1000`, `multBeyond`, `divBeyond`, `round`, `clock`, `chain` a `ops`,
-a `poolKeys()` to překládá na klíče příkladů. Násobení a dělení za násobilkou jsou dvě pole,
+`as100`, `as1000`, `multBeyond`, `divBeyond`, `round`, `clock`, `chain`, `ops`,
+`multTens`, `divTens` a `units`,
+a `poolKeys()` to překládá na klíče příkladů. Vedle toho smí kapitola říct
+`variant`, což není pool, ale **tvar otázky**: tytéž klíče položené jinak, dnes
+`"missing"`, viz oddíl 7. Do `poolKeys()` nevstupuje. Násobení a dělení za násobilkou jsou dvě pole,
 a ne jedno jako u stovky, protože je učebnice učí jako dvě samostatné
 kapitoly a kapitola 14 má umět chtít jen násobení. Nikdy do kurikula
 nepiš klíče přímo. `poolSize()` počítá kbelík do sta za čtyři, ne za jeden,
@@ -1543,12 +1585,14 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po přidání převodů jednotek je 85 hratelných
-kapitol z 95, po ročnících 18/18, 43/44 a 24/33; první ročník je tím celý.
+dojmu. Stav po doplnění chybějícího členu je 86 hratelných
+kapitol z 95, po ročnících 18/18, 43/44 a 25/33; první ročník je tím celý
+a **vlna A, tedy všechno, co jde na `pad`, je hotová celá**. Zbylých osm
+zamčených kapitol třetí třídy čeká na nový vstupní prvek nebo na dílnu, tedy
+na krok E a F plánu.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
-| `missing_operand` + `inverse_check` | `pad` | 1 | g3: 5 |
 | `div_remainder` | `pad2` | 1 | g3: 27 |
 | `place_value` | `pad3` | 1 | g3: 21 |
 | `parity` + `digit_count` | `pick` | 1 | g3: 6 |
@@ -1561,14 +1605,17 @@ kapitol z 95, po ročnících 18/18, 43/44 a 24/33; první ročník je tím cel�
 `beyond`; odemkl kapitoly 14, 16 a 31. `rounding_10` s `rounding_100` byl druhý,
 trať `round`, kapitoly 7 a 26. `chain_3` byl třetí, trať `chain`, kapitola 11,
 a `order_of_ops` čtvrtý, trať `ops`, kapitoly 13 a 30. `mult_div_10_100`
-s `mult_round` byl pátý, trať `tens`, kapitola 28, a `unit_convert`
-s `time_convert` šestý, trať `units`, kapitoly 18 a 29.
+s `mult_round` byl pátý, trať `tens`, kapitola 28, `unit_convert`
+s `time_convert` šestý, trať `units`, kapitoly 18 a 29, a `missing_operand`
+s `inverse_check` sedmý a poslední, kapitola 5. Ten jediný **žádnou trať
+nedostal**, protože to není rodina, ale varianta nad existujícími klíči, viz
+oddíl 7.
 
-**Hlavní zjištění.** Jedna z devíti zbylých zamčených kapitol třetí třídy
-nepotřebuje na vstupu vůbec nic nového, stačí generátor na `pad`. Třetí třída
-tím jde z 24/33 na 25/33, aniž by se sáhlo na klávesnici; zbylých osm čeká na
-nový vstupní prvek nebo na dílnu. Kapitola 17 mezi ně patří: jednotky jen
-pojmenovává a porovnává, takže na ni `unit_convert` nestačí.
+**Hlavní zjištění platilo.** Poslední z devíti zamčených kapitol třetí třídy,
+která nepotřebovala na vstupu nic nového, byla kapitola 5, a třetí třída je
+s ní na 25/33, aniž by se sáhlo na klávesnici. Kapitola 17 mezi zbylých osm
+patří: jednotky jen pojmenovává a porovnává, takže na ni `unit_convert`
+nestačí.
 
 **`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
@@ -1588,17 +1635,21 @@ přidat nesmí. Vzniklo to z rešerše, u každého zjištění je odkaz na stud
 
 ## 12b. Další krok
 
-Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`. `add_sub_1000`
-je z toho hotový, byla to páteř osmého dílu a architektonicky
-jen další sada kbelíků vedle `add_sub_100`. Hotové je i `mult_beyond`
-a `div_beyond`, první položka vlny A, `rounding_10` s `rounding_100`, druhá,
-`chain_3`, třetí, `order_of_ops`, čtvrtá, `mult_div_10_100` s `mult_round`,
-pátá, a `unit_convert` s `time_convert`, šestá. Nakonec `missing_operand`
-a `inverse_check`, protože to nejsou samostatné rodiny, ale modifikátory
-existujících, a to je jiný typ zásahu do `itemFromKey`.
+Pořadí, na kterém jsme se dohodli: nejdřív všechno, co jde na `pad`. **Tahle
+část je od 13. září 2026 hotová celá.** `add_sub_1000` byl první, páteř osmého
+dílu a architektonicky jen další sada kbelíků vedle `add_sub_100`. Pak vlna A:
+`mult_beyond` s `div_beyond`, `rounding_10` s `rounding_100`, `chain_3`,
+`order_of_ops`, `mult_div_10_100` s `mult_round`, `unit_convert`
+s `time_convert` a nakonec `missing_operand` s `inverse_check`. Ten poslední
+byl schválně až na konci, protože to nejsou samostatné rodiny, ale
+modifikátory existujících, a byl to jiný typ zásahu: ne nová trať a nové
+klíče, ale druhý parametr `itemFromKey()` a druhý tvar řádku otázky.
 
-Teprve pak nové vstupní prvky: `pad2` a `div_remainder`, `pad3` a `place_value`,
-`pick` a dvojice `parity` s `digit_count`, úplně nakonec `cmp` a porovnávání.
+**Další na řadě jsou nové vstupní prvky**, tedy krok E plánu: `pad2`
+a `div_remainder`, `pad3` a `place_value`, `pick` a dvojice `parity`
+s `digit_count`, úplně nakonec `cmp` a porovnávání. Od téhle chvíle každá
+další kapitola čeká buď na ně, nebo na dílnu, což je jiný druh práce než
+celá vlna A: sahá se na klávesnici a na `tap()`, ne jen na generátor.
 
 **Dílna měla být až po tom všem, ale předběhla**, protože se ukázalo, že čtyři
 kapitoly nečekají na nic jiného a že bez ní nejde říct, kam patří slovní úlohy.
@@ -1829,6 +1880,14 @@ správy.
 Projela tudy tisícovka, za násobilkou i zaokrouhlování a sedělo to do puntíku.
 Od kroku 4 a 4c v něm přibyly dva body, prostředí ve čtyřech světech a ročník.
 
+**Na variantu se tenhle seznam nevztahuje.** Varianta je tentýž klíč položený
+jinak, dnes doplňování chybějícího členu; klíč se nemění, krabička ani sbírka
+se nemění, vlastní trať nevzniká, do `FAMILY_HEADS` se nepíše nic a heatmapa
+zůstane, jak byla. Zásah je jinde a je krátký: obalení v `itemFromKey()`,
+pole `variant` na kapitole v `src/curricula.js`, předání ve větvi `school`
+v `buildRun()`, násobitel v `thresholds()` a případný druhý tvar řádku
+v `questionHTML()`. Viz oddíl 7.
+
 **V `src/app.js`:**
 
 1. písmeno hlavičky klíče do `FAMILY_HEADS`
@@ -1868,7 +1927,8 @@ letoška, dílna) a rozbaleno 24 cest a 26 míst, za dveřmi má 7 tratí; druh�
 18 míst bez dveří a bez milníku a k tomu dveře dopředu; prvňák má 8 a dveře
 zpátky nemá; čtvrťák vidí celou mapu, tedy 25 míst a žádné dveře ani milník.
 Dál sedí počet tratí v ukázce druhého ročníku (10) a počet zamčených kapitol
-třetí třídy (9 z 33).
+třetí třídy (8 z 33). Krok D4 mapu neposunul, protože varianta vlastní trať
+nemá; posunul jen ten poslední počet, z devíti na osm.
 
 **Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
 `grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v
@@ -1883,18 +1943,24 @@ v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
 s dnešním úkolem.
 
 **Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
-a 4d. Z vlny A je hotových šest položek ze sedmi. Revize ze 13. září sepsala
-`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava B0b, celý
-krok C (responzivita ve dvou commitech, druhý s písmem podle ročníku a šestým
-testovým souborem), D1 (pořadí operací, trať `ops`), D2 (kulatá čísla, trať
-`tens`) a D3 (převody jednotek, trať `units`), nejbližší je poslední položka
-kroku D, tedy D4, vlastní subagent a vlastní commit. Z rozhodnutí
+a 4d. **Vlna A je hotová celá**, tedy všech sedm položek. Revize ze 13. září
+sepsala `docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava
+B0b, celý krok C (responzivita ve dvou commitech, druhý s písmem podle ročníku
+a šestým testovým souborem) a **celý krok D**: D1 (pořadí operací, trať `ops`),
+D2 (kulatá čísla, trať `tens`), D3 (převody jednotek, trať `units`) a D4
+(chybějící člen, varianta bez vlastní trati). Nejbližší je krok E, tedy nové
+vstupní prvky, počínaje `pad2` a dělením se zbytkem. Z rozhodnutí
 v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
-nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px) a R5 (měřítka
-písma 1,25 / 1,12 / 1,04 / 1,0), všechna podle doporučení. R1 (žebřík minulých
+nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px), R5 (měřítka
+písma 1,25 / 1,12 / 1,04 / 1,0) a R3 (chybějící člen pod původním klíčem),
+všechna podle doporučení. R1 (žebřík minulých
 let) je odložené a po B0b už není naléhavé, viz hlavička.
 
-**Co je čerstvě hotové a nesmí se rozbít.** Převody jednotek drží obě čísla,
+**Co je čerstvě hotové a nesmí se rozbít.** Chybějící člen je varianta, ne
+rodina: klíč se nemění, variantu si vyžádá kapitola a předává ji jediné místo,
+větev `school` v `buildRun()`, takže se nikdy nedostane do šampionátu ani do
+trati "co ti nejde", a obalit se dá jen prostý početní řádek, takže ciferník
+projde nedotčený (D4). Převody jednotek drží obě čísla,
 v zadání i v odpovědi, do tisíce a jednotku nesou jako údaj na položce, takže
 o ní mimo `itemFromKey`, `questionHTML()` a `rightAnswerText()` nikdo neví
 (D3). Kulatá čísla staví součin tak, aby
@@ -1923,10 +1989,12 @@ ročníku (4b).
 > subagentovi, než půjdeš dál. Když subagent hlásí rozpor s plánem, rozhodni
 > autonomně podle plánu.
 >
-> Dneska chci poslední položku kroku D, tedy D4, vlastní subagent a vlastní
-> commit, přesně podle oddílu 10 plánu. Rozhodnutí z oddílu 9 plánu
-> ber podle doporučení a řekni to subagentovi v zadání; R1 (žebřík minulých
-> let) zatím nedělej.
+> Dneska chci krok E, tedy nové vstupní prvky, počínaje `pad2` a dělením se
+> zbytkem; E1 rozděl na dva subagenty, jak říká oddíl 10 plánu, nejdřív dvě
+> políčka `pad2` a pak generátor. Každý subagent má vlastní commit.
+> Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentovi
+> v zadání, u E1 hlavně R2 (rodina po dělitelích `r2` až `r10`); R1 (žebřík
+> minulých let) zatím nedělej.
 >
 > Každá nová rodina si vyrenderuje své čtyři palety a prohlédne je na obrázku
 > podle oddílu 2; `convert` nekreslí přechody, takže se pozadí skládá zvlášť.
@@ -1944,7 +2012,7 @@ ročníku (4b).
 > Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
 > které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
 > hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
-> úkolem byl krok E, a ověř, že subagenti označili hotové kroky
+> úkolem byl zbytek kroku E, a ověř, že subagenti označili hotové kroky
 > v `docs/PLAN.md`.
 
 ### Prompt pro autonomní dokončení celého plánu

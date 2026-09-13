@@ -205,7 +205,7 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===9, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===8, zamcene().length+' zamcenych z 33');
 ok('scitani a odcitani vice cisel se da vybrat', !zamcene().includes(11));
 ok('deleni se zbytkem a zlomky jsou mezi zamcenymi', zamcene().includes(27) && zamcene().includes(32));
 // nasobeni a deleni mimo malou nasobilku uz umime, takze jeho tri kapitoly zamcene byt nesmi
@@ -221,6 +221,9 @@ ok('nasobeni a deleni 10 a 100 se da vybrat', !zamcene().includes(28));
 // a objem v kapitole 29. Kapitola 17 jednotky jen pojmenovava, takze
 // generator nema a zamcena zustava
 ok('prevody jednotek se daji vybrat', !zamcene().includes(18) && !zamcene().includes(29));
+// zkouska spravnosti od kroku D4: neni to novy generator, ale latka
+// predchozich kapitol pozpatku, takze kapitola 5 uz zamcena neni
+ok('zkouska spravnosti se da vybrat', !zamcene().includes(5));
 ok('kapitola, ktera jednotky jen pojmenovava, zamcena zustala', zamcene().includes(17));
 // obor do tisice uz umime, takze jeho tri kapitoly zamcene byt nesmi
 ok('obor do tisice se da vybrat', !zamcene().includes(23) && !zamcene().includes(24) && !zamcene().includes(25));
@@ -241,6 +244,26 @@ const tabs=[]; while(inRace() && tabs.length<40){ tabs.push(qtext()); type(answe
 await wait(1500);
 ok('zavod podle kapitoly probehl a drzel se nasobilky z kapitoly',
    tabs.length===10 && tabs.every(x=>/×|:/.test(x)), tabs.length+' otazek');
+// zkouska spravnosti, kapitola 5: tataz latka pozpatku. Neni to vlastni
+// trat ani vlastni klic, jede se pres skolni trat, a radek ma jiny tvar,
+// tedy policko vpredu. Odpoved se bere z RUN, protoze "× 7 = 42" se ze
+// zadani spocitat neda, o to prave jde.
+click(q('[data-act="map"]'));
+ev('(function(){const p=P();p.chapter=5;save();})()');
+click(q('[data-act="play"][data-id="school"]')); click(q('[data-go]'));
+const qbHTML=d.getElementById('qbox').innerHTML;
+ok('u chybejiciho clenu stoji policko pred zadanim',
+   qbHTML.indexOf('id="abox"')>=0 && qbHTML.indexOf('id="abox"')<qbHTML.indexOf('id="qtext"'));
+ok('u chybejiciho clenu je receno, co se hleda', /Které číslo chybí/.test(d.getElementById('hint').textContent));
+const mtabs=[];
+while(inRace() && mtabs.length<40){ mtabs.push(qtext()); type(ev('RUN.items[RUN.idx].answer')); await wait(640); }
+await wait(1500);
+ok('zavod podle zkousky spravnosti probehl a cely byl pozpatku',
+   mtabs.length===10 && mtabs.every(x=>/^[+\-×:] /.test(x)), mtabs.length+' otazek, napr. '+mtabs[0]);
+ok('chybejici clen se zapsal pod puvodni klic, ne pod novy',
+   Object.keys(DBg().profiles[0].facts).every(k=>/^[mdpn]/.test(k)),
+   Object.keys(DBg().profiles[0].facts).join(' '));
+ev('(function(){const p=P();p.chapter=2;save();})()');
 console.log('--- hodiny ---');
 click(q('[data-act="map"]'));
 click(qa('[data-act="play"]').find(b=>b.dataset.id==='clock')); click(q('[data-go]'));

@@ -42,9 +42,9 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `add_sub_10` | sčítání a odčítání do 10 | `pad` | 0 až 10 | hotovo, je to `add_sub_20` s `maxSum` |
 | `add_sub_20` | sčítání a odčítání do 20 | `pad` | 0 až 20 | hotovo |
 | `add_sub_100` | sčítání a odčítání do 100, pět kbelíků obtížnosti | `pad` | 0 až 100 | hotovo |
-| `missing_operand` | chybějící sčítanec, menšenec, činitel nebo dělenec | `pad` | podle nosného tématu | nové |
+| `missing_operand` | chybějící sčítanec, menšenec, činitel nebo dělenec | `pad` | podle nosného tématu | hotovo, varianta nad klíči nosného tématu, ne vlastní rodina |
 | `times_more_less` | o kolik více či méně, kolikrát více či méně | `pad` | podle nosného tématu | nové |
-| `inverse_check` | zkouška správnosti jako obrácená operace | `pad` | podle nosného tématu | nové |
+| `inverse_check` | zkouška správnosti jako obrácená operace | `pad` | podle nosného tématu | hotovo, na klávesnici je to totéž co `missing_operand`, skládá se do něj |
 | `rounding_10` | zaokrouhlování na desítky, dvojciferná i trojciferná | `pad` | 0 až 1000 | hotovo |
 | `rounding_100` | zaokrouhlování na stovky | `pad` | 0 až 1000 | hotovo |
 | `chain_3` | řetězec tří čísel, sčítání a odčítání, tři kbelíky podle oboru | `pad` | 0 až 100 | hotovo |

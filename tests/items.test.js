@@ -4,12 +4,15 @@ let src=fs.readFileSync(base+'i18n.js','utf8')+'\n'+fs.readFileSync(base+'curric
 const el=()=>({innerHTML:'',textContent:'',className:'',style:{},clientWidth:360,classList:{add(){},remove(){}},appendChild(){},remove(){},dataset:{},querySelector:()=>el(),querySelectorAll:()=>[],closest:()=>null,focus(){},offsetWidth:1});
 // layoutClass() cte sirku a vysku okna a zapisuje je na <html>, takze
 // nahrazka okna je musi mit; bez documentElementu by se rozvrzeni
-// nespoctelo a mapa by se v testu vzdycky skladala do dvou sloupcu
-global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll:()=>[],addEventListener(){},createElement:()=>el(),body:{appendChild(){}},onkeydown:null,documentElement:el()};
+// nespoctelo a mapa by se v testu vzdycky skladala do dvou sloupcu.
+// #app je jeden a tyz prvek po celou dobu behu, protoze mapa si z nej
+// bere sirku a kontrola 15 ji potrebuje menit.
+const appEl=el();
+global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el(),querySelectorAll:()=>[],addEventListener(){},createElement:()=>el(),body:{appendChild(){}},onkeydown:null,documentElement:el()};
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,placeBox,placeHeight,PLACE_H,PLACE_STEP,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -1020,43 +1023,164 @@ rk1.stars={kpb1:true};
 if(!A.collectionSpecs(rk1).some(sp=>sp.keys.indexOf('kpb1')>=0)) gsay('rozsvicena sbirka mimo rocnik zmizela');
 console.log('rocniku:',A.MAX_GRADE,'| chyb:',gBad);
 
-// 15. rozvrzeni mapy: dve mista se nikdy nesmi prekryt a zadne nesmi
-// vyjet ven. jsdom ani tenhle test rozvrzeni nemaji, takze se pocita z
-// tehoz, z ceho ho pocita mapa: sirka v procentech, vyska v pixelech.
+// 15. rozvrzeni mapy: dve karty se nikdy nesmi prekryt a zadna nesmi
+// vyjet ven.
+//
+// Vysku karty si tenhle test pocita sam ze stylu, ne z placeBox(): kdyby
+// meril obdelniky touz vyskou, ze ktere worldSpots() odvozuje rozestup,
+// platilo by "neprekryvaji se" z definice a zadnou kolizi by nechytil.
+// Cte tedy src/styles.css, secte z nej odsazeni, ramecek, mezery,
+// nahled a radky textu, a to pro obe meritka, pro dva, tri i ctyri
+// sloupce, pro nejdelsi skutecna jmena trati ve vsech trech jazycich a
+// pro vsechny ctyri tvary karty. Je to jedina pojistka proti tomu, aby
+// se karty zase zacaly prekryvat, takze je zamerne prisna.
 let mBad=0;
-const msay=m=>{mBad++;console.log('  !!  '+m)};
-// Dva sloupce musi po pridani sirsich rozvrzeni vratit presne to, co
-// vracely predtim, jinak by se hnul telefon, na kterem se hraje. Tohle
-// je vystup pred zmenou, zaokrouhleny na desetiny, osm mist v okruhu.
-const DNES=[[2.3,14],[53.6,110],[2.6,206],[51.3,302],[2.6,398],[53.7,494],[3,590],[53.5,686]];
-{
-  const s=A.worldSpots({world:'circuit'},8);
-  const ted=s.map(x=>[+x.left.toFixed(1),+x.y.toFixed(1)]);
-  if(JSON.stringify(ted)!==JSON.stringify(DNES))
-    msay('dva sloupce se hnuly: '+JSON.stringify(ted)+' misto '+JSON.stringify(DNES));
-  // a cely stary tvar, tedy krok i vyska karty, se pocita dal ze stejnych cisel
-  const b=A.placeBox(2);
-  if(b.w!==44||b.h!==A.PLACE_H||b.step!==A.PLACE_STEP) msay('dva sloupce zmenily rozmer karty');
+const msay=m=>{mBad++;if(mBad<=12)console.log('  !!  '+m)};
+
+/* --- co o karte rika src/styles.css --- */
+const CSSSRC=fs.readFileSync(base+'styles.css','utf8');
+function cssRules(src){
+  const out=[],stack=[];let buf='';
+  for(const ch of src.replace(/\/\*[\s\S]*?\*\//g,'')){
+    if(ch==='{'){stack.push(buf.trim());buf='';}
+    else if(ch==='}'){const sel=stack.pop();if(sel&&sel[0]!=='@')out.push({sel,body:buf});buf='';}
+    else buf+=ch;
+  }
+  return out;
 }
-for(const cols of [2,3,4]){
-  const b=A.placeBox(cols);
-  for(let n=8;n<=24;n++){
-    const s=A.worldSpots({world:'circuit'},n,null,cols);
-    if(s.length!==n){msay('worldSpots vratil '+s.length+' mist misto '+n);continue;}
-    const r=s.map(x=>({l:x.left,r:x.left+b.w,t:x.y,b:x.y+b.h}));
-    for(let i=0;i<r.length;i++){
-      if(r[i].l<0||r[i].r>100){msay('cols '+cols+', n '+n+': misto '+i+' vyjelo ven ('
-        +r[i].l.toFixed(1)+' az '+r[i].r.toFixed(1)+' %)');break;}
-      for(let j=i+1;j<r.length;j++){
-        if(r[i].l<r[j].r&&r[j].l<r[i].r&&r[i].t<r[j].b&&r[j].t<r[i].b){
-          msay('cols '+cols+', n '+n+': mista '+i+' a '+j+' se prekryvaji');break;
+const CR=cssRules(CSSSRC);
+const cbody=sel=>CR.filter(r=>r.sel.split(',').map(s=>s.trim().replace(/\s+/g,' ')).indexOf(sel)>=0);
+const cdecl=(sel,prop)=>{
+  const r=cbody(sel);
+  for(let i=r.length-1;i>=0;i--){const m=r[i].body.match(new RegExp(prop+'\\s*:\\s*([^;}]+)'));if(m)return m[1].trim();}
+  return null;
+};
+const cpx=v=>parseFloat(v);
+// zaklad velikosti pisma: calc(Zpx * var(--tx)) -> Z
+const cbase=v=>{const m=/calc\(\s*([\d.]+)px\s*\*\s*var\(--tx\)\s*\)/.exec(v);return m?+m[1]:parseFloat(v)};
+const cclamp=sel=>{const v=cdecl(sel,'-webkit-line-clamp');return v?parseInt(v,10):99};
+const CARD={
+  pad:cpx(cdecl('.place','padding')),
+  bord:cpx(/([\d.]+)px/.exec(cdecl('.place','border'))[1]),
+  gap:cpx(cdecl('.place','gap')),
+  thumb:(()=>{const a=cdecl('.place .thumb','aspect-ratio').split('/');return +a[1]/+a[0]})(),
+  nm:cbase(cdecl('.place .nm','font-size')),nmLh:parseFloat(cdecl('.place .nm','line-height')),nmMax:cclamp('.place .nm'),
+  sub:cbase(cdecl('.place .sub','font-size')),subLh:parseFloat(cdecl('.place .sub','line-height')),subMax:cclamp('.place .sub'),
+  bar:cpx(cdecl('.place .bar','height')),
+  foot:cbase(cdecl('.place .foot','font-size')),footLh:parseFloat(cdecl('.place .foot','line-height')),
+  footMin:cpx(cdecl('.place .foot','min-height')),
+  lock:cbase(cdecl('.place.locked .lockmsg','font-size')),lockLh:parseFloat(cdecl('.place.locked .lockmsg','line-height')),
+  lockMax:cclamp('.place.locked .lockmsg'),
+  edge:2*cpx(cdecl('.world','margin').split(/\s+/)[1])
+};
+const SIRKA={2:{w:cpx(cdecl('.place','width')),max:cpx(cdecl('.place','max-width'))},
+             3:{w:cpx(cdecl('.world[data-cols="3"] .place','width')),max:Infinity},
+             4:{w:cpx(cdecl('.world[data-cols="4"] .place','width')),max:Infinity}};
+const MERITKA={};
+for(const g of [1,2,3,4,5]){const r=cbody('html[data-grade="'+g+'"]');if(r.length)MERITKA[g]=parseFloat(/--tx\s*:\s*([\d.]+)/.exec(r[0].body)[1]);}
+for(const k of Object.keys(CARD)) if(!(CARD[k]>0)) msay('ze stylu se nepodarilo precist '+k+': '+CARD[k]);
+
+/* --- nejdelsi texty, ktere na karte opravdu stoji --- */
+// Sirku pismene bereme 0,58 em; pro Baloo 2 i Nunito je to spis vic nez
+// min, takze odhad poctu radku nadhodnocuje a test je tim prisnejsi.
+const EM=0.58;
+const radku=(txt,fs,w,max)=>Math.min(max,Math.max(1,Math.ceil(txt.length*fs*EM/w)));
+const NEJ={nm:'',sub:'',lock:''};
+for(const l of ['cs','en','de']){
+  const D=A.I18N[l];
+  const jmena=Object.keys(D).filter(k=>/^trk_/.test(k)&&D[k+'s']).map(k=>D[k])
+    .concat([D.backTitle,D.peekTitle,D.shopTitle]);
+  const podtitulky=Object.keys(D).filter(k=>/^trk_.+s$/.test(k)&&D[k.slice(0,-1)]).map(k=>D[k])
+    .concat([D.backSub.replace('{0}','1. a 2.'),D.peekSub,D.peekOpenSub,D.shopSub]);
+  const duvody=[D.lockByParent,D.lockHalfTable,D.lockRaceFirst]
+    .concat(jmena.map(n=>D.lockFinish.replace('{0}',n)))
+    .concat(jmena.map(n=>D.lockOpen.replace('{0}',n)));
+  for(const [kde,pole] of [['nm',jmena],['sub',podtitulky],['lock',duvody]])
+    for(const s of pole) if(s&&s.length>NEJ[kde].length) NEJ[kde]=s;
+}
+if(NEJ.nm.length<16||NEJ.sub.length<20||NEJ.lock.length<16)
+  msay('nejdelsi texty na karte vypadaji podezrele kratke: '+JSON.stringify(NEJ));
+
+/* --- vyska karty, spoctena nezavisle na app.js --- */
+// tvary: 'trat' (otevrena trat s pruhem postupu), 'zamcena', 'dvere'
+// (zpatky do minulych let, na pristi rok, dilna) a 'bezpruhu'
+// (sampionat a "co ti nejde", ktere pruh nemaji)
+function vyskaKarty(wPx,tx,tvar){
+  const inner=wPx-2*CARD.pad-2*CARD.bord;
+  const nmFs=CARD.nm*tx, subFs=CARD.sub*tx, lockFs=CARD.lock*tx;
+  const noha=Math.max(CARD.footMin,CARD.foot*tx*CARD.footLh);
+  let h=2*CARD.pad+2*CARD.bord+inner*CARD.thumb
+    + radku(NEJ.nm,nmFs,inner,CARD.nmMax)*nmFs*CARD.nmLh
+    + radku(NEJ.sub,subFs,inner,CARD.subMax)*subFs*CARD.subLh;
+  if(tvar==='zamcena') h+=3*CARD.gap+radku(NEJ.lock,lockFs,inner,CARD.lockMax)*lockFs*CARD.lockLh;
+  else if(tvar==='trat') h+=4*CARD.gap+CARD.bar+noha;
+  else h+=3*CARD.gap+noha;
+  return h;
+}
+const TVARY=['trat','zamcena','dvere','bezpruhu'];
+
+/* --- dva sloupce: vodorovne polohy zustavaji, kde byly --- */
+// Zleva doprava se telefon nehnul o pixel, protoze wobble i strany jsou
+// tytez (rozhodnuti R6). Svisly rozestup se zvetsit musel: karta je pri
+// dvouradkovem jmenu 200 az 226 px vysoka a stary krok 96 px ji nechal
+// sednout na sousedku o dva nize. Cisla nize jsou po oprave, osm mist.
+const VLEVO=[2.3,53.6,2.6,51.3,2.6,53.7,3,53.5];
+{
+  global.document.documentElement.dataset.grade='';
+  appEl.clientWidth=375;
+  const s=A.worldSpots({world:'circuit'},8);
+  const ted=s.map(x=>+x.left.toFixed(1));
+  if(JSON.stringify(ted)!==JSON.stringify(VLEVO))
+    msay('dva sloupce se hnuly do stran: '+JSON.stringify(ted)+' misto '+JSON.stringify(VLEVO));
+  const b=A.placeBox(2);
+  if(b.w!==44) msay('dva sloupce zmenily sirku karty: '+b.w);
+  if(Math.abs(s[1].y-s[0].y-b.step)>0.05) msay('rozestup sousedu neodpovida kroku karty');
+}
+
+/* --- nic se nesmi prekryt, pro obe meritka a vsechny sirky --- */
+const OKNA=[[360,2],[375,2],[568,2],[600,3],[768,3],[812,3],[900,4],[1024,4],[1280,4]];
+for(const rocnik of ['','1']){
+  const tx=rocnik?MERITKA[rocnik]:1;
+  global.document.documentElement.dataset.grade=rocnik;
+  for(const [appW,cols] of OKNA){
+    appEl.clientWidth=appW;
+    const svet=appW-CARD.edge;
+    const b=A.placeBox(cols);
+    const wPx=Math.min(svet*SIRKA[cols].w/100,SIRKA[cols].max);
+    const vlastni=Math.max(...TVARY.map(t=>vyskaKarty(wPx,tx,t)));
+    // app.js musi na kartu myslet aspon tak velkou, jaka opravdu je
+    if(b.h+0.05<vlastni) msay('tx '+tx+', '+appW+' px, cols '+cols+': placeBox pocita s kartou '
+      +b.h.toFixed(1)+' px, ale nejvyssi tvar ma '+vlastni.toFixed(1)+' px');
+    for(let n=8;n<=24;n++){
+      const s=A.worldSpots({world:'circuit'},n,n>12?5:null,cols);
+      if(s.length!==n){msay('worldSpots vratil '+s.length+' mist misto '+n);continue;}
+      // obdelniky v pixelech: vodorovne z procent sirky mapy, svisle
+      // z vlastni spoctene vysky, ne z te, kterou pocita mapa. Kazda
+      // karta se bere jako nejvyssi tvar, protoze na kterem miste ktery
+      // tvar stoji, rozhoduje az postup ditete.
+      const r=s.map(x=>({l:x.left*svet/100,r:x.left*svet/100+wPx,t:x.y,b:x.y+vlastni}));
+      for(let i=0;i<r.length&&mBad<=12;i++){
+        if(s[i].left<0||s[i].left+SIRKA[cols].w>100){
+          msay('tx '+tx+', cols '+cols+', n '+n+': misto '+i+' vyjelo ven ('
+            +s[i].left.toFixed(1)+' az '+(s[i].left+SIRKA[cols].w).toFixed(1)+' %)');break;}
+        for(let j=i+1;j<r.length;j++){
+          if(r[i].l<r[j].r-0.05&&r[j].l<r[i].r-0.05&&r[i].t<r[j].b-0.05&&r[j].t<r[i].b-0.05){
+            msay('tx '+tx+', '+appW+' px, cols '+cols+', n '+n+': mista '+i+' a '+j
+              +' se prekryvaji o '+Math.min(r[i].b-r[j].t,r[j].b-r[i].t).toFixed(1)+' px');break;
+          }
         }
       }
-      if(mBad>6)break;
+      if(mBad>12)break;
     }
-    if(mBad>6)break;
   }
 }
+global.document.documentElement.dataset.grade='';
+appEl.clientWidth=360;
+// tabulka meritek v app.js a v CSS musi rikat totez; hlida to i
+// style.test.js, tady je to proto, ze se z ni pocita vyska karty
+for(const g of Object.keys(MERITKA))
+  if(A.TX_BY_GRADE[g]!==MERITKA[g])
+    msay('rocnik '+g+' ma v app.js meritko '+A.TX_BY_GRADE[g]+', v CSS '+MERITKA[g]);
 // tri sloupce od 600 px, ctyri od 900 px, dva na telefonu na vysku.
 // Telefon polozeny na bok ma pres 600 px sirky, takze uz ma tri sloupce
 // a orientaci "wide": rozhoduje sirka okna, ne to, co je to za pristroj.

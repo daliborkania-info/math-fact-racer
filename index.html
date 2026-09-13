@@ -69,14 +69,19 @@ html[data-o="wide"]{--appw:none}
    data-grade, so a first year reads the same screen in larger type than
    a fourth year does. The parent section and a screen with no profile
    behind it stay at 1, and so do the uppercase labels and the heatmap,
-   which are read by a grown up. These four numbers are the whole tuning
+   which are read by a grown up. These numbers are the whole tuning
    knob: they are estimates to be checked on a child, and this is the one
-   place to change them. */
+   place to change them. The fifth year is written down before it exists,
+   so that switching it on cannot silently drop the scale back to 1.
+   app.js carries the same table as TX_BY_GRADE, because the height of a
+   map card depends on it and JS cannot read a custom property without a
+   layout; tests/style.test.js checks the two agree. */
 html{--tx:1}
 html[data-grade="1"]{--tx:1.25}
 html[data-grade="2"]{--tx:1.12}
 html[data-grade="3"]{--tx:1.04}
 html[data-grade="4"]{--tx:1}
+html[data-grade="5"]{--tx:1}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -155,7 +160,7 @@ input{font-family:inherit}
 .btn[disabled]{opacity:.45;pointer-events:none}
 
 .card{background:var(--paper);border-radius:var(--r-l);padding:16px;border:2px solid var(--line)}
-.h2{font-family:var(--font-display);font-size:17px;margin:22px 0 10px}
+.h2{font-family:var(--font-display);font-size:calc(17px * var(--tx));margin:22px 0 10px}
 .muted{color:var(--ink-soft);font-weight:600;font-size:13.5px;line-height:1.5}
 /* The same paragraph read by a child rather than by a parent: bigger to
    start with, and it grows with the school year on top of that. The
@@ -228,18 +233,28 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
   border:2px solid rgba(24,37,67,.12);background:#1a2440;
 }
 .place .thumb svg{position:absolute;inset:0;width:100%;height:100%}
-/* The name of a place is allowed a second line rather than being cut off
-   with an ellipsis: at the larger scales of the first years a name like
-   "Počítání dílků" no longer fits on one, and a place whose name is cut
-   in half is a place the child cannot read. */
+/* The name of a place is allowed a second line: at the larger scales of
+   the first years a name like "Počítání dílků" no longer fits on one, and
+   a place whose name is cut in half is a place the child cannot read. A
+   third line is clamped away with an ellipsis, and a word longer than the
+   card ("Zaokrouhlování", "Kettenrechnen") is broken across the two lines
+   rather than sliced at the edge: the clamp only puts an ellipsis where
+   there is a line to hide, and a single long word never makes one.
+   Two lines is also the number placeHeight() in app.js counts on. */
 .place .nm{font-family:var(--font-display);font-size:calc(16px * var(--tx));line-height:1.1;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  text-overflow:ellipsis;overflow-wrap:break-word}
 .place .sub{font-size:calc(12.5px * var(--tx));color:var(--ink-soft);font-weight:700;line-height:1.25;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  text-overflow:ellipsis;overflow-wrap:break-word}
 .place .bar{height:7px;border-radius:99px;background:var(--shell-2);overflow:hidden}
 .place .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),#6ee7a8)}
+/* Every line here has a line-height of its own and every optional part a
+   known height, because placeHeight() in app.js adds them up to decide how
+   far apart two cards stand; a line whose height is left to the font would
+   make that sum a guess. */
 .place .foot{display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--tx));font-weight:800;
-  color:var(--ink-soft);min-height:16px}
+  color:var(--ink-soft);min-height:16px;line-height:1.25}
 /* --ink-faint on the shell is about 2.6 : 1, which is fine for a dot or a
    border and not for something a child is meant to read; every child
    facing line therefore stands in --ink-soft. */
@@ -266,9 +281,14 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 .milestone{position:absolute;transform:translate(-50%,-50%);z-index:1;
   padding:5px 13px;border-radius:999px;border:2px solid var(--line);
   background:var(--paper);box-shadow:var(--shadow-soft);color:var(--ink);
-  font-family:var(--font-display);font-size:14px;white-space:nowrap}
+  font-family:var(--font-display);font-size:calc(14px * var(--tx));white-space:nowrap}
 .place.locked{filter:grayscale(.85);opacity:.6}
-.place.locked .lockmsg{font-size:calc(12.5px * var(--tx));color:var(--ink-soft);font-weight:700;line-height:1.25}
+/* two lines like the name and the subtitle above it: the reason a track is
+   shut is a hint beside a name the child can already read, and a card of a
+   height nobody can predict is a card that lands on its neighbour */
+.place.locked .lockmsg{font-size:calc(12.5px * var(--tx));color:var(--ink-soft);font-weight:700;line-height:1.25;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  text-overflow:ellipsis;overflow-wrap:break-word}
 
 /* ---------- race screen ---------- */
 .game{position:relative;display:flex;flex-direction:column;flex:1;min-height:0;background:#0d1428}
@@ -288,7 +308,7 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 .carwrap.rivalcar{width:26px;height:26px;z-index:5;opacity:.48;filter:grayscale(.8) brightness(.72)}
 .finbadge{
   position:absolute;left:50%;top:14px;transform:translateX(-50%) scale(0);z-index:7;
-  font-family:var(--font-display);font-size:14px;color:#0d1428;background:linear-gradient(180deg,#ffe17a,#ffb020);
+  font-family:var(--font-display);font-size:calc(14px * var(--tx));color:#0d1428;background:linear-gradient(180deg,#ffe17a,#ffb020);
   border-radius:99px;padding:4px 14px;box-shadow:0 3px 0 rgba(0,0,0,.3);letter-spacing:.6px;
   transition:transform .3s cubic-bezier(.2,1.6,.4,1);
 }
@@ -313,21 +333,21 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 .pip.bad{background:#ff6f95;box-shadow:none}
 .pip.now{background:#fff;transform:scale(1.3);box-shadow:0 0 8px rgba(255,255,255,.9)}
 .gamebar .cnt{
-  font-family:var(--font-display);font-size:13px;color:#fff;background:rgba(9,16,34,.55);
+  font-family:var(--font-display);font-size:calc(13px * var(--tx));color:#fff;background:rgba(9,16,34,.55);
   backdrop-filter:blur(4px);border-radius:11px;padding:5px 10px;min-width:54px;text-align:center;
   font-variant-numeric:tabular-nums;letter-spacing:.3px;
 }
 
 .combo{
   position:absolute;right:12px;top:calc(46px + env(safe-area-inset-top,0px));z-index:6;
-  font-family:var(--font-display);font-size:15px;color:#0f1730;background:linear-gradient(180deg,#ffd166,#ffb020);
+  font-family:var(--font-display);font-size:calc(15px * var(--tx));color:#0f1730;background:linear-gradient(180deg,#ffd166,#ffb020);
   border-radius:10px;padding:3px 10px;box-shadow:0 3px 0 rgba(0,0,0,.28);
   transform:scale(0);transition:transform .22s cubic-bezier(.2,1.6,.4,1);letter-spacing:.5px;
 }
 .combo.on{transform:scale(1)}
 
 .floaty{
-  position:absolute;z-index:7;font-family:var(--font-display);font-size:23px;color:#34e39b;
+  position:absolute;z-index:7;font-family:var(--font-display);font-size:calc(23px * var(--tx));color:#34e39b;
   text-shadow:0 2px 6px rgba(0,0,0,.55);pointer-events:none;animation:floaty 1s ease-out forwards;
   font-variant-numeric:tabular-nums;
 }
@@ -336,17 +356,26 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 
 /* status strip below the track */
 .rail{flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px;background:#141f3d;color:#fff}
-.rail .num{font-family:var(--font-display);font-size:16px;font-variant-numeric:tabular-nums}
-.rail .lap{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;opacity:.55}
-.rail .gap{margin-left:auto;font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;
+.rail .num{font-family:var(--font-display);font-size:calc(16px * var(--tx));font-variant-numeric:tabular-nums}
+.rail .lap{font-size:calc(12.5px * var(--tx));font-weight:800;letter-spacing:.5px;text-transform:uppercase;opacity:.55}
+.rail .gap{margin-left:auto;font-size:calc(12.5px * var(--tx));font-weight:800;padding:4px 10px;border-radius:99px;
   background:rgba(255,255,255,.1);font-variant-numeric:tabular-nums;white-space:nowrap}
 .rail .gap.ahead{background:rgba(52,227,155,.2);color:#7cf0c0}
 .rail .gap.behind{background:rgba(255,111,149,.18);color:#ffa8bf}
 
+/* The zone is the part of the race screen that gives way, so it is also
+   the part that has to be able to scroll: on a 360 x 640 phone a first
+   year's keypad and scene leave it about 120 px for a question and a hint
+   that want 137, and nothing in the game may be cut off. "safe center"
+   keeps the top of the question reachable when it overflows; a browser
+   that does not know the keyword drops the whole declaration and falls
+   back to the plain "center" above, which is what it does today. */
 .qzone{
   flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:10px;padding:12px 18px;background:var(--shell);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
+.qzone{justify-content:safe center}
 .question{
   font-family:var(--font-display);font-size:calc(var(--tx) * clamp(38px,12vw,54px));line-height:1;
   letter-spacing:1px;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:12px;
@@ -419,8 +448,19 @@ html[data-o="wide"] .game{
 html[data-o="wide"] .stage{grid-area:stage;aspect-ratio:auto;max-height:none;height:100%;min-height:0}
 html[data-o="wide"] .rail{grid-area:rail}
 html[data-o="wide"] .qzone{grid-area:qzone;padding:10px 14px 4px}
-html[data-o="wide"] .keypad{grid-area:keypad;grid-template-rows:repeat(4,minmax(40px,1fr));min-height:0;align-self:stretch}
-html[data-o="wide"] .key{height:auto;min-height:40px}
+html[data-o="wide"] .keypad{grid-area:keypad;min-height:0;align-self:stretch}
+/* the four rows belong to the number pad, not to every answering surface
+   that may come later: .keypad is the surface, .keypad-pad is this one
+   layout of it */
+html[data-o="wide"] .keypad-pad{grid-template-rows:repeat(4,minmax(calc(38px * var(--tx)),1fr))}
+/* The floor of a key grows with the digit on it here too, which is what
+   step C4 asks for and what the flat 40 px of step C1 took away again.
+   It starts lower than the 50 px of a screen held upright, because on its
+   side the keypad has half a phone's height to live in: on a 640 x 360
+   window the question zone takes 117 px and four rows of the upright
+   floor would need 10 px more than the rest. The rows are 1fr, so the
+   floor only decides how small a key may get, never how big. */
+html[data-o="wide"] .key{height:auto;min-height:calc(38px * var(--tx))}
 /* A tablet held upright is wide enough that a full width keypad would
    have keys 160 px across; that is a target nobody misses, and a reach
    nobody wants. */
@@ -457,7 +497,7 @@ html[data-w="tablet"][data-o="tall"] .keypad{width:100%;max-width:480px;margin:0
 .item .nm{font-size:calc(12.5px * var(--tx));font-weight:800;text-align:center;line-height:1.15;color:var(--ink-soft)}
 .item.locked{background:var(--shell-2);border-style:dashed}
 .item.locked .pic{filter:grayscale(1) brightness(1.6) contrast(.35);opacity:.65}
-.item .lvl{position:absolute;top:5px;right:6px;font-size:10px;font-weight:900;color:var(--sun-dark);background:#fff5df;border-radius:99px;padding:2px 6px}
+.item .lvl{position:absolute;top:5px;right:6px;font-size:calc(12.5px * var(--tx));font-weight:900;color:var(--sun-dark);background:#fff5df;border-radius:99px;padding:2px 5px}
 .xpbar{height:5px;width:80%;border-radius:99px;background:var(--shell-2);overflow:hidden}
 .xpbar i{display:block;height:100%;background:var(--sun)}
 
@@ -664,6 +704,12 @@ html[data-o="wide"] .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1
   .question.q-long{font-size:calc(var(--tx) * clamp(26px,7.2vw,36px))}
   .question.q-xlong{font-size:calc(var(--tx) * clamp(21px,5.6vw,30px))}
   .answerbox{height:52px;font-size:calc(34px * var(--tx));min-width:calc(92px * var(--tx))}
+  /* A short screen is where the keypad and the question fight over the
+     same pixels. The key still grows with its digit, but from a lower
+     floor: at 44 px the first year's keypad is the height everybody
+     else's is, which leaves the question the 137 px it needs instead of
+     119, and the digit is still 32.5 px in a key of 55. */
+  .key{min-height:calc(44px * var(--tx))}
 }
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -4251,7 +4297,12 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 function layoutClass(){
   const de = document.documentElement;
   if(!de || !de.dataset) return;
-  const w = window.innerWidth || 375, h = window.innerHeight || 812;
+  /* Some webviews report an innerWidth of 0 on the very first frame. The
+     document element knows its own width by then, so it is asked before
+     the phone sized guess is used; without it the map would be built in
+     two columns on a tablet and only put right by the first resize. */
+  const w = window.innerWidth || de.clientWidth || 375;
+  const h = window.innerHeight || de.clientHeight || 812;
   de.dataset.w = w < 600 ? "phone" : w < 900 ? "tablet" : "desk";
   // a short wide window only pays off from 640 px across: below that the
   // two columns of the race screen would both be too narrow to read
@@ -4265,6 +4316,19 @@ function mapCols(){
   const de = document.documentElement;
   const w = (de && de.dataset && de.dataset.w) || "phone";
   return w === "desk" ? 4 : w === "tablet" ? 3 : 2;
+}
+/* The type scale of the year at the screen, the same table as the five
+   --tx lines in src/styles.css. It is written twice because the map has
+   to know how tall a card is before it is drawn, and a custom property
+   cannot be read without a layout; tests/style.test.js fails if the two
+   copies ever say different things. The stylesheet stays the place to
+   tune them (decision R5): the test catches the drift, so the second copy
+   cannot quietly go stale. */
+const TX_BY_GRADE = {"1": 1.25, "2": 1.12, "3": 1.04, "4": 1, "5": 1};
+function txNow(){
+  const de = document.documentElement;
+  const g = (de && de.dataset && de.dataset.grade) || "";
+  return TX_BY_GRADE[g] || 1;
 }
 
 let view = {name:"players"};
@@ -4351,28 +4415,66 @@ function viewPlayers(){
    found on hub structures reports a drop in felt competence and autonomy
    when the player has to keep passing through the middle. */
 function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] || ""; }
-/* A place is 44 percent wide, so the two columns cannot touch even at
-   the far end of the wobble, and the step is half a card, so two places
-   on the same side never overlap either. Both are checked by the
-   numbers below rather than by looking at it on one phone. */
-const PLACE_STEP = 96;      // vertical distance between two neighbours
-const PLACE_H = 172;        // how tall a place card is, give or take
-/* A wider window gets more columns, and a wider card is a taller card:
-   the preview keeps its 400 : 205 shape and the text under it takes the
-   measured 92 px whatever the width. Only the two column layout has a
-   card of a known height, so only that one can use the constant. */
-function placeHeight(widthPx){ return widthPx * 205 / 400 + 92; }
+/* A place is 44 percent wide in the two column layout, so the two columns
+   cannot touch even at the far end of the wobble, and from three columns
+   up the width follows the count. How far apart they stand vertically is
+   not a constant any more: the card is as tall as its own preview and its
+   own text, and the text grows with the school year. */
+const PLACE_GAP = 20;       // clear air between two cards in one column
+const PLACE_MAX = 205;      // .place max-width, two column layout only
+const WORLD_EDGE = 28;      // .world margin: 0 14px, both sides
+/* How wide the map is drawn, in pixels. The card is a percentage of
+   .world, which is #app less its margins, not of #app itself. Before the
+   first layout there is nothing to measure; then the window is taken,
+   which can only be wider than #app, never narrower, because --appw only
+   caps it. A step that comes out of a guess therefore has too much air
+   rather than too little, and never lands a card on its neighbour. */
+function mapWidth(){
+  const px = (app && app.clientWidth)
+    || (typeof window !== "undefined" && window.innerWidth)
+    || 375;
+  return Math.max(120, px - WORLD_EDGE);
+}
+/* How tall a place card is, in pixels, added up from src/styles.css. It
+   is the worst case of every shape the card takes, so that one step fits
+   the whole map and no card can land on the one below it:
+
+     22           .place padding 9 and border 2, top and bottom
+     preview      .place .thumb, aspect-ratio 400 / 205 of the inner width
+     5 per gap    .place gap, between every pair of children
+     .nm          16px * tx, line-height 1.1, up to two lines
+     .sub         12.5px * tx, line-height 1.25, up to two lines
+     open card    .bar 7px + .foot, min-height 16px or 13px * tx at 1.25
+     locked card  .lockmsg, 12.5px * tx, line-height 1.25, up to two lines
+
+   An open track has four gaps (preview, name, subtitle, bar, foot), a
+   locked one and a door have three. Two lines is what the name really
+   takes: "Šestky a sedmičky", "Sechser und Siebener" and "Was ihr in der
+   Schule macht" do not fit on one even at tx 1, and none of the three
+   elements can take a third line, because the stylesheet clamps them. */
+function placeHeight(widthPx, tx){
+  const s = tx || txNow();
+  const inner = widthPx - 22;
+  const thumb = inner * 205 / 400;
+  const nm   = 2 * 16 * 1.1 * s;
+  const sub  = 2 * 12.5 * 1.25 * s;
+  const foot = Math.max(16, 13 * 1.25 * s);
+  const lock = 2 * 12.5 * 1.25 * s;
+  const open = 4 * 5 + nm + sub + 7 + foot;
+  const shut = 3 * 5 + nm + sub + lock;
+  return 22 + thumb + Math.max(open, shut);
+}
 /* How wide one place is, in percent of the map, and how tall in pixels.
-   Two columns keep the numbers the phone was measured on; from three
-   columns up the width follows the count and the height follows from it.
    The percentages match the widths in the stylesheet, which is where the
-   card is actually sized. */
-function placeBox(cols){
-  if(cols < 3) return {w: 44, h: PLACE_H, step: PLACE_STEP};
-  const w = 100 / cols - 3;
-  const px = ((app && app.clientWidth) || 375) * w / 100;
-  const h = placeHeight(px);
-  return {w, h, step: h + 22};
+   card is actually sized. Two columns alternate sides, so the distance
+   between two neighbours is half the distance between two cards in the
+   same column; from three columns up a step is a row. */
+function placeBox(cols, tx){
+  const c = cols < 3 ? 2 : cols;
+  const w = c === 2 ? 44 : 100 / c - 3;
+  const px = c === 2 ? Math.min(mapWidth() * w / 100, PLACE_MAX) : mapWidth() * w / 100;
+  const h = placeHeight(px, tx);
+  return {w, h, step: c === 2 ? (h + PLACE_GAP) / 2 : h + PLACE_GAP};
 }
 /* gapAt, when given, is the index where this year starts: the road takes
    half a step more there, which is the room the year sign stands in.
@@ -4380,17 +4482,17 @@ function placeBox(cols){
    row, otherwise the places sharing that row would sit at two heights.
    cols defaults to two, so every caller that does not care about the
    width keeps the layout the phone was measured on. */
-function worldSpots(p, n, gapAt, cols){
+function worldSpots(p, n, gapAt, cols, tx){
   const rnd = seedRand("svet-" + (p && p.world ? p.world : "circuit"));
-  const b = placeBox(cols || 2);
+  const b = placeBox(cols || 2, tx);
   const out = [];
   if((cols || 2) < 3){
     for(let i = 0; i < n; i++){
       const wobble = rnd() * 3;
       const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
-      const gap = (gapAt != null && i >= gapAt) ? PLACE_STEP / 2 : 0;
-      const y = 14 + i * PLACE_STEP + gap;
-      out.push({left, y, cx: left + 22, cy: y + PLACE_H / 2});
+      const gap = (gapAt != null && i >= gapAt) ? b.step / 2 : 0;
+      const y = +(14 + i * b.step + gap).toFixed(1);
+      out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
     }
     return out;
   }
@@ -4408,7 +4510,7 @@ function worldSpots(p, n, gapAt, cols){
     // 0.5 to 2.5 of wobble leaves a one percent lane between two columns
     // and keeps the last one half a percent inside the right edge
     const left = c * (100 / cols) + 0.5 + rnd() * 2;
-    const y = 14 + r * b.step + (gapAt != null && i >= gapAt ? b.step / 2 : 0);
+    const y = +(14 + r * b.step + (gapAt != null && i >= gapAt ? b.step / 2 : 0)).toFixed(1);
     out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
   }
   return out;
@@ -4460,9 +4562,12 @@ function viewMap(p){
   const total = nPast + own.length + 1 + (ahead.length ? 1 : 0) + (peeking ? ahead.length : 0);
   const cols = mapCols();
   const spots = worldSpots(p, total, folding ? nPast : null, cols);
-  // the map is as tall as its lowest card, whatever the number of columns
+  /* The map is as tall as the bottom of its lowest card plus the same air
+     that stands between two cards, whatever the number of columns and
+     whatever the type scale; the card height has to be the one the cards
+     were spaced with, or the last row loses the ground under it. */
   const box = placeBox(cols);
-  const height = spots.reduce((m, s) => Math.max(m, s.y), 0) + box.h + 20;
+  const height = Math.round(spots.reduce((m, s) => Math.max(m, s.y), 0) + box.h + PLACE_GAP);
 
   const placeHTML = (tr, spot, kind) => {
     const peek = kind === "peek";

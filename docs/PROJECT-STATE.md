@@ -835,7 +835,7 @@ protože za dveřmi jsou obory prvního ročníku i most přes desítku.
 
 **Milník je ten předěl, kvůli kterému to celé je,** takže stojí na cestě
 vždycky, ať jsou dveře otevřené, nebo zavřené. Není to tlačítko. Mezi místa se
-nepočítá, ale na cestě zabírá půl kroku (`PLACE_STEP / 2`); `worldSpots()` to
+nepočítá, ale na cestě zabírá půl kroku (`placeBox().step / 2`); `worldSpots()` to
 umí přes parametr `gapAt` a milník sedí v půlce toho esíčka, což je u téhle
 křivky přesně střed obou sousedních míst. **Od tří sloupců začíná letošek
 vlastním řádkem**, protože mezi dvěma kartami v jednom řádku není pro ceduli
@@ -922,10 +922,26 @@ vpravo pult, nápovědu, mince a Hotovo; obal tlačítka Hotovo se jmenuje `jobg
 
 **Mapa má podle šířky dva, tři nebo čtyři sloupce**, viz oddíl 7c a rozhodnutí
 R6 v `docs/PLAN.md`. `viewMap()` spočítá `cols` přes `mapCols()` a předá ho
-`worldSpots()`; šířku karty nastavuje CSS podle `data-cols` na `.world`. Výška
-karty už není konstanta, počítá ji `placeHeight()` z šířky v pixelech, a výška
-celé mapy se bere z nejnižší karty, ne ze vzorce. Změna orientace mapu překreslí
-s odkladem 150 ms; pohled se vrátí nahoru, což je při otočení tabletu v pořádku.
+`worldSpots()`; šířku karty nastavuje CSS podle `data-cols` na `.world`. Změna
+orientace mapu překreslí s odkladem 150 ms; pohled se vrátí nahoru, což je při
+otočení tabletu v pořádku.
+
+**Výška karty na mapě se počítá, neodhaduje.** `placeHeight(šířkaPx, tx)` sčítá
+kartu z hodnot v `src/styles.css`: odsazení 9 a rámeček 2 nahoře i dole, náhled
+v poměru 400 : 205 z vnitřní šířky, mezera 5 mezi každými dvěma prvky, název
+16 px × `tx` s řádkováním 1,1 na dva řádky, podtitulek 12,5 × `tx` s 1,25 na dva
+řádky a podle tvaru karty buď pruh postupu 7 px a patička, nebo dvouřádková
+zpráva o zámku. Bere největší ze čtyř tvarů, takže je rozestup v celé mapě
+stejný a nezáleží na tom, která karta kde stojí. Dva řádky nejsou opatrnost,
+ale skutečnost: "Šestky a sedmičky", "Sechser und Siebener" ani "Was ihr in der
+Schule macht" se na jeden řádek nevejdou. Všechny tři texty mají v CSS
+`-webkit-line-clamp:2`, takže třetí řádek vzniknout nemůže. `placeBox()` počítá
+šířku z `.world`, tedy `#app` mínus 28 px okrajů, a když není co změřit, vezme
+šířku okna, která může být jen větší; krok pak vyjde s přebytkem vzduchu, nikdy
+s nedostatkem. Mezi dvěma kartami v jednom sloupci je `PLACE_GAP`, 20 px, a
+z téhož čísla se počítá i vzduch pod poslední kartou. Dva sloupce se střídají
+po stranách, takže rozestup dvou sousedů je půl kroku sloupce. Hlídá to okruh
+15 v `items.test.js`, který si výšku karty počítá nezávisle, přímo ze stylu.
 
 **Co se rozvržením nemění:** číselná klávesnice zůstává jediným vstupem závodu,
 dílna nedostala nic, co by se hýbalo nebo odpočítávalo, klepnutí na místo jde
@@ -942,14 +958,35 @@ jednom místě v `src/styles.css` hned pod `--appw` a jsou to odhady k ověřen�
 dítěti; ladí se tam, ne v kódu. Na `<html>` proto, že spodní listy `.sheet` visí
 na `body` a z `#app` by měřítko nezdědily.
 
+Hodnoty stojí na dvou místech, ne na jednom: `src/styles.css` je to místo, kde
+se ladí, a `TX_BY_GRADE` v `app.js` je jeho opis, protože mapa musí znát výšku
+karty dřív, než se karta nakreslí, a vlastnost z CSS se bez rozvržení přečíst
+nedá. `style.test.js` spadne, jakmile se kopie rozejdou. `html[data-grade="5"]`
+je v obou předem, ať krok G nespustí pátý ročník s tichým pádem měřítka na 1.
+
 Spolu s měřítkem se zvedly základy, které byly pod hranicí čitelnosti:
 **žádný dětský text nezačíná pod 12,5 px**, což je prvňákovi zhruba 15,6 px.
 Název místa na mapě smí mít dva řádky místo výpustky, protože při 1,25 se
-"Počítání dílků" na jeden nevejde, a barva `--ink-faint` (kontrast 2,6 : 1) se
-na dětský text nepoužívá, zůstává jen na dekoraci; tři místa, která v ní stála
+"Počítání dílků" na jeden nevejde; dlouhé jediné slovo ("Zaokrouhlování",
+"Kettenrechnen") se zalomí, `overflow-wrap:break-word`, a výpustka zůstává pro
+přetečení druhého řádku. Barva `--ink-faint` (kontrast 2,6 : 1) se na dětský
+text nepoužívá, zůstává jen na dekoraci; tři místa, která v ní stála
 (`.place .tokc`, `.tokn`, `.counter-empty`), jsou dnes v `--ink-soft`.
-Rodičovská sekce, heatmapa a `.tiny` s `.legend` se nemění, čte je dospělý.
-Hlídá to `tests/style.test.js`, viz oddíl 8.
+Rodičovská sekce, heatmapa a `.tiny` s `.legend` se nemění, čte je dospělý;
+výběr hráče je v `PARENT_VIEWS`, takže i tam je měřítko 1. Hlídá to
+`tests/style.test.js`, viz oddíl 8, a hlídá to obráceně, než se zdá: projde
+všechny velikosti písma v souboru a chce, aby každá buď násobila `--tx`, nebo
+stála na krátkém seznamu výjimek, což jsou rodičovské obrazovky a znaky, které
+nejsou text (ikony, emoji, fajfka a guma na klávesnici). Seznam vypsaných
+dětských selektorů by novou velikost nikdy neuviděl, a taky neviděl.
+
+**Klávesa roste s číslicí na ní, ale nikdy přes okraj.** Podlaha je
+`calc(50px * var(--tx))` na výšku, `calc(44px * var(--tx))` na displeji nižším
+než 660 px, kde by prvňákova klávesnice jinak vytlačila otázku, a
+`calc(38px * var(--tx))` na šířku, kde má klávesnice jen půlku obrazovky.
+Řádky mřížky jsou `1fr`, takže podlaha rozhoduje jen o tom, jak malá klávesa
+smí být. A `.qzone`, tedy ta část závodu, která ustupuje, se roluje: co se
+nevejde, se nikdy neuřízne.
 
 ---
 
@@ -996,8 +1033,13 @@ jednu otevřenou trať**, že ukázka nabízí právě jeden rok dopředu a že 
 ani rodičovská sekce nemluví o tom, co na mapě není. Od kroku C k tomu přibylo
 rozvržení mapy: obdélníky míst se pro dva, tři i čtyři sloupce při osmi až
 čtyřiadvaceti místech nesmí protnout ani vyjet přes sto procent šířky, dva
-sloupce musí vrátit přesně ty polohy, které vracely dřív, a sedm šířek okna
-musí dát očekávaný počet sloupců a orientaci.
+sloupce musí vodorovně vrátit přesně ty polohy, které vracely dřív, a sedm
+šířek okna musí dát očekávaný počet sloupců a orientaci. **Výšku karty si ta
+kontrola počítá sama ze `src/styles.css`**, ne z `placeBox()`, jinak by měřila
+definici proti sobě samé a nechytila nic; jede pro měřítko 1 i 1,25, pro devět
+šířek okna, pro nejdelší skutečná jména tratí ve všech třech jazycích a pro
+všechny čtyři tvary karty, a porovnává i to, že `TX_BY_GRADE` v `app.js` říká
+totéž co `--tx` v CSS.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
@@ -1037,11 +1079,17 @@ pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
 `style.test.js` je od kroku C šestý soubor a jediný bez jsdomu: čte
 `src/styles.css`, `src/index.template.html` a manifest jako text a hlídá to,
 co se jinak pozná jen na obrázku. Tedy `vh` před `dvh`, strop výšky spodního
-listu, `orientation` `any`, mřížku závodu na šířku, že se nevrátily mrtvé
-selektory `.runner` a `.ghost`, a celé měřítko písma: pět řádků s `--tx` na
-jednom místě, každá dětská velikost ze seznamu z C4 násobená `--tx`, žádný
-základ pod 12,5 px a žádný dětský text v `--ink-faint`. Seznam selektorů si
-nese sám, aby si všiml nového pravidla, které na ročník zapomnělo.
+listu, `orientation` `any`, mřížku závodu na šířku i s jejími oblastmi, že
+řádky klávesnice visí na `.keypad-pad` a ne na `.keypad`, že podlaha klávesy
+roste s ročníkem i na šířku, že se otázka při nedostatku místa roluje, že se
+nevrátily mrtvé selektory `.runner` a `.ghost`, a celé měřítko písma: řádky
+s `--tx` na jednom místě pro ročníky 1 až 5, shodu s tabulkou `TX_BY_GRADE`
+v `app.js`, žádný základ pod 12,5 px a žádný dětský text v `--ink-faint`.
+**Velikosti i barvu prochází všechny**, ne podle seznamu dětských selektorů:
+každý výskyt buď násobí `--tx`, nebo stojí na krátkém seznamu výjimek, a
+nepoužitá výjimka je taky chyba. Vypsaný seznam dětských selektorů nové
+pravidlo nikdy neuvidí, a taky neuviděl: `.item .lvl` zůstalo na 10 px
+a `.rail .lap` na 11, obojí pod hranicí, kterou měl ten test hlídat.
 
 ---
 
@@ -1148,6 +1196,23 @@ se na ně `yearOf()`; za dveřmi zůstaly jen obory prvního ročníku a most.
 Druhák tím dveře ztratil úplně, protože celý první ročník opakuje. Napříště to
 hlídá kontrola, že hlavní blok mapy má pro každý ročník aspoň jednu otevřenou
 trať.
+
+**Karty na mapě si sedaly jedna na druhou.** Když písmo dostalo ročníkové
+měřítko a název místa směl mít dva řádky, zůstala výška karty v kódu pevných
+"92 px textu pod náhledem" změřených na jednom telefonu. Karta tím byla
+o 5 až 30 px vyšší než rozestup, ve všech čtyřech šířkách a ve všech ročnících,
+nejhorší u prvňáka, kterému je to nejvíc vidět. Výška se teď sčítá z hodnot
+v CSS, a to z nejhoršího případu a z nejvyššího ze čtyř tvarů karty, takže
+je rozestup v celé mapě stejný; podrobnosti v oddílu 7e. Poučení je ale
+obecnější než ta jedna funkce, a proto to stojí tady: **rozměr, který v kódu
+opisuje CSS, se musí počítat, ne odhadnout, a musí to hlídat test, který si
+tentýž rozměr spočítá nezávisle.** Původní kontrola v `items.test.js` měřila
+obdélníky toutéž hodnotou, ze které se odvozuje rozestup, takže "nic se
+nepřekrývá" platilo z definice a devět měsíců by to tak vydrželo. Test si dnes
+čte `src/styles.css` sám, pro obě měřítka, pro dva až čtyři sloupce a pro
+nejdelší skutečná jména tratí ve všech třech jazycích. Stejný důvod má i
+`TX_BY_GRADE` v `app.js`: kopie hodnot z CSS je v pořádku jen s testem, který
+spadne, jakmile se obě strany rozejdou.
 
 ---
 

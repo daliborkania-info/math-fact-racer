@@ -220,7 +220,7 @@ přesně jako `PEEK`, takže zavření hry i přepnutí hráče mapu zase slož�
    s textem `yearSign` ("3. třída"). Není to tlačítko. Je tam vždycky, když
    jsou dveře, ať už jsou rozbalené, nebo ne, protože právě ona je ten předěl,
    který synovi chyběl; nezapočítává se mezi místa, ale zabírá na cestě půl
-   kroku (`PLACE_STEP / 2`).
+   kroku (`placeBox().step / 2`; do kroku C8 to byla konstanta `PLACE_STEP`).
 4. **Letošní tratě**: `tr.grade === g` plus tratě, které patří každému roku,
    tedy `mix`, `weak` a `school`. Ty dvě první mají v `TRACKS` `grade` 2 a 1
    jen proto, aby prvňák neviděl šampionát; pro účely předělu se berou jako
@@ -499,7 +499,9 @@ v tom duchu.
 
 ## Krok C. Responzivita a písmo podle ročníku — HOTOVO 13. září 2026
 
-**Stav: celý krok je hotový, ve dvou commitech. První: C1, C2, C3 a C5 i se
+**Stav: celý krok je hotový, ve třech commitech; třetí jsou opravy po
+kontrole, viz C8 na konci oddílu, a patří k nim i to, že se výška karty na
+mapě od té chvíle počítá, a ne odhaduje. První: C1, C2, C3 a C5 i se
 společnou částí níže, tedy `layoutClass()`, `data-w` a `data-o` na `<html>`,
 `--appw` a třída `narrow`. Druhý: C4 a C7, tedy `--tx` s `data-grade` na
 `<html>` a šestý testový soubor `tests/style.test.js`. Rozvržení samo se
@@ -618,7 +620,10 @@ procento; dva sloupce mají wobble beze změny a vracejí přesně dnešní polo
 A **letošek začíná od tří sloupců vlastním řádkem** (`pad` v `worldSpots()`),
 protože mezi dvěma kartami v jednom řádku nemá milník kam stoupnout a sedl by
 si na ně; bylo to vidět až na vyrenderované geometrii, ne v testu. Výška mapy
-se počítá z nejnižší karty, ne ze vzorce s `PLACE_STEP`.
+se počítá z nejnižší karty, ne ze vzorce s `PLACE_STEP`. (Vzorec
+`placeHeight(widthPx) = widthPx * 205 / 400 + 92` a obě konstanty `PLACE_H`
+a `PLACE_STEP` níže platily jen do C8; text pod náhledem není 92 px a s
+měřítkem roste, takže se karty překrývaly. Dnešní podobu popisuje C8.)
 
 Dnes dva sloupce, místo 44 % široké s `max-width:205px`, sousedi po 96 px,
 karta 172 px vysoká, spočítané pro 375 px. Na tabletu tím vznikne úzký had
@@ -774,6 +779,77 @@ k tomu slouží. Kterou cestu, říká uživatel.
 Krok C je velký; dělit na dva commity je rozumné: C1 až C3 a C5
 (`Let the game use the whole screen, on its side and on a tablet`), C4 a C7
 (`Give the youngest readers bigger letters`).
+
+### C8. Co našla kontrola kroku C a jak se to spravilo — HOTOVO 13. září 2026
+
+Kontrolní subagent nad oběma commity našel devět věcí, tři z nich blokující.
+Spraveno třetím commitem kroku C (`Keep the map cards clear of one another
+whatever the letters do`).
+
+**Karty na mapě se překrývaly.** `placeHeight()` počítala text pod náhledem
+jako pevných 92 px, jenže od C4 smí mít název dva řádky a všechny velikosti
+násobí `--tx`, které JS vůbec neznal. Naměřeno před opravou: telefon 375 px,
+karta 200 px (prvňák 226) proti rozestupu 192; tablet 768 px karta 238 (263)
+proti 233; desk 1024 px karta 236 (260) proti 230; telefon na boku 812 px
+karta 245 (270) proti 240. Překryv 5 až 30 px, na každém rozměru a v každém
+ročníku. Nově `placeHeight(šířkaPx, tx)` sčítá kartu z hodnot v `styles.css`:
+odsazení a rámeček, náhled v poměru 400 : 205, mezery mezi dětmi prvku a
+řádky textu při nejhorším případu, tedy dvouřádkovém názvu i podtitulku.
+Bere největší ze čtyř tvarů karty (trať s pruhem, zamčená, dveře, trať bez
+pruhu), takže je rozestup v celé mapě stejný. Měřítko zná JS z tabulky
+`TX_BY_GRADE` v `app.js`, která je opisem pěti řádků s `--tx`; `style.test.js`
+hlídá, že se obě kopie shodují, takže R5 platí dál a ladí se v CSS.
+Dvousloupcová mapa si nechala vodorovné polohy byte po bytu (R6), svislý krok
+se zvětšit musel: karta je vyšší než dvojnásobek starých 96 px, a tohle byla
+právě ta chyba. `.place.locked .lockmsg` dostala `-webkit-line-clamp:2` jako
+název a podtitulek, jinak by výška karty nebyla předvídatelná vůbec.
+
+**Test kolizi nechytal.** Okruh 15 v `items.test.js` měřil obdélníky toutéž
+výškou, ze které se odvozuje rozestup, takže "neprotnou se" platilo
+z definice. Nově si výšku počítá sám z `src/styles.css` (řádkování, počty
+řádků, náhled, odsazení), pro obě měřítka, pro dva, tři i čtyři sloupce,
+pro devět šířek okna, pro nejdelší skutečná jména tratí ve všech třech
+jazycích a pro všechny čtyři tvary karty. Ověřeno, že spadne, když se vrátí
+starý vzorec i když se hne řádkování nebo zmizí clamp v CSS.
+
+**Na nízkém displeji se ořízla otázka.** Na 360 × 640 zvedla podlaha klávesy
+`calc(50px * var(--tx))` klávesnici prvňáka z 266 na 296 px a na `.qzone`
+zbylo 122 px proti potřebným 124 až 137. Uděláno obojí, co kontrola nabízela:
+`.qzone` je teď rolovatelná (`overflow-y:auto` a `justify-content:safe center`,
+které starší prohlížeč zahodí a zůstane mu dnešní `center`), což je pojistka,
+aby se nikdy nic neuřízlo, a na nízkém displeji roste podlaha klávesy
+z nižšího základu, `@media (max-height:660px){.key{min-height:calc(44px *
+var(--tx))}}`, takže prvňák má klávesnici vysokou jako všichni ostatní
+(266 px) a na otázku zbude 146 px. Rolování je záchranná síť, nižší základ je
+to, proč po ní není potřeba sahat: k otázce, ke které se musí rolovat, má
+šestileté dítě skoro stejně daleko jako k uříznuté.
+
+**C1 a C4 si odporovaly u klávesnice na šířku** a rozhodlo se ve prospěch
+dítěte: `html[data-o="wide"] .key{min-height:40px}` přebíjelo podlahu podle
+ročníku, takže prvňák měl na šířku klávesu 40 px s číslicí 32,5 px. Nově
+`calc(38px * var(--tx))`, a totéž v `minmax()` řádků mřížky. Základ je 38, ne
+50: na 640 × 360 zabere otázka 117 px a čtyři řady podle svislé podlahy by
+potřebovaly o 10 px víc, než zbývá. Řádky jsou `1fr`, takže podlaha rozhoduje
+jen o tom, jak malá klávesa smí být, ne jak velká bude.
+
+Ostatní nálezy: `placeBox()` počítá šířku z `.world`, tedy `#app` mínus 28 px,
+a když není co změřit, vezme šířku okna, která může být jen větší než `#app`,
+takže krok vyjde s přebytkem vzduchu, nikdy s nedostatkem. Výška mapy se
+počítá ze stejné výšky karty jako rozestup. `.place .nm` a `.sub` mají zpátky
+`text-overflow:ellipsis` a k tomu `overflow-wrap:break-word`, aby se dlouhé
+slovo zalomilo místo uříznutí. Velikosti, které princip "žádný dětský text
+pod 12,5 px a všechno násobí `--tx`" míjely, ho dodržují: `.item .lvl` (10),
+`.rail .lap` (11), `.rail .gap` (12) a `.gamebar .cnt` (13) mají základ
+12,5 a 13, `.milestone`, `.rail .num`, `.h2`, `.finbadge`, `.combo` a
+`.floaty` měřítko násobí. Kontrola ve `style.test.js` se obrátila: projde
+**všechny** `font-size` v souboru a `var(--ink-faint)` a vyžaduje, aby každý
+výskyt buď násobil `--tx`, nebo stál na krátkém seznamu výslovných výjimek,
+což jsou rodičovské obrazovky (včetně výběru hráče, který je v `PARENT_VIEWS`)
+a znaky, které nejsou text, tedy ikony, emoji a fajfka s gumou na klávesnici.
+`layoutClass()` se při `innerWidth` 0 zeptá dokumentu, než sáhne po 375.
+`html[data-grade="5"]{--tx:1}` je v CSS i v `TX_BY_GRADE` předem, ať krok G
+nespustí pátý ročník s tichým pádem na 1. Rozvržení řádků klávesnice na šířku
+přešlo z `.keypad` na `.keypad-pad`, jak říká PROJECT-STATE, oddíl 7.
 
 ---
 

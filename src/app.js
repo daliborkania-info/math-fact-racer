@@ -2492,7 +2492,12 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 function layoutClass(){
   const de = document.documentElement;
   if(!de || !de.dataset) return;
-  const w = window.innerWidth || 375, h = window.innerHeight || 812;
+  /* Some webviews report an innerWidth of 0 on the very first frame. The
+     document element knows its own width by then, so it is asked before
+     the phone sized guess is used; without it the map would be built in
+     two columns on a tablet and only put right by the first resize. */
+  const w = window.innerWidth || de.clientWidth || 375;
+  const h = window.innerHeight || de.clientHeight || 812;
   de.dataset.w = w < 600 ? "phone" : w < 900 ? "tablet" : "desk";
   // a short wide window only pays off from 640 px across: below that the
   // two columns of the race screen would both be too narrow to read
@@ -2506,6 +2511,19 @@ function mapCols(){
   const de = document.documentElement;
   const w = (de && de.dataset && de.dataset.w) || "phone";
   return w === "desk" ? 4 : w === "tablet" ? 3 : 2;
+}
+/* The type scale of the year at the screen, the same table as the five
+   --tx lines in src/styles.css. It is written twice because the map has
+   to know how tall a card is before it is drawn, and a custom property
+   cannot be read without a layout; tests/style.test.js fails if the two
+   copies ever say different things. The stylesheet stays the place to
+   tune them (decision R5): the test catches the drift, so the second copy
+   cannot quietly go stale. */
+const TX_BY_GRADE = {"1": 1.25, "2": 1.12, "3": 1.04, "4": 1, "5": 1};
+function txNow(){
+  const de = document.documentElement;
+  const g = (de && de.dataset && de.dataset.grade) || "";
+  return TX_BY_GRADE[g] || 1;
 }
 
 let view = {name:"players"};
@@ -2592,28 +2610,66 @@ function viewPlayers(){
    found on hub structures reports a drop in felt competence and autonomy
    when the player has to keep passing through the middle. */
 function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] || ""; }
-/* A place is 44 percent wide, so the two columns cannot touch even at
-   the far end of the wobble, and the step is half a card, so two places
-   on the same side never overlap either. Both are checked by the
-   numbers below rather than by looking at it on one phone. */
-const PLACE_STEP = 96;      // vertical distance between two neighbours
-const PLACE_H = 172;        // how tall a place card is, give or take
-/* A wider window gets more columns, and a wider card is a taller card:
-   the preview keeps its 400 : 205 shape and the text under it takes the
-   measured 92 px whatever the width. Only the two column layout has a
-   card of a known height, so only that one can use the constant. */
-function placeHeight(widthPx){ return widthPx * 205 / 400 + 92; }
+/* A place is 44 percent wide in the two column layout, so the two columns
+   cannot touch even at the far end of the wobble, and from three columns
+   up the width follows the count. How far apart they stand vertically is
+   not a constant any more: the card is as tall as its own preview and its
+   own text, and the text grows with the school year. */
+const PLACE_GAP = 20;       // clear air between two cards in one column
+const PLACE_MAX = 205;      // .place max-width, two column layout only
+const WORLD_EDGE = 28;      // .world margin: 0 14px, both sides
+/* How wide the map is drawn, in pixels. The card is a percentage of
+   .world, which is #app less its margins, not of #app itself. Before the
+   first layout there is nothing to measure; then the window is taken,
+   which can only be wider than #app, never narrower, because --appw only
+   caps it. A step that comes out of a guess therefore has too much air
+   rather than too little, and never lands a card on its neighbour. */
+function mapWidth(){
+  const px = (app && app.clientWidth)
+    || (typeof window !== "undefined" && window.innerWidth)
+    || 375;
+  return Math.max(120, px - WORLD_EDGE);
+}
+/* How tall a place card is, in pixels, added up from src/styles.css. It
+   is the worst case of every shape the card takes, so that one step fits
+   the whole map and no card can land on the one below it:
+
+     22           .place padding 9 and border 2, top and bottom
+     preview      .place .thumb, aspect-ratio 400 / 205 of the inner width
+     5 per gap    .place gap, between every pair of children
+     .nm          16px * tx, line-height 1.1, up to two lines
+     .sub         12.5px * tx, line-height 1.25, up to two lines
+     open card    .bar 7px + .foot, min-height 16px or 13px * tx at 1.25
+     locked card  .lockmsg, 12.5px * tx, line-height 1.25, up to two lines
+
+   An open track has four gaps (preview, name, subtitle, bar, foot), a
+   locked one and a door have three. Two lines is what the name really
+   takes: "Šestky a sedmičky", "Sechser und Siebener" and "Was ihr in der
+   Schule macht" do not fit on one even at tx 1, and none of the three
+   elements can take a third line, because the stylesheet clamps them. */
+function placeHeight(widthPx, tx){
+  const s = tx || txNow();
+  const inner = widthPx - 22;
+  const thumb = inner * 205 / 400;
+  const nm   = 2 * 16 * 1.1 * s;
+  const sub  = 2 * 12.5 * 1.25 * s;
+  const foot = Math.max(16, 13 * 1.25 * s);
+  const lock = 2 * 12.5 * 1.25 * s;
+  const open = 4 * 5 + nm + sub + 7 + foot;
+  const shut = 3 * 5 + nm + sub + lock;
+  return 22 + thumb + Math.max(open, shut);
+}
 /* How wide one place is, in percent of the map, and how tall in pixels.
-   Two columns keep the numbers the phone was measured on; from three
-   columns up the width follows the count and the height follows from it.
    The percentages match the widths in the stylesheet, which is where the
-   card is actually sized. */
-function placeBox(cols){
-  if(cols < 3) return {w: 44, h: PLACE_H, step: PLACE_STEP};
-  const w = 100 / cols - 3;
-  const px = ((app && app.clientWidth) || 375) * w / 100;
-  const h = placeHeight(px);
-  return {w, h, step: h + 22};
+   card is actually sized. Two columns alternate sides, so the distance
+   between two neighbours is half the distance between two cards in the
+   same column; from three columns up a step is a row. */
+function placeBox(cols, tx){
+  const c = cols < 3 ? 2 : cols;
+  const w = c === 2 ? 44 : 100 / c - 3;
+  const px = c === 2 ? Math.min(mapWidth() * w / 100, PLACE_MAX) : mapWidth() * w / 100;
+  const h = placeHeight(px, tx);
+  return {w, h, step: c === 2 ? (h + PLACE_GAP) / 2 : h + PLACE_GAP};
 }
 /* gapAt, when given, is the index where this year starts: the road takes
    half a step more there, which is the room the year sign stands in.
@@ -2621,17 +2677,17 @@ function placeBox(cols){
    row, otherwise the places sharing that row would sit at two heights.
    cols defaults to two, so every caller that does not care about the
    width keeps the layout the phone was measured on. */
-function worldSpots(p, n, gapAt, cols){
+function worldSpots(p, n, gapAt, cols, tx){
   const rnd = seedRand("svet-" + (p && p.world ? p.world : "circuit"));
-  const b = placeBox(cols || 2);
+  const b = placeBox(cols || 2, tx);
   const out = [];
   if((cols || 2) < 3){
     for(let i = 0; i < n; i++){
       const wobble = rnd() * 3;
       const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
-      const gap = (gapAt != null && i >= gapAt) ? PLACE_STEP / 2 : 0;
-      const y = 14 + i * PLACE_STEP + gap;
-      out.push({left, y, cx: left + 22, cy: y + PLACE_H / 2});
+      const gap = (gapAt != null && i >= gapAt) ? b.step / 2 : 0;
+      const y = +(14 + i * b.step + gap).toFixed(1);
+      out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
     }
     return out;
   }
@@ -2649,7 +2705,7 @@ function worldSpots(p, n, gapAt, cols){
     // 0.5 to 2.5 of wobble leaves a one percent lane between two columns
     // and keeps the last one half a percent inside the right edge
     const left = c * (100 / cols) + 0.5 + rnd() * 2;
-    const y = 14 + r * b.step + (gapAt != null && i >= gapAt ? b.step / 2 : 0);
+    const y = +(14 + r * b.step + (gapAt != null && i >= gapAt ? b.step / 2 : 0)).toFixed(1);
     out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
   }
   return out;
@@ -2701,9 +2757,12 @@ function viewMap(p){
   const total = nPast + own.length + 1 + (ahead.length ? 1 : 0) + (peeking ? ahead.length : 0);
   const cols = mapCols();
   const spots = worldSpots(p, total, folding ? nPast : null, cols);
-  // the map is as tall as its lowest card, whatever the number of columns
+  /* The map is as tall as the bottom of its lowest card plus the same air
+     that stands between two cards, whatever the number of columns and
+     whatever the type scale; the card height has to be the one the cards
+     were spaced with, or the last row loses the ground under it. */
   const box = placeBox(cols);
-  const height = spots.reduce((m, s) => Math.max(m, s.y), 0) + box.h + 20;
+  const height = Math.round(spots.reduce((m, s) => Math.max(m, s.y), 0) + box.h + PLACE_GAP);
 
   const placeHTML = (tr, spot, kind) => {
     const peek = kind === "peek";

@@ -1,6 +1,6 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 13. září 2026, po krocích A, B0, B a opravě B0b nového plánu
+Poslední aktualizace: 13. září 2026, po krocích A, B0, B, opravě B0b a celém kroku C nového plánu
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
 nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
@@ -12,7 +12,7 @@ a rozdělení prvního ročníku na šest číselných oborů.
 
 **Stav v číslech.** Dvaadvacet tratí ve čtyřech světech, 88 palet prostředí,
 dvě zakázky v dílně, 80 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 19/33), tři jazyky, pět testových souborů.
+třetí 19/33), tři jazyky, šest testových souborů.
 
 **Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
 okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
@@ -65,8 +65,18 @@ důvod padl s opravou B0b, protože násobilka i hodiny jsou otevřené od zač�
 R1 (otevřít staršímu dítěti celé minulé roky) je tedy dnes jen pohodlí navíc
 a čeká na rozhodnutí uživatele.
 
-**Na řadě je krok C**, responzivita a písmo podle ročníku, a dál podle
-`docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
+**Krok C je hotový** (13. září), ve dvou commitech. První dal hře celou plochu:
+rozvržení se rozhoduje v JS a stojí jako `data-w` a `data-o` na `<html>`, závod
+i dílna se na šířku skládají do dvou sloupců, mapa má podle šířky dva, tři nebo
+čtyři sloupce a manifest dovolí obě orientace. Druhý (C4 a C7) přidal měřítko
+písma podle ročníku: jedno `--tx` v CSS, které `render()` zapíná přes
+`data-grade` na `<html>`, prvňák čte o čtvrtinu větší písmo než čtvrťák a žádný
+dětský text nezačíná pod 12,5 px. K tomu šestý testový soubor
+`tests/style.test.js`, který hlídá pravidla CSS textově, protože jsdom rozvržení
+nemá. Viz oddíl 7e.
+
+**Na řadě je krok D**, zbytek vlny A, tedy rodiny na číselné klávesnici, a dál
+podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -615,7 +625,9 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
 zapisuje při startu, v `resize` i v `orientationchange` a `mapCols()` z nich
 odvozuje počet sloupců mapy; podrobnosti v oddílu 7e. Obrazovky o tom vědí jen
 tolik, že mapa si vyžádá `cols` a textové obrazovky mají na `.scr` třídu
-`narrow`.
+`narrow`. Třetí hodnotu, `data-grade`, píše na `<html>` `render()` hned za
+`applyLang()` a je to jediné, co kód o velikosti písma ví; samo měřítko `--tx`
+je v CSS.
 
 **Obrazovka se smí otevřít u konkrétní sekce.** `go(name, {focus:"id"})` po
 vykreslení posune sekci s tím `id` do zorného pole. Používá to dílna, když
@@ -920,19 +932,38 @@ dílna nedostala nic, co by se hýbalo nebo odpočítávalo, klepnutí na místo
 rovnou na trať a zamčené místo zůstává `div`, ne tlačítko. A nic se nesmí
 schovat pod okraj: když se něco nevejde, roluje se.
 
-**Písmo podle ročníku (C4) a `tests/style.test.js` (C7) zatím nejsou.**
+**Písmo roste s tím, jak malé je dítě.** Je to jedno měřítko `--tx` na `<html>`,
+kterým se násobí každá velikost písma v dětské části: `render()` hned za
+`applyLang()` zapíše `data-grade`, a to jen tehdy, když obrazovka patří dítěti
+a nějaký profil existuje; v rodičovské sekci (`PARENT_VIEWS`) i před založením
+prvního hráče je prázdné a `--tx` zůstane 1. Hodnoty jsou **1,25 / 1,12 / 1,04 /
+1,0** pro první až čtvrtý ročník (rozhodnutí R5 v `docs/PLAN.md`), stojí na
+jednom místě v `src/styles.css` hned pod `--appw` a jsou to odhady k ověření na
+dítěti; ladí se tam, ne v kódu. Na `<html>` proto, že spodní listy `.sheet` visí
+na `body` a z `#app` by měřítko nezdědily.
+
+Spolu s měřítkem se zvedly základy, které byly pod hranicí čitelnosti:
+**žádný dětský text nezačíná pod 12,5 px**, což je prvňákovi zhruba 15,6 px.
+Název místa na mapě smí mít dva řádky místo výpustky, protože při 1,25 se
+"Počítání dílků" na jeden nevejde, a barva `--ink-faint` (kontrast 2,6 : 1) se
+na dětský text nepoužívá, zůstává jen na dekoraci; tři místa, která v ní stála
+(`.place .tokc`, `.tokn`, `.counter-empty`), jsou dnes v `--ink-soft`.
+Rodičovská sekce, heatmapa a `.tiny` s `.legend` se nemění, čte je dospělý.
+Hlídá to `tests/style.test.js`, viz oddíl 8.
 
 ---
 
 ## 8. Testy
 
-V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
-`tests/README.md`. Testy načítají sestavený `index.html`, kromě `items.test.js`,
-který skládá zdroje přímo, takže před během je nutné pustit `build.py`.
+V `tests/` je jich šest, spouštějí se přes node, potřebují jen `jsdom`.
+Podrobnosti v `tests/README.md`. Testy načítají sestavený `index.html`, kromě
+`items.test.js`, který skládá zdroje přímo, a `style.test.js`, který zdroje čte
+jako text a jsdom nepotřebuje vůbec; před během je nutné pustit `build.py`.
 
 Po každé změně mechaniky pusť `flow.test.js` a `items.test.js`, po každé změně
 textů `i18n.test.js` a `names.test.js`, po každém doteku datového modelu
-`migration.test.js`. Žádný test nevrací nenulový kód, kontroluje se výskyt `!!`
+`migration.test.js`, po každém doteku `src/styles.css` nebo kostry dokumentu
+`style.test.js`. Žádný test nevrací nenulový kód, kontroluje se výskyt `!!`
 ve výstupu:
 
 ```bash
@@ -988,10 +1019,11 @@ zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má od kroku C 181 kontrol, po kroku B0b jich bylo 175, po kroku
-B0 170 a po kroku A 153. Šest přibylo v kroku C: mapa říká, kolik má sloupců,
-rozvržení stojí na `<html>`, tlačítko Hotovo v dílně má svůj obal a k tomu tři
-kontroly po vědomém přepnutí okna na 1024 × 768. Navíc
+`flow.test.js` má od kroku C 184 kontrol, po kroku B0b jich bylo 175, po kroku
+B0 170 a po kroku A 153. Devět přibylo v kroku C: mapa říká, kolik má sloupců,
+rozvržení stojí na `<html>`, tlačítko Hotovo v dílně má svůj obal, tři kontroly
+po vědomém přepnutí okna na 1024 × 768 a tři na písmo podle ročníku, tedy že
+prvňák má `data-grade="1"`, rodičovská sekce prázdné a čtvrťák `"4"`. Navíc
 předěl ročníků popsaný výše, a už od kroku A vynulování postupu, po kterém
 prvňák zůstane prvňákem a nastavení rodiče se nehne, zatímco krabička, mince
 a medaile jsou pryč, a dva různé chybné počty dílků, které musí dát dva štítky,
@@ -1002,6 +1034,14 @@ změny nikdo neviděl.
 `migration.test.js` nabootuje zamrazené profily ze starších verzí a hlídá
 pravidlo z oddílu 3, tedy že se nic neztratilo. Fixtury jsou v
 `tests/fixtures/legacy-profiles.json` a jen se přidávají, nikdy neupravují.
+`style.test.js` je od kroku C šestý soubor a jediný bez jsdomu: čte
+`src/styles.css`, `src/index.template.html` a manifest jako text a hlídá to,
+co se jinak pozná jen na obrázku. Tedy `vh` před `dvh`, strop výšky spodního
+listu, `orientation` `any`, mřížku závodu na šířku, že se nevrátily mrtvé
+selektory `.runner` a `.ghost`, a celé měřítko písma: pět řádků s `--tx` na
+jednom místě, každá dětská velikost ze seznamu z C4 násobená `--tx`, žádný
+základ pod 12,5 px a žádný dětský text v `--ink-faint`. Seznam selektorů si
+nese sám, aby si všiml nového pravidla, které na ročník zapomnělo.
 
 ---
 
@@ -1543,13 +1583,14 @@ s dnešním úkolem.
 
 **Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
 a 4d. Z vlny A jsou hotové tři položky ze sedmi. Revize ze 13. září sepsala
-`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava B0b a z kroku
-C části C1, C2, C3 a C5 (responzivita), nejbližší je zbytek kroku C, tedy C4
-(písmo podle ročníku) a C7 (nový `tests/style.test.js`). Z rozhodnutí
+`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava B0b a celý
+krok C (responzivita ve dvou commitech, druhý s písmem podle ročníku a šestým
+testovým souborem), nejbližší je krok D, tedy zbytek vlny A, čtyři rodiny na
+číselné klávesnici, každá vlastní subagent a vlastní commit. Z rozhodnutí
 v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
-nastavení) a R6 (tři sloupce mapy na tabletu, čtyři od 900 px), všechna podle
-doporučení. R1 (žebřík minulých let) je odložené a po B0b už není naléhavé, viz
-hlavička; R5 (měřítka písma) se rozhoduje v C4 a plán doporučuje ano.
+nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px) a R5 (měřítka
+písma 1,25 / 1,12 / 1,04 / 1,0), všechna podle doporučení. R1 (žebřík minulých
+let) je odložené a po B0b už není naléhavé, viz hlavička.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se
@@ -1617,7 +1658,7 @@ nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se kro
 > `docs/PLAN.md`. **`src/app.js` ani testy nečti celé**, do zdrojů se dívej
 > jen přes grep. Každý krok zadej jednomu subagentovi přesně podle oddílu 10
 > plánu (šablona zadání, rozdělení kroků, kontrolní subagent); po jeho návratu
-> sám pusť `python3 build.py` a všech pět testů z `tests/`, prohlédni
+> sám pusť `python3 build.py` a všech šest testů z `tests/`, prohlédni
 > `git log -1 --stat` a teprve pak zadej další krok. Po každém hotovém kroku
 > přepiš v tomhle souboru hlavičku "Kde se přestalo" jednou větou, aby šlo
 > po případném přerušení navázat.
@@ -1668,6 +1709,6 @@ nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se kro
 > tratí a klíčů, oddíl 12, kontrolní seznam v oddílu 14 s novými čísly,
 > prompt pro další session, kde bude dalším úkolem krok G a rozhodnutí R1), ověř, že
 > `docs/PLAN.md` má u každého kroku HOTOVO nebo ODLOŽENO s datem, pusť
-> všech pět testů naposledy a napiš mi česky, stručně: seznam commitů
+> všech šest testů naposledy a napiš mi česky, stručně: seznam commitů
 > k pushnutí v pořadí, která rozhodnutí padla a proč, co je odložené a proč,
 > a co mám prohlédnout sám (obrazovky z kroku C, texty pro děti).

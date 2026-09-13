@@ -461,6 +461,10 @@ click(q('[data-act="map"]')); click(q('[data-act="players"]'));
 click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Prvňák';
 click(qa('[data-gr]').find(b=>b.dataset.gr==='1')); click(q('[data-go]'));
 const prvni=()=>DBg().profiles.find(x=>x.name==='Prvňák');
+// pismo roste s tim, jak male je dite: obrazovka rekne jen rocnik,
+// meritko --tx uz je v CSS
+ok('prvnak dostal nejvetsi pismo', d.documentElement.dataset.grade==='1',
+   'data-grade '+d.documentElement.dataset.grade);
 ok('prvnak ma na mape jen ucivo sveho rocniku',
    /Do dvaceti/.test(txt()) && !/Rozjezd|Hodiny|Do tisíce/.test(txt()), txt().slice(0,90));
 const mistPrvnak=qa('.place:not(.peekdoor)').length;
@@ -526,6 +530,8 @@ click(q('[data-act="shop"]')); click(q('[data-act="map"]'));
 click(q('[data-act="gate"]'));
 d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));
 ok('rodic ma prepinac rocniku', qa('[data-act="gradeset"]').length===4 && /Ročník/.test(txt()));
+ok('rodicovska sekce pismo nezvetsuje', d.documentElement.dataset.grade==='',
+   'data-grade "'+d.documentElement.dataset.grade+'"');
 click(qa('[data-act="gradeset"]').find(b=>b.dataset.gr==='2'));
 ok('rocnik prepnut', prvni().grade===2);
 click(q('[data-act="map"]'));
@@ -595,6 +601,8 @@ console.log('--- ctvrty rocnik se neskláda ---');
 ev('go("map")'); click(q('[data-act="players"]'));
 click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Čtvrťák';
 click(qa('[data-gr]').find(b=>b.dataset.gr==='4')); click(q('[data-go]'));
+ok('ctvrtak cte pismo v zakladni velikosti', d.documentElement.dataset.grade==='4',
+   'data-grade '+d.documentElement.dataset.grade);
 ok('ctvrtak nema dvere zpatky ani predel',
    qa('.place.backdoor').length===0 && qa('.milestone').length===0);
 ok('ctvrtak vidi celou mapu jako driv',

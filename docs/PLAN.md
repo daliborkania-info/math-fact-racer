@@ -497,11 +497,13 @@ v tom duchu.
 
 ---
 
-## Krok C. Responzivita a písmo podle ročníku
+## Krok C. Responzivita a písmo podle ročníku — HOTOVO 13. září 2026
 
-**Stav: C1, C2, C3 a C5 jsou HOTOVÉ 13. září 2026 i se společnou částí níže,
-tedy `layoutClass()`, `data-w` a `data-o` na `<html>`, `--appw` a třída
-`narrow`. C4 a C7 zbývají a jsou to samostatný commit.**
+**Stav: celý krok je hotový, ve dvou commitech. První: C1, C2, C3 a C5 i se
+společnou částí níže, tedy `layoutClass()`, `data-w` a `data-o` na `<html>`,
+`--appw` a třída `narrow`. Druhý: C4 a C7, tedy `--tx` s `data-grade` na
+`<html>` a šestý testový soubor `tests/style.test.js`. Rozvržení samo se
+v prohlížeči prohlíží podle seznamu rozměrů v C7.**
 
 Cíl: hra funguje na telefonu i tabletu, na výšku i na šířku, využívá plochu
 a písmo roste s tím, jak malé je dítě. Nic z toho nesahá na mechaniku ani na
@@ -649,7 +651,18 @@ a že žádné nevyjede přes 100 % šířky; pro `cols === 2` navíc porovnat v
 s dnešními hodnotami, které si test zapíše před změnou (osm míst, zaokrouhleno
 na desetiny).
 
-### C4. Písmo podle ročníku
+### C4. Písmo podle ročníku — HOTOVO 13. září 2026 (R5 podle doporučení)
+
+Proti plánu se upřesnila jedna hodnota a dvě barvy. `.stat .l` má základ 12,5 px,
+ne 12: tabulka u něj psala 12, ale pravidlo "žádný dětský text pod 12,5 px" je
+nadřazené a jinak by test z C7 musel mít pro jediný řádek výjimku. A protože
+`--ink-faint` se na dětský text přestal používat, přešly do `--ink-soft` vedle
+`.place .tokc` i `.tokn` a `.counter-empty`, což jsou zbylá dvě dětská místa,
+která v té barvě stála; `.tiny` a `.legend` v rodičovské sekci zůstaly. Výška
+`.answerbox` a velikosti `.key.act` a `.key.del` se nenásobí, v tabulce nejsou.
+Pozor na `.muted`: selektor z tabulky je `.scr:not(.narrow) .muted`, takže na
+výsledku, výsledku zakázky a pokladech, které jsou `narrow`, zůstává 13,5 px
+bez měřítka; kdyby to dítěti vadilo, je to jeden selektor.
 
 Princip: jedno měřítko `--tx` na `<html>`, které násobí každou velikost písma
 v dětské části. Rodičovská část zůstává na 1. `render()` po `applyLang()`
@@ -725,7 +738,15 @@ jediným vstupem závodu. Dílna nedostává žádný prvek, který by se hýbal
 odpočítával. Mapa zůstává klepnutím rovnou na trať. `.place.locked` zůstává
 `div`, ne tlačítko. Focus ring `button:focus-visible` zůstává.
 
-### C7. Testy
+### C7. Testy — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo, že kontrola mrtvých selektorů musí hledat `.runner`
+a `.ghost` jen jako samostatnou třídu, jinak by ji shodilo živé `.btn.ghost`,
+a že `style.test.js` kromě velikostí ověřuje i to, že každá dětská velikost
+opravdu násobí `--tx` a že pět řádků s `--tx` stojí na jednom místě; bez toho
+by seznam hlídal jen čísla, ne princip. Kontroly `data-cols` a `jobgo` ve
+`flow.test.js` přibyly už v prvním commitu kroku C, přidaly se tedy jen tři na
+`data-grade`, celkem 184 kontrol.
 
 jsdom nemá layout, takže rozvržení se ověřuje na obrázcích a pravidla se
 hlídají textově. Nový soubor `tests/style.test.js`, čistý node bez jsdom, čte
@@ -1024,9 +1045,11 @@ v předchozím plánu; `inverse_check` se do varianty skládá, viz D4.
 **R4. Poloha řetězce na mapě.** Před `beyond`, v pořadí knihy. Alternativa
 za `round`, aby se pořadí hotových tratí nehnulo. Doporučení: před `beyond`.
 
-**R5. Měřítka písma.** 1,25 / 1,12 / 1,04 / 1,0 pro první až čtvrtý ročník.
+**R5. Měřítka písma. Rozhodnuto 13. září 2026 podle doporučení, hotovo v C4.**
+1,25 / 1,12 / 1,04 / 1,0 pro první až čtvrtý ročník.
 Jsou to odhady k ověření na dítěti; první úprava má být na jednom místě
-v CSS, ne v kódu.
+v CSS, ne v kódu, a je jí pět řádků s `--tx` v `src/styles.css` hned pod
+`--appw`.
 
 **R6. Mapa na tabletu. Rozhodnuto 13. září 2026 podle doporučení, hotovo v C3.**
 Tři sloupce na tabletu, čtyři od 900 px, hadovitě.
@@ -1084,7 +1107,7 @@ případně se zeptá uživatele; subagent plán nemění.
 > plánu nečti. Ze `src/app.js` čti jen funkce, které krok jmenuje, najdi je
 > přes grep. Implementuj přesně to, co krok říká, nic navíc a nic z jiných
 > kroků. Zdroje v `src/`, nikdy `index.html`. Po každé změně `python3 build.py`
-> a `node tests/items.test.js | grep '  !!  '`; před commitem všech pět testů
+> a `node tests/items.test.js | grep '  !!  '`; před commitem všech šest testů
 > z `tests/`, čisté je bez `!!`. Nové chování má vlastní kontrolu v testu.
 > Když kreslíš nebo měníš vzhled, vyrenderuj si to (postup v PROJECT-STATE,
 > oddíl 2). Aktualizuj dokumentaci podle oddílu 8 plánu a krok označ v plánu

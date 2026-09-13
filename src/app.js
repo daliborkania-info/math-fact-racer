@@ -2514,6 +2514,16 @@ function go(name, data){ view = Object.assign({name}, data || {}); render(); }
 function render(){
   const p = P();
   applyLang();
+  /* How big the letters are on this screen. The scale itself lives in the
+     stylesheet as --tx; all the screen says is whose eyes are reading it.
+     It goes on <html> rather than on #app, because the bottom sheets are
+     pinned to <body> and would not inherit it from #app. The parent
+     section keeps the plain size, and so does a screen drawn before any
+     profile exists. */
+  try{
+    const parent = PARENT_VIEWS.indexOf(view.name) >= 0;
+    document.documentElement.dataset.grade = (parent || !p) ? "" : String(gradeOf(p));
+  }catch(e){}
   if(p && rememberUnlocks(p)) save();
   if(view.name !== "game") stopAnim();
   if(view.name === "setpin"){ app.innerHTML = viewSetPin(); return; }

@@ -1,7 +1,8 @@
 # Tests
 
-Headless regression tests. They load the built `index.html` into jsdom and drive
-the real interface, so they catch broken rendering as well as broken logic.
+Headless regression tests. Most of them load the built `index.html` into jsdom and
+drive the real interface, so they catch broken rendering as well as broken logic;
+`style.test.js` is the exception and reads the sources as text.
 
 ```bash
 npm install jsdom      # the only dependency, not committed
@@ -17,6 +18,7 @@ for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 | `migration.test.js` | Boots frozen profiles saved by older versions and proves nothing was lost: no field gone, no number smaller, no track closed that used to be open, no chapter moved forward. Reads `fixtures/legacy-profiles.json` |
 | `i18n.test.js` | Dictionary completeness across cs/en/de and a full race in each language |
 | `names.test.js` | Racer names render in every language in both the pre-race picker and the garage |
+| `style.test.js` | The rules the pictures of step C were paid for, checked as text in `src/styles.css`, `src/index.template.html` and the manifest: `vh` before `dvh`, a ceiling on the bottom sheet, `orientation: any`, the race grid for a window on its side, no dead `.runner` or `.ghost` selector, and the type scale, that is the four `--tx` values living in one place, every child facing size multiplying `--tx`, none of them starting below 12.5 px, and no child text left in the faintest ink. Plain node: no jsdom, no build |
 
 **A check that fires once in twenty runs is not a check.** The shuffle that keeps
 the same fact from being asked twice in a row is tested by building five hundred
@@ -33,9 +35,12 @@ the number has to be looked at and confirmed, not quietly recomputed.
 **Layout is checked in pictures, not in jsdom.** jsdom has no layout at all, so
 nothing here can tell whether the keypad fits under the question. What the tests
 can hold on to is the arithmetic behind the layout: `worldSpots()` returns
-rectangles, and those are checked for overlap and for staying inside the width.
-Everything else about the way a screen looks is checked on rendered images and in
-a real browser at the sizes listed in `docs/PLAN.md`, step C.
+rectangles, and those are checked for overlap and for staying inside the width,
+and the rules themselves, which `style.test.js` reads as text. Everything else
+about the way a screen looks is checked on rendered images and in a real browser
+at the sizes listed in `docs/PLAN.md`, step C. The type scale needs a browser
+too: a test can say that every child facing size multiplies `--tx`, not that the
+larger letters still fit on the card.
 
 A run is clean when no line contains `!!`. The tests print in Czech because that
 is the working language of the project; the code and comments are English.
@@ -46,7 +51,8 @@ empty. `flow.test.js` and `names.test.js` were both doing that until step A,
 each stuck on a step the interface no longer has. Look at the exit status and at
 how many `OK` lines came out, not only at the absence of `!!`.
 
-How long they take: `items.test.js` runs in about a second and is the one to
+How long they take: `style.test.js` is instant and needs neither jsdom nor a
+build; `items.test.js` runs in about a second and is the one to
 run after every change to the engine; `names.test.js` a few seconds;
 `migration.test.js` under ten; `i18n.test.js` and `flow.test.js` about a
 minute each, because they drive whole games through jsdom. Run those two

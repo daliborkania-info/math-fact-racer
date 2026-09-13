@@ -782,6 +782,7 @@ cs: {
   trk_beyond: "Za násobilkou",  trk_beyonds: "velké násobení a dělení",
   trk_round: "Zaokrouhlování",  trk_rounds: "na desítky a na stovky",
   trk_chain: "Řetězec",         trk_chains: "tři čísla za sebou, plus a minus",
+  trk_ops: "Co dřív",           trk_opss: "krát a děleno jdou první",
   trk_a3: "Do tří",             trk_a3s: "plus a minus do 3",
   trk_a5: "Do pěti",            trk_a5s: "plus a minus do 5",
   trk_a7: "Do sedmi",           trk_a7s: "plus a minus do 7",
@@ -1085,6 +1086,7 @@ en: {
   trk_beyond: "Past the tables", trk_beyonds: "big multiplying and dividing",
   trk_round: "Rounding",       trk_rounds: "to tens and to hundreds",
   trk_chain: "Chains",         trk_chains: "three numbers in a row, plus and minus",
+  trk_ops: "What first",       trk_opss: "times and divide go first",
   trk_a3: "Up to three",        trk_a3s: "adding and taking away to 3",
   trk_a5: "Up to five",         trk_a5s: "adding and taking away to 5",
   trk_a7: "Up to seven",        trk_a7s: "adding and taking away to 7",
@@ -1379,6 +1381,7 @@ de: {
   trk_beyond: "Hinter dem Einmaleins", trk_beyonds: "großes Mal und Geteilt",
   trk_round: "Runden",          trk_rounds: "auf Zehner und Hunderter",
   trk_chain: "Kettenrechnen",   trk_chains: "drei Zahlen hintereinander, plus und minus",
+  trk_ops: "Was zuerst",        trk_opss: "Mal und Geteilt gehen vor",
   trk_a3: "Bis drei",           trk_a3s: "plus und minus bis 3",
   trk_a5: "Bis fünf",           trk_a5s: "plus und minus bis 5",
   trk_a7: "Bis sieben",         trk_a7s: "plus und minus bis 7",
@@ -1656,6 +1659,9 @@ const LANGS = [["cs", "Čeština"], ["en", "English"], ["de", "Deutsch"]];
  *                                 tens of a three digit number, hundreds
  *   chain [bucket ids]            1..3, three numbers and two signs,
  *                                 within twenty, whole tens, the hundred
+ *   ops   [bucket ids]            1..4, which operation goes first:
+ *                                 plain and then bracketed, first inside
+ *                                 a hundred and then inside a thousand
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
  *   shop  [job ids]               workshop jobs, for material that is
@@ -1671,6 +1677,7 @@ const ALL_C = ["c1","c2","c3","c4","c5","c6"];
 const ALL_K = ["b1","b2","b3","b4","b5","b6"];
 const ALL_X = ["1","2","3","4"];
 const ALL_O = ["o1","o2","o3"];
+const ALL_Z = ["1","2","3","4"];
 
 const CURRICULA = [
   {
@@ -1775,7 +1782,9 @@ const CURRICULA = [
       {n:10, name:"S přechodem přes základ 10",           src:"7. díl, s. 24–27", pool:{as100:["h2","h5"]}},
       {n:11, name:"Sčítání a odčítání více čísel",        src:"7. díl, s. 28–29", pool:{chain:["1","2","3"]}},
       {n:12, name:"Opakování do sta",                     src:"7. díl, s. 30–31", pool:{as100:ALL_H}},
-      {n:13, name:"Početní operace se závorkami",         src:"7. díl, s. 32–34", pool:null},
+      // the seventh part stays inside a hundred, so only the two buckets
+      // that do; the eighth part takes the same skill past it, chapter 30
+      {n:13, name:"Početní operace se závorkami",         src:"7. díl, s. 32–34", pool:{ops:["1","2"]}},
       // the seventh part stays inside a hundred, so only the first two
       // buckets; the eighth part takes the same skill past it, chapter 31
       {n:14, name:"Násobení mimo rozsah malé násobilky",  src:"7. díl, s. 34–37", pool:{multBeyond:["1","2"]}},
@@ -1795,7 +1804,7 @@ const CURRICULA = [
       {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35", pool:null},
       {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39", pool:null},
       {n:29, name:"Převody jednotek",                     src:"8. díl, s. 38–41", pool:null},
-      {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:null},
+      {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:{ops:ALL_Z}},
       {n:31, name:"Mimo rozsah malé násobilky do tisíce", src:"8. díl, s. 42–47",
              pool:{multBeyond:ALL_X, divBeyond:ALL_X}},
       {n:32, name:"Zlomky a porovnávání zlomků",          src:"8. díl, s. 45–47", pool:null},
@@ -2123,6 +2132,29 @@ const chainKeys = ids => ids.map(b => "q" + b);
 // the four patterns a pair of signs can take, drawn evenly
 const Q_SIGNS = ["++", "+-", "-+", "--"];
 
+/* Which of two operations is done first. Chapter 13 of the seventh part
+   is the one without a thousand in sight, chapter 30 of the eighth part
+   comes back to it with bigger numbers, so the four buckets run along
+   two axes: brackets or none, and within a hundred or within a
+   thousand.
+   Multiplying and dividing stay inside the small times table and every
+   division comes out even. The track opens on the table alone, and
+   nothing in the game has taught a child 360 : 4 yet; that is the
+   `tens` family, which is not built. One consequence is worth writing
+   down, because it is why the fourth bucket looks different from the
+   second: an expression whose outer operation is × or : cannot leave
+   the hundred while the table is the limit, so the fourth bucket grows
+   the range on the adding side and its brackets are the kind that
+   really change the answer, a - (b + c). Read left to right that line
+   comes out differently, which is the whole lesson. */
+const Z_BUCKETS = [
+  {id:"1", label:"no brackets, within a hundred"},    // 4 + 3 × 5
+  {id:"2", label:"brackets, within a hundred"},       // (4 + 3) × 5
+  {id:"3", label:"no brackets, within a thousand"},   // 300 + 7 × 8
+  {id:"4", label:"brackets, within a thousand"}       // 500 - (40 + 30)
+];
+const opsKeys = ids => ids.map(b => "z" + b);
+
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
   {id:"c1", mins:[0]},                            // whole hours
@@ -2201,6 +2233,9 @@ const TRACKS = [
   // tables is chapter 14, so on the map it comes first: the road runs in
   // the order of the book
   {id:"chain", op:"chain",                                env:"marsh",    grade:3},
+  // which operation goes first is chapter 13, so it stands between the
+  // chain of three numbers and multiplying past the tables
+  {id:"ops",  op:"ops",                                   env:"amethyst", grade:3},
   {id:"beyond",op:"beyond",                               env:"savanna",  grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
@@ -2297,6 +2332,7 @@ function poolKeys(spec){
   if(spec.divBeyond)  out.push(...spec.divBeyond.map(b => "xd" + b));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
+  if(spec.ops) out.push(...opsKeys(spec.ops));
   if(spec.clock) out.push(...spec.clock);
   return [...new Set(out)];
 }
@@ -2337,7 +2373,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxoq";
+const FAMILY_HEADS = "pnckxoqz";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -2386,6 +2422,7 @@ function trackKeys(p, tr){
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.map(b => b.id));
+  if(tr.op === "ops")   return opsKeys(Z_BUCKETS.map(b => b.id));
   if(tr.op === "clock") return clockKeys();
   return [];
 }
@@ -2413,6 +2450,9 @@ function beyondStage(p){ return stageIndex(p, i => beyondKeys([X_BUCKETS[i].id])
 function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
 // which range the chain of three numbers is being practised in
 function chainStage(p){ return stageIndex(p, i => chainKeys([Q_BUCKETS[i].id]), Q_BUCKETS.length); }
+// how far the order of operations has got: brackets come after the
+// plain line, and the thousand after the hundred
+function opsStage(p){ return stageIndex(p, i => opsKeys([Z_BUCKETS[i].id]), Z_BUCKETS.length); }
 /* What a track would actually serve right now. A staged track holds
    back the levels the child has not reached yet, and the championship
    has to respect that, otherwise it hands out material that the track
@@ -2428,6 +2468,7 @@ function reachedKeys(p, tr){
   if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.slice(0, chainStage(p) + 1).map(b => b.id));
+  if(tr.op === "ops") return opsKeys(Z_BUCKETS.slice(0, opsStage(p) + 1).map(b => b.id));
   return trackKeys(p, tr);
 }
 function trackProgress(p, tr){
@@ -2532,6 +2573,10 @@ function unlockState(p, tr){
     // buckets within a hundred, so it stands on the hundred exactly as
     // rounding does
     case "chain": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
+    // knowing which operation goes first is only worth anything once the
+    // multiplying itself is fluent, so this one hangs on the whole table
+    // rather than on the hundred
+    case "ops": return (m("t5") >= .6 || many("t5")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_t5"))};
     // the hundred is built on being able to cross a ten, not merely on
     // having finished the first year's ranges
     case "a100": return (m("bridge") >= .6 || many("bridge")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_bridge"))};
@@ -2586,6 +2631,7 @@ function rawItem(key){
   if(head === "x") return beyondItem(key);
   if(head === "o") return roundItem(key);
   if(head === "q") return chainItem(key);
+  if(head === "z") return opsItem(key);
   if(head === "c") return clockItem(key);
   return {key, text:"1 + 1", answer:2, kind:"add"};
 }
@@ -2770,6 +2816,105 @@ function chainTriple(b, sg){
   return [a, s1, y, s2, z];
 }
 
+/* Which operation goes first. Every line here is built by construction:
+   the multiplying or dividing half is drawn first, and the number it is
+   joined to comes out of a range that already holds the bucket, so
+   nothing is trimmed afterwards, no step falls below zero and no draw
+   has to be thrown away and repeated.
+   Only the last two buckets can answer in four digits, so only they say
+   so; the first two live under a hundred. */
+function opsItem(key){
+  const b = key.slice(1);
+  const e = b === "1" ? opsPlain(100)
+          : b === "2" ? opsBracket()
+          : b === "3" ? opsPlain(1000)
+          : opsBracketPair();
+  const it = {key, kind:"ops", text: e.text, answer: e.answer};
+  if(b === "3" || b === "4") it.maxLen = 4;
+  return it;
+}
+/* One multiplication or division out of the small times table, worth at
+   most `cap`. Dividing is the same fact read backwards, so it is built
+   from the quotient and the divisor and can never leave a remainder.
+   Neither half is ever times one: a child gains nothing from 7 × 1 and
+   the line would stop being about the order at all. */
+function opsFact(cap){
+  if(Math.random() < .5){
+    const x = ri(2, Math.min(10, Math.floor(cap / 2)));
+    const y = ri(2, Math.min(10, Math.floor(cap / x)));
+    return {text: x + " × " + y, value: x * y};
+  }
+  const q = ri(2, Math.min(10, cap));
+  const d = ri(2, 10);
+  return {text: (q * d) + " : " + d, value: q};
+}
+/* A line without brackets: a plain number and a table fact, in either
+   order. Within a hundred the plain number is anything that leaves room
+   for the fact; within a thousand it is a whole ten in the hundreds and
+   leads the line, which is how the eighth part writes these. */
+function opsPlain(top){
+  const f = opsFact(top === 100 ? 90 : 100);
+  const v = f.value;
+  if(top === 100){
+    switch(ri(0, 3)){
+      case 0:  { const a = ri(1, 100 - v); return {text: a + " + " + f.text, answer: a + v}; }
+      case 1:  { const a = ri(1, 100 - v); return {text: f.text + " + " + a, answer: v + a}; }
+      case 2:  { const a = ri(v, 100);     return {text: a + " - " + f.text, answer: a - v}; }
+      default: { const a = ri(1, v);       return {text: f.text + " - " + a, answer: v - a}; }
+    }
+  }
+  if(Math.random() < .5){
+    const a = ri(10, Math.floor((1000 - v) / 10)) * 10;
+    return {text: a + " + " + f.text, answer: a + v};
+  }
+  const a = ri(Math.max(10, Math.ceil(v / 10)), 90) * 10;
+  return {text: a + " - " + f.text, answer: a - v};
+}
+/* A line whose brackets are done first and then multiplied or divided,
+   all of it inside a hundred. The value inside the brackets is drawn
+   before it is split into two terms, because it is that value the outer
+   operation has to afford: a sum of ten can be multiplied by anything up
+   to ten, and a bracket that is to be divided has to be a multiple of
+   the divisor. */
+function opsBracket(){
+  const minus = Math.random() < .5;
+  let s, tail, answer;
+  if(Math.random() < .5){                     // (a ± b) : c, always even
+    const q = ri(2, 10);
+    const d = ri(2, Math.min(10, Math.floor((minus ? 90 : 100) / q)));
+    s = q * d; tail = " : " + d; answer = q;
+  } else {                                    // (a ± b) × c, inside the table
+    s = ri(2, 10);
+    const c = ri(2, Math.min(10, Math.floor(100 / s)));
+    tail = " × " + c; answer = s * c;
+  }
+  if(minus){
+    // the bracket is a subtraction, so the first term is the value plus
+    // whatever is taken away again; a minus bucket keeps the value under
+    // ninety so that first term still fits in two digits
+    const b = ri(1, Math.min(9, 100 - s));
+    return {text: "(" + (s + b) + " - " + b + ")" + tail, answer};
+  }
+  const a = ri(1, s - 1);
+  return {text: "(" + a + " + " + (s - a) + ")" + tail, answer};
+}
+/* Brackets inside a thousand. Here they stand in front of an adding or
+   taking away, because with the table as the ceiling an outer × or :
+   could never reach past a hundred, and a bracket that changes nothing
+   teaches nothing: read left to right, both of these lines come out
+   differently, which is exactly what the child is being asked to
+   notice. */
+function opsBracketPair(){
+  if(Math.random() < .5){
+    const b = ri(11, 89), c = ri(11, 89);
+    const a = ri(Math.max(10, Math.ceil((b + c) / 10)), 90) * 10;
+    return {text: a + " - (" + b + " + " + c + ")", answer: a - b - c};
+  }
+  const b = ri(21, 89), c = ri(11, b - 10);
+  const a = ri(10, 90) * 10;
+  return {text: a + " - (" + b + " - " + c + ")", answer: a - (b - c)};
+}
+
 /* The answer is the time as a digital watch shows it, typed on the same
    keypad as everything else: 7:45 is keyed 745 and 19:45 is keyed 1945,
    so hour times a hundred plus minutes is a single whole number and
@@ -2948,6 +3093,10 @@ function buildRun(p, tr){
     const qi = chainStage(p);
     const review = chainKeys(Q_BUCKETS.slice(0, qi).map(b => b.id));
     keys = focusAndReview(p, chainKeys([Q_BUCKETS[qi].id]), review, n, 2);
+  } else if(tr.op === "ops"){
+    const zi = opsStage(p);
+    const review = opsKeys(Z_BUCKETS.slice(0, zi).map(b => b.id));
+    keys = focusAndReview(p, opsKeys([Z_BUCKETS[zi].id]), review, n, 2);
   } else if(tr.op === "clock"){
     const ci = clockStage(p);
     keys = focusAndReview(p, [C_BUCKETS[ci].id], C_BUCKETS.slice(0, ci).map(b => b.id), n, 1);
@@ -3260,7 +3409,12 @@ function thresholds(p, item){
   // a chain is two operations where every other family has one, so it
   // gets twice the allowance of a plain sum; forgetting this is the one
   // thing in a new family that goes wrong quietly
+  // deciding which half of the line goes first and then doing both of
+  // them is the longest piece of thinking in the game so far, brackets
+  // included, so it gets a little more room than a chain of plus and
+  // minus does
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "ops" ? 2.4
                : item.kind === "chain" ? 2.0
                : item.kind === "round" ? 2.0
                : item.kind === "clock" ? 2.4
@@ -3569,6 +3723,12 @@ const ENVS = Object.assign({
   // coastline uses. Darker than the school track's mint on purpose, or
   // the two would read as the same place on a thumbnail.
   marsh:  pal(170, 150, 52, "drop"),
+  // A violet plateau for the circuit. The green end of the circuit is
+  // full (meadow, forest, savanna, marsh), and a yellow green ground
+  // read as one more field on a thumbnail; the circuit is the world
+  // that already has a pink clock town and a purple city, so a dusky
+  // violet belongs there and is unmistakable next to either of them.
+  amethyst: pal(272, 285, 44, "crystal", {sat:30}),
   dunes:  pal( 46,  90, 72, "shell"),
   shore:  pal( 38, 190, 76, "shell"),
   palms:  pal(105, 150, 58, "leaf"),
@@ -3601,6 +3761,9 @@ const ENVS = Object.assign({
   tr_mist:   pal(215, 225, 44, "drop",   {sat:16}),
   tr_garden: pal(120, 100, 55, "flower"),
   tr_reeds:  pal(150, 130, 58, "leaf"),
+  // the one khaki hollow among two dozen greens, darker and yellower
+  // than the birch wood and greener than the stubble field
+  tr_hollow: pal( 70,  95, 50, "stone"),
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
@@ -3626,6 +3789,9 @@ const ENVS = Object.assign({
   sk_fog:    pal(212, 218, 58, "drop",    {h2:216, l2:81, sat:22}),
   sk_kite:   pal(200, 140, 52, "leaf",    {h2:150, l2:79}),
   sk_haze:   pal(204, 170, 60, "drop",    {h2:160, l2:82}),
+  // a deeper blue than the rest of the sky, so it does not read as the
+  // grey of the dust; the fresh green horizon is what names the place
+  sk_gate:   pal(214, 110, 48, "leaf",    {h2: 96, l2:78, sat:56}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
   dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
@@ -3652,7 +3818,10 @@ const ENVS = Object.assign({
   // a shallow: the floor is close enough to the surface that the water
   // still colours it, so it is a muted green blue rather than the grass
   // green the first draft gave it, which read as a lawn under water
-  dp_shoal:  pal(188, 150, 62, "shell",   {h2:158, l2:52, sat:38})
+  dp_shoal:  pal(188, 150, 62, "shell",   {h2:158, l2:52, sat:38}),
+  // water above and a bed of yellow green weed below, which is the one
+  // floor colour the deep has not used yet
+  dp_weed:   pal(194,  84, 62, "leaf",    {h2: 84, l2:38})
 });
 
 /* --- worlds ---
@@ -3672,21 +3841,21 @@ const WORLDS = [
    env:{a3:"tr_moss", a5:"tr_ferns", a7:"tr_birch", a10:"tr_clearing", a15:"tr_creek",
         a20:"tr_brook", bridge:"tr_log",
         t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
-        d1:"tr_burrow", chain:"tr_reeds", beyond:"tr_field", round:"tr_quarry",
+        d1:"tr_burrow", chain:"tr_reeds", ops:"tr_hollow", beyond:"tr_field", round:"tr_quarry",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
    env:{a3:"sk_meadowair", a5:"sk_hilltop", a7:"sk_updraft", a10:"sk_first", a15:"sk_flock",
         a20:"sk_breeze", bridge:"sk_arch",
         t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
-        d1:"sk_void", chain:"sk_haze", beyond:"sk_dust", round:"sk_storm",
+        d1:"sk_void", chain:"sk_haze", ops:"sk_gate", beyond:"sk_dust", round:"sk_storm",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
    env:{a3:"dp_pool", a5:"dp_tide", a7:"dp_grass", a10:"dp_coral", a15:"dp_drift",
         a20:"dp_lagoon", bridge:"dp_arch",
         t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
-        d1:"dp_abyss", chain:"dp_shoal", beyond:"dp_sand", round:"dp_cavern",
+        d1:"dp_abyss", chain:"dp_shoal", ops:"dp_weed", beyond:"dp_sand", round:"dp_cavern",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -5621,6 +5790,7 @@ const C_EX = {c1:"7:00", c2:"7:30", c3:"7:15", c4:"7:20", c5:"7:23", c6:"19:45"}
 const X_EX = {"1":"12×3", "2":"17×5", "3":"34×6", "4":"213×3"};
 const O_EX = {"1":"47→50", "2":"347→350", "3":"347→300"};
 const Q_EX = {"1":"7+5-3", "2":"30+40-20", "3":"47+5-3"};
+const Z_EX = {"1":"4+3×5", "2":"(4+3)×5", "3":"300+7×8", "4":"500-(40+30)"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
 const divEx = ex => { const [a,b] = ex.split("×").map(Number); return (a*b) + ":" + b; };
 const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
@@ -5661,6 +5831,10 @@ function heatSpecs(p){
   // sits right under the hundred and the parent reads the two together
   push("chain", heatStrip(t("trk_chain"), 3, Q_BUCKETS.map(b =>
     ({label: Q_EX[b.id], keys:["q" + b.id], tip: Q_EX[b.id]}))));
+  // which operation goes first is the chapter right after the chain, so
+  // the two lines of several numbers stand together
+  push("ops", heatStrip(t("trk_ops"), 4, Z_BUCKETS.map(b =>
+    ({label: Z_EX[b.id], keys:["z" + b.id], tip: Z_EX[b.id]}))));
   push("a1000", heatStrip(t("trk_a1000"), 6,
     bucketTiles(K_EX, id => "kp" + id, id => "kn" + id)));
   push("round", heatStrip(t("trk_round"), 3, O_BUCKETS.map(b =>

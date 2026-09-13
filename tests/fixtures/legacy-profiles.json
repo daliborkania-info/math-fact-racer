@@ -1598,6 +1598,175 @@
      }
     ]
    }
+  },
+  {
+   "id": "v9-pred-poradim-operaci",
+   "note": "zari 2026, tretak z verze pred tratí Co dřív, tedy pred poradim operaci. Malou nasobilku ma rozjetou tesne pod branou 0,6, takze se mu nova trat nesmi sama otevrit bez zasluhy, presne jako to hlida v3 u trati za nasobilkou a v8 u retezce. Datovy model se nemeni, fixture je tu kvuli te brane a kvuli tomu, ze pribyla trat na mape",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "bridge",
+    "t1",
+    "t2",
+    "t3",
+    "clock",
+    "a100"
+   ],
+   "expectClosed": [
+    "ops",
+    "chain",
+    "round",
+    "beyond",
+    "a1000",
+    "mix"
+   ],
+   "expectChapter": 12,
+   "expectWorld": "trail",
+   "expectGrade": 3,
+   "expectStars": [
+    "a4p6",
+    "s3p4"
+   ],
+   "expectNoStars": [
+    "m2x3",
+    "ph1"
+   ],
+   "db": {
+    "current": "stareZ",
+    "sound": true,
+    "lang": "cs",
+    "pin": "pqr678",
+    "profiles": [
+     {
+      "id": "stareZ",
+      "name": "Matyas",
+      "lang": "cs",
+      "_fillFacts": "nasobilka-tesne-pod-branou",
+      "facts": {
+       "a4p6": {
+        "lv": 5,
+        "reps": 11,
+        "ok": 11,
+        "bad": 0,
+        "best": 1400,
+        "seen": 1757000000000
+       },
+       "s3p4": {
+        "lv": 4,
+        "reps": 8,
+        "ok": 7,
+        "bad": 1,
+        "best": 1900,
+        "seen": 1757000000000
+       },
+       "ph1": {
+        "lv": 2,
+        "reps": 5,
+        "ok": 4,
+        "bad": 1,
+        "best": 3400,
+        "seen": 1757000000000
+       },
+       "nh1": {
+        "lv": 1,
+        "reps": 4,
+        "ok": 3,
+        "bad": 1,
+        "best": 3900,
+        "seen": 1757000000000
+       }
+      },
+      "stars": {
+       "a4p6": true
+      },
+      "best": {
+       "t1": {
+        "dist": 121,
+        "hist": [],
+        "n0": 20
+       },
+       "clock": {
+        "dist": 104,
+        "hist": [],
+        "n0": 15
+       }
+      },
+      "done": {
+       "t1": 3,
+       "t2": 2,
+       "clock": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_bugina",
+       "ri_motor",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "pet_duha"
+      ],
+      "runner": "pet_duha",
+      "xp": {
+       "pet_duha": 150,
+       "ri_auto": 40
+      },
+      "coins": 212,
+      "parts": 9,
+      "paints": [
+       "pa_grape"
+      ],
+      "paint": {
+       "pet_duha": "pa_grape"
+      },
+      "jobRuns": {
+       "money": 3
+      },
+      "trackRuns": {
+       "t1": 5,
+       "t2": 3,
+       "t3": 1,
+       "a100": 2,
+       "clock": 4
+      },
+      "opened": {
+       "a3": true,
+       "a5": true,
+       "a7": true,
+       "a10": true,
+       "a15": true,
+       "a20": true,
+       "bridge": true,
+       "t1": true,
+       "t2": true,
+       "t3": true,
+       "clock": true,
+       "a100": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": "nns-matysek-3",
+      "chapter": 12,
+      "chapterMode": "soft",
+      "world": "trail",
+      "grade": 3,
+      "streak": 2,
+      "lastDay": null,
+      "bestStreak": 6,
+      "runs": 15,
+      "totalOk": 241,
+      "totalAns": 288,
+      "msSum": 780000,
+      "msN": 270,
+      "created": 1757450000000
+     }
+    ]
+   }
   }
  ]
 }

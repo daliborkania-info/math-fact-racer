@@ -19,6 +19,15 @@ const phone=win=>{
 /* prilis velke sady prikladu, aby fixture zustala citelna */
 function fillFacts(tag){
   const out={};
+  if(tag==='nasobilka-tesne-pod-branou'){
+    // cela mala nasobilka rozjeta, ale jen rozjeta: dve tretiny spoju na
+    // urovni 2 a zbytek na 1 delaji zvladnuti 0,55, tedy tesne pod branou
+    // 0,6, kterou se otevira trat Co dřív. Nova verze ji tedy nesmi
+    // otevrit sama, dokud si ji dite neodjezdi.
+    let i=0;
+    for(let a=1;a<=10;a++) for(let b=a;b<=10;b++)
+      out['m'+a+'x'+b]={lv:(i++%3?2:1),reps:5,ok:4,bad:1,best:2600,seen:1757000000000};
+  }
   if(tag==='a20-stare-klice-na-uroven-2'){
     // obor do dvaceti tak, jak vypadal pred pridanim desitkovych spoju:
     // oba scitance do deseti. Uroven 2 dela zvladnuti 2/3, tedy tesne

@@ -860,7 +860,21 @@ přešlo z `.keypad` na `.keypad-pad`, jak říká PROJECT-STATE, oddíl 7.
 C4 (velikosti jsou už násobené). Tady jsou jen rozhodnutí, která seznam
 nepokrývá.
 
-### D1. `order_of_ops`, hlavička `z`, trať `ops`, kapitoly 13 a 30
+### D1. `order_of_ops`, hlavička `z`, trať `ops`, kapitoly 13 a 30 — HOTOVO 13. září 2026
+
+Proti plánu se upřesnil čtvrtý kbelík: dokud násobení a dělení zůstávají
+v malé násobilce, nemůže příklad, který se násobí nebo dělí jako poslední,
+přelézt stovku, takže `(300 + 60) : 4` by bylo dělení mimo násobilku, které
+hra zatím nikde neučí (je to rodina `tens` z kroku D2). `z4` proto roste do
+tisíce na straně sčítání a jeho závorka je ta, která výsledek opravdu mění,
+tedy `500 - (40 + 30)`; `Z_EX` a heatmapa nesou tenhle příklad. Zbytek vyšel
+podle plánu, včetně násobitele prahů 2,4 a `maxLen: 4` u `z3` a `z4`.
+Nejdelší zadání rodiny je tím pádem `900 - (89 + 99)`, patnáct znaků včetně
+mezer, tedy `q-xlong`, jak plán čekal. Ze čtyř navržených palet prošla na
+obrázku hned napoprvé jen stezka; okruh šel z žlutozeleného bambusu na
+fialovou `amethyst`, protože mezi loukou, lesem a savanou vypadal jako další
+pole, obloha dostala sytější modrou, aby se nepletla s prachem, a v hlubině se
+posunulo dno. Kontrol ve `flow.test.js` je po tomhle kroku 186.
 
 Čtyři kbelíky, číslované: `z1` bez závorek do sta (`4 + 3 × 5`, `20 - 12 : 4`,
 `6 × 7 - 2`), `z2` se závorkami do sta (`(4 + 3) × 5`, `(20 - 8) : 4`), `z3`

@@ -32,6 +32,9 @@
  *                                 tens of a three digit number, hundreds
  *   chain [bucket ids]            1..3, three numbers and two signs,
  *                                 within twenty, whole tens, the hundred
+ *   ops   [bucket ids]            1..4, which operation goes first:
+ *                                 plain and then bracketed, first inside
+ *                                 a hundred and then inside a thousand
  *   clock [bucket ids]            c1..c6, telling the time by precision,
  *                                 c6 being the afternoon 24 hour reading
  *   shop  [job ids]               workshop jobs, for material that is
@@ -47,6 +50,7 @@ const ALL_C = ["c1","c2","c3","c4","c5","c6"];
 const ALL_K = ["b1","b2","b3","b4","b5","b6"];
 const ALL_X = ["1","2","3","4"];
 const ALL_O = ["o1","o2","o3"];
+const ALL_Z = ["1","2","3","4"];
 
 const CURRICULA = [
   {
@@ -151,7 +155,9 @@ const CURRICULA = [
       {n:10, name:"S přechodem přes základ 10",           src:"7. díl, s. 24–27", pool:{as100:["h2","h5"]}},
       {n:11, name:"Sčítání a odčítání více čísel",        src:"7. díl, s. 28–29", pool:{chain:["1","2","3"]}},
       {n:12, name:"Opakování do sta",                     src:"7. díl, s. 30–31", pool:{as100:ALL_H}},
-      {n:13, name:"Početní operace se závorkami",         src:"7. díl, s. 32–34", pool:null},
+      // the seventh part stays inside a hundred, so only the two buckets
+      // that do; the eighth part takes the same skill past it, chapter 30
+      {n:13, name:"Početní operace se závorkami",         src:"7. díl, s. 32–34", pool:{ops:["1","2"]}},
       // the seventh part stays inside a hundred, so only the first two
       // buckets; the eighth part takes the same skill past it, chapter 31
       {n:14, name:"Násobení mimo rozsah malé násobilky",  src:"7. díl, s. 34–37", pool:{multBeyond:["1","2"]}},
@@ -171,7 +177,7 @@ const CURRICULA = [
       {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35", pool:null},
       {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39", pool:null},
       {n:29, name:"Převody jednotek",                     src:"8. díl, s. 38–41", pool:null},
-      {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:null},
+      {n:30, name:"Sloučené početní operace",             src:"8. díl, s. 40–41", pool:{ops:ALL_Z}},
       {n:31, name:"Mimo rozsah malé násobilky do tisíce", src:"8. díl, s. 42–47",
              pool:{multBeyond:ALL_X, divBeyond:ALL_X}},
       {n:32, name:"Zlomky a porovnávání zlomků",          src:"8. díl, s. 45–47", pool:null},

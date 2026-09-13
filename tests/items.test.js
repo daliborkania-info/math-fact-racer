@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -33,6 +33,7 @@ const RANGE={
   x:[11,999],      // za nasobilkou, soucin i vracene cislo
   o:[10,1000],     // zaokrouhleni, nejmensi desitka az kulaty tisic
   q:[0,100],       // retezec tri cisel, nikdy pod nulu a nikdy pres sto
+  z:[0,1000],      // co se pocita driv, nikdy pod nulu a nikdy pres tisic
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -44,6 +45,7 @@ A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 for(const k of keys) for(let i=0;i<40;i++){
@@ -165,6 +167,7 @@ A.as1000Keys(A.K_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.beyondKeys(A.X_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.roundKeys(A.O_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.chainKeys(A.Q_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -581,6 +584,134 @@ const poradi=A.TRACKS.map(x=>x.id);
 if(poradi.indexOf('chain')>poradi.indexOf('beyond')){qStBad++;console.log('  !!  retezec stoji na mape az za nasobenim mimo nasobilku');}
 console.log('chyb ve stupnich retezce:',qStBad);
 
+// 7l. co se pocita driv: kazdy kbelik dela to, co slibuje. Poradi
+// operaci se tady pocita znovu a rucne, ne pres eval, protoze prave
+// poradi je to, co se ma overit; eval by odpovidal toutez pravidlem,
+// ktere mel zkontrolovat. Deleni musi vzdycky vyjit beze zbytku a
+// nikde po ceste nesmi byt zaporne cislo.
+let zBad=0, zN=0, zPoradi=0;
+const zsay=m=>{zBad++; if(zBad<8) console.log('  !!  '+m);};
+// jeden nasobici nebo delici clen: oba cinitele do deseti, deleni beze
+// zbytku a podil do deseti, tedy porad jeste mala nasobilka
+const zFact=(txt,kde)=>{
+  const m=txt.match(/^(\d+) ([×:]) (\d+)$/);
+  if(!m){zsay(kde+': "'+txt+'" neni ani nasobeni, ani deleni');return null;}
+  const a=+m[1], b=+m[3];
+  if(m[2]==='×'){
+    if(a<2||a>10||b<2||b>10){zsay(kde+': nasobi se mimo malou nasobilku: '+txt);return null;}
+    return {value:a*b, x:a, y:b, op:'×'};
+  }
+  if(a%b!==0){zsay(kde+': deleni ma zbytek: '+txt);return null;}
+  const q=a/b;
+  if(b<2||b>10||q<2||q>10){zsay(kde+': deleni je mimo malou nasobilku: '+txt);return null;}
+  return {value:q, x:a, y:b, op:':'};
+};
+const zApply=(op,a,b)=> op==='+'?a+b : op==='-'?a-b : op==='×'?a*b : a/b;
+const zPlain=(txt,kde)=>{     // cislo a nasobici clen v libovolnem poradi
+  let m=txt.match(/^(\d+) ([+-]) (\d+ [×:] \d+)$/);
+  if(m){ const f=zFact(m[3],kde); if(!f) return null;
+         // kdyby se to cetlo zleva doprava, spocitalo by se nejdriv
+         // cislo se zacatkem nasobiciho clenu, a to je prave ta chyba,
+         // kterou se rodina uci nedelat
+         return {val: zApply(m[2], +m[1], f.value), part:f.value, plain:+m[1], first:'num',
+                 lr: zApply(f.op, zApply(m[2], +m[1], f.x), f.y)}; }
+  m=txt.match(/^(\d+ [×:] \d+) ([+-]) (\d+)$/);
+  if(m){ const f=zFact(m[1],kde); if(!f) return null;
+         // s nasobicim clenem vpredu vyjde cteni zleva doprava stejne,
+         // takze na poradi v tomhle tvaru nezalezi a necita se
+         return {val: zApply(m[2], f.value, +m[3]), part:f.value, plain:+m[3], first:'fact', lr:null}; }
+  zsay(kde+': "'+txt+'" neni cislo a jeden nasobici clen');
+  return null;
+};
+for(const b of A.Z_BUCKETS){
+  for(let i=0;i<400;i++){
+    const it=A.itemFromKey('z'+b.id); zN++;
+    const txt=String(it.text);
+    const top=(b.id==='1'||b.id==='2')?100:1000;
+    if(it.maxLen!==((b.id==='3'||b.id==='4')?4:3)){
+      zsay('kbelik z'+b.id+' ma spatne maxLen: '+it.maxLen);break;
+    }
+    let val=null, lr=null;
+    if(b.id==='1'||b.id==='3'){
+      const e=zPlain(txt,'z'+b.id); if(!e) break;
+      val=e.val; lr=e.lr;
+      if(e.part<0||e.val<0){zsay('po ceste se objevilo zaporne cislo: '+txt);break;}
+      if(b.id==='3'){
+        if(e.first!=='num'){zsay('do tisice ma vest velke cislo: '+txt);break;}
+        if(e.plain%10!==0||e.plain<100||e.plain>990){zsay('do tisice neni prvni cislo cela desitka ve stovkach: '+txt);break;}
+      } else if(e.plain>100||e.part>100){zsay('prvni kbelik prelezl stovku: '+txt);break;}
+    } else if(b.id==='2'){
+      const m=txt.match(/^\((\d+) ([+-]) (\d+)\) ([×:]) (\d+)$/);
+      if(!m){zsay('z2 neni zavorka a za ni krat nebo deleno: '+txt);break;}
+      const inner=m[2]==='+'? +m[1]+ +m[3] : +m[1]- +m[3];
+      if(inner<0){zsay('zavorka vysla pod nulu: '+txt);break;}
+      if(inner>100){zsay('zavorka prelezla stovku: '+txt);break;}
+      if(m[4]===':'){
+        if(inner%+m[5]!==0){zsay('deleni zavorky ma zbytek: '+txt);break;}
+        val=inner/+m[5];
+        if(val>10||+m[5]>10){zsay('deleni zavorky je mimo malou nasobilku: '+txt);break;}
+      } else {
+        val=inner*+m[5];
+        if(inner>10||+m[5]>10){zsay('nasobeni zavorky je mimo malou nasobilku: '+txt);break;}
+      }
+      // zavorka je videt, takze "cteno zleva doprava" tady nema smysl;
+      // na poradi se ptaji kbeliky bez zavorek a ten se zavorkou do tisice
+      lr=null;
+    } else {
+      const m=txt.match(/^(\d+) - \((\d+) ([+-]) (\d+)\)$/);
+      if(!m){zsay('z4 neni velke cislo minus zavorka: '+txt);break;}
+      const inner=m[3]==='+'? +m[2]+ +m[4] : +m[2]- +m[4];
+      if(inner<0){zsay('zavorka vysla pod nulu: '+txt);break;}
+      if(+m[1]%10!==0||+m[1]<100||+m[1]>900){zsay('z4 nevede cela desitka ve stovkach: '+txt);break;}
+      val=+m[1]-inner;
+      lr=m[3]==='+'? +m[1]- +m[2]+ +m[4] : +m[1]- +m[2]- +m[4];
+    }
+    if(val!==it.answer){zsay('poradi operaci nesedi: '+txt+' je '+val+', vraceno '+it.answer);break;}
+    if(val<0){zsay('vysledek klesl pod nulu: '+txt);break;}
+    if(val>top){zsay('kbelik z'+b.id+' prelezl svuj obor: '+txt+' = '+val);break;}
+    if(lr!==null && lr!==val) zPoradi++;
+  }
+}
+// a hlavne: zadani, ktere by se cetlo zleva doprava, musi vyjit jinak,
+// jinak by rodina o prednosti operaci vubec nebyla
+if(zPoradi < zN*0.15) zsay('na poradi operaci skoro nikdy nezalezi: '+zPoradi+' z '+zN);
+console.log('zkontrolovano zadani s poradim operaci:',zN,'| chyb:',zBad,'| zalezi na poradi:',zPoradi);
+
+// 7m. co se pocita driv se stupnuje a stoji na cele nasobilce
+let zStBad=0;
+const tz1=A.newProfile('Z1'); A.DB.profiles=[tz1]; A.DB.current=tz1.id;
+if(A.opsStage(tz1)!==0){zStBad++;console.log('  !!  zacatecnik nezacina bez zavorek do sta');}
+const zRun0=A.buildRun(tz1,A.trackById('ops'));
+for(const it of zRun0) if(it.key!=='z1'){zStBad++;console.log('  !!  zacatecnik dostal tezsi kbelik',it.text);break;}
+A.opsKeys(['1']).forEach(k=>tz1.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.opsStage(tz1)!==1){zStBad++;console.log('  !!  po zvladnuti prvniho kbeliku se neposunul');}
+const zRun1=A.buildRun(tz1,A.trackById('ops'));
+const zFocus=zRun1.filter(it=>it.key==='z2').length;
+if(zFocus<zRun1.length*0.5){zStBad++;console.log('  !!  druhy kbelik nenese zavod',zFocus+'/'+zRun1.length);}
+if(zFocus===zRun1.length){zStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+const zg=A.newProfile('Z2'); A.DB.profiles=[zg]; A.DB.current=zg.id;
+if(A.unlockState(zg,A.trackById('ops')).open){zStBad++;console.log('  !!  poradi operaci je otevrene hned od zacatku');}
+// stovka sama nestaci, tohle visi na cele nasobilce
+A.trackKeys(zg,A.trackById('a100')).forEach(k=>zg.facts[k]={lv:3,reps:9,ok:8,bad:1,best:3000,seen:Date.now()});
+if(A.unlockState(zg,A.trackById('ops')).open){zStBad++;console.log('  !!  otevrela to stovka misto nasobilky');}
+A.trackKeys(zg,A.trackById('t5')).forEach(k=>zg.facts[k]={lv:2,reps:9,ok:7,bad:2,best:3000,seen:Date.now()});
+if(!A.unlockState(zg,A.trackById('ops')).open){zStBad++;console.log('  !!  rozjeta nasobilka neotevrela poradi operaci');}
+// kapitola 13 je pred kapitolou 14, tedy na mape pred nasobenim mimo
+// malou nasobilku a hned za retezcem
+const zPor=A.TRACKS.map(x=>x.id);
+if(zPor.indexOf('ops')<zPor.indexOf('chain')||zPor.indexOf('ops')>zPor.indexOf('beyond')){
+  zStBad++;console.log('  !!  poradi operaci nestoji na mape mezi retezcem a nasobenim mimo nasobilku');}
+// kapitoly 13 a 30 uz musi jit vybrat a musi ukazovat sem
+const cur3=A.CURRICULA.find(c=>c.id==='nns-matysek-3');
+for(const n of [13,30]){
+  const ch=cur3.chapters.find(x=>x.n===n);
+  if(!A.isPlayable(ch)){zStBad++;console.log('  !!  kapitola '+n+' porad nejde vybrat');}
+  if(!A.poolKeys(ch.pool).every(k=>k[0]==='z')){zStBad++;console.log('  !!  kapitola '+n+' neukazuje na poradi operaci');}
+}
+if(A.poolKeys(cur3.chapters.find(x=>x.n===13).pool).length!==2){
+  zStBad++;console.log('  !!  kapitola 13 ma mit jen dva kbeliky, sedmy dil je do sta');}
+console.log('chyb ve stupnich poradi operaci:',zStBad);
+
 // 7k. dlouhe zadani si rekne o mensi pismo, kratke ne
 let qhBad=0;
 const qh=k=>A.questionHTML(A.itemFromKey(k));
@@ -588,6 +719,19 @@ const qh=k=>A.questionHTML(A.itemFromKey(k));
 // z nich nesmi zustat v plne velikosti, at padne jakakoli trojice
 for(const b of ['q1','q2','q3']) for(let i=0;i<200;i++)
   if(!/q-long|q-xlong/.test(qh(b))){qhBad++;console.log('  !!  retezec si nerekl o mensi pismo',b);break;}
+// poradi operaci je jeste delsi radek nez retezec: nejkratsi zadani ma
+// devet znaku ("4 + 3 × 5") a nejdelsi patnact ("900 - (89 + 99)"),
+// takze zadny kbelik nesmi zustat v plne velikosti a cely ctvrty musi
+// dostat tu nejmensi
+let zDelka=0, zDelsi='';
+for(const b of ['z1','z2','z3','z4']) for(let i=0;i<300;i++){
+  const it=A.itemFromKey(b), h=A.questionHTML(it);
+  if(String(it.text).length>zDelka){zDelka=String(it.text).length; zDelsi=it.text;}
+  if(!/q-long|q-xlong/.test(h)){qhBad++;console.log('  !!  poradi operaci si nereklo o mensi pismo',b,it.text);break;}
+  if(b==='z4'&&!/q-xlong/.test(h)){qhBad++;console.log('  !!  zavorky do tisice nedostaly nejmensi pismo',it.text);break;}
+}
+if(zDelka<13){qhBad++;console.log('  !!  nejdelsi zadani rodiny je kratsi, nez plan cekal:',zDelsi);}
+console.log('nejdelsi zadani poradi operaci:',zDelsi,'('+zDelka+' znaku)');
 if(/q-long|q-xlong/.test(qh('m7x8'))){qhBad++;console.log('  !!  kratka otazka si zbytecne zmensila pismo');}
 if(/q-long|q-xlong/.test(qh('xm4'))){qhBad++;console.log('  !!  trojciferne nasobeni se zmensilo, i kdyz se veslo');}
 if(/q-long|q-xlong/.test(qh('c1'))){qhBad++;console.log('  !!  obrazkova otazka se meri jako text');}

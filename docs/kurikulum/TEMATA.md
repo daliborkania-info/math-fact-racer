@@ -48,7 +48,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `rounding_10` | zaokrouhlování na desítky, dvojciferná i trojciferná | `pad` | 0 až 1000 | hotovo |
 | `rounding_100` | zaokrouhlování na stovky | `pad` | 0 až 1000 | hotovo |
 | `chain_3` | řetězec tří čísel, sčítání a odčítání, tři kbelíky podle oboru | `pad` | 0 až 100 | hotovo |
-| `order_of_ops` | pořadí operací bez závorek a se závorkami | `pad` | 0 až 1000 | nové |
+| `order_of_ops` | pořadí operací bez závorek a se závorkami, čtyři kbelíky: bez závorek a se závorkami, do sta a do tisíce | `pad` | 0 až 1000 | hotovo |
 | `mult_beyond` | násobení mimo rozsah malé násobilky, 12 × 3, čtyři kbelíky podle toho, co se rozkládá | `pad` | do 1000 | hotovo |
 | `div_beyond` | dělení mimo rozsah malé násobilky, 56 : 4, totéž sezení pozpátku | `pad` | do 1000 | hotovo |
 | `div_remainder` | dělení se zbytkem | `pad2` | dělitel 2 až 10 | **pilot** |

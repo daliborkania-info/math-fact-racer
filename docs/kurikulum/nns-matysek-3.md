@@ -87,15 +87,23 @@ Z osmého dílu jsou hotové kapitoly 23, 24 a 25, tedy páteř celého oboru do
 tisíce. Odemkl je generátor `add_sub_1000` a jezdí se na vlastní trati `a1000`,
 která má šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku.
 
-V září 2026 přibyly tři rodiny z vlny A. `mult_beyond` s `div_beyond` otevřely
+V září 2026 přibyly čtyři rodiny z vlny A. `mult_beyond` s `div_beyond` otevřely
 kapitoly 14, 16 a 31 a jezdí se na trati `beyond`, `rounding_10`
 s `rounding_100` otevřely kapitoly 7 a 26 a jezdí se na trati `round`,
-a `chain_3` otevřel kapitolu 11 a jezdí se na trati `chain`, která má tři
+`chain_3` otevřel kapitolu 11 a jezdí se na trati `chain`, která má tři
 kbelíky podle oboru a na mapě stojí hned za stovkou, tedy v pořadí učebnice
-před `beyond`. Celkem je to devatenáct kapitol z třiatřiceti.
+před `beyond`, a `order_of_ops` otevřel kapitoly 13 a 30 a jezdí se na trati
+`ops`, která má čtyři kbelíky, bez závorek a se závorkami, do sta a do tisíce,
+a na mapě stojí mezi `chain` a `beyond`. Celkem je to jedenadvacet kapitol
+z třiatřiceti.
 
-Zamčené zůstávají kapitoly 5, 6, 13, 15, 17, 18, 19, 21, 22, 27, 28, 29, 30
-a 32. Šest z nich nepotřebuje na vstupu nic nového, stačí další generátory
+Násobí a dělí se v `ops` jen v oboru malé násobilky a dělení vždycky vyjde
+beze zbytku, protože `mult_div_10_100` ani `div_remainder` zatím nejsou.
+Čtvrtý kbelík proto roste do tisíce na straně sčítání, tedy `500 - (40 + 30)`,
+ne `(300 + 60) : 4`; celé je to popsané v `PROJECT-STATE.md`, oddíl 4.
+
+Zamčené zůstávají kapitoly 5, 6, 15, 17, 18, 19, 21, 22, 27, 28, 29 a 32.
+Čtyři z nich nepotřebují na vstupu nic nového, stačí další generátory
 na číselnou klávesnici; pořadí je v `PROJECT-STATE.md`, oddíl 12b.
 
 ## Pilot

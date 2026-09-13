@@ -42,6 +42,9 @@ async function play(lang){
   click(qa('[data-gr]').find(b=>b.dataset.gr==='3'));            // bez tridy se dal nejde
   click(q('[data-go]'));
   const map=txt();
+  // mapa treťáka zacina u letosniho ucivo a to je zatim vsechno zamcene,
+  // takze se nejdriv otevrou dvere do minulych let a jede se odtamtud
+  click(q('[data-act="back"]'));
   click(q('[data-act="play"]')); click(q('[data-go]'));
   let n=0;
   while(qt() && qt()!==fin() && n<40){ const a=eval(qt().replace('×','*').replace(':','/')); type(n===3?a+1:a); n++; await wait(n===4?2000:620); }

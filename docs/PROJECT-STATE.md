@@ -81,7 +81,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 322 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 328 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -696,14 +696,15 @@ každého telefonu; cesta je jedno SVG přes celou plochu s `vector-effect`, jin
 by ji roztažení do šířky rozmázlo. **Klepnutí na místo skočí rovnou na trať**,
 cesta je ozdoba; jediná nalezená studie hlásí u povinného průchodu centrem
 pokles pocitu kompetence a autonomie. Zamčené místo je vidět, jen je tmavé,
-a není to tlačítko. Dílna má vlastní místo a vlastní vzhled.
+a není to tlačítko. Dílna má vlastní místo a vlastní vzhled. Co z mapy patří
+letošku a co minulým letům, řeší oddíl 7d.
 
 **Rozměry jsou spočítané, ne odhadnuté.** Místo je široké 44 procent a sousedi
 jsou po 96 pixelech, takže se dvě místa na téže straně nepřekryjou a dva sloupce
 se nedotknou ani na nejužším telefonu. `flow.test.js` to ověřuje polohami, ne
 pohledem.
 
-## 7d. Ročník a ukázka dalšího roku
+## 7d. Ročník, předěl na mapě a ukázka dalšího roku
 
 Od září 2026 má profil `grade`, tedy třídu, do které dítě chodí. **Skládá se
 podle něj mapa**: jsou na ní tratě letošního ročníku a všech dřívějších.
@@ -714,9 +715,49 @@ učebnic, viz tabulka v oddílu 5.
 na mapě nezačíná u jednoho velkého místa, ale u nejmenšího oboru a pět dalších
 vidí před sebou.
 
-**Dřívější ročník se nikdy neschovává** a žádné tlačítko zpátky není. Učivo
-minulého roku prostě zůstává na mapě, protože se k němu stejně vrací
-Leitnerova krabička a dítě ho potřebuje dál.
+**Mapa začíná tam, kde je letos třída.** Přišlo to z hraní s dítětem 13. září
+2026: syn si nastavil třetí třídu a mapa byla jen pokračování celého
+předchozího bloku, bez předělu, kde začíná "jeho" učivo. Dřívější roky jsou
+proto na mapě složené a rozbalí se jen na žádost, stejně jako se na druhém
+konci rozbaluje příští rok. Tím padl dřívější závěr, že se dřívější ročník
+nikdy neschovává a žádné tlačítko zpátky není. **Nic se ale neztrácí:** učivo
+minulých let zůstává v profilu, v krabičce, v šampionátu i v rodičovské sekci
+beze změny, vrací se k němu Leitnerova krabička a odemykání se nemění. Na mapě
+je jen za dveřmi.
+
+**Tvar mapy shora dolů:** dveře do minulých let (`.place.backdoor`,
+`data-act="back"`, s podtitulkem, které třídy jsou za nimi, a v patičce
+součtem rozsvícených míst ve sbírkách těch tratí), za nimi rozbalené tratě
+minulých let s třídou `past` (plný vzhled, ne čárkovaný, protože je to učivo,
+které dítě má, ne ukázka), pak **milník** `.milestone` s letošním ročníkem,
+pak letošní tratě, dílna a nakonec dveře do příštího roku s ukázkou.
+
+**Milník je ten předěl, kvůli kterému to celé je,** takže stojí na cestě
+vždycky, ať jsou dveře otevřené, nebo zavřené. Není to tlačítko. Mezi místa se
+nepočítá, ale na cestě zabírá půl kroku (`PLACE_STEP / 2`); `worldSpots()` to
+umí přes parametr `gapAt` a milník sedí v půlce toho esíčka, což je u téhle
+křivky přesně střed obou sousedních míst.
+
+**Co je letošní, říká `yearOf(p, tr)`**, ne `tr.grade`, a ptá se jí celá mapa.
+Vrací `"past"`, `"own"` nebo `"ahead"`. Šampionát (`mix`), slabá místa (`weak`)
+a trať podle školy (`school`) jsou **vždycky letošní**: ročník mají v `TRACKS`
+jen proto, aby je prvňák neviděl.
+
+**Ročník 4 se neskládá.** Nemá vlastní trať, takže by složení schovalo celou
+mapu za jedny dveře, a jsou to zároveň všechny starší profily, kterým
+`seedGrade()` dal čtyřku. Pravidlo je ve `foldsYears(p)`: skládá se jen ročník,
+který má v `TRACKS` aspoň jednu vlastní trať. Až krok G přinese učivo čtvrtého
+ročníku, začne se skládat i on. Prvňák dveře zpátky nemá taky, ale z druhé
+strany: nemá co složit.
+
+**Po rozbalení i po sbalení se pohled posune na milník**, `go("map",
+{focus:"milestone"})`. Rozbalení přidá místa nad letošní blok, cesta vyroste
+směrem nahoru a pod prstem by se jinak objevilo něco jiného.
+
+**Čerstvý třeťák má po složení mapu bez jediné otevřené trati**, protože
+letošní tratě visí na zvládnutí těch loňských a odemykání tenhle krok nemění.
+Dveře do minulých let jsou tedy jeho první klepnutí. Jestli se to má změnit,
+řeší rozhodnutí R1 v `docs/PLAN.md`, oddíl 9; zatím se nedělá.
 
 **Ročník se vybírá při zakládání hráče** a nedá se přeskočit; předvolba by byla
 tichý odhad, který buď zavalí prvňáka, nebo schová půlku hry třeťákovi. Rodič
@@ -727,6 +768,10 @@ následujícího ročníku, dají se rovnou zkusit, ale **nic se tím nepřepín
 `PEEK` je proměnná, ne pole v profilu, takže zavření hry i přepnutí hráče
 ji složí zpátky. Nabízí se vždycky jen jeden rok dopředu; seznam všeho, co
 zbývá, není pozvánka, ale zeď.
+
+**Do profilu nezapisují ani jedny dveře.** Rozbalení minulých let drží `BACK`
+s id profilu, přesně jako `PEEK`, takže zavření hry i přepnutí hráče mapu zase
+složí. `pick` a `gradeset` nulují obojí.
 
 **Filtr platí i jinde než na mapě.** Šampionát nesmí podstrčit učivo, které
 na mapě ještě není, rodičovská heatmapa a souhrn mluví jen o tom, co dítě
@@ -770,8 +815,10 @@ nepoužitá, že přepnutí světa nehne učivem, odemčením ani rekordy a že 
 jezdců jen řadí; a tvary cest, tedy že okruh zůstal uzavřený, že ostatní světy
 vedou z jedné strany na druhou, že cesta nevyjede ze scény a že se patnáct
 tratí v jednom světě od sebe pozná; a ročníky, tedy že prvňák nevidí násobilku,
-že dřívější ročník nikdy nezmizí, že ukázka nabízí právě jeden rok dopředu
-a že šampionát ani rodičovská sekce nemluví o tom, co na mapě není.
+že dřívější ročník nikdy nezmizí z dosahu, že `yearOf()` sedí pro každou trať
+a každý ročník a že šampionát, slabá místa i trať podle školy jsou vždycky
+letošní, že se skládá jen ročník s vlastní tratí, že ukázka nabízí právě jeden
+rok dopředu a že šampionát ani rodičovská sekce nemluví o tom, co na mapě není.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
@@ -781,13 +828,18 @@ zakázku v dílně a hlídá, že se kruh odkrývá po jednom dílu za vyřešen
 dvaceti a nepřekrývají se, že v oboru není jediný přechod přes desítku a že
 prvňákův první závod nevyleze nad tři.
 `flow.test.js` navíc projde celý ročníkový tok: založí prvňáka, ověří, že má
-krátkou mapu, rozbalí ukázku, spustí z ní trať a zkontroluje, že se ročník
-nezměnil a že přepnutí hráče ukázku složí.
+krátkou mapu a žádné dveře zpátky, rozbalí ukázku, spustí z ní trať
+a zkontroluje, že se ročník nezměnil a že přepnutí hráče ukázku složí. Od kroku
+B0 měří i předěl ročníků: složenou i rozbalenou mapu třeťáka a druháka, že
+dveře zpátky jsou od druhé třídy, že milník nese číslo třídy i se složenou
+mapou, že rozbalení nezapíše do profilu ani písmeno, že přepnutí hráče mapu
+zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `items.test.js` postaví od kroku A pět set závodů na každé z tratí `a3`, `a5`,
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má od kroku A 154 kontrol: navíc vynulování postupu, po kterém
+`flow.test.js` má od kroku B0 170 kontrol, po kroku A jich bylo 153: navíc
+předěl ročníků popsaný výše, a už od kroku A vynulování postupu, po kterém
 prvňák zůstane prvňákem a nastavení rodiče se nehne, zatímco krabička, mince
 a medaile jsou pryč, a dva různé chybné počty dílků, které musí dát dva štítky,
 ne jeden. Do kroku A jich dobíhalo 148, protože `flow.test.js` i `names.test.js`
@@ -886,6 +938,12 @@ se v nabídce usekla a rodič si nastavil kapitolu, se kterou se nestalo nic.
 Mezikrok s tichým návratem na dřívější kapitolu byl taky špatně, protože
 nastavení pořád dělalo něco jiného, než říkalo. Teď je kapitola bez generátoru
 nevybratelná, viz princip v oddílu 3.
+
+Mapa třeťáka byla pokračování prvních dvou tříd bez předělu. Syn si nastavil
+třetí třídu a dostal jednadvacet míst v jedné řadě, ve které nebylo poznat,
+kde končí loňsko a kde začíná "jeho" učivo. Minulé roky se teď skládají za
+dveře a mezi ně a letošek se postavil milník s číslem třídy; nic z toho se
+neztratilo, jen to na mapě není v cestě, viz oddíl 7d.
 
 ---
 
@@ -1273,10 +1331,12 @@ třech jazycích v `src/i18n.js`.
 skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do množiny
 `VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co slibuje.
 
-**V `tests/flow.test.js` sedí natvrdo tahle čísla** a každá nová trať je posune:
-počet různých cest na mapě (20), počet míst na mapě (21), délka mapy prvňáka (8),
-počet tratí v ukázce druhého ročníku (10), délka mapy druháka (18) a počet
-zamčených kapitol třetí třídy (15 z 33).
+**V `tests/flow.test.js` sedí natvrdo tahle čísla** a každá nová trať je posune.
+Od kroku B0 se měří zvlášť složená a rozbalená mapa, viz oddíl 7d: třeťák má
+složeno 5 různých cest a 7 míst a rozbaleno 20 cest a 22 míst, druhák má
+složeno 13 míst a rozbaleno 19, prvňák má 8 a dveře zpátky nemá, čtvrťák vidí
+celou mapu, tedy 21 míst a žádné dveře ani milník. Dál sedí počet tratí
+v ukázce druhého ročníku (10) a počet zamčených kapitol třetí třídy (15 z 33).
 
 **Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
 `grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v

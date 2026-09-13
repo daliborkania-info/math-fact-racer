@@ -42,11 +42,27 @@ ok('po vyberu tridy uz tlacitko jde', !q('[data-go]').hasAttribute('disabled'));
 click(q('[data-go]'));
 ok('rocnik se ulozil do profilu', DBg().profiles[0].grade===3, 'grade '+DBg().profiles[0].grade);
 ok('profil dostal startovni sestku zdarma', DBg().profiles[0].owned.length===6, DBg().profiles[0].owned.join(','));
-ok('mapa ma 20 ruznych cest', new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size===20,
-   new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size+' okruhu');
+// mapa treťáka zacina tam, kde je letos trida: minule roky jsou slozene za
+// dvermi, takze cest i mist je jen tolik, kolik patri do treti tridy
+// (beyond, round, a1000, mix, weak) plus dilna a dvere zpatky
+const cesty=()=>new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size;
+ok('slozena mapa treťáka ma 5 ruznych cest', cesty()===5, cesty()+' okruhu');
+ok('slozena mapa ma 7 mist', qa('.world .place').length===7, qa('.world .place').length+' mist');
+ok('dvere do minulych let jsou od druhe tridy',
+   qa('.place.backdoor[data-act="back"]').length===1 && /Z minulých let/.test(txt()));
+ok('predel nese letosni rocnik', qa('.milestone').length===1 && /3\. třída/.test(q('.milestone').textContent),
+   q('.milestone')?q('.milestone').textContent.trim():'zadny predel');
+ok('minule roky jsou slozene, ne jen tmave', !/Hodiny/.test(txt()));
+const predRozbalenim=JSON.stringify(DBg());
+click(q('[data-act="back"]'));
+ok('rozbaleni ukazalo minule roky', cesty()===20, cesty()+' okruhu');
 ok('trat hodin je na mape a odemcena od zacatku', /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
+ok('minule roky jsou plne, ne carkovane jako ukazka', qa('.place.past').length===15 && qa('.place.peek').length===0,
+   qa('.place.past').length+' trati z minulych let');
+ok('o rozbaleni neni v ulozenych datech ani slovo', JSON.stringify(DBg())===predRozbalenim);
+ok('predel je videt i s rozbalenou mapou', qa('.milestone').length===1);
 // mapa uz neni svisly seznam: mista lezi podel cesty a zamcene je vidět taky
-ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===21 && qa('.worldroad path').length>0,
+ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===22 && qa('.worldroad path').length>0,
    qa('.world .place').length+' mist');
 ok('kazde misto ma svou polohu v mape', qa('.place').every(el=>/left:/.test(el.getAttribute('style')||'')));
 ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky a sedmičky/.test(txt()),
@@ -409,6 +425,8 @@ ok('prvnak ma na mape jen ucivo sveho rocniku',
    /Do dvaceti/.test(txt()) && !/Rozjezd|Hodiny|Do tisíce/.test(txt()), txt().slice(0,90));
 const mistPrvnak=qa('.place:not(.peekdoor)').length;
 ok('mapa prvnaka je kratka', mistPrvnak===8, mistPrvnak+' mist vcetne dilny');
+// prvnak nema co slozit, takze zadne dvere zpatky ani predel nedostane
+ok('prvnak nema dvere do minulych let', qa('.place.backdoor').length===0 && qa('.milestone').length===0);
 ok('na konci cesty je tlacitko na priste', qa('.place.peekdoor').length===1 && /Co tě čeká příští rok/.test(txt()));
 ok('dilna je na mape i prvnakovi', qa('[data-act="shop"]').length===1);
 // ukazka rozbali dalsi rocnik, ale profil nechava na miste
@@ -471,8 +489,20 @@ ok('rodic ma prepinac rocniku', qa('[data-act="gradeset"]').length===4 && /Ročn
 click(qa('[data-act="gradeset"]').find(b=>b.dataset.gr==='2'));
 ok('rocnik prepnut', prvni().grade===2);
 click(q('[data-act="map"]'));
-ok('mapa druhaka je delsi', qa('.place:not(.peekdoor)').length===18 && /Rozjezd/.test(txt()),
+// druhak ma za dvermi prvni tridu: 11 letosnich trati, dilna a dvere zpatky
+ok('slozena mapa druhaka', qa('.place:not(.peekdoor)').length===13 && /Rozjezd/.test(txt())
+   && !/Do tří/.test(txt()), qa('.place:not(.peekdoor)').length+' mist');
+ok('predel druhaka nese jeho rocnik', /2\. třída/.test(q('.milestone').textContent),
+   q('.milestone').textContent.trim());
+ok('dvere rikaji, ktere roky jsou za nimi', /1\. třída/.test(q('.place.backdoor').textContent),
+   q('.place.backdoor .sub').textContent.trim());
+click(q('[data-act="back"]'));
+ok('rozbalena mapa druhaka je delsi', qa('.place:not(.peekdoor)').length===19 && /Do tří/.test(txt()),
    qa('.place:not(.peekdoor)').length+' mist');
+// prepnuti hrace mapu zase slozi, stejne jako zavreni hry
+click(q('[data-act="players"]')); click(qa('[data-act="pick"]').find(b=>b.dataset.id===prvni().id));
+ok('prepnuti hrace mapu slozilo', qa('.place.past').length===0 && qa('.place.backdoor').length===1
+   && qa('.place:not(.peekdoor)').length===13);
 ok('druhak vidi ukazku treti tridy', /Do tisíce/.test((click(q('[data-act="peek"]')), txt())));
 
 console.log('--- druhy hrac ---');
@@ -509,6 +539,19 @@ ok('vynulovani smazalo postup',
    !Object.keys(ter().facts).length && !Object.keys(ter().stars).length && !Object.keys(ter().done).length
    && ter().coins===0 && ter().parts===0 && ter().streak===0,
    Object.keys(ter().facts).length+' prikladu, '+ter().coins+' minci');
+
+console.log('--- ctvrty rocnik se neskláda ---');
+// ctvrtak nema zadnou vlastni trat, takze by slozeni schovalo celou mapu za
+// jedny dvere; a ctvrtak je zaroven kazdy starsi profil po seedGrade()
+ev('go("map")'); click(q('[data-act="players"]'));
+click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Čtvrťák';
+click(qa('[data-gr]').find(b=>b.dataset.gr==='4')); click(q('[data-go]'));
+ok('ctvrtak nema dvere zpatky ani predel',
+   qa('.place.backdoor').length===0 && qa('.milestone').length===0);
+ok('ctvrtak vidi celou mapu jako driv',
+   qa('.place').length===21 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
+   qa('.place').length+' mist');
+ok('ctvrtak nema ani dvere dopredu, nic dalsiho neni', qa('.place.peekdoor').length===0);
 
 console.log('\nchyby za behu:', errs.length?errs.join('\n'):'zadne');
 process.exit(0);

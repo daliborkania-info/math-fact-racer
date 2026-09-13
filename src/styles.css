@@ -182,6 +182,22 @@ input{font-family:inherit}
 .place.peekdoor .foot{color:var(--grape-dark)}
 .peekthumb{display:grid;place-items:center;font-size:32px;background:#d8ddff !important}
 .place.peek{border-style:dashed;opacity:.9}
+/* The door back into the earlier years, and the places behind it. The
+   door is dashed like the other one, because it is a fold rather than a
+   part of this year's road, but papery instead of violet: what is behind
+   it already belongs to the child. The places themselves are drawn in
+   full for the same reason. */
+.place.backdoor{background:linear-gradient(160deg,#fbf7ed,#f2ebdd);border-color:#ddd0b4;border-style:dashed}
+.place.backdoor .foot{color:#8a7444}
+.backthumb{display:grid;place-items:center;font-size:32px;background:#ece0c8 !important}
+.place.past{background:linear-gradient(160deg,#fdfbf6,#f6f1e6);border-color:#e6dcc7}
+/* The sign on the road where this year begins. It is the whole point of
+   folding the earlier years away, so it stands there whether the door is
+   open or shut; it is not a button and nothing happens on it. */
+.milestone{position:absolute;transform:translate(-50%,-50%);z-index:1;
+  padding:5px 13px;border-radius:999px;border:2px solid var(--line);
+  background:var(--paper);box-shadow:var(--shadow-soft);color:var(--ink);
+  font-family:var(--font-display);font-size:14px;white-space:nowrap}
 .place.locked{filter:grayscale(.85);opacity:.6}
 .place.locked .lockmsg{font-size:11px;color:var(--ink-soft);font-weight:700;line-height:1.25}
 

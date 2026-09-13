@@ -376,9 +376,26 @@ function seedGrade(p){
 }
 const gradeOf = p => (p && p.grade) || MAX_GRADE;
 /* Is this track part of what the class is doing this year or earlier?
-   Earlier years stay on the map on purpose: the child keeps the material
-   it has already met, and there is no going-back button to look for. */
+   Earlier years stay in the profile, in the box and in the parent area
+   exactly as before; on the map they are folded behind a door, see
+   yearOf() and viewMap(). */
 function inGrade(p, tr){ return !tr.grade || tr.grade <= gradeOf(p); }
+/* Which year a place on the map belongs to, seen from this profile:
+   "past", "own" or "ahead". The championship, the weak-spot track and
+   the school track carry a grade only so that a first year does not see
+   them; whatever year the child is in, they are that year's, so they
+   never end up behind the door to earlier years. Everything on the map
+   asks this rather than reading tr.grade. */
+function yearOf(p, tr){
+  if(!tr.grade || tr.op === "mix" || tr.op === "weak" || tr.op === "school") return "own";
+  const g = gradeOf(p);
+  return tr.grade < g ? "past" : (tr.grade > g ? "ahead" : "own");
+}
+/* Does this year fold the earlier ones away? Only a year that has tracks
+   of its own. The fourth has none yet, so folding would put the whole
+   map behind one door, and every older profile is a fourth year after
+   seedGrade(). Once the fourth year has material, it folds too. */
+function foldsYears(p){ return TRACKS.some(tr => tr.grade === gradeOf(p)); }
 /* What next year holds. Only the next one: a taste of what is coming is
    an invitation, a list of everything left is a wall. */
 function peekTracks(p){
@@ -2385,13 +2402,16 @@ function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] ||
    numbers below rather than by looking at it on one phone. */
 const PLACE_STEP = 96;      // vertical distance between two neighbours
 const PLACE_H = 172;        // how tall a place card is, give or take
-function worldSpots(p, n){
+/* gapAt, when given, is the index where this year starts: the road takes
+   half a step more there, which is the room the year sign stands in. */
+function worldSpots(p, n, gapAt){
   const rnd = seedRand("svet-" + (p && p.world ? p.world : "circuit"));
   const out = [];
   for(let i = 0; i < n; i++){
     const wobble = rnd() * 3;
     const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
-    const y = 14 + i * PLACE_STEP;
+    const gap = (gapAt != null && i >= gapAt) ? PLACE_STEP / 2 : 0;
+    const y = 14 + i * PLACE_STEP + gap;
     out.push({left, y, cx: left + 22, cy: y + PLACE_H / 2});
   }
   return out;
@@ -2420,13 +2440,26 @@ function viewMap(p){
   const shown = visibleTracks(p);
   const ahead = peekTracks(p);
   const peeking = PEEK === p.id && ahead.length > 0;
-  // the road: this year's tracks, then the workshop, then the door to
-  // next year, and behind it next year's places once it is opened
-  const total = shown.length + 1 + (ahead.length ? 1 : 0) + (peeking ? ahead.length : 0);
-  const spots = worldSpots(p, total);
-  const height = 14 + (total - 1) * PLACE_STEP + PLACE_H + 20;
+  /* Earlier years are folded away, so the map starts where the class is
+     rather than reading as one long continuation of the last two years.
+     Nothing is taken away: the material stays in the profile, in the box
+     and in the parent area, it is simply behind a door here. */
+  const past = foldsYears(p) ? shown.filter(tr => yearOf(p, tr) === "past") : [];
+  const folding = past.length > 0;
+  const own = folding ? shown.filter(tr => yearOf(p, tr) !== "past") : shown;
+  const backOpen = folding && BACK === p.id;
+  const pastShown = backOpen ? past : [];
+  /* the road, top to bottom: the door to earlier years and what is
+     behind it when it is open, the year sign, this year's tracks, the
+     workshop, then the door to next year and next year's places once
+     that one is open */
+  const nPast = (folding ? 1 : 0) + pastShown.length;
+  const total = nPast + own.length + 1 + (ahead.length ? 1 : 0) + (peeking ? ahead.length : 0);
+  const spots = worldSpots(p, total, folding ? nPast : null);
+  const height = 14 + (total - 1) * PLACE_STEP + PLACE_H + 20 + (folding ? PLACE_STEP / 2 : 0);
 
-  const placeHTML = (tr, spot, peek) => {
+  const placeHTML = (tr, spot, kind) => {
+    const peek = kind === "peek";
     const u = peek ? {open: true} : unlockState(p, tr);
     const pr = Math.round(trackProgress(p, tr) * 100);
     const med = p.done[tr.id] || 0;
@@ -2437,19 +2470,47 @@ function viewMap(p){
     // a locked place is still drawn, just dark: the child sees where the
     // road goes on to, which is the whole point of a map
     if(!u.open){
-      return `<div class="place locked" ${at}>${head}
+      return `<div class="place locked${kind ? " " + kind : ""}" ${at}>${head}
         <span class="lockmsg">&#128274; ${u.why}</span></div>`;
     }
-    return `<button class="place${peek ? " peek" : ""}" data-act="play" data-id="${tr.id}" ${at}>${head}
+    return `<button class="place${kind ? " " + kind : ""}" data-act="play" data-id="${tr.id}" ${at}>${head}
       ${(tr.op === "mix" || tr.op === "weak") ? "" : `<span class="bar"><i style="width:${pr}%"></i></span>`}
       <span class="foot">${medalEmoji(med)}${placeTokens(p, trackSpec(p, tr))}</span>
     </button>`;
   };
-  const places = shown.map((tr, i) => placeHTML(tr, spots[i], false)).join("");
+
+  /* The door back into the years the class has already been through, and
+     the sign that says where this year begins. The door is only a fold,
+     not a lock: everything behind it is the child's own material, drawn
+     in full rather than dashed. Like the look ahead, it is a variable
+     and not a field in the profile, so closing the game or switching
+     player folds it back. */
+  let backPlace = "", sign = "";
+  if(folding){
+    const specs = past.map(tr => trackSpec(p, tr)).filter(Boolean);
+    const have = specs.reduce((n, s) => n + starCount(p, s.keys), 0);
+    const all = specs.reduce((n, s) => n + s.keys.length, 0);
+    const bs = spots[0];
+    backPlace = `<button class="place backdoor" data-act="back"
+        style="left:${bs.left.toFixed(1)}%;top:${bs.y}px">
+      <span class="thumb backthumb">${backOpen ? "&#128214;" : "&#128218;"}</span>
+      <span class="nm">${t("backTitle")}</span>
+      <span class="sub">${t("backSub", gradeList(past))}</span>
+      <span class="foot">${backOpen ? t("backHide") : t("backShow")}
+        ${all ? `<span class="tokc">&#10024; ${have}/${all}</span>` : ""}</span>
+    </button>`;
+    backPlace += pastShown.map((tr, i) => placeHTML(tr, spots[1 + i], "past")).join("");
+    // the sign sits on the road halfway through the extra half step; the
+    // middle of that S bend is the midpoint of the two places it joins
+    const a = spots[nPast - 1], b = spots[nPast];
+    sign = `<div class="milestone" id="milestone" style="left:${((a.cx + b.cx) / 2).toFixed(1)}%;`
+      + `top:${((a.cy + b.cy) / 2).toFixed(1)}px">${t("yearSign", t("grade" + gradeOf(p)))}</div>`;
+  }
+  const places = own.map((tr, i) => placeHTML(tr, spots[nPast + i], "")).join("");
 
   // the workshop keeps its own look and its own place off the road, so it
   // never reads as one more track in the row
-  const sp = spots[shown.length];
+  const sp = spots[nPast + own.length];
   const shopPlace = `<button class="place shopplace" data-act="shop"
       style="left:${sp.left.toFixed(1)}%;top:${sp.y}px">
     <span class="thumb shopthumb">&#128736;</span>
@@ -2462,11 +2523,10 @@ function viewMap(p){
      Opening it lays the rest of the road out and lets the child try any
      of it, and it is forgotten the moment the game is closed: it is a
      look ahead, not a promotion, and the year in the profile is the
-     parent's to set. There is no door the other way, because everything
-     from earlier years is simply still on the map. */
+     parent's to set. */
   let peekPlace = "";
   if(ahead.length){
-    const ps = spots[shown.length + 1];
+    const ps = spots[nPast + own.length + 1];
     peekPlace = `<button class="place peekdoor" data-act="peek"
         style="left:${ps.left.toFixed(1)}%;top:${ps.y}px">
       <span class="thumb peekthumb">${peeking ? "&#128275;" : "&#128064;"}</span>
@@ -2475,7 +2535,7 @@ function viewMap(p){
       <span class="foot">${peeking ? t("peekHide") : t("peekShow")}</span>
     </button>`;
     if(peeking){
-      peekPlace += ahead.map((tr, i) => placeHTML(tr, spots[shown.length + 2 + i], true)).join("");
+      peekPlace += ahead.map((tr, i) => placeHTML(tr, spots[nPast + own.length + 2 + i], "peek")).join("");
     }
   }
 
@@ -2502,17 +2562,31 @@ function viewMap(p){
           <path d="${worldRoad(spots, height)}" fill="none" stroke="var(--shell-2)" stroke-width="10"
                 stroke-linecap="round" stroke-dasharray="1 22" vector-effect="non-scaling-stroke"/>
         </svg>
-        ${places}${shopPlace}${peekPlace}
+        ${backPlace}${sign}${places}${shopPlace}${peekPlace}
       </div>
     </div>
   </div>`;
 }
 
-/* Who is currently looking ahead at next year. Deliberately a variable
-   and not a field in the profile: closing the game forgets it, and the
-   next start has the road folded back to this year. It holds a profile
-   id, so switching player folds it away as well. */
+/* Which years are behind the door, said in words: "1. a 2." and then
+   the word for class comes from backSub. The last two are joined by the
+   language's own "and", the rest by commas. */
+function gradeList(tracks){
+  const gs = [];
+  for(const tr of tracks) if(tr.grade && gs.indexOf(tr.grade) < 0) gs.push(tr.grade);
+  gs.sort((a, b) => a - b);
+  const names = gs.map(g => t("grade" + g));
+  if(names.length < 2) return names.join("");
+  return names.slice(0, -1).join(", ") + " " + t("backAnd") + " " + names[names.length - 1];
+}
+
+/* Who is currently looking ahead at next year, and who has the earlier
+   years unfolded. Deliberately variables and not fields in the profile:
+   closing the game forgets both, and the next start has the road folded
+   back to this year. They hold a profile id, so switching player folds
+   them away as well. */
 let PEEK = null;
+let BACK = null;
 
 /* ---------- race screen ---------- */
 let RUN = null;
@@ -3675,10 +3749,17 @@ document.addEventListener("click", e => {
     inp.onkeydown = ev => { if(ev.key === "Enter") create(); };
     return;
   }
-  if(act === "pick"){ DB.current = id; PEEK = null; save(); go("map"); return; }
+  if(act === "pick"){ DB.current = id; PEEK = null; BACK = null; save(); go("map"); return; }
   // looking ahead is a toggle and nothing is written down: the year in
   // the profile stays where the parent put it
   if(act === "peek"){ PEEK = (PEEK === p.id) ? null : p.id; sfx.coin(); render(); return; }
+  /* Unfolding the earlier years grows the road upwards, so whatever the
+     finger was on would be replaced by something else; the view moves
+     back to the year sign, both on opening and on closing. Nothing is
+     written down here either. */
+  if(act === "back"){
+    BACK = (BACK === p.id) ? null : p.id; sfx.coin(); go("map", {focus:"milestone"}); return;
+  }
   if(act === "delplayer"){
     e.stopPropagation();
     const who = DB.profiles.find(x => x.id === id);
@@ -3833,7 +3914,7 @@ document.addEventListener("click", e => {
   }
   // moving the year down takes tracks off the map, which only a parent
   // may do, exactly like closing a track by hand
-  if(act === "gradeset"){ p.grade = +el.dataset.gr; PEEK = null; save(); render(); return; }
+  if(act === "gradeset"){ p.grade = +el.dataset.gr; PEEK = null; BACK = null; save(); render(); return; }
   if(act === "chaptermode"){ p.chapterMode = el.dataset.cm; save(); render(); return; }
   if(act === "autounlock"){ p.autoUnlock = !p.autoUnlock; save(); render(); return; }
   if(act === "force"){

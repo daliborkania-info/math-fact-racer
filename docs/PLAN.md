@@ -177,7 +177,16 @@ before anything else is built on them`.
 
 ---
 
-## Krok B0. Předěl ročníků na mapě
+## Krok B0. Předěl ročníků na mapě — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo tohle: vedle `yearOf()` vznikla ještě `foldsYears(p)`
+na pravidlo o vlastní trati ročníku a `worldSpots()` dostalo parametr `gapAt`
+na ten půlkrok pod milníkem; a protože R1 se nedělá, nemá čerstvý třeťák na
+složené mapě jedinou otevřenou trať, takže `i18n.test.js` i `names.test.js`
+musely před závodem otevřít dveře do minulých let, jinak neměly na co
+kliknout. Přibyl klíč `backAnd` (spojka mezi třídami v podtitulku dveří)
+a přepsala se poznámka `gradeNote` v rodičovské sekci, která slibovala, že
+z mapy nic nemizí. Kontrol ve `flow.test.js` je po tomhle kroku 170.
 
 Přišlo z hraní 13. září, výslovný pokyn uživatele: syn si nastavil třetí třídu
 a mapa byla jen pokračování celého předchozího bloku, bez předělu, kde začíná

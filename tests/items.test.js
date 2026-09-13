@@ -6,7 +6,7 @@ global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll
 global.window={addEventListener(){}};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,overallMastery,heatSpecs,collectionSpecs};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -818,8 +818,8 @@ console.log('zkontrolovano cest:',A.WORLDS.length*vsechnyTrati.length,'| chyb:',
 // 14. rocniky
 //
 // Mapa se sklada podle toho, do ktere tridy dite chodi: je na ni ucivo
-// letosniho rocniku a vsech drivejsich. Drivejsi se nikdy neschovava,
-// zpatky se totiz vraci pres krabicku a neni k nemu zadne tlacitko.
+// letosniho rocniku a vsech drivejsich. Drivejsi se z profilu nikdy
+// neztrati, na mape je jen slozene za dvermi, viz yearOf() nize.
 // Starsi profil zadny rocnik nema a musi dostat nejvyssi, jinak by mu
 // nova verze vzala trati, ktere uz vidi.
 let gBad=0;
@@ -848,9 +848,37 @@ if(vidi(rk1).includes('a1000')) gsay('prvnak vidi tisicovku');
 if(!vidi(rk2).includes('t1')||!vidi(rk2).includes('a20')) gsay('druhak nevidi nasobilku nebo dvacitku');
 if(vidi(rk2).includes('a1000')) gsay('druhak vidi tisicovku');
 if(!vidi(rk3).includes('a1000')||!vidi(rk3).includes('a20')) gsay('tretak neco ztratil');
-// drivejsi rocnik se nikdy neschovava
+// drivejsi rocnik na mape zustava, jen slozeny; z dosahu nezmizi
 for(const p of [rk2,rk3]) for(const tr of A.TRACKS) if(tr.grade && tr.grade<p.grade && !A.inGrade(p,tr))
   gsay('rocnik '+p.grade+' schoval drivejsi trat '+tr.id);
+// predel rocniku: yearOf() rozhoduje, co je na mape letosni, co minule
+// a co teprve prijde, a ptá se na nej celá mapa misto tr.grade
+const rk4=A.newProfile('G4',4);
+for(const p of [rk1,rk2,rk3,rk4]) for(const tr of A.TRACKS){
+  const y=A.yearOf(p,tr);
+  if(['own','past','ahead'].indexOf(y)<0){gsay('yearOf vratil nesmysl '+y+' pro '+tr.id);continue;}
+  // sampionat, slaba mista a trat podle skoly patri vzdycky letosku
+  if(tr.op==='mix'||tr.op==='weak'||tr.op==='school'||!tr.grade){
+    if(y!=='own') gsay('trat '+tr.id+' ma byt vzdycky letosni, ale pro rocnik '+p.grade+' je '+y);
+    continue;
+  }
+  const cekano = tr.grade<p.grade ? 'past' : (tr.grade>p.grade ? 'ahead' : 'own');
+  if(y!==cekano) gsay('yearOf('+p.grade+','+tr.id+') je '+y+', ma byt '+cekano);
+  // co je na mape videt, to nikdy neni "ahead", a naopak
+  if(A.inGrade(p,tr) && y==='ahead') gsay('viditelna trat '+tr.id+' oznacena jako pristi rok');
+  if(!A.inGrade(p,tr) && y!=='ahead') gsay('neviditelna trat '+tr.id+' neoznacena jako pristi rok');
+}
+// sklada se jen rocnik, ktery ma vlastni trat; ctvrty zadnou nema, takze by
+// slozeni schovalo celou mapu za jedny dvere, a takove jsou vsechny starsi profily
+for(const p of [rk1,rk2,rk3]) if(!A.foldsYears(p)) gsay('rocnik '+p.grade+' se neskládá, i kdyz ma vlastni trat');
+if(A.foldsYears(rk4)) gsay('ctvrtak sklada mapu, i kdyz nema vlastni trat');
+if(A.foldsYears(gp)) gsay('starsi profil bez rocniku sklada mapu');
+// prvnak nema co slozit, od druhaka uz ano
+for(const p of [rk1,rk2,rk3]){
+  const minule=A.visibleTracks(p).filter(tr=>A.yearOf(p,tr)==='past').length;
+  if(p.grade===1 && minule) gsay('prvnak ma za sebou '+minule+' trati z minulych let');
+  if(p.grade>1 && !minule) gsay('rocnik '+p.grade+' nema co slozit za dvere');
+}
 // ukazka nabizi prave jeden dalsi rocnik, nikdy vic a nikdy zpatky
 for(const p of [rk1,rk2,rk3]){
   const ah=A.peekTracks(p);

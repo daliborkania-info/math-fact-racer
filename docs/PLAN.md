@@ -1241,7 +1241,14 @@ Sedmý startovní závodník zdarma, kreslený parametricky, bez jediného dopl�
   musí se průhlednost pro tu jednu kontrolu zamíchat do plné barvy, jinak
   se posuzuje něco, co prohlížeč nikdy neukáže.
 
-### H2. Datový model a vrstva Tělo
+### H2. Datový model a vrstva Tělo — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo tohle: datový model sedí, jak byl navržený, tedy
+`duckParts` a `duck` v profilu a `seedDuck()` v `load()` i ve větvi `import`;
+fixture se jmenuje `v12-pred-kacenkami` a `migration.test.js` u ní hlídá, že
+starší profil dostane obě pole prázdná, kačenku mezi závodníky a beze změny
+součástky i nátěry; těl je deset podle katalogu, ale **součet vypsaných cen je
+120 součástek, ne 145** ze souhrnu, a test si zapisuje ten vypsaný součet.
 
 Deset těl, `db_*`, a s nimi celý datový model vrstev. Tohle je jediná část
 kroku H, která sahá na profil.
@@ -1364,7 +1371,7 @@ kreslení**, ne jednou při načtení, aby šlo v testu pohnout `DUCK.HEAD` a ov
 a zobák jako klín ze tří obdélníků: obdélník, do kterého se vejdou, zakazoval
 i to, co leží vedle nich.
 
-### H4. Oči a výbava
+### H4. Oči a výbava — HOTOVO 14. září 2026
 
 Devět dílů na oči `de_*` a šestnáct kusů výbavy `dg_*`, tedy 25 dílů
 a 75 textů.
@@ -1403,6 +1410,34 @@ maska se stužkou na boku, v barvě, kterou si nese vrstva, **nikdy černá
 s pláštěm**. A `dg_privesek` je hvězdička na šňůrce, ne medaile; medaile se
 schválně nedá koupit, protože je to jediná věc, kterou dítě v závodě vyjezdí,
 a koupitelná medaile by ji znehodnotila.
+
+**Co se proti plánu upřesnilo.** Ceny obou vrstev sedí, 108 a 278 součástek,
+takže všech 65 dílů stojí 934, ne 939 ze souhrnu: vrstva Tělo je o 25 levnější
+(120 místo 145) a vrstva Na hlavu o 20 dražší (314 místo 294).
+Kačenka je vidět ze strany a má jedno oko, takže na obličeji je jen šest bodů
+mezi okem a linkou klobouku a pět mezi okem a zobákem; **všechny oční díly
+proto končí nejvýš na hranici `brim` a nejdál na `K.x`**, jinak se schovají pod
+klobouk nebo vylezou na zobák, a `de_rasy` jsou jediný díl, který smí špičkou
+linku klobouku přerůst, protože řasa je tenká jako čára. Oko zůstává vidět
+u `de_rasy`, `de_dioptr`, `de_potapec`, `de_snorchl` (obroučka bez skla)
+a u `de_maska`, která má **díru přes `fill-rule="evenodd"`**; tmavé sklo ho
+zakrývá jen u brýlí, klapky a lyžařských, tedy tam, kde je zakryté i doopravdy.
+`de_maska` se překreslovala třikrát: s ploutvičkovou mašlí na konci vypadala
+jako ryba ležící přes obličej, takže má teď zoubkovaný horní okraj se zlatou
+linkou a **dvě tkanice vedené dozadu po hlavě** místo mašle. Tmavá skla
+(`de_brejle`, `de_sport`, `de_klapka`) mají obrys v pevné šedé, ne v kontrastní
+barvě vrstvy: bílá linka kolem tmavého skla udělá z uhlíkové kačenky dvě
+vyvalené oči. Výbava má **zadní půlku jen u čtyř dílů** (kruh, pneumatika,
+batoh, nádrž) plus surf, který je celý vzadu, protože kačenka na něm sedí;
+`dg_vlajecka` se naopak musela přestěhovat celá dopředu, protože praporek
+kreslený za tělem si zakryl vlastní tyčku a vypadal jako trojúhelník ve
+vzduchu. Kruh i pneumatika se kreslí **kvadratikou, ne eliptickým obloukem**,
+aby si je test uměl přečíst zpátky, a obě mají pod sebou kontrastní linku,
+jinak zmizí černá pneumatika na uhlíkové a červený kruh na ohnivé kačence.
+`dg_kridla` jsou pás kolem křídla: prstenec z nich dělal druhý plovací kruh
+a dva vyplněné laloky dva pomeranče. Strojová kontrola přibyla v okruhu 3e
+`items.test.js` a kromě rámu a kotev měří i **pořadí vrstev v hotovém SVG**,
+tedy zadní výbava, tělo, vzor, oko, oční díl, klobouk, přední výbava.
 
 ### H5. Dílna ukazuje, kam součástky jdou
 

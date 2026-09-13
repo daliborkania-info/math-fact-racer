@@ -538,19 +538,20 @@ console.log('--- kacenciny barvy ---');
 // dily kacenky se kupuji za tutez menu jako natery, tedy za soucastky
 // z dilny, nikdy za mince; mincim se po nakupu nesmi stat vubec nic
 const minciPred=DBg().profiles[0].coins, soucastekPred=DBg().profiles[0].parts;
-// tri vrstvy pod natery: deset barev, deset vzoru, dvacet dilu na
-// hlavu. Cisla se posunula krokem H3 vedome: k devíti placenym telum
-// pribylo 30 placenych dilu, tedy 39 k odemceni, a k jedinemu dilu
-// zdarma (klasicka zluta) pribyly dve prazdne dlazdice "bez vzoru"
-// a "nic na hlave", tedy tri, na ktere se klepne bez placeni
+// pet vrstev pod natery: deset barev, deset vzoru, dvacet dilu na
+// hlavu, devet na oci a sestnact kusu vybavy. Cisla se posunula krokem
+// H4 vedome: k 39 placenym dilum z H2 a H3 pribylo 25, tedy 64
+// k odemceni, a k jedinemu dilu zdarma (klasicka zluta) pribyly ctyri
+// prazdne dlazdice, tedy pet dlazdic, na ktere se klepne bez placeni
 ok('vrstvy kacenky jsou v garazi pod natery', !!d.getElementById('duckbodysec')
    && !!d.getElementById('duckpatsec') && !!d.getElementById('duckheadsec')
-   && qa('[data-act="buyduck"]').length===39, qa('[data-act="buyduck"]').length+' k odemceni');
+   && !!d.getElementById('duckeyesec') && !!d.getElementById('duckgearsec')
+   && qa('[data-act="buyduck"]').length===64, qa('[data-act="buyduck"]').length+' k odemceni');
 // klasicka zluta je zdarma, takze se nekupuje, jen vybira, a vrstvy,
 // ktere jdou sundat, maji prazdnou dlazdici
-ok('telo zdarma a dve prazdne dlazdice se nekupuji', qa('[data-act="useduck"]').length===3
+ok('telo zdarma a ctyri prazdne dlazdice se nekupuji', qa('[data-act="useduck"]').length===5
    && qa('[data-act="useduck"]')[0].dataset.id==='db_klasik'
-   && qa('[data-act="useduck"]').filter(b=>b.dataset.id==='').length===2,
+   && qa('[data-act="useduck"]').filter(b=>b.dataset.id==='').length===4,
    qa('[data-act="useduck"]').map(b=>b.dataset.id+':'+b.dataset.layer).join(' '));
 const telo=qa('[data-act="buyduck"]')[0].dataset.id;
 const cenaTela=ev('duckPartById("'+telo+'").cost');
@@ -567,27 +568,33 @@ ok('vyber klasicke barvy koupenou neztratil', DBg().profiles[0].duckParts.includ
 ok('koupena barva uz se znovu neprodava',
    !qa('[data-act="buyduck"]').some(b=>b.dataset.id===telo)
    && qa('[data-act="useduck"]').some(b=>b.dataset.id===telo));
-// vrstvy se skladaji: vzor i klobouk se daji koupit a nosit zaroven
-// s barvou, a sundani jednoho nesahne na zbytek ani na koupene dily
-const vzor=qa('[data-act="buyduck"]').find(b=>b.dataset.layer==='pat').dataset.id;
-click(qa('[data-act="buyduck"]').find(b=>b.dataset.id===vzor)); click(q('[data-yes]'));
-const klobouk=qa('[data-act="buyduck"]').find(b=>b.dataset.layer==='head').dataset.id;
-click(qa('[data-act="buyduck"]').find(b=>b.dataset.id===klobouk)); click(q('[data-yes]'));
-ok('kacenka ma na sobe vsechny tri vrstvy najednou',
+// vrstvy se skladaji: vzor, klobouk, bryle i vybava se daji koupit
+// a nosit zaroven s barvou, a sundani jedne nesahne na zbytek ani na
+// koupene dily
+const koupVrstvu=layer=>{
+  const id=qa('[data-act="buyduck"]').find(b=>b.dataset.layer===layer).dataset.id;
+  click(qa('[data-act="buyduck"]').find(b=>b.dataset.id===id)); click(q('[data-yes]'));
+  return id;
+};
+const vzor=koupVrstvu('pat'), klobouk=koupVrstvu('head');
+const bryle=koupVrstvu('eye'), vybava=koupVrstvu('gear');
+ok('kacenka ma na sobe vsech pet vrstev najednou',
    DBg().profiles[0].duck.body==='db_klasik' && DBg().profiles[0].duck.pat===vzor
-   && DBg().profiles[0].duck.head===klobouk, JSON.stringify(DBg().profiles[0].duck));
+   && DBg().profiles[0].duck.head===klobouk && DBg().profiles[0].duck.eye===bryle
+   && DBg().profiles[0].duck.gear===vybava, JSON.stringify(DBg().profiles[0].duck));
 // prazdna dlazdice vrstvu sundá, ale koupeny dil zustava koupeny
 click(qa('[data-act="useduck"]').find(b=>b.dataset.id===''&&b.dataset.layer==='head'));
 ok('klobouk jde sundat a zustane koupeny', DBg().profiles[0].duck.head===undefined
    && DBg().profiles[0].duckParts.includes(klobouk)
-   && DBg().profiles[0].duck.pat===vzor, JSON.stringify(DBg().profiles[0].duck));
+   && DBg().profiles[0].duck.pat===vzor && DBg().profiles[0].duck.eye===bryle,
+   JSON.stringify(DBg().profiles[0].duck));
 // a na co dite nema, to se nekoupi; soucastky zustanou, kde byly
 const chudy=DBg(); chudy.profiles[0].parts=1;
 w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(chudy));
 jev('load(); go("collection")');
 click(qa('[data-act="buyduck"]')[0]);
 ok('bez soucastek se dil nekoupi', DBg().profiles[0].parts===1
-   && DBg().profiles[0].duckParts.length===3, DBg().profiles[0].parts+' soucastek');
+   && DBg().profiles[0].duckParts.length===5, DBg().profiles[0].parts+' soucastek');
 q('.sheet').remove();
 
 console.log('--- rocnik a ukazka dalsiho roku ---');

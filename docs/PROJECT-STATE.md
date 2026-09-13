@@ -214,6 +214,15 @@ se z SVG vyřízne podkladový obdélník, scéna se vyrenderuje s průhledným
 pozadím a podloží se přechodem složeným v ImageMagicku
 (`convert -size 400x205 gradient:hill1-hill2 scena.png -composite`).
 
+**Všechny tři obcházky odpadnou, když je po ruce opravdový renderer SVG.**
+V kroku H4 se ukázalo, že stačí `pip install cairosvg` a pak
+`cairosvg.svg2png(url=..., write_to=..., output_width=..., background_color="white")`:
+přechody, průhlednost i `clip-path` vyjdou tak, jak je nakreslí prohlížeč, takže
+se kresba posuzuje na tom, co uvidí dítě, a ne na náhradě. Skládat obrázky vedle
+sebe do jedné mřížky s popisky umí dál `montage`. Jestli cairosvg na stroji není
+a nejde doinstalovat, platí postup s `convert` výš; ověřit, který z obou právě
+běží, je dobré dřív, než se podle obrázku něco překreslí.
+
 ---
 
 ## 3. Nedotknutelné principy

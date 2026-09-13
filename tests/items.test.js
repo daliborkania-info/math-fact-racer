@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,duckFit,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -542,6 +542,182 @@ if(pf.duck.head!==undefined||pf.duck.pat!=='dp_kostka'||pf.duck.body!=='db_mint'
 if(!pf.duckParts.includes('dh_koruna')) hsay('sundani klobouku pripravilo dite o koupeny dil');
 console.log('vzory a hlava:',hBad?'chyb '+hBad:'v poradku',
   '| vrstva Vzor stoji '+cenaVzor+', Na hlavu '+cenaHlava+' soucastek');
+
+// 3e. vrstvy Oci a Vybava
+//
+// Oko je nejmensi misto kresby a nese cely vyraz, takze se u nej hlida
+// vic nez u ostatnich vrstev: ze dil opravdu sedi na oku a ne vedle
+// nej, ze nevyleze na zobak a ze se vejde pod klobouk, protoze nad
+// linkou brim konci klobouk a bryle, ktere tam vylezou, uz nikdo
+// neuvidi. Vybava naopak na hlavu nesmi vubec: patri telu, takze se
+// hlida, ze je pod toutez linkou, ze nesahne na oko ani na zobak a ze
+// se aspon kouskem drzi tela, jinak by visela ve vzduchu.
+// Nejdulezitejsi je ale porovnani poradi vrstev: zadni vybava pod
+// telem, predni nad vsim, a ocni dil mezi okem a kloboukem. Kdyby se
+// poradi otocilo, mela by kacenka nadrz pres kridlo a bryle pres
+// klobouk, a zadna jina kontrola by si toho nevsimla.
+let eBad=0;
+const esay=m=>{eBad++;console.log('  !!  '+m);};
+const OCI=A.DUCK_EYE, VYBAVA=A.DUCK_GEAR, kacka3=A.DUCKS[0];
+const BODYBOX=[sed.B.x-sed.B.rx,sed.B.y-sed.B.ry,sed.B.x+sed.B.rx,sed.B.y+sed.B.ry];
+// vlasova rezerva nad linkou klobouku: spicka rasy ji smi prekrocit,
+// protoze je tenka jako cara a klobouk pres ni vypada spravne, ale nic,
+// co nese sklo, se tam nedostane
+const POD_KLOBOUK=sed.brim-4;
+
+// --- katalog ---
+if(OCI.length!==9) esay('ocnich dilu uz neni devet, ale '+OCI.length);
+if(VYBAVA.length!==16) esay('kusu vybavy uz neni sestnact, ale '+VYBAVA.length);
+if(new Set(A.DUCK_PARTS.map(x=>x.id)).size!==A.DUCK_PARTS.length) esay('dva dily maji stejne id');
+if(A.DUCK_PARTS.length!==A.DUCK_BODY.length+VZORY.length+HLAVA.length+OCI.length+VYBAVA.length)
+  esay('spolecny seznam dilu neobsahuje vsech pet vrstev');
+for(const [list,layer,jm] of [[OCI,A.EYE_LAYER,'oci'],[VYBAVA,A.GEAR_LAYER,'vybava']]){
+  for(let i=0;i<list.length;i++){
+    const x=list[i];
+    if(A.duckLayerOf(x)!==layer) esay(x.id+' nepatri do vrstvy '+jm);
+    if(A.duckPartById(x.id)!==x) esay(x.id+' nejde najit podle id');
+    if(typeof x.draw!=='function') esay(x.id+' nema kresbu');
+    if(!x.cost) esay(x.id+' je zdarma, placene vrstvy zadny dil zdarma nemaji');
+    if(i&&list[i].cost<list[i-1].cost) esay('katalog '+jm+' neni razeny od nejlevnejsiho: '+list[i-1].id+' pred '+x.id);
+    // krome kresby a ceny nesmi dil nest nic; `back` je druha pulka
+    // kresby, ne vlastnost, a ma ji jen vybava
+    const navic=Object.keys(x).filter(k=>['id','cost','draw','back'].indexOf(k)<0);
+    if(navic.length) esay(x.id+' ma atribut navic: '+navic.join(','));
+    if(x.back&&layer!==A.GEAR_LAYER) esay(x.id+' ma zadni pulku, a to umi jen vybava');
+    for(const l of ['cs','en','de']) if(!A.I18N[l][x.id]) esay(x.id+' nema jmeno v jazyce '+l);
+  }
+}
+// ceny vrstev jsou zapsana cisla, ne dopoctena, stejne jako u H2 a H3
+const CENA_OCI=108, CENA_VYBAVA=278;
+const cenaOci=OCI.reduce((s,x)=>s+x.cost,0), cenaVyb=VYBAVA.reduce((s,x)=>s+x.cost,0);
+if(cenaOci!==CENA_OCI) esay('vrstva Oci stoji '+cenaOci+', zapsano bylo '+CENA_OCI);
+if(cenaVyb!==CENA_VYBAVA) esay('vrstva Vybava stoji '+cenaVyb+', zapsano bylo '+CENA_VYBAVA);
+if(A.DUCK_LAYERS.length!==5) esay('garaz ukazuje '+A.DUCK_LAYERS.length+' vrstev misto peti');
+
+// --- kresba kazdeho dilu ---
+const vRamu=(part,bbx)=>{
+  const px=x=>50+1.08*(x-46), py=y=>63+1.08*(y-65.5);
+  if(px(bbx[0])<0||px(bbx[2])>100||py(bbx[1])<0||py(bbx[3])>118)
+    esay(part.id+' vyjel z ramu: '+[px(bbx[0]),py(bbx[1]),px(bbx[2]),py(bbx[3])].map(v=>+v.toFixed(1)).join(','));
+};
+const zdravaKresba=(part,frag)=>{
+  if(!frag||/NaN|undefined/.test(frag)) esay('kresba '+part.id+' je vadna');
+  if((frag.match(/</g)||[]).length!==(frag.match(/>/g)||[]).length) esay('rozbite tagy u '+part.id);
+  if((frag.match(/"/g)||[]).length%2) esay('rozbite uvozovky u '+part.id);
+  for(const m of frag.match(/ d="[^"]*"/g)||[]) if(/[a-z]/.test(m.slice(4,-1).replace(/e-/g,'')))
+    esay(part.id+' kresli relativni cestou, to uz nikdo nezkontroluje');
+  // pruhledny smi byt jediny dil ve hre, skafandr, a ten je na hlave
+  if(/opacity/.test(frag)) esay(part.id+' je pruhledny, a to umi jen skafandr');
+};
+for(const part of OCI){
+  const frag=part.draw(sed,'#26324c');
+  zdravaKresba(part,frag);
+  const shp=boxesOf(frag);
+  if(!shp.length){esay(part.id+' nekresli nic');continue;}
+  const bx=bbox(shp);
+  vRamu(part,bx);
+  // dil musi sedet na oku, ne vedle nej
+  if(!(bx[0]<=EYE.x&&bx[2]>=EYE.x&&bx[1]<=EYE.y&&bx[3]>=EYE.y))
+    esay(part.id+' nesedi na oku: '+bx.map(v=>+v.toFixed(1)).join(','));
+  // a nejen ze ho obepina: aspon jeden tvar musi lezet na samotnem oku,
+  // jinak by dil mohl byt prstenec kolem prazdna
+  if(!shp.some(s=>odOka(s.b)<OKO)) esay(part.id+' se oka jen letmo dotyka');
+  for(const s of shp){
+    if(ZOBAK.some(z=>kryje(s.b,z[0],z[1],z[2],z[3])))
+      esay(part.id+' sedl na zobak: '+s.b.map(v=>+v.toFixed(1)).join(','));
+    if(s.b[1]<POD_KLOBOUK)
+      esay(part.id+' vyleze nad linku klobouku ('+s.b[1].toFixed(1)+' proti '+POD_KLOBOUK.toFixed(1)+')');
+    // bryle drzi na hlave, ne vedle ni: kazdy roh tvaru lezi uvnitr
+    // hlavy plus rezerva na tloustku cary
+    const rohy=[[s.b[0],s.b[1]],[s.b[2],s.b[1]],[s.b[0],s.b[3]],[s.b[2],s.b[3]]];
+    if(rohy.some(r=>Math.hypot(r[0]-sed.x,r[1]-sed.y)>sed.r+3))
+      esay(part.id+' vyjel z hlavy: '+s.b.map(v=>+v.toFixed(1)).join(','));
+  }
+}
+for(const part of VYBAVA){
+  const zadni=part.back?part.back(sed,'#26324c'):'';
+  const predni=part.draw(sed,'#26324c');
+  if(!zadni&&!predni) esay(part.id+' nekresli nic');
+  if(part.back&&!zadni) esay(part.id+' ma prazdnou zadni pulku');
+  zdravaKresba(part,zadni+predni);
+  const shp=boxesOf(zadni+predni);
+  if(!shp.length){esay(part.id+' nekresli zadny tvar');continue;}
+  vRamu(part,bbox(shp));
+  // vybava patri telu: na hlavu, na oko ani na zobak nesmi
+  if(!shp.some(s=>kryje(s.b,BODYBOX[0],BODYBOX[1],BODYBOX[2],BODYBOX[3])))
+    esay(part.id+' se nedrzi tela a visi ve vzduchu');
+  for(const s of shp){
+    if(odOka(s.b)<OKO) esay(part.id+' sedl na oko: '+s.b.map(v=>+v.toFixed(1)).join(','));
+    if(ZOBAK.some(z=>kryje(s.b,z[0],z[1],z[2],z[3]))) esay(part.id+' sedl na zobak');
+    if(s.b[1]<sed.brim) esay(part.id+' leze na hlavu, kde uz je klobouk ('+s.b[1].toFixed(1)+')');
+  }
+}
+// zadni pulku ma mit jen to, co musi jit za telo, a je jich mene nez pul
+const sZady=VYBAVA.filter(x=>x.back).map(x=>x.id);
+if(sZady.length<3) esay('zadni pulku nema skoro nic, kruh nebo batoh se ztratil: '+sZady.join(','));
+
+// --- poradi vrstev ---
+// jedna kacenka se vsemi peti vrstvami a strojova kontrola, ze se
+// kresli v poradi zadni vybava, telo, vzor, oko, ocni dil, klobouk,
+// predni vybava
+const pet=A.duckSVG(kacka3,{body:'db_klasik',pat:'dp_puntiky',head:'dh_koruna',eye:'de_brejle',gear:'dg_kruh'});
+const poradiVrstev=[['zadni vybava','#e8402a'],['telo',kacka3.c1],['vzor','clip-path'],['oko','#22314f'],
+              ['bryle','#23283a'],['klobouk','#f2c13c'],['predni vybava','#fdfdff']];
+let posledni=-1;
+for(const [jm,znak] of poradiVrstev){
+  const i=pet.indexOf(znak);
+  if(i<0){esay('v peti vrstvach chybi '+jm);continue;}
+  if(i<posledni) esay('poradi vrstev se rozpadlo, '+jm+' se kresli prilis brzy');
+  posledni=i;
+}
+// kazda vrstva zvlast: dil se nasadi jen do sve vrstvy a neznamy dil
+// nechá vrstvu holou misto toho, aby kacenku rozbil
+if(A.duckSVG(kacka3,{eye:'dg_kruh'})!==A.duckSVG(kacka3,{})) esay('vybava zapsana do vrstvy oci se presto nakreslila');
+if(A.duckSVG(kacka3,{gear:'de_brejle'})!==A.duckSVG(kacka3,{})) esay('bryle zapsane do vrstvy vybavy se presto nakreslily');
+if(A.duckSVG(kacka3,{eye:'de_neexistuje'})!==A.duckSVG(kacka3,{})) esay('neznamy ocni dil kacenku rozbije');
+if(A.duckSVG(kacka3,{gear:''})!==A.duckSVG(kacka3,{})) esay('prazdna vybava neni tataz jako zadna');
+
+// --- kotvy ---
+// ocni dil se musi pohnout s okem a vybava s telem; tohle je jedina
+// kontrola, ktera pozna souradnici napsanou v dilu natvrdo
+const zmerO=part=>bbox(boxesOf(part.draw(A.duckFit(),'#26324c')));
+const zmerV=part=>bbox(boxesOf((part.back?part.back(A.duckFit(),'#26324c'):'')+part.draw(A.duckFit(),'#26324c')));
+const predOci=OCI.map(zmerO), predVyb=VYBAVA.map(zmerV);
+const E0=A.DUCK.EYE, B1=A.DUCK.BODY, W0=A.DUCK.WING, T0=A.DUCK.TAIL, WA0=A.DUCK.WATER;
+A.DUCK.EYE={x:E0.x+5,y:E0.y-3};
+OCI.forEach((part,i)=>{const b=zmerO(part),p=predOci[i];
+  if(Math.abs(b[0]-p[0]-5)>.06||Math.abs(b[1]-p[1]+3)>.06)
+    esay(part.id+' se s okem neposunul, ma v sobe napsanou souradnici');});
+A.DUCK.EYE=E0;
+A.DUCK.BODY={x:B1.x+6,y:B1.y+4,rx:B1.rx,ry:B1.ry};
+A.DUCK.WING={x:W0.x+6,y:W0.y+4}; A.DUCK.TAIL={x:T0.x+6,y:T0.y+4}; A.DUCK.WATER=WA0+4;
+VYBAVA.forEach((part,i)=>{const b=zmerV(part),p=predVyb[i];
+  if(Math.abs(b[0]-p[0]-6)>.06||Math.abs(b[1]-p[1]-4)>.06)
+    esay(part.id+' se s telem neposunul, ma v sobe napsanou souradnici');});
+A.DUCK.BODY=B1; A.DUCK.WING=W0; A.DUCK.TAIL=T0; A.DUCK.WATER=WA0;
+
+// --- skladani vrstev ---
+// kazdy novy dil na kazdem tele, protoze pod nim se meni barva
+for(const telo of A.DUCK_BODY) for(const part of OCI.concat(VYBAVA)){
+  const outfit={}; outfit[A.BODY_LAYER]=telo.id; outfit[A.duckLayerOf(part)]=part.id;
+  const svg=A.duckSVG(kacka3,outfit);
+  if(/NaN|undefined/.test(svg)) esay('SVG problem u '+telo.id+' + '+part.id);
+  if((svg.match(/</g)||[]).length!==(svg.match(/>/g)||[]).length) esay('rozbite tagy u '+telo.id+' + '+part.id);
+  if(svg.length<=A.duckSVG(kacka3,{[A.BODY_LAYER]:telo.id}).length) esay(part.id+' se na '+telo.id+' vubec nepridal');
+}
+// vsech pet vrstev najednou drzi kazda svoje a sundani jedne nesahne
+// na ostatni
+const pf5={duckParts:['dp_kostka','dh_koruna','de_maska','dg_kruh'],duck:{}};
+A.wearDuckPart(pf5,A.BODY_LAYER,'db_mint'); A.wearDuckPart(pf5,A.PAT_LAYER,'dp_kostka');
+A.wearDuckPart(pf5,A.HEAD_LAYER,'dh_koruna'); A.wearDuckPart(pf5,A.EYE_LAYER,'de_maska');
+A.wearDuckPart(pf5,A.GEAR_LAYER,'dg_kruh');
+if(Object.keys(pf5.duck).length!==5) esay('pet vrstev najednou se do profilu nevejde');
+A.wearDuckPart(pf5,A.EYE_LAYER,'');
+if(pf5.duck.eye!==undefined||pf5.duck.gear!=='dg_kruh'||pf5.duck.head!=='dh_koruna')
+  esay('sundani bryli sahlo na ostatni vrstvy');
+if(!pf5.duckParts.includes('de_maska')) esay('sundani bryli pripravilo dite o koupeny dil');
+console.log('oci a vybava:',eBad?'chyb '+eBad:'v poradku',
+  '| vrstva Oci stoji '+cenaOci+', Vybava '+cenaVyb+' soucastek');
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
 const VALID=new Set();

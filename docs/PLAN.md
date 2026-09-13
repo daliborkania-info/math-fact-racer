@@ -892,11 +892,51 @@ kterou závod držet nesmí.
 
 ## Krok G. Čtvrtý a pátý ročník
 
+Krok se po průzkumu státního kurikula (13. září 2026, záznam v
+`docs/kurikulum/ZDROJE-RVP.md`) rozpadá na dvě části, které na sobě nezávisí.
+G0 je nová mapa, kterou jde napsat hned, G1 je zapnutí ročníků v aplikaci.
+
+### G0. Mapa `npi-msvp-1st` z modelového ŠVP
+
+Předmětový modelový ŠVP "Matematika pro 1. stupeň ZŠ" na
+`revize.rvp.cz/zv/jak-na-svp/modelove-svp-pro-zs` má samostatné oddíly pro
+1. až 5. ročník a u každého sloupec "Učivo k dosažení OVU", tedy ročníky
+i číselné rozsahy. Nečeká na nic, co se teprve má ověřit v Matýskovi.
+
+Udělá se nová mapa `docs/kurikulum/npi-msvp-1st.md` v témže tvaru jako mapy
+učebnic, tedy hlavička s `id` a zdrojem a tabulka kapitol odkazujících na
+témata z `TEMATA.md`. Do `src/curricula.js` přibydou řádky téhož tvaru jako
+u tří stávajících kurikul, včetně deklarativního popisu poolu, a do `i18n.js`
+název kurikula ve všech třech jazycích. Kód enginu se nesahá, protože mapa
+nezavádí žádné téma mimo katalog; jediné nové téma z průzkumu,
+`number_pattern`, se do katalogu přidalo bez generátoru a v této mapě se
+zatím nepoužije.
+
+Hrubší je to ve dvou věcech. Ročník má v modelovém ŠVP asi osm položek, ne
+třicet dvoustran, takže rodičovský přepínač nastaví čtvrtinu roku, ne
+konkrétní kapitolu. A samotný dokument je pracovní verze k pilotnímu
+ověřování, finální znění se čeká na přelomu 2026 a 2027. Nevadí to, protože
+proti dnešku, kdy čtvrťák nemá co nastavit vůbec, je hrubá mapa zlepšení, a
+měkký režim beztak serveruje jen sedmdesát procent z aktuální kapitoly, takže
+se nepřesnost v zařazení neprojeví tak, jako by se projevila v tvrdém režimu.
+Až vyjde finální znění a k němu tematické plány, mapa se zpřesní na místě,
+protože `normalizeChapter(p)` srovná uložené profily na nejbližší dřívější
+hratelnou kapitolu.
+
+### G1. Zapnutí čtvrtého a pátého ročníku
+
 Beze změny proti předchozímu plánu: mapy v `docs/kurikulum/nns-matysek-4.md`
 a `-5.md` vznikly z obsahů a před zapnutím se ověřují ze stránek. Zapnutí
 znamená `MAX_GRADE = 5` nebo 6, což je změna datového modelu (starší profily
 mají `grade: 4` jako "všechno" a nová hodnota "všechno" je jiná), takže
 `seedGrade()` musí starou čtyřku přeložit a přibude fixture.
+
+Otazníky u číselných rozsahů v obou mapách jdou sundat z RVP, aniž by se
+čekalo na prohlédnuté stránky, protože rozsahy za období jsou v RVP uvedené
+závazně. Jde o sčítání a odčítání do 10 000 pamětně i písemně, násobení dvou
+dvouciferných čísel, písemné dělení jednociferným dělitelem se zbytkem i beze
+zbytku, desetinná čísla na dvě desetinná místa a zlomky kmenové i nekmenové.
+Otazníky u formátu odpovědi to nesundá, ty pořád potřebují stránky.
 
 ---
 
@@ -970,6 +1010,23 @@ poloviny obrazovky, což už není mapa.
 **R7. Co přežije vynulování postupu.** Návrh v A2: nastavení zůstávají,
 postup se maže. Alternativa je dnešní stav, kdy se maže všechno včetně ročníku,
 což je skoro jistě nezáměr.
+
+**R8. Mapa z modelového ŠVP dřív než ověřený Matýsek.** Dnes jsou v aplikaci
+kurikula jen pro první až třetí ročník, takže rodič čtvrťáka si nemá co
+nastavit a zbývá mu adaptivní režim. Mapy `nns-matysek-4.md` a `-5.md` sice
+existují, ale vznikly jen z obsahů a před zapnutím se mají ověřit ze stránek,
+což čeká na přístup k učebnicím. Otázka zní, jestli mezitím postavit mapu
+`npi-msvp-1st` z předmětového modelového ŠVP, viz krok G0 a
+`docs/kurikulum/ZDROJE-RVP.md`. Doporučení: ano. Čtvrťák tím dostane něco, co
+jde nastavit, a zpřesnit se to dá později, protože `normalizeChapter(p)` umí
+uložené profily srovnat a mapa se mění na místě. Stojí to jednu novou mapu
+v `docs/kurikulum/`, řádky v `src/curricula.js`, tři jazykové mutace názvu a
+doplnění fixture pro novou volbu kurikula; do enginu se nesahá. Nejisté je,
+že modelový ŠVP je zatím pracovní verze k pilotnímu ověřování s finálním
+zněním čekaným na přelomu 2026 a 2027, takže se dělení do ročníků ještě může
+posunout, a že přepínač bude hrubší než u třetí třídy, tedy po čtvrtinách roku
+místo po dvoustranách. Pokud ne, čeká se na Matýska a čtvrtý a pátý ročník
+zůstávají bez kurikula.
 
 ---
 

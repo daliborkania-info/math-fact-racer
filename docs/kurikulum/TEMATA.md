@@ -62,6 +62,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `unit_convert` | převody jednotek délky, hmotnosti a objemu | `pad` | celá čísla | nové |
 | `parity` | sudé nebo liché | `pick` | 0 až 1000 | nové |
 | `digit_count` | jednociferné, dvojciferné, trojciferné | `pick` | 0 až 1000 | nové |
+| `number_pattern` | doplnění dalšího členu číselné řady, aritmetické i geometrické | `pad` | 0 až 1000 | nové |
 | `compare_numbers` | porovnávání čísel | `cmp` | 0 až 1000 | nové |
 | `compare_units` | porovnávání veličin s jednotkami | `cmp` | podle jednotky | nové |
 | `clock_read` | přečtení analogových hodin na digitální čas | `clock` | 12 i 24 hodin | hotovo |
@@ -136,6 +137,14 @@ jednociferné, dvojciferné, nebo celé stovky. Učebnice tomu věnuje devět
 dvoustran a rozlišuje šest případů, takže kbelíků je šest, ne pět, a na rozdíl
 od stovky jsou stupňované: aktuální nese sedmdesát procent závodu a dřívější
 se vracejí jako opakování, stejně jako u mostů přes desítku a u hodin.
+
+**`number_pattern`.** Jediné téma v katalogu, které nepochází z učebnice, ale ze
+státního kurikula: v revidovaném RVP ZV je to samostatný očekávaný výstup
+`MAT-MAT-001-ZV5-012` pro první stupeň, zatímco Matýskovy mapy ho nemají.
+Zadání je řada čtyř až pěti členů a otázka na další člen, například
+`80, 40, 20, 10`, tedy geometrická stejně jako aritmetická. Odpověď je jedno
+číslo na klávesnici, takže se do závodu vejde beze změny vstupních prvků.
+Podrobnosti o zdroji jsou v [ZDROJE-RVP.md](ZDROJE-RVP.md).
 
 **`times_more_less`.** Pozor na rozdíl mezi "o kolik" a "kolikrát". Je to
 nejčastější zdroj chyb v celé třetí třídě a stojí za samostatné téma, i když

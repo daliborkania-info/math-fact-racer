@@ -1092,6 +1092,25 @@ a třicetidenní zkušební přístup. Účet zakládat nebudu. Další učebnic
 chodí tak, že uživatel pošle odkaz, nebo se sám přihlásí v prohlížeči a já pak
 katalog přečtu.
 
+**Druhý typ zdroje je státní kurikulum.** Mapa nemusí pocházet z učebnice.
+Revidované RVP ZV na `prohlednout.rvp.cz` samo o sobě na mapu nestačí, protože
+matematika v něm má uzlové body jen v 5. a 9. ročníku a celý první stupeň je
+v něm třináct očekávaných výstupů bez pořadí probírání. Použitelný je ale
+předmětový modelový ŠVP "Matematika pro 1. stupeň ZŠ" na
+`revize.rvp.cz/zv/jak-na-svp/modelove-svp-pro-zs`, který má samostatné oddíly
+pro jednotlivé ročníky i sloupec s učivem, a použitelné jsou z RVP číselné
+rozsahy za období, kterými jde sundat otazníky v mapách čtvrtého a pátého
+ročníku. Celý záznam průzkumu z 13. září 2026 včetně názvů souborů a toho, co
+je v nich, drží `docs/kurikulum/ZDROJE-RVP.md`; navázaný plán je v `PLAN.md`
+jako krok G0 a rozhodnutí R8.
+
+**Licence je u státního kurikula jiná než u učebnice.** Datová sada RVP ZV na
+`opendata.npi.cz` má v podmínkách užití uvedeno, že neobsahuje autorská díla a
+že databáze není chráněná, takže text RVP jde převzít i doslova. Výjimkou jsou
+jednotlivé ilustrační materiály s uvedeným autorem, u kterých stojí BY-NC-SA;
+ty se nepřebírají. Modelové ŠVP licenci neuvádějí, takže u nich platí stejné
+opatrné pravidlo jako u učebnice, tedy jen struktura.
+
 **Volba učebnice patří profilu**, ne aplikaci, protože sourozenci mohou mít
 různé učebnice. Profil má `curriculum`, `chapter` a `chapterMode`. Výchozí je
 `curriculum: null`, tedy adaptivní režim. Měkký režim serveruje zhruba sedmdesát

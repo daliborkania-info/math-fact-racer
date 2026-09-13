@@ -29,6 +29,7 @@ nového, nesahá se do kódu vůbec.
 | soubor | obsah | spolehlivost |
 | --- | --- | --- |
 | [TEMATA.md](TEMATA.md) | katalog témat, společný pro všechny mapy | |
+| [ZDROJE-RVP.md](ZDROJE-RVP.md) | státní kurikulum jako zdroj, záznam průzkumu | |
 | [nns-matysek-1.md](nns-matysek-1.md) | Matýskova matematika, 1. ročník | jen z obsahu |
 | [nns-matysek-2.md](nns-matysek-2.md) | Matýskova matematika, 2. ročník | **ověřeno ze stránek** |
 | [nns-matysek-3.md](nns-matysek-3.md) | Matýskova matematika, 3. ročník | **ověřeno ze stránek** |
@@ -46,6 +47,20 @@ nejde. Ta témata jsou v mapách značená `?` a v katalogu vedená jako neově�
 u každé dvoustrany vypisuje názvy interaktivních cvičení, takže je z ní vidět
 typ úlohy, ne jen název kapitoly. Odkaz má tvar
 `mediacreator.cz/mc/index.php?opentitle=<titul>/<titul>.mc&pageord=1`.
+
+## Druhý typ zdroje, státní kurikulum
+
+Mapa nemusí pocházet jen z učebnice. Vedle učebnicových řad existuje státní
+kurikulum, tedy revidované RVP ZV a k němu modelové školní vzdělávací programy,
+a z toho druhého jde mapu postavit taky. Má to dva rozdíly proti učebnici.
+Mapa z modelového ŠVP je hrubší, protože popisuje ročník zhruba osmi položkami,
+ne třiceti dvoustranami, takže rodič nastaví čtvrtinu roku, ne konkrétní
+kapitolu. Zato se z ní dají doplnit číselné rozsahy, které v učebnicových
+mapách chybí, a licenčně je volnější, protože text RVP je vedený jako
+nechráněný.
+
+Co přesně na těch webech je, kde soubory leží, co z nich jde použít a jak je to
+s licencí, drží [ZDROJE-RVP.md](ZDROJE-RVP.md).
 
 ## Jak se to promítne do profilu
 

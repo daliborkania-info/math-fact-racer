@@ -12,8 +12,8 @@ for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 
 | File | What it covers |
 | --- | --- |
-| `flow.test.js` | Whole game cycle: parent code, profile creation with the school year, racer picker, a race with mistakes, records, the map laid out as a world, the collection, garage purchase, parent section, textbook and chapter selection, the workshop in both its jobs, world switching, the look ahead at next year, a second profile, and wiping progress, which keeps the school year and every parent setting and takes away only what was earned |
-| `items.test.js` | Generates thousands of questions and verifies every answer by evaluating the printed expression; checks the clock dial against its own answer, race composition, sprite validity, curriculum consistency, both chapter modes, the first year's ranges and the bridges over ten, the clock and thousand stages, the unlock memory, the rules for which chapter can be picked, the collection, the workshop window, the four worlds and their route shapes, the school years, the chain of three numbers with the length of its question row, and that a counting task draws exactly as many parts as its answer |
+| `flow.test.js` | Whole game cycle: parent code, profile creation with the school year, racer picker, a race with mistakes, records, the map laid out as a world, the collection, garage purchase, parent section, textbook and chapter selection, the workshop in both its jobs, world switching, the look ahead at next year, a second profile, and wiping progress, which keeps the school year and every parent setting and takes away only what was earned. It plays on a 375 x 812 phone, set in `beforeParse` because the layout is decided at boot; one check at the end deliberately switches the window to 1024 x 768 and waits for the map to move into four columns |
+| `items.test.js` | Generates thousands of questions and verifies every answer by evaluating the printed expression; checks the clock dial against its own answer, race composition, sprite validity, curriculum consistency, both chapter modes, the first year's ranges and the bridges over ten, the clock and thousand stages, the unlock memory, the rules for which chapter can be picked, the collection, the workshop window, the four worlds and their route shapes, the school years, the chain of three numbers with the length of its question row, that a counting task draws exactly as many parts as its answer, and the geometry of the map, that is no two places overlapping and none running off the side for two, three and four columns, with the two column layout still landing byte for byte where it landed before |
 | `migration.test.js` | Boots frozen profiles saved by older versions and proves nothing was lost: no field gone, no number smaller, no track closed that used to be open, no chapter moved forward. Reads `fixtures/legacy-profiles.json` |
 | `i18n.test.js` | Dictionary completeness across cs/en/de and a full race in each language |
 | `names.test.js` | Racer names render in every language in both the pre-race picker and the garage |
@@ -29,6 +29,13 @@ distinct routes and places the map has, how long a first and a second year map
 is, how many tracks the look ahead unfolds, and how many chapters of the third
 year are still locked. A new track or generator moves them, which is deliberate:
 the number has to be looked at and confirmed, not quietly recomputed.
+
+**Layout is checked in pictures, not in jsdom.** jsdom has no layout at all, so
+nothing here can tell whether the keypad fits under the question. What the tests
+can hold on to is the arithmetic behind the layout: `worldSpots()` returns
+rectangles, and those are checked for overlap and for staying inside the width.
+Everything else about the way a screen looks is checked on rendered images and in
+a real browser at the sizes listed in `docs/PLAN.md`, step C.
 
 A run is clean when no line contains `!!`. The tests print in Czech because that
 is the working language of the project; the code and comments are English.

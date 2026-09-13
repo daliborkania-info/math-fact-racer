@@ -499,6 +499,10 @@ v tom duchu.
 
 ## Krok C. Responzivita a písmo podle ročníku
 
+**Stav: C1, C2, C3 a C5 jsou HOTOVÉ 13. září 2026 i se společnou částí níže,
+tedy `layoutClass()`, `data-w` a `data-o` na `<html>`, `--appw` a třída
+`narrow`. C4 a C7 zbývají a jsou to samostatný commit.**
+
 Cíl: hra funguje na telefonu i tabletu, na výšku i na šířku, využívá plochu
 a písmo roste s tím, jak malé je dítě. Nic z toho nesahá na mechaniku ani na
 datový model. Sahá to do `styles.css` hodně, do `app.js` na čtyřech místech
@@ -540,7 +544,13 @@ kód, rodičovská sekce, dostanou na `.scr` třídu `narrow` a pravidlo
 řádky textu na tabletu netáhnou přes celou šířku. Mapa, závod, dílna a garáž
 zůstávají široké, protože právě ty plochu potřebují.
 
-### C1. Závodní obrazovka na šířku
+### C1. Závodní obrazovka na šířku — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo jen tohle: `sceneSVG()` už `preserveAspectRatio
+="xMidYMid meet"` mělo, takže se nic měnit nemuselo, a na obrázku je vidět, že
+tečky spočítané stejně jako `fitBox()` sedí na cestě ve všech čtyřech světech
+i v boxu 470 × 330. Navíc `.keypad` dostala pravidlo pro tablet na výšku
+(z C5), aby se klávesy nenafoukly na 160 px.
 
 Dnes: `.game` je sloupec scéna, lišta, otázka, klávesnice. Na šířku se sloupec
 nevejde a `.qzone` s `flex:1;min-height:0` se stlačí na nulu.
@@ -572,7 +582,10 @@ Na výšku se nemění nic kromě stropu scény: `max-height:46vh` zůstává, a
 `@media (max-height:660px)` dostane `max-height:36vh` místo pevné výšky
 (viz A6).
 
-### C2. Dílna na šířku
+### C2. Dílna na šířku — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo, že třídu `jobgo` nese existující obal `.pad`
+s tlačítkem, takže do `viewJob()` nepřibyl žádný prvek navíc.
 
 `viewJob()` skládá do `.scr-scroll` sedm sourozenců: `.jobask`, `.jobpicbox`
 (jen u počítání), `.revealbox`, `.counter`, `.jobhint`, `.tray` a `.pad`
@@ -594,7 +607,16 @@ a Hotovo. Chybějící `.jobpicbox` nechá oblast `pic` prázdnou, mřížka se 
 nerozpadne. `.tray.one` (jeden velký dílek) má `padding:10px 26%`, na šířku
 zmenšit na `10px 18%`.
 
-### C3. Mapa podle šířky
+### C3. Mapa podle šířky — HOTOVO 13. září 2026 (R6 podle doporučení)
+
+Proti plánu se upřesnily tři věci. Wobble `rnd() * 3` by u posledního sloupce
+vyjel na 101 %, takže od tří sloupců je wobble 0,5 až 2,5 a mezi sloupci zbývá
+procento; dva sloupce mají wobble beze změny a vracejí přesně dnešní polohy.
+`cols` je čtvrtý parametr `worldSpots()`, ne třetí, protože `gapAt` už tam byl.
+A **letošek začíná od tří sloupců vlastním řádkem** (`pad` v `worldSpots()`),
+protože mezi dvěma kartami v jednom řádku nemá milník kam stoupnout a sedl by
+si na ně; bylo to vidět až na vyrenderované geometrii, ne v testu. Výška mapy
+se počítá z nejnižší karty, ne ze vzorce s `PLACE_STEP`.
 
 Dnes dva sloupce, místo 44 % široké s `max-width:205px`, sousedi po 96 px,
 karta 172 px vysoká, spočítané pro 375 px. Na tabletu tím vznikne úzký had
@@ -679,7 +701,11 @@ Kontrola po zásahu: na 375 px širokém telefonu s `--tx:1.25` se mapa prvňák
 ("Počítání dílků", "Do patnácti"); klávesnice nesmí vytlačit otázku z obrazovky
 při 640 px výšky. Obojí se kontroluje na obrázku, ne v jsdom.
 
-### C5. Drobnosti, které patří k témuž
+### C5. Drobnosti, které patří k témuž — HOTOVO 13. září 2026
+
+Proti plánu se upřesnilo, že pravidlo pro klávesnici na tabletu na výšku je
+`html[data-w="tablet"][data-o="tall"]`, tedy vázané na obě osy, jinak by
+platilo i na tabletu na šířku, kde klávesnice vyplňuje vlastní sloupec.
 
 `.grid` v garáži: `grid-template-columns:repeat(auto-fill,minmax(104px,1fr))`
 místo pevných tří sloupců, s `max-width:1000px;margin:0 auto`. `.jobs` na
@@ -1002,7 +1028,8 @@ za `round`, aby se pořadí hotových tratí nehnulo. Doporučení: před `beyon
 Jsou to odhady k ověření na dítěti; první úprava má být na jednom místě
 v CSS, ne v kódu.
 
-**R6. Mapa na tabletu.** Tři sloupce na tabletu, čtyři od 900 px, hadovitě.
+**R6. Mapa na tabletu. Rozhodnuto 13. září 2026 podle doporučení, hotovo v C3.**
+Tři sloupce na tabletu, čtyři od 900 px, hadovitě.
 Alternativa: nechat dva sloupce a jen zvětšit karty. Doporučení: sloupce,
 protože dva sloupce na 1024 px dávají kartu 45 % široké a náhled velikosti
 poloviny obrazovky, což už není mapa.

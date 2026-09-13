@@ -33,7 +33,17 @@
   --font-display:"Baloo 2", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
   --font-body:"Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
   --safe-b: env(safe-area-inset-bottom, 0px);
+
+  /* How wide the game itself is allowed to be. A phone is the measure;
+     a tablet held upright gets a little more, and a window on its side
+     gets the lot, because that is where the screen is worth using. The
+     two values behind data-w and data-o are written on <html> by
+     layoutClass(), not by a media query, so the map can read the same
+     decision. */
+  --appw:520px;
 }
+html[data-w="tablet"],html[data-w="desk"]{--appw:720px}
+html[data-o="wide"]{--appw:none}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -53,7 +63,7 @@ input{font-family:inherit}
 #app{
   position:relative;
   width:100%;
-  max-width:520px;
+  max-width:var(--appw);
   margin:0 auto;
   /* vh first as the fallback, dvh last so it wins where it is understood;
      the other way round iOS Safari kept vh and hid the bottom row of the
@@ -72,6 +82,12 @@ input{font-family:inherit}
 /* ---------- shared building blocks ---------- */
 .scr{display:flex;flex-direction:column;flex:1;min-height:0}
 .scr-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + var(--safe-b))}
+/* A screen that is text and a list keeps its lines short even when the
+   window is wide: a line of reading that runs the whole width of a
+   tablet is a line nobody follows. The map, the race, the workshop and
+   the garage are not marked narrow, because those are exactly the ones
+   that want the room. */
+.scr.narrow .scr-scroll{width:100%;max-width:760px;margin:0 auto}
 .pad{padding:0 18px}
 
 .topbar{
@@ -140,6 +156,9 @@ input{font-family:inherit}
 /* Five chips do not fit a narrow phone in one line, and a chip pushed
    off the edge is a chip nobody taps, so the row wraps. */
 .hud{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px 4px;flex:none}
+/* on its side there is room for all five in one line, and a wrapped row
+   would only push the map down */
+html[data-o="wide"] .hud{flex-wrap:nowrap}
 .chip{
   display:flex;align-items:center;gap:6px;background:var(--paper);
   border:2px solid var(--line);border-radius:999px;padding:7px 13px;
@@ -160,6 +179,12 @@ input{font-family:inherit}
   padding:9px;border-radius:var(--r-l);border:2px solid var(--line);
   background:var(--paper);text-align:left;box-shadow:var(--shadow-soft);
 }
+/* From three columns up the card follows the column count instead of the
+   205 px cap measured on a phone, and the road snakes across the rows.
+   The number of columns is decided in JS, because worldSpots() has to
+   know it too, and arrives here on the map itself. */
+.world[data-cols="3"] .place{width:30.3%;max-width:none}
+.world[data-cols="4"] .place{width:22%;max-width:none}
 .place:active{transform:translateY(2px)}
 .place .thumb{
   width:100%;aspect-ratio:400/205;border-radius:11px;overflow:hidden;position:relative;
@@ -326,6 +351,33 @@ input{font-family:inherit}
 .key.del{background:var(--shell-2);box-shadow:0 4px 0 #c3cde5;font-size:22px}
 .key.del:active{box-shadow:0 1px 0 #c3cde5}
 
+/* The race on a screen held on its side. A column of scene, strip,
+   question and keypad does not fit, and the question zone, which is the
+   one part that grows, was the part that got squeezed to nothing. So:
+   the scene down the left with the points strip under it, the question
+   and the keypad down the right, and the keypad takes whatever height is
+   left. sceneSVG() keeps its aspect ratio inside whatever box it is
+   given ("xMidYMid meet") and fitBox() puts the car on the road from the
+   measured box, so the road is still under the wheels in a box that is
+   not 400 : 205; the night blue shows at the sides, which is the colour
+   of the race anyway. Never "slice" here: fitBox() takes the smaller of
+   the two scales. */
+html[data-o="wide"] .game{
+  display:grid;
+  grid-template-columns:minmax(0,46fr) minmax(0,54fr);
+  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"stage qzone" "stage keypad" "rail keypad";
+}
+html[data-o="wide"] .stage{grid-area:stage;aspect-ratio:auto;max-height:none;height:100%;min-height:0}
+html[data-o="wide"] .rail{grid-area:rail}
+html[data-o="wide"] .qzone{grid-area:qzone;padding:10px 14px 4px}
+html[data-o="wide"] .keypad{grid-area:keypad;grid-template-rows:repeat(4,minmax(40px,1fr));min-height:0;align-self:stretch}
+html[data-o="wide"] .key{height:auto;min-height:40px}
+/* A tablet held upright is wide enough that a full width keypad would
+   have keys 160 px across; that is a target nobody misses, and a reach
+   nobody wants. */
+html[data-w="tablet"][data-o="tall"] .keypad{width:100%;max-width:480px;margin:0 auto}
+
 /* ---------- result screen ---------- */
 .result{padding:22px 18px calc(22px + var(--safe-b));text-align:center}
 .medal{font-size:78px;line-height:1;animation:pop .55s cubic-bezier(.2,1.5,.4,1)}
@@ -342,7 +394,11 @@ input{font-family:inherit}
 .newthing .pic svg{width:100%;height:100%}
 
 /* ---------- garage / collection ---------- */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;padding:4px 18px 0}
+/* Three fixed columns made a machine a third of a tablet wide. The cells
+   keep a phone's size and the row simply holds more of them, up to a
+   width where the eye still takes the row in at once. */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:11px;
+  padding:4px 18px 0;max-width:1000px;margin:0 auto}
 .item{
   background:var(--paper);border:2px solid var(--line);border-radius:var(--r-m);
   padding:9px 5px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;
@@ -432,6 +488,13 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
 .pickitem.sel{border-color:var(--grape);background:var(--grape-soft);box-shadow:0 0 0 3px rgba(91,75,214,.16)}
 .pickitem.sel .nm{color:var(--grape-dark)}
 .pickscroll{max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}
+/* A sheet slid up from the bottom of a screen held on its side is a
+   letterbox. On its side it becomes a dialog in the middle instead, with
+   all four corners rounded, and the list inside it gets more of the
+   little height there is. */
+html[data-o="wide"] .sheet{align-items:center}
+html[data-o="wide"] .sheet .inner{border-radius:var(--r-xl)}
+html[data-o="wide"] .pickscroll{max-height:42vh}
 /* the world picker: a strip of landscapes, because a world is something
    you look at rather than a word you read */
 .worldgrid{display:flex;flex-direction:column;gap:9px}
@@ -516,14 +579,35 @@ textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--li
   box-shadow:0 4px 0 var(--line);display:grid;place-items:center;padding:5px}
 .traycoin:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
 
+/* The workshop on a screen held on its side. The task, the thing to
+   count and the round window go down the left; the counter, the hint,
+   the coins and Done go down the right, so the child's hands stay where
+   they were and nothing has to be scrolled to. A task without a picture
+   simply leaves the "pic" area empty, which the grid does not mind. */
+html[data-o="wide"] .shop .scr-scroll{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  grid-template-rows:auto auto minmax(0,1fr) auto;column-gap:12px;
+  grid-template-areas:"ask counter" "pic hint" "reveal tray" "reveal go";
+  align-content:start;
+}
+.jobask{grid-area:ask} .jobpicbox{grid-area:pic} .revealbox{grid-area:reveal}
+.counter{grid-area:counter} .jobhint{grid-area:hint} .tray{grid-area:tray} .jobgo{grid-area:go}
+/* half a screen is narrower than a screen, so the single big part does
+   not need a quarter of it as margin */
+html[data-o="wide"] .tray.one{padding:10px 18%}
+/* the list of pieces of work has room for two columns on its side */
+html[data-o="wide"] .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+
 @media (max-height:660px){
   .counter{min-height:72px}
   .reveal{width:64px;height:64px}
   .revealbox{padding:0 18px 6px}
   .putcoin{width:38px;height:38px}
   /* a cap, not a fixed height: a fixed one overrode the aspect ratio and
-     left dark bars beside the scene */
-  .stage{max-height:148px}
+     left dark bars beside the scene. It is a share of the height rather
+     than a number of pixels, so a 500 px window and a 660 px one both
+     leave the same room for the question and the keypad. */
+  .stage{max-height:36vh}
   /* the long lines have to be repeated here, class for class: a bare
      `.question` is one class deep and loses to the two class rules for
      `.q-long` and `.q-xlong` above, so without these a short screen

@@ -1,6 +1,15 @@
 const fs=require('fs');const path=require('path');const ROOT=path.resolve(__dirname, '..');const {JSDOM}=require('jsdom');
 const html=fs.readFileSync(path.join(ROOT, 'index.html'),'utf8');
-const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'https://x.test/'});
+// Okno jsdomu je 1024 x 768, tedy sirsi nez telefon, a od kroku C se
+// podle nej rozhoduje rozvrzeni uz pri startu. Testuje se telefon na
+// vysku, takze se sirka i vyska nastavi jeste pred spustenim skriptu;
+// jedna kontrola nize se pak vedome prepne zpatky na 1024 x 768.
+const phone=win=>{
+  Object.defineProperty(win,'innerWidth',{value:375,configurable:true,writable:true});
+  Object.defineProperty(win,'innerHeight',{value:812,configurable:true,writable:true});
+};
+const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'https://x.test/',
+  beforeParse:phone});
 const w=dom.window,d=w.document;const errs=[];
 w.addEventListener('error',e=>errs.push('ERROR: '+e.message));
 dom.virtualConsole.on('jsdomError',e=>errs.push('JSDOM: '+e.message));
@@ -91,6 +100,11 @@ ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky 
    qa('.place.locked').length+' zamcenych');
 ok('zamcene misto neni tlacitko', qa('.place.locked').every(el=>el.tagName!=='BUTTON'));
 ok('dilna je vlastni misto mimo rady trati', qa('.place.shopplace[data-act="shop"]').length===1);
+// kolik ma mapa sloupcu, rika sama; na telefonu na vysku jsou to dva
+ok('mapa rika, kolik ma sloupcu', q('.world').dataset.cols==='2', 'data-cols '+q('.world').dataset.cols);
+ok('rozvrzeni je na html, ne v media query',
+   d.documentElement.dataset.w==='phone' && d.documentElement.dataset.o==='tall',
+   d.documentElement.dataset.w+' / '+d.documentElement.dataset.o);
 ok('misto ukazuje, kolik uz je ve sbirce', /0\/4\b/.test(txt()));
 
 console.log('--- zavod s chybami ---');
@@ -269,6 +283,9 @@ ok('tecky v dilne nerostou do vysky',
 ok('otazka a pult jsou nad mincemi videt',
    q('#jobask').textContent.length>5 && q('#counter')!==null, q('#jobask').textContent);
 ok('v dilne nejsou stopky ani body', !/bodů|body/.test(txt()) && qa('.rail,.stage').length===0);
+// obal tlacitka Hotovo se musi dat adresovat, jinak ho rozvrzeni na sirku
+// nema kam postavit
+ok('tlacitko Hotovo ma svuj obal', q('.jobgo #jobok')!==null);
 ok('mince jsou k dispozici', qa('[data-coin]').length===6);
 // vyresit celou zakazku: mince se klepou, dokud se nesejde castka
 const jev=s=>dom.window.eval(s);
@@ -584,6 +601,23 @@ ok('ctvrtak vidi celou mapu jako driv',
    qa('.place').length===22 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
    qa('.place').length+' mist');
 ok('ctvrtak nema ani dvere dopredu, nic dalsiho neni', qa('.place.peekdoor').length===0);
+
+console.log('--- sirsi okno ---');
+// Az sem se hralo na telefonu 375 x 812. Tady se okno vedome prepne na
+// 1024 x 768, tedy tablet na sirku, a mapa se musi prestehovat do ctyr
+// sloupcu sama. Prekresleni ma debounce 150 ms, proto to cekani.
+ev('go("map")');
+Object.defineProperty(w,'innerWidth',{value:1024,configurable:true,writable:true});
+Object.defineProperty(w,'innerHeight',{value:768,configurable:true,writable:true});
+w.dispatchEvent(new w.Event('resize'));
+await wait(260);
+ok('sirsi okno da mape ctyri sloupce', q('.world').dataset.cols==='4', 'data-cols '+q('.world').dataset.cols);
+ok('okno na sirku se pozna na html', d.documentElement.dataset.o==='wide' && d.documentElement.dataset.w==='desk',
+   d.documentElement.dataset.w+' / '+d.documentElement.dataset.o);
+const sirka=ev('placeBox(4).w');       // 22 procent, tedy 100/4 - 3
+ok('siroka mapa nevyjede ven',
+   qa('.world .place').every(el=>parseFloat(el.style.left)+sirka<=100),
+   qa('.world .place').length+' mist siroke po '+sirka+' %');
 
 console.log('\nchyby za behu:', errs.length?errs.join('\n'):'zadne');
 process.exit(0);

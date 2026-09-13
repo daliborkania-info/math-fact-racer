@@ -611,6 +611,12 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
 8. Interakce. Jeden delegovaný posluchač kliknutí nad celým dokumentem, plus
    druhý na `change` kvůli rozbalovacím nabídkám, které klik nevyvolávají.
 
+**Rozvržení je dvě hodnoty na `<html>`, ne media query.** `layoutClass()` je
+zapisuje při startu, v `resize` i v `orientationchange` a `mapCols()` z nich
+odvozuje počet sloupců mapy; podrobnosti v oddílu 7e. Obrazovky o tom vědí jen
+tolik, že mapa si vyžádá `cols` a textové obrazovky mají na `.scr` třídu
+`narrow`.
+
 **Obrazovka se smí otevřít u konkrétní sekce.** `go(name, {focus:"id"})` po
 vykreslení posune sekci s tím `id` do zorného pole. Používá to dílna, když
 posílá dítě utratit součástky za nátěry. `scrollIntoView` v jsdomu není, takže
@@ -756,10 +762,15 @@ pokles pocitu kompetence a autonomie. Zamčené místo je vidět, jen je tmavé,
 a není to tlačítko. Dílna má vlastní místo a vlastní vzhled. Co z mapy patří
 letošku a co minulým letům, řeší oddíl 7d.
 
-**Rozměry jsou spočítané, ne odhadnuté.** Místo je široké 44 procent a sousedi
-jsou po 96 pixelech, takže se dvě místa na téže straně nepřekryjou a dva sloupce
-se nedotknou ani na nejužším telefonu. `flow.test.js` to ověřuje polohami, ne
-pohledem.
+**Rozměry jsou spočítané, ne odhadnuté.** Na telefonu je místo široké 44 procent
+a sousedi jsou po 96 pixelech, takže se dvě místa na téže straně nepřekryjou a
+dva sloupce se nedotknou ani na nejužším telefonu. `flow.test.js` to ověřuje
+polohami, ne pohledem, a `items.test.js` od kroku C počítá obdélníky míst pro
+dva, tři i čtyři sloupce a hlídá, že se žádné dva neprotnou a žádné nevyjede ven.
+
+**Kolik má mapa sloupců, řídí šířka okna**, viz oddíl 7e. Dva sloupce vracejí
+přesně ty polohy, které vracely před krokem C; od tří sloupců se jede hadovitě
+po řádcích a karta roste do šířky i do výšky.
 
 ## 7d. Ročník, předěl na mapě a ukázka dalšího roku
 
@@ -814,7 +825,10 @@ protože za dveřmi jsou obory prvního ročníku i most přes desítku.
 vždycky, ať jsou dveře otevřené, nebo zavřené. Není to tlačítko. Mezi místa se
 nepočítá, ale na cestě zabírá půl kroku (`PLACE_STEP / 2`); `worldSpots()` to
 umí přes parametr `gapAt` a milník sedí v půlce toho esíčka, což je u téhle
-křivky přesně střed obou sousedních míst.
+křivky přesně střed obou sousedních míst. **Od tří sloupců začíná letošek
+vlastním řádkem**, protože mezi dvěma kartami v jednom řádku není pro ceduli
+místo a sedla by si na ně; buňky, které tím na konci předchozího řádku zbydou,
+zůstanou prázdné a milník stojí v tom prázdném pásu nad letoškem.
 
 **Co je letošní, říká `yearOf(p, tr)`**, ne `tr.grade`, a ptá se jí celá mapa.
 Vrací `"past"`, `"own"` nebo `"ahead"`. Šampionát (`mix`), slabá místa (`weak`)
@@ -865,6 +879,51 @@ mapu, protože cokoli nižšího by mu vzalo tratě, které už vidí. Čtyřka 
 čtvrtou třídu a výš, tedy všechno; čtvrtý ročník v aplikaci zatím není, takže
 čtvrťák nemá co ukazovat dopředu a dveře na příští rok se mu neobjeví.
 
+## 7e. Rozvržení: šířka, orientace a počet sloupců
+
+Od kroku C (13. září 2026) hra nepočítá s tím, že je na telefonu na výšku.
+
+**Rozhoduje JS, ne media query.** `layoutClass()` přečte `innerWidth` a
+`innerHeight` a zapíše na `<html>` dvě hodnoty: `data-w` je `phone` pod 600 px,
+`tablet` od 600 do 899 a `desk` od 900, `data-o` je `wide`, když je okno na
+šířku a aspoň 640 px široké, jinak `tall`. Volá se při startu před prvním
+`go()`, v `resize` a v `orientationchange`. Důvod, proč ne media query: mapu
+skládá JS a musí vědět, kolik má sloupců, a část pravidel by potřebovala `or`,
+které starší Android v media query neumí. CSS pak píše `html[data-o="wide"]
+.game{...}`. Rozhoduje **šířka okna, ne přístroj**: telefon položený na bok má
+přes 600 px, takže dostane tři sloupce a `wide`, a je to tak správně.
+
+**Šířka aplikace** je `--appw`: 520 px na telefonu, 720 px na tabletu na výšku,
+`none` na šířku. Obrazovky, které jsou text a seznam (hráči, výsledek, výsledek
+zakázky, poklady, brána, kód, rodičovská sekce), mají na `.scr` třídu `narrow`
+a jejich `.scr-scroll` má `max-width:760px`, ať se řádky netáhnou přes celý
+tablet. Mapa, závod, dílna a garáž `narrow` nemají, protože plochu potřebují.
+
+**Na šířku se závod i dílna skládají do dvou sloupců.** Závod je mřížka
+`"stage qzone" "stage keypad" "rail keypad"`, tedy scéna vlevo přes celou výšku,
+vpravo otázka a pod ní klávesnice, která vyplní zbytek. Scéna si drží poměr
+(`preserveAspectRatio="xMidYMid meet"`) a `fitBox()` počítá polohu auta
+z naměřeného boxu, takže auto sedí na cestě i v jiném než 400 : 205 boxu; po
+stranách zůstane `#0d1428`, což je barva noci závodu. `slice` nikdy, `fitBox()`
+počítá s menším z obou měřítek. Dílna má vlevo zadání, obrázek a kruhové okno,
+vpravo pult, nápovědu, mince a Hotovo; obal tlačítka Hotovo se jmenuje `jobgo`.
+
+**Mapa má podle šířky dva, tři nebo čtyři sloupce**, viz oddíl 7c a rozhodnutí
+R6 v `docs/PLAN.md`. `viewMap()` spočítá `cols` přes `mapCols()` a předá ho
+`worldSpots()`; šířku karty nastavuje CSS podle `data-cols` na `.world`. Výška
+karty už není konstanta, počítá ji `placeHeight()` z šířky v pixelech, a výška
+celé mapy se bere z nejnižší karty, ne ze vzorce. Změna orientace mapu překreslí
+s odkladem 150 ms; pohled se vrátí nahoru, což je při otočení tabletu v pořádku.
+
+**Co se rozvržením nemění:** číselná klávesnice zůstává jediným vstupem závodu,
+dílna nedostala nic, co by se hýbalo nebo odpočítávalo, klepnutí na místo jde
+rovnou na trať a zamčené místo zůstává `div`, ne tlačítko. A nic se nesmí
+schovat pod okraj: když se něco nevejde, roluje se.
+
+**Písmo podle ročníku (C4) a `tests/style.test.js` (C7) zatím nejsou.**
+
+---
+
 ## 8. Testy
 
 V `tests/`, spouštějí se přes node, potřebují jen `jsdom`. Podrobnosti v
@@ -881,7 +940,7 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá devatenáct okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá dvacet okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
 stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
@@ -903,7 +962,11 @@ i hodiny v hlavním bloku a za dveřmi jen obory prvního ročníku a most, a ž
 šampionát, slabá místa i trať podle školy jsou vždycky letošní, že se skládá
 jen ročník s vlastní tratí, že **hlavní blok mapy má pro každý ročník aspoň
 jednu otevřenou trať**, že ukázka nabízí právě jeden rok dopředu a že šampionát
-ani rodičovská sekce nemluví o tom, co na mapě není.
+ani rodičovská sekce nemluví o tom, co na mapě není. Od kroku C k tomu přibylo
+rozvržení mapy: obdélníky míst se pro dva, tři i čtyři sloupce při osmi až
+čtyřiadvaceti místech nesmí protnout ani vyjet přes sto procent šířky, dva
+sloupce musí vrátit přesně ty polohy, které vracely dřív, a sedm šířek okna
+musí dát očekávaný počet sloupců a orientaci.
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
@@ -925,8 +988,10 @@ zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má od kroku B0b 175 kontrol, po kroku B0 jich bylo 170 a po
-kroku A 153: navíc
+`flow.test.js` má od kroku C 181 kontrol, po kroku B0b jich bylo 175, po kroku
+B0 170 a po kroku A 153. Šest přibylo v kroku C: mapa říká, kolik má sloupců,
+rozvržení stojí na `<html>`, tlačítko Hotovo v dílně má svůj obal a k tomu tři
+kontroly po vědomém přepnutí okna na 1024 × 768. Navíc
 předěl ročníků popsaný výše, a už od kroku A vynulování postupu, po kterém
 prvňák zůstane prvňákem a nastavení rodiče se nehne, zatímco krabička, mince
 a medaile jsou pryč, a dva různé chybné počty dílků, které musí dát dva štítky,
@@ -1478,13 +1543,13 @@ s dnešním úkolem.
 
 **Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
 a 4d. Z vlny A jsou hotové tři položky ze sedmi. Revize ze 13. září sepsala
-`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B a oprava B0b,
-nejbližší je
-C (responzivita a písmo podle ročníku, jedna až dvě session). Z rozhodnutí
-v oddílu 9 plánu padla R4 (řetězec před `beyond`) a R7 (vynulování nechá
-nastavení), obojí podle doporučení. R1 (žebřík minulých let) je odložené a po
-B0b už není naléhavé, viz hlavička; R5 a R6 se rozhodují v kroku C a plán
-u obou doporučuje ano.
+`docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava B0b a z kroku
+C části C1, C2, C3 a C5 (responzivita), nejbližší je zbytek kroku C, tedy C4
+(písmo podle ročníku) a C7 (nový `tests/style.test.js`). Z rozhodnutí
+v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
+nastavení) a R6 (tři sloupce mapy na tabletu, čtyři od 900 px), všechna podle
+doporučení. R1 (žebřík minulých let) je odložené a po B0b už není naléhavé, viz
+hlavička; R5 (měřítka písma) se rozhoduje v C4 a plán doporučuje ano.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se

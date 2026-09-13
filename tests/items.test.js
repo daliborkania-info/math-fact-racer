@@ -2,11 +2,14 @@ const fs=require('fs');const path=require('path');const ROOT=path.resolve(__dirn
 const base = path.join(ROOT, 'src') + '/';
 let src=fs.readFileSync(base+'i18n.js','utf8')+'\n'+fs.readFileSync(base+'curricula.js','utf8')+'\n'+fs.readFileSync(base+'app.js','utf8');
 const el=()=>({innerHTML:'',textContent:'',className:'',style:{},clientWidth:360,classList:{add(){},remove(){}},appendChild(){},remove(){},dataset:{},querySelector:()=>el(),querySelectorAll:()=>[],closest:()=>null,focus(){},offsetWidth:1});
-global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll:()=>[],addEventListener(){},createElement:()=>el(),body:{appendChild(){}},onkeydown:null};
-global.window={addEventListener(){}};const store={};
+// layoutClass() cte sirku a vysku okna a zapisuje je na <html>, takze
+// nahrazka okna je musi mit; bez documentElementu by se rozvrzeni
+// nespoctelo a mapa by se v testu vzdycky skladala do dvou sloupcu
+global.document={getElementById:()=>el(),querySelector:()=>el(),querySelectorAll:()=>[],addEventListener(){},createElement:()=>el(),body:{appendChild(){}},onkeydown:null,documentElement:el()};
+global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,questionHTML,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,PETS,RIDES,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,placeBox,placeHeight,PLACE_H,PLACE_STEP,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -1016,6 +1019,57 @@ if(A.collectionSpecs(rk1).some(sp=>sp.title===A.I18N.cs.trk_a1000)) gsay('sbirka
 rk1.stars={kpb1:true};
 if(!A.collectionSpecs(rk1).some(sp=>sp.keys.indexOf('kpb1')>=0)) gsay('rozsvicena sbirka mimo rocnik zmizela');
 console.log('rocniku:',A.MAX_GRADE,'| chyb:',gBad);
+
+// 15. rozvrzeni mapy: dve mista se nikdy nesmi prekryt a zadne nesmi
+// vyjet ven. jsdom ani tenhle test rozvrzeni nemaji, takze se pocita z
+// tehoz, z ceho ho pocita mapa: sirka v procentech, vyska v pixelech.
+let mBad=0;
+const msay=m=>{mBad++;console.log('  !!  '+m)};
+// Dva sloupce musi po pridani sirsich rozvrzeni vratit presne to, co
+// vracely predtim, jinak by se hnul telefon, na kterem se hraje. Tohle
+// je vystup pred zmenou, zaokrouhleny na desetiny, osm mist v okruhu.
+const DNES=[[2.3,14],[53.6,110],[2.6,206],[51.3,302],[2.6,398],[53.7,494],[3,590],[53.5,686]];
+{
+  const s=A.worldSpots({world:'circuit'},8);
+  const ted=s.map(x=>[+x.left.toFixed(1),+x.y.toFixed(1)]);
+  if(JSON.stringify(ted)!==JSON.stringify(DNES))
+    msay('dva sloupce se hnuly: '+JSON.stringify(ted)+' misto '+JSON.stringify(DNES));
+  // a cely stary tvar, tedy krok i vyska karty, se pocita dal ze stejnych cisel
+  const b=A.placeBox(2);
+  if(b.w!==44||b.h!==A.PLACE_H||b.step!==A.PLACE_STEP) msay('dva sloupce zmenily rozmer karty');
+}
+for(const cols of [2,3,4]){
+  const b=A.placeBox(cols);
+  for(let n=8;n<=24;n++){
+    const s=A.worldSpots({world:'circuit'},n,null,cols);
+    if(s.length!==n){msay('worldSpots vratil '+s.length+' mist misto '+n);continue;}
+    const r=s.map(x=>({l:x.left,r:x.left+b.w,t:x.y,b:x.y+b.h}));
+    for(let i=0;i<r.length;i++){
+      if(r[i].l<0||r[i].r>100){msay('cols '+cols+', n '+n+': misto '+i+' vyjelo ven ('
+        +r[i].l.toFixed(1)+' az '+r[i].r.toFixed(1)+' %)');break;}
+      for(let j=i+1;j<r.length;j++){
+        if(r[i].l<r[j].r&&r[j].l<r[i].r&&r[i].t<r[j].b&&r[j].t<r[i].b){
+          msay('cols '+cols+', n '+n+': mista '+i+' a '+j+' se prekryvaji');break;
+        }
+      }
+      if(mBad>6)break;
+    }
+    if(mBad>6)break;
+  }
+}
+// tri sloupce od 600 px, ctyri od 900 px, dva na telefonu na vysku.
+// Telefon polozeny na bok ma pres 600 px sirky, takze uz ma tri sloupce
+// a orientaci "wide": rozhoduje sirka okna, ne to, co je to za pristroj.
+for(const [w,h,cols,ori] of [[375,812,2,'tall'],[812,375,3,'wide'],[768,1024,3,'tall'],
+                             [1024,768,4,'wide'],[900,600,4,'wide'],[640,360,3,'wide'],
+                             [568,320,2,'tall']]){
+  global.window.innerWidth=w; global.window.innerHeight=h; A.layoutClass();
+  if(A.mapCols()!==cols) msay(w+'x'+h+' dalo '+A.mapCols()+' sloupcu misto '+cols);
+  if(global.document.documentElement.dataset.o!==ori)
+    msay(w+'x'+h+' dalo orientaci '+global.document.documentElement.dataset.o+' misto '+ori);
+}
+global.window.innerWidth=375; global.window.innerHeight=812; A.layoutClass();
+console.log('chyb v rozvrzeni mapy:',mBad);
 
 // 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
 let trBad=0;

@@ -2480,6 +2480,34 @@ function buzz(ms){ try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} 
    ================================================================= */
 const app = document.getElementById("app");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Two axes decide the layout: how wide the window is and whether it is
+   held on its side. JS decides them rather than a media query, because
+   the map is built in JS and has to know how many columns it has, and
+   because a couple of the rules would need an `or` inside a media query,
+   which older Android does not understand. The two values are written on
+   <html>, so the stylesheet reads them as html[data-w="tablet"] and
+   html[data-o="wide"], and the sheets pinned to <body> inherit them too.
+   Called once at boot, then on every resize and orientationchange. */
+function layoutClass(){
+  const de = document.documentElement;
+  if(!de || !de.dataset) return;
+  const w = window.innerWidth || 375, h = window.innerHeight || 812;
+  de.dataset.w = w < 600 ? "phone" : w < 900 ? "tablet" : "desk";
+  // a short wide window only pays off from 640 px across: below that the
+  // two columns of the race screen would both be too narrow to read
+  de.dataset.o = (w > h && w >= 640) ? "wide" : "tall";
+}
+/* How many columns of places the map has. Two on a phone, because that
+   is what 375 px fits; three on a tablet and four from 900 px, where two
+   would mean a card nearly half the screen wide and a preview the size
+   of half a phone, which stops reading as a map. */
+function mapCols(){
+  const de = document.documentElement;
+  const w = (de && de.dataset && de.dataset.w) || "phone";
+  return w === "desk" ? 4 : w === "tablet" ? 3 : 2;
+}
+
 let view = {name:"players"};
 function go(name, data){ view = Object.assign({name}, data || {}); render(); }
 
@@ -2526,7 +2554,7 @@ function viewPlayers(){
       </span>
       <span class="del" data-act="delplayer" data-id="${p.id}">&#10005;</span>
     </button>`).join("");
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="hero">
       <h1>${t("appName")}</h1>
       <p>${t("tagline")}</p>
@@ -2560,17 +2588,59 @@ function medalEmoji(m){ return ["", "&#129353;", "&#129352;", "&#129351;"][m] ||
    numbers below rather than by looking at it on one phone. */
 const PLACE_STEP = 96;      // vertical distance between two neighbours
 const PLACE_H = 172;        // how tall a place card is, give or take
+/* A wider window gets more columns, and a wider card is a taller card:
+   the preview keeps its 400 : 205 shape and the text under it takes the
+   measured 92 px whatever the width. Only the two column layout has a
+   card of a known height, so only that one can use the constant. */
+function placeHeight(widthPx){ return widthPx * 205 / 400 + 92; }
+/* How wide one place is, in percent of the map, and how tall in pixels.
+   Two columns keep the numbers the phone was measured on; from three
+   columns up the width follows the count and the height follows from it.
+   The percentages match the widths in the stylesheet, which is where the
+   card is actually sized. */
+function placeBox(cols){
+  if(cols < 3) return {w: 44, h: PLACE_H, step: PLACE_STEP};
+  const w = 100 / cols - 3;
+  const px = ((app && app.clientWidth) || 375) * w / 100;
+  const h = placeHeight(px);
+  return {w, h, step: h + 22};
+}
 /* gapAt, when given, is the index where this year starts: the road takes
-   half a step more there, which is the room the year sign stands in. */
-function worldSpots(p, n, gapAt){
+   half a step more there, which is the room the year sign stands in.
+   With three or four columns the extra half step belongs to the whole
+   row, otherwise the places sharing that row would sit at two heights.
+   cols defaults to two, so every caller that does not care about the
+   width keeps the layout the phone was measured on. */
+function worldSpots(p, n, gapAt, cols){
   const rnd = seedRand("svet-" + (p && p.world ? p.world : "circuit"));
+  const b = placeBox(cols || 2);
   const out = [];
+  if((cols || 2) < 3){
+    for(let i = 0; i < n; i++){
+      const wobble = rnd() * 3;
+      const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
+      const gap = (gapAt != null && i >= gapAt) ? PLACE_STEP / 2 : 0;
+      const y = 14 + i * PLACE_STEP + gap;
+      out.push({left, y, cx: left + 22, cy: y + PLACE_H / 2});
+    }
+    return out;
+  }
+  // the road snakes: left to right along one row, right to left along the
+  // next, so it still reads as one path rather than as a grid.
+  // This year starts on a row of its own, because the year sign stands in
+  // the half step above it and there is no room for it between two cards
+  // sharing a row; the cells left over at the end of the row before it
+  // simply stay empty.
+  const pad = gapAt == null ? 0 : (cols - gapAt % cols) % cols;
   for(let i = 0; i < n; i++){
-    const wobble = rnd() * 3;
-    const left = (i % 2 ? 51 : 2) + wobble;        // 2 to 5, or 51 to 54
-    const gap = (gapAt != null && i >= gapAt) ? PLACE_STEP / 2 : 0;
-    const y = 14 + i * PLACE_STEP + gap;
-    out.push({left, y, cx: left + 22, cy: y + PLACE_H / 2});
+    const j = gapAt != null && i >= gapAt ? i + pad : i;
+    const r = Math.floor(j / cols);
+    const c = r % 2 ? cols - 1 - (j % cols) : j % cols;
+    // 0.5 to 2.5 of wobble leaves a one percent lane between two columns
+    // and keeps the last one half a percent inside the right edge
+    const left = c * (100 / cols) + 0.5 + rnd() * 2;
+    const y = 14 + r * b.step + (gapAt != null && i >= gapAt ? b.step / 2 : 0);
+    out.push({left, y, cx: left + b.w / 2, cy: y + b.h / 2});
   }
   return out;
 }
@@ -2619,8 +2689,11 @@ function viewMap(p){
      that one is open */
   const nPast = (folding ? 1 : 0) + pastShown.length;
   const total = nPast + own.length + 1 + (ahead.length ? 1 : 0) + (peeking ? ahead.length : 0);
-  const spots = worldSpots(p, total, folding ? nPast : null);
-  const height = 14 + (total - 1) * PLACE_STEP + PLACE_H + 20 + (folding ? PLACE_STEP / 2 : 0);
+  const cols = mapCols();
+  const spots = worldSpots(p, total, folding ? nPast : null, cols);
+  // the map is as tall as its lowest card, whatever the number of columns
+  const box = placeBox(cols);
+  const height = spots.reduce((m, s) => Math.max(m, s.y), 0) + box.h + 20;
 
   const placeHTML = (tr, spot, kind) => {
     const peek = kind === "peek";
@@ -2719,7 +2792,7 @@ function viewMap(p){
         <button class="chip" data-act="tokens"><span class="em">&#10024;</span> ${starsAll(p)}</button>
         <button class="chip" data-act="collection" style="margin-left:auto"><span class="em">&#127873;</span> ${t("collection")}</button>
       </div>
-      <div class="world" style="height:${height}px">
+      <div class="world" data-cols="${cols}" style="height:${height}px">
         <svg class="worldroad" viewBox="0 0 100 ${height}" preserveAspectRatio="none" aria-hidden="true">
           <path d="${worldRoad(spots, height)}" fill="none" stroke="var(--line)" stroke-width="16"
                 stroke-linecap="round" vector-effect="non-scaling-stroke"/>
@@ -3217,7 +3290,7 @@ function viewResult(p){
       <div class="muted">${t("grewSub")}</div></span>
     </div>` : "";
 
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="scr-scroll">
       <div class="result">
         <div class="medal">${emojis[med]}</div>
@@ -3314,7 +3387,7 @@ function viewJob(p){
       <div class="counter" id="counter">${counterHTML()}</div>
       <div class="jobhint" id="jobhint">${t(item.input === "pieces" ? "jobTapPieces" : "jobTapCoins")}</div>
       ${trayHTML(item)}
-      <div class="pad" style="padding-bottom:calc(18px + var(--safe-b))">
+      <div class="pad jobgo" style="padding-bottom:calc(18px + var(--safe-b))">
         <button class="btn mint wide" data-act="jobcheck" id="jobok">${t("jobReady")}</button>
       </div>
     </div>
@@ -3440,7 +3513,7 @@ function viewJobDone(p){
   // glued every counting task into one chip.
   const miss = [...new Map(JOB.missed.map(i =>
     [i.key + "|" + (i.answer !== undefined ? i.answer : i.amount), i])).values()].slice(0, 3);
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="scr-scroll">
       <div class="result">
         <div class="medal">&#9881;</div>
@@ -3474,7 +3547,7 @@ function viewTokens(p){
   const blocks = collectionSpecs(p).map(spec => `
     <div class="h3">${esc(spec.title)} <span class="tokn">${t("tokHave", starCount(p, spec.keys), spec.keys.length)}</span></div>
     <div class="tokwrap">${tokenGridSVG(p, spec)}</div>`).join("");
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="topbar">
       <button class="iconbtn" data-act="map" aria-label="${t("back")}">&#8592;</button>
       <h1>${t("tokens")}</h1>
@@ -3573,7 +3646,7 @@ function hashPin(s){
 }
 function viewSetPin(){
   const change = !!DB.pin;
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="hero">
       <h1>${change ? t("pinTitleChange") : t("pinTitle")}</h1>
       <p>${change ? t("pinSubChange") : t("pinSub")}</p>
@@ -3594,7 +3667,7 @@ function viewSetPin(){
   </div>`;
 }
 function viewGate(){
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="topbar">
       <button class="iconbtn" data-act="map" aria-label="${t("back")}">&#8592;</button>
       <h1>${t("gateTitle")}</h1>
@@ -3759,7 +3832,7 @@ function viewParent(p){
     </div>`;
   }).join("");
 
-  return `<div class="scr">
+  return `<div class="scr narrow">
     <div class="topbar">
       <button class="iconbtn" data-act="map" aria-label="${t("back")}">&#8592;</button>
       <h1>${t("gateTitle")} &middot; ${esc(p.name)}</h1>
@@ -4173,15 +4246,32 @@ document.addEventListener("change", e => {
   }
 });
 
-window.addEventListener("resize", () => {
-  if(view.name !== "game") return;
-  placeCar(document.getElementById("mycar"), anim.shown, 0);
-  placeCar(document.getElementById("rivalcar"), anim.ghostShown, -13);
-});
+/* Turning the tablet changes both axes, so the two values on <html> are
+   written again first. The race only has to put the cars back on the
+   road, which is cheap; the map is built in JS and has to be built again
+   to land in the right number of columns, so it waits for the resize to
+   settle. The view scrolls back to the top, which is what turning a
+   tablet does anyway. */
+let layoutWait = 0;
+function onResize(){
+  layoutClass();
+  if(view.name === "game"){
+    placeCar(document.getElementById("mycar"), anim.shown, 0);
+    placeCar(document.getElementById("rivalcar"), anim.ghostShown, -13);
+    return;
+  }
+  if(view.name === "map"){
+    clearTimeout(layoutWait);
+    layoutWait = setTimeout(() => { if(view.name === "map") render(); }, 150);
+  }
+}
+window.addEventListener("resize", onResize);
+window.addEventListener("orientationchange", onResize);
 
 /* boot */
 load();
 save();
+layoutClass();
 if(!DB.pin) go("setpin");
 else if(DB.current && P()) go("map");
 else go("players");

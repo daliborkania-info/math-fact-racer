@@ -8,6 +8,13 @@ const fs=require('fs');const path=require('path');const ROOT=path.resolve(__dirn
 const html=fs.readFileSync(path.join(ROOT, 'index.html'),'utf8');
 const FX=JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'legacy-profiles.json'),'utf8'));
 const ok=(n,c,x)=>console.log((c?'  OK  ':'  !!  ')+n+(x!==undefined?'   ['+x+']':''));
+/* Okno jsdomu je 1024 x 768; migrace se hlida na telefonu na vysku,
+   takze se rozmery nastavi jeste pred spustenim skriptu hry. Od kroku C
+   se podle nich pri startu rozhoduje rozvrzeni. */
+const phone=win=>{
+  Object.defineProperty(win,'innerWidth',{value:375,configurable:true,writable:true});
+  Object.defineProperty(win,'innerHeight',{value:812,configurable:true,writable:true});
+};
 
 /* prilis velke sady prikladu, aby fixture zustala citelna */
 function fillFacts(tag){
@@ -62,7 +69,7 @@ for(const c of FX.cases){
   const before=JSON.parse(JSON.stringify(db));
 
   const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'https://x.test/',
-    beforeParse(win){ win.localStorage.setItem('math-fact-racer-v1', JSON.stringify(db)); }});
+    beforeParse(win){ win.localStorage.setItem('math-fact-racer-v1', JSON.stringify(db)); phone(win); }});
   const w=dom.window; const errs=[];
   w.addEventListener('error',e=>errs.push('ERROR: '+e.message));
   dom.virtualConsole.on('jsdomError',e=>errs.push('JSDOM: '+e.message));
@@ -142,7 +149,7 @@ console.log('--- opakovane nacteni');
 const db2=JSON.parse(JSON.stringify(FX.cases[0].db));
 const boot=raw=>{
   const d=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'https://x.test/',
-    beforeParse(win){ win.localStorage.setItem('math-fact-racer-v1', raw); }});
+    beforeParse(win){ win.localStorage.setItem('math-fact-racer-v1', raw); phone(win); }});
   Object.defineProperty(d.window.HTMLElement.prototype,'clientWidth',{get(){return 375}});
   Object.defineProperty(d.window.HTMLElement.prototype,'clientHeight',{get(){return 192}});
   return d;

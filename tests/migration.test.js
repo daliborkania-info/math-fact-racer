@@ -141,6 +141,28 @@ for(const c of FX.cases){
        navic.length?'rozsvitilo se '+navic.join(','):'ok');
   }
 
+  // kacenka a jeji vystroj: profil z verze pred kackou o nich nevi a musi
+  // je dostat, aniz by cokoli ztratil. Prazdna vystroj neznamena holou
+  // kacenku: bez ulozeneho tela se kresli klasicka zluta, takze dite
+  // otevre garaz a vidi hotovou kacenku, ne rozdelanou.
+  if(c.expectDuck){
+    const pr=after.profiles[0];
+    ok('profil dostal kacenku mezi zavodniky', (pr.owned||[]).includes('du_kacka'),
+       (pr.owned||[]).length+' zavodniku');
+    ok('kacenka ma zalozenou prazdnou vystroj',
+       Array.isArray(pr.duckParts) && pr.duckParts.length===0
+       && pr.duck && typeof pr.duck==='object' && Object.keys(pr.duck).length===0,
+       JSON.stringify(pr.duckParts)+' / '+JSON.stringify(pr.duck));
+    ok('bez ulozeneho tela je kacenka klasicka zluta',
+       w.eval('duckSVG(itemById("du_kacka"), P().duck)===duckSVG(itemById("du_kacka"), {body:DUCK_BODY[0].id})')===true);
+    // soucastky a natery jsou mena a zbozi dilny; kacenciny dily se za ne
+    // kupuji, takze se prave tady nesmi nic z toho vytratit
+    ok('soucastky a natery prezily beze zmeny',
+       pr.parts===before.profiles[0].parts
+       && (before.profiles[0].paints||[]).every(x=>(pr.paints||[]).includes(x)),
+       pr.parts+' soucastek, natery '+(pr.paints||[]).join(','));
+  }
+
   // svet: starsi profil patri do okruhu, protoze v nem uz hral, a zadny
   // svet mu nesmi vzit koupeneho zavodnika z nabidky
   if(c.expectWorld){

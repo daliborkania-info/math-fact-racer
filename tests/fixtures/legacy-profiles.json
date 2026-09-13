@@ -23,7 +23,8 @@
   "              patri do okruhu, protoze tam uz byl",
   "expectGrade = rocnik, ve kterem profil po nacteni skonci; starsi",
   "              profil zadny nema a dostane nejvyssi, protoze nizsi by",
-  "              mu vzal trati, ktere uz na mape vidi"
+  "              mu vzal trati, ktere uz na mape vidi",
+  "expectDuck = profil ma po nacteni dostat gumovou kacenku mezi zavodniky a k ni prazdne duckParts a duck, aniz by cokoli ztratil"
  ],
  "cases": [
   {
@@ -2080,6 +2081,176 @@
       "totalAns": 301,
       "msSum": 812000,
       "msN": 284
+     }
+    ]
+   }
+  },
+  {
+   "id": "v12-pred-kacenkami",
+   "note": "zari 2026, tretak z verze tesne pred gumovou kacenkou: zna dilnu, ma nasetrene soucastky, koupene natery a jeden z nich nasazeny, ale nezna du_kacka, duckParts ani duck. Po nacteni musi dostat kacenku mezi zavodniky a obe nova pole prazdna, a nesmi mu ubyt ani jedna soucastka, ani jeden nater a ani jeden zavodnik. Kdyby se profil dnesni verze nezamrazil ted, nebylo by uz nikdy z ceho migraci kacenciny vystroje overit",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "bridge",
+    "t1",
+    "clock",
+    "a100"
+   ],
+   "expectClosed": [
+    "a1000",
+    "round",
+    "chain",
+    "ops",
+    "tens",
+    "units",
+    "beyond",
+    "d1"
+   ],
+   "expectChapter": null,
+   "expectWorld": "circuit",
+   "expectGrade": 3,
+   "expectStars": [
+    "m2x3",
+    "a4p6"
+   ],
+   "expectNoStars": [
+    "o1"
+   ],
+   "expectDuck": true,
+   "db": {
+    "current": "stareK",
+    "sound": true,
+    "lang": "cs",
+    "pin": "h7f2x91",
+    "profiles": [
+     {
+      "id": "stareK",
+      "name": "Kuba",
+      "lang": "cs",
+      "facts": {
+       "m1x1": {
+        "lv": 5,
+        "reps": 14,
+        "ok": 14,
+        "bad": 0,
+        "best": 1050,
+        "seen": 1757600000000
+       },
+       "m2x3": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 1600,
+        "seen": 1757600000000
+       },
+       "a4p6": {
+        "lv": 5,
+        "reps": 11,
+        "ok": 11,
+        "bad": 0,
+        "best": 1200,
+        "seen": 1757600000000
+       },
+       "o1": {
+        "lv": 2,
+        "reps": 6,
+        "ok": 4,
+        "bad": 2,
+        "best": 4100,
+        "seen": 1757600000000
+       }
+      },
+      "stars": {
+       "m1x1": true,
+       "a4p6": true
+      },
+      "best": {
+       "t1": {
+        "dist": 109.5,
+        "hist": [
+         7.1,
+         13.9
+        ],
+        "n0": 20
+       },
+       "a100": {
+        "dist": 96,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 3,
+       "a100": 2,
+       "clock": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "ri_ufo"
+      ],
+      "runner": "ri_ufo",
+      "xp": {
+       "pet_kiki": 310,
+       "pet_mecha": 65
+      },
+      "coins": 118,
+      "parts": 47,
+      "paints": [
+       "pa_neon",
+       "pa_lava"
+      ],
+      "paint": {
+       "ri_ufo": "pa_lava"
+      },
+      "jobRuns": {
+       "money": 5,
+       "count": 3
+      },
+      "trackRuns": {
+       "t1": 11,
+       "clock": 2,
+       "a100": 7
+      },
+      "opened": {
+       "a3": true,
+       "a5": true,
+       "a7": true,
+       "a10": true,
+       "a15": true,
+       "a20": true,
+       "bridge": true,
+       "t1": true,
+       "clock": true,
+       "a100": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": null,
+      "chapter": null,
+      "chapterMode": "soft",
+      "world": "circuit",
+      "grade": 3,
+      "streak": 2,
+      "lastDay": null,
+      "bestStreak": 9,
+      "runs": 20,
+      "totalOk": 331,
+      "totalAns": 402,
+      "msSum": 967000,
+      "msN": 388,
+      "created": 1757600000000
      }
     ]
    }

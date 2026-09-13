@@ -938,6 +938,13 @@ cs: {
   buyPaintText: "Stojí {0} součástek. Máš jich {1}.",
   notEnoughPartsTitle: "Ještě to nestačí",
   notEnoughPartsText: "Chybí ti {0} součástek. Zajdi do dílny, tam se vydělávají.",
+  duckBodies: "Barvy kačenky",
+  duckBodiesNote: "Barvy pro kačenku se kupují za součástky z dílny, mincemi je nepořídíš. Co jednou koupíš, to ti zůstane, i když si pak vybereš jinou. Na jízdu nemají žádný vliv, jen na to, jak kačenka vypadá.",
+  buyDuckTitle: "Koupit {0}?",
+  buyDuckText: "Stojí {0} součástek. Máš jich {1}.",
+  db_klasik: "Klasická", db_bila: "Sněhová", db_ruzova: "Růžová", db_mint: "Mátová",
+  db_nebeska: "Nebeská", db_limetka: "Jablíčková", db_levandule: "Fialová",
+  db_ohniva: "Ohnivá", db_uhel: "Uhlíková", db_duhova: "Duhová",
 
   /* workshop */
   shopTitle: "Dílna",
@@ -1246,6 +1253,13 @@ en: {
   buyPaintText: "It costs {0} parts. You have {1}.",
   notEnoughPartsTitle: "Not quite enough",
   notEnoughPartsText: "You are {0} parts short. Head to the workshop, that is where parts come from.",
+  duckBodies: "Duck colours",
+  duckBodiesNote: "Duck colours are bought with parts from the workshop, never with coins. Once you buy one it is yours, even after you pick another. They change nothing about the racing, only how the duck looks.",
+  buyDuckTitle: "Buy {0}?",
+  buyDuckText: "It costs {0} parts. You have {1}.",
+  db_klasik: "Classic", db_bila: "Snow", db_ruzova: "Pink", db_mint: "Mint",
+  db_nebeska: "Sky", db_limetka: "Apple", db_levandule: "Purple",
+  db_ohniva: "Fire", db_uhel: "Coal", db_duhova: "Rainbow",
 
   /* workshop */
   shopTitle: "Workshop",
@@ -1552,6 +1566,13 @@ de: {
   buyPaintText: "Kostet {0} Teile. Du hast {1}.",
   notEnoughPartsTitle: "Reicht noch nicht",
   notEnoughPartsText: "Dir fehlen {0} Teile. Geh in die Werkstatt, dort gibt es sie.",
+  duckBodies: "Farben für die Ente",
+  duckBodiesNote: "Farben für die Ente kauft man mit Teilen aus der Werkstatt, niemals mit Münzen. Was du einmal gekauft hast, bleibt dir, auch wenn du später eine andere nimmst. Am Rennen ändern sie nichts, nur am Aussehen der Ente.",
+  buyDuckTitle: "{0} kaufen?",
+  buyDuckText: "Kostet {0} Teile. Du hast {1}.",
+  db_klasik: "Klassisch", db_bila: "Schnee", db_ruzova: "Rosa", db_mint: "Minze",
+  db_nebeska: "Himmel", db_limetka: "Apfel", db_levandule: "Lila",
+  db_ohniva: "Feuer", db_uhel: "Kohle", db_duhova: "Regenbogen",
 
   /* workshop */
   shopTitle: "Werkstatt",
@@ -1973,11 +1994,20 @@ function load(){
     if(p.curriculum) normalizeChapter(p);
     seedOpened(p);
     seedShop(p);
+    seedDuck(p);
     seedStars(p);
     seedWorld(p);
     seedGrade(p);
     seedBands(p);
   }
+}
+/* What goes on the duck, added later. An older profile knows none of it
+   and starts with an empty wardrobe; it loses nothing by that, because a
+   duck with no body chosen is the classic yellow one, which is what it
+   was already looking at. */
+function seedDuck(p){
+  p.duckParts = p.duckParts || [];   // duck part ids bought with parts
+  p.duck      = p.duck      || {};   // layer -> the part id worn on it
 }
 /* The workshop, added later. An older profile has none of this and must
    simply start with an empty toolbox; nothing it already owns is touched. */
@@ -2021,6 +2051,8 @@ function newProfile(name, grade){
     parts: 0,           // workshop currency, cannot be earned by racing
     paints: [],         // paint ids bought with parts
     paint: {},          // machine id -> paint id currently on it
+    duckParts: [],      // duck part ids bought with parts, never given back
+    duck: {},           // duck layer -> the part id worn on it
     jobRuns: {},        // workshop job id -> pieces of work finished
     trackRuns: {},      // track id -> races completed
     opened: {},         // track id -> true once it has ever been unlocked
@@ -3806,6 +3838,70 @@ const RIDES = [
 const DUCKS = [
   {id:"du_kacka", duck:true, c1:"#ffd23f", c2:"#e0a41f", cost:0}
 ];
+/* --- what a duck wears ---
+   The duck itself is free; what costs something is what goes on it, in
+   layers. A layer holds one part and only one, so a profile stores
+   `duck` as layer -> part id rather than a list: a duck cannot wear two
+   bodies. What was paid for lands in `duckParts` and stays there for
+   good, exactly like a paint: taking a part off means putting a
+   different one on, never losing the one bought, and nothing sells a
+   part back.
+   Parts are paid for in workshop parts, never in coins. That is the
+   whole answer to what parts are for once every paint is bought, and it
+   is also why no part may ever be earned by racing.
+   No part has any attribute but its drawing. A dressed duck races
+   exactly like a bare one, and the rival is still your own best lap.
+   Today there is one layer, the body; patterns, head, eyes and gear
+   follow, each its own list with the same shape. */
+const BODY_LAYER = "body";
+/* Ten bodies, cheapest first, because the first tile a child sees
+   should be one they can afford. The classic yellow is free and is what
+   an older profile sees without having chosen anything, so it carries
+   no colours of its own: it borrows the duck's, and the classic yellow
+   is written down in exactly one place.
+   Optional fields, each used by one body or two, never scattered as
+   special cases through the drawing:
+     beak / beak2  the bill is orange because that is how a duck reads;
+                   the pink duck from the photo is the one exception
+     beakEdge      an outline for a body the orange bill sinks into
+     belly         how strongly the pale underside shows through
+     eyeRing       a pale patch behind the eye, for a dark body
+     edge          an outline, for a body that would vanish on a white tile
+     grad          a body that is not a flat colour at all */
+const DUCK_BODY = [
+  {id:"db_klasik",    cost:0},
+  {id:"db_bila",      c1:"#fafcff", c2:"#c2cee0", cost:8,  edge:"#b4c2d8"},
+  {id:"db_ruzova",    c1:"#ff9ec4", c2:"#e56d9d", cost:10, beak:"#ff4f96", beak2:"#d62f77"},
+  {id:"db_mint",      c1:"#8ee6d5", c2:"#4bb8a4", cost:10},
+  {id:"db_nebeska",   c1:"#7ad3ff", c2:"#3ea8e0", cost:12},
+  {id:"db_limetka",   c1:"#a4e768", c2:"#6fbb34", cost:12},
+  {id:"db_levandule", c1:"#c9a8ff", c2:"#8a63d8", cost:15},
+  {id:"db_ohniva",    c1:"#ff7a3d", c2:"#c23a12", cost:15, beakEdge:"#8a3208"},
+  {id:"db_uhel",      c1:"#3a4360", c2:"#1b2436", cost:18, belly:.45, eyeRing:"#f2f5ff"},
+  // the only body that is not a flat colour; `c1` is what a renderer
+  // without gradients falls back to, and the wing keeps a solid edge
+  {id:"db_duhova",    c1:"#7ae582", c2:"#e0568a", cost:20,
+   grad:["#ff6b6b", "#ffd166", "#7ae582", "#3ec1ff", "#c9a8ff"]}
+];
+const DUCK_PARTS = DUCK_BODY;          // every layer's catalogue, in one list
+const duckPartById = id => DUCK_PARTS.find(x => x.id === id) || null;
+/* A part knows which layer it belongs to from its id, so no catalogue
+   entry can be filed under the wrong one by hand. */
+const DUCK_LAYER_BY_PREFIX = {db: BODY_LAYER};
+const duckLayerOf = part => DUCK_LAYER_BY_PREFIX[part.id.slice(0, 2)];
+/* The free part of a layer belongs to everyone from the start, exactly
+   like the starter racers; the rest are paid for once and kept. */
+const ownsDuckPart = (p, part) => part.cost === 0 || (p.duckParts || []).includes(part.id);
+/* Putting a part on is the only thing that changes; `duckParts` only
+   ever grows. An empty id means the layer goes bare, which is how the
+   layers after the body will be taken off again. */
+function wearDuckPart(p, layer, id){
+  p.duck = p.duck || {};
+  if(id) p.duck[layer] = id; else delete p.duck[layer];
+}
+/* No body chosen means the classic yellow, so an older profile opens the
+   garage and sees a finished duck rather than an empty one. */
+const duckBodyOf = outfit => duckPartById((outfit || {})[BODY_LAYER]) || DUCK_BODY[0];
 /* Paints are what parts are for. They are bought with workshop currency
    only, so they cannot be raced for, and they change nothing but the
    colour of a machine: the rival is still your own best lap, and a
@@ -3988,8 +4084,9 @@ function rideSVG(it){
    The frame is the same 100 x 118 as an animal, and the duck sits low
    in it on purpose: the empty band above the head is head room, and a
    tall hat is going to need all of it.
-   The draw order below has empty slots in it. They are the layers, and
-   today every one of them is empty: this duck wears nothing at all. */
+   The draw order below has empty slots in it. They are the layers that
+   are still to come; the body is the one that is here, and it is the
+   only layer that is never empty, because a duck cannot be colourless. */
 const DUCK = {
   BODY:  {x:46, y:76, rx:32, ry:22},   // the float: everything hangs off it
   HEAD:  {x:60, y:50, r:17},           // hats, hair and helmets sit here
@@ -3999,30 +4096,65 @@ const DUCK = {
   TAIL:  {x:26, y:66},                 // a backpack hangs behind this
   WATER: 88                            // where a swim ring would meet the body
 };
-function duckSVG(it){
+function duckSVG(it, outfit){
   const B = DUCK.BODY, H = DUCK.HEAD, E = DUCK.EYE, W = DUCK.WING, K = DUCK.BEAK, T = DUCK.TAIL;
-  // the layers, all empty today: nothing is worn and nothing is for sale
+  const b = duckBodyOf(outfit);
+  // the free body has no colours of its own, so the classic yellow is
+  // written down once, on the duck, and nowhere else
+  const c1 = b.c1 || it.c1, c2 = b.c2 || it.c2;
+  // the rainbow body is one sweep across the whole duck rather than a
+  // fill per shape, so the head carries on where the body left off. Its
+  // id is fixed on purpose: every rainbow duck on the screen is the same
+  // sweep, so two ducks dressed the same still look the same.
+  const skin = b.grad ? "url(#duckrb)" : c1;
+  const defs = b.grad
+    ? `<defs><linearGradient id="duckrb" gradientUnits="userSpaceOnUse"`
+      + ` x1="${B.x - B.rx}" y1="${B.y}" x2="${H.x + H.r}" y2="${H.y}">`
+      + b.grad.map((c, i) => `<stop offset="${Math.round(i / (b.grad.length - 1) * 100)}%" stop-color="${c}"/>`).join("")
+      + `</linearGradient></defs>`
+    : "";
+  const beak = b.beak || "#ff9f1c", beak2 = b.beak2 || "#e5820c";
+  const bill = `M${K.x} ${K.y-5} Q ${K.x+14} ${K.y-6} ${K.x+17} ${K.y-1}`
+             + ` Q ${K.x+18} ${K.y+2} ${K.x+13} ${K.y+4} Q ${K.x+6} ${K.y+6} ${K.x} ${K.y+5}`;
+  // The tail goes in before the body, so the body hides where it grows
+  // out, and the head overlaps the body, so the neck is the notch the
+  // two leave. That is why the three come as one call: an outline drawn
+  // around each of them separately would draw the seams as well.
+  const shell = (tailPaint, skinPaint, extra) =>
+      `<path d="M${T.x+4} ${T.y-4} L${T.x-22} ${T.y-15} L${T.x-2} ${T.y+14} Z" fill="${tailPaint}"${extra}/>`
+    + `<ellipse cx="${B.x}" cy="${B.y}" rx="${B.rx}" ry="${B.ry}" fill="${skinPaint}"${extra}/>`
+    + `<circle cx="${H.x}" cy="${H.y}" r="${H.r}" fill="${skinPaint}"${extra}/>`;
+  // A body pale enough to vanish into a white garage tile says so and
+  // gets an outline: the same three shapes underneath in the outline
+  // colour, so only the silhouette shows and no seam inside it does.
+  const edge = b.edge ? shell(b.edge, b.edge, ` stroke="${b.edge}" stroke-width="2.4"`) : "";
+  // the layers still to come; the body is the one that is already here
   const back = "", pat = "", eyewear = "", headwear = "", front = "";
-  const g = back
-    // the tail goes in before the body, so the body hides where it grows out
-    + `<path d="M${T.x+4} ${T.y-4} L${T.x-22} ${T.y-15} L${T.x-2} ${T.y+14} Z" fill="${it.c2}"/>`
-    + `<ellipse cx="${B.x}" cy="${B.y}" rx="${B.rx}" ry="${B.ry}" fill="${it.c1}"/>`
-    // the head overlaps the body, so the neck is the notch the two leave
-    + `<circle cx="${H.x}" cy="${H.y}" r="${H.r}" fill="${it.c1}"/>`
+  const g = defs + back
+    + edge
+    + shell(c2, skin, "")
     + pat
     // the pale underside, kept wholly inside the body: any part of it
-    // that reached past the edge would read as a puddle, not a belly
+    // that reached past the edge would read as a puddle, not a belly.
+    // A dark body needs more of it, or the belly is not there at all.
     + `<ellipse cx="${B.x+2}" cy="${B.y+7}" rx="${B.rx*.75}" ry="${B.ry*.61}"`
-    + ` fill="#fff" opacity=".2"/>`
+    + ` fill="#fff" opacity="${b.belly || .2}"/>`
     + `<path d="M${W.x-16} ${W.y-10} Q ${W.x+4} ${W.y-12} ${W.x+10} ${W.y+2}`
-    + ` Q ${W.x-2} ${W.y+12} ${W.x-14} ${W.y+6} Z" fill="${it.c2}"/>`
-    + `<path d="M${K.x} ${K.y-5} Q ${K.x+14} ${K.y-6} ${K.x+17} ${K.y-1}`
-    + ` Q ${K.x+18} ${K.y+2} ${K.x+13} ${K.y+4} Q ${K.x+6} ${K.y+6} ${K.x} ${K.y+5} Z"`
-    + ` fill="#ff9f1c"/>`
+    + ` Q ${W.x-2} ${W.y+12} ${W.x-14} ${W.y+6} Z" fill="${c2}"/>`
+    // the bill is orange, because orange is how a duck reads; a body may
+    // say otherwise, and exactly one of them does
+    + `<path d="${bill} Z" fill="${beak}"/>`
     // the lower half of the bill, darker, so the beak is a beak and not a wedge
     + `<path d="M${K.x} ${K.y+1} Q ${K.x+8} ${K.y+3.5} ${K.x+15.5} ${K.y+1}`
     + ` Q ${K.x+13} ${K.y+4.5} ${K.x+6} ${K.y+5.6} Q ${K.x+2.5} ${K.y+6} ${K.x} ${K.y+5} Z"`
-    + ` fill="#e5820c"/>`
+    + ` fill="${beak2}"/>`
+    // an orange bill on an orange body needs a line around it, and only
+    // around what is outside the head: the same path without the closing
+    // side, so nothing is drawn across the face
+    + (b.beakEdge ? `<path d="${bill}" fill="none" stroke="${b.beakEdge}"`
+                  + ` stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>` : "")
+    // a dark body swallows a dark eye, so it gets a pale patch to sit on
+    + (b.eyeRing ? `<circle cx="${E.x}" cy="${E.y}" r="5" fill="${b.eyeRing}"/>` : "")
     + `<circle cx="${E.x}" cy="${E.y}" r="3.4" fill="#22314f"/>`
     + `<circle cx="${E.x-1.1}" cy="${E.y-1.3}" r="1.2" fill="#fff"/>`
     + eyewear + headwear + front;
@@ -4034,7 +4166,7 @@ function duckSVG(it){
 
 function itemSVG(p, id){
   const it = itemById(id);
-  if(it.duck) return duckSVG(it);
+  if(it.duck) return duckSVG(it, p && p.duck);
   if(!it.kind) return petSVG(it, stageOf(p, id));
   const pa = paintById((p.paint || {})[id]);
   return rideSVG(pa ? Object.assign({}, it, {c1: pa.c1, c2: pa.c2}) : it);
@@ -6148,6 +6280,9 @@ function viewCollection(p){
       <div class="h2 pad" id="paintsec" style="margin-bottom:8px">${t("paints")}</div>
       <div class="pad muted" style="margin-bottom:10px">${t("paintsNote")}</div>
       <div class="grid">${paintCells(p)}</div>
+      <div class="h2 pad" id="duckbodysec" style="margin-bottom:8px">${t("duckBodies")}</div>
+      <div class="pad muted" style="margin-bottom:10px">${t("duckBodiesNote")}</div>
+      <div class="grid">${duckPartCells(p, BODY_LAYER)}</div>
       <div style="height:20px"></div>
     </div>
   </div>`;
@@ -6173,6 +6308,25 @@ function paintCells(p){
       : cell(pa.id, svg, "&#9881; " + pa.cost, pa.cost, false);
   }).join("");
   return none + rest;
+}
+/* A duck part is shown on a whole duck wearing it, not as a swatch, for
+   the same reason a paint is shown on a machine: a coloured square tells
+   a child nothing about what they would end up with. The duck shown is
+   dressed the way the child has it, with this one part swapped in, so
+   the tile is a preview of their own duck. */
+function duckPartCells(p, layer){
+  const duck = DUCKS[0];
+  return DUCK_BODY.filter(part => duckLayerOf(part) === layer).map(part => {
+    const on = (p.duck || {})[layer] === part.id
+            || (!(p.duck || {})[layer] && part === DUCK_BODY[0]);
+    const owned = ownsDuckPart(p, part);
+    const svg = duckSVG(duck, Object.assign({}, p.duck, {[layer]: part.id}));
+    return `<button class="item ${on ? "sel" : ""}" data-act="${owned ? "useduck" : "buyduck"}"
+      data-id="${part.id}" data-layer="${layer}">
+      <span class="pic">${svg}</span>
+      <span class="nm">${owned ? t(part.id) : "&#9881; " + part.cost}</span>
+    </button>`;
+  }).join("");
 }
 
 /* ---------- parent code ---------- */
@@ -6707,6 +6861,24 @@ document.addEventListener("click", e => {
   }
   if(act === "usepaint"){ wearPaint(p, id); save(); render(); return; }
 
+  // the same two steps as a paint, and for the same currency: parts are
+  // earned in the workshop and never in a race, and nothing here can be
+  // bought with coins
+  if(act === "buyduck"){
+    const part = duckPartById(id);
+    if(p.parts < part.cost){
+      sheet(`<h3>${t("notEnoughPartsTitle")}</h3><div class="muted">${t("notEnoughPartsText", part.cost - p.parts)}</div>
+        <button class="btn wide" style="margin-top:16px" data-act="closesheet">${t("okBtn")}</button>`);
+      return;
+    }
+    ask(t("buyDuckTitle", t(part.id)), t("buyDuckText", part.cost, p.parts), t("buyYes"), () => {
+      p.parts -= part.cost; p.duckParts.push(part.id);
+      wearDuckPart(p, duckLayerOf(part), part.id); save(); sfx.coin(); render();
+    });
+    return;
+  }
+  if(act === "useduck"){ wearDuckPart(p, el.dataset.layer, id); save(); render(); return; }
+
   if(act === "gate"){ DB.pin ? go("gate") : go("setpin"); return; }
   if(act === "gatego"){
     const v = (document.getElementById("gatein").value || "").trim();
@@ -6756,6 +6928,7 @@ document.addEventListener("click", e => {
       normalizeChapter(DB.profiles[i]);
       seedOpened(DB.profiles[i]);
       seedShop(DB.profiles[i]);
+      seedDuck(DB.profiles[i]);
       seedStars(DB.profiles[i]);
       seedWorld(DB.profiles[i]);
       seedGrade(DB.profiles[i]);

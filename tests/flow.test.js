@@ -534,6 +534,39 @@ ok('nater stal soucastky, ne mince', DBg().profiles[0].parts===170, DBg().profil
 click(qa('[data-act="usepaint"]')[0]);
 ok('nater jde zase sundat', Object.keys(DBg().profiles[0].paint).length===0);
 
+console.log('--- kacenciny barvy ---');
+// dily kacenky se kupuji za tutez menu jako natery, tedy za soucastky
+// z dilny, nikdy za mince; mincim se po nakupu nesmi stat vubec nic
+const minciPred=DBg().profiles[0].coins, soucastekPred=DBg().profiles[0].parts;
+ok('barvy kacenky jsou v garazi pod natery', !!d.getElementById('duckbodysec')
+   && qa('[data-act="buyduck"]').length===9, qa('[data-act="buyduck"]').length+' k odemceni');
+// klasicka zluta je zdarma, takze se nekupuje, jen vybira
+ok('telo zdarma se nekupuje', qa('[data-act="useduck"]').length===1
+   && qa('[data-act="useduck"]')[0].dataset.id==='db_klasik');
+const telo=qa('[data-act="buyduck"]')[0].dataset.id;
+const cenaTela=ev('duckPartById("'+telo+'").cost');
+click(qa('[data-act="buyduck"]')[0]); click(q('[data-yes]'));
+ok('barva koupena a kacenka ji ma na sobe', DBg().profiles[0].duckParts.includes(telo)
+   && DBg().profiles[0].duck.body===telo, JSON.stringify(DBg().profiles[0].duck));
+ok('barva stala soucastky, ne mince', DBg().profiles[0].coins===minciPred
+   && DBg().profiles[0].parts===soucastekPred-cenaTela,
+   DBg().profiles[0].parts+' soucastek, '+DBg().profiles[0].coins+' minci');
+// koupeny dil se neztrati tim, ze si dite vybere jiny, presne jako nater
+click(qa('[data-act="useduck"]').find(b=>b.dataset.id==='db_klasik'));
+ok('vyber klasicke barvy koupenou neztratil', DBg().profiles[0].duckParts.includes(telo)
+   && DBg().profiles[0].duck.body==='db_klasik', JSON.stringify(DBg().profiles[0].duckParts));
+ok('koupena barva uz se znovu neprodava',
+   !qa('[data-act="buyduck"]').some(b=>b.dataset.id===telo)
+   && qa('[data-act="useduck"]').some(b=>b.dataset.id===telo));
+// a na co dite nema, to se nekoupi; soucastky zustanou, kde byly
+const chudy=DBg(); chudy.profiles[0].parts=1;
+w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(chudy));
+jev('load(); go("collection")');
+click(qa('[data-act="buyduck"]')[0]);
+ok('bez soucastek se dil nekoupi', DBg().profiles[0].parts===1
+   && DBg().profiles[0].duckParts.length===1, DBg().profiles[0].parts+' soucastek');
+q('.sheet').remove();
+
 console.log('--- rocnik a ukazka dalsiho roku ---');
 click(q('[data-act="map"]')); click(q('[data-act="players"]'));
 click(q('[data-act="newplayer"]')); d.querySelector('#nm').value='Prvňák';

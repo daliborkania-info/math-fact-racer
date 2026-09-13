@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,BODY_LAYER,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -207,6 +207,110 @@ else{
   if(overlap<=0) dsay('hlava se nedotyka tela, chybi '+(-overlap).toFixed(1));
 }
 console.log('kacenka:',dBad?'chyb '+dBad:'v poradku');
+
+// 3c. kacenciny barvy, tedy vrstva Telo
+//
+// Vrstva je datovy model, ne jen kresba, takze se hlida oboji. Z kresby
+// to, co se spocitat da: ze se kazda barva vykresli, ze se barvy navzajem
+// lisi a ze zadna nesplyne s bilou dlazdici v garazi. Barvy vypadaji
+// v kode odlisne a na obrazku stejne, viz krok D, takze se rozdil meri
+// v Lab, ne odhaduje; prah 25 dE je s rezervou nad tim, co dite na
+// dlazdici sirokou 104 px rozezna.
+// Z modelu to, ze koupeny dil nejde ztratit: obleknuti jine barvy nesmi
+// sahnout na seznam koupenych. Vratit dil taky nejde, stejne jako se
+// neda vratit nater.
+const labOf=hex=>{
+  const n=parseInt(hex.slice(1),16);
+  const g=v=>{v/=255; return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const r=g((n>>16)&255), z=g((n>>8)&255), b=g(n&255);
+  const f=t=>t>0.008856?Math.cbrt(t):(7.787*t+16/116);
+  const X=f((r*0.4124564+z*0.3575761+b*0.1804375)/0.95047);
+  const Y=f( r*0.2126729+z*0.7151522+b*0.0721750);
+  const Z=f((r*0.0193339+z*0.1191920+b*0.9503041)/1.08883);
+  return [116*Y-16, 500*(X-Y), 200*(Y-Z)];
+};
+const deLab=(a,b)=>{const x=labOf(a),y=labOf(b);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]);};
+let bBad=0;
+const bsay=m=>{bBad++;console.log('  !!  '+m);};
+const BODY_PRAH=25, DLAZDICE='#ffffff';   // .item ma background var(--paper)
+const TELA=A.DUCK_BODY, zdarmaTelo=TELA[0];
+if(TELA.length!==10) bsay('tel uz neni deset, ale '+TELA.length);
+if(new Set(TELA.map(x=>x.id)).size!==TELA.length) bsay('dve tela maji stejne id');
+if(TELA.some(x=>A.duckLayerOf(x)!==A.BODY_LAYER)) bsay('telo, ktere nepatri do vrstvy telo');
+if(TELA.some(x=>A.duckPartById(x.id)!==x)) bsay('dil nejde najit podle id');
+if(zdarmaTelo.cost!==0) bsay('prvni telo neni zdarma, stoji '+zdarmaTelo.cost);
+if(zdarmaTelo.c1||zdarmaTelo.c2) bsay('klasicka zluta je zapsana dvakrat, na kacence i na dilu');
+for(let i=1;i<TELA.length;i++) if(TELA[i].cost<TELA[i-1].cost)
+  bsay('katalog neni razeny od nejlevnejsiho: '+TELA[i-1].id+' '+TELA[i-1].cost+' pred '+TELA[i].id+' '+TELA[i].cost);
+// cena cele vrstvy je zapsane cislo, ne dopoctene: kdyz se posune, ma se
+// na to kouknout. Plan kroku H2 pocital se 145, soucet vypsanych cen je 120.
+const CENA_TEL=120;
+const cenaTel=TELA.reduce((s,x)=>s+x.cost,0);
+if(cenaTel!==CENA_TEL) bsay('vrstva Telo stoji '+cenaTel+' soucastek, zapsano bylo '+CENA_TEL);
+// zobak je oranzovy, pokud telo nerekne jinak, a jinak rekne jenom jedno
+const jinyZobak=TELA.filter(x=>x.beak);
+if(jinyZobak.length!==1 || jinyZobak[0].id!=='db_ruzova')
+  bsay('zobak si prebarvuje '+(jinyZobak.map(x=>x.id).join(',')||'nikdo')+', mel jen db_ruzova');
+// kresba: kazda barva se musi vykreslit a stara kacenka bez ulozeneho
+// tela musi vypadat presne jako ta klasicka, ne jako prazdna
+const kacka=A.DUCKS[0];
+for(const telo of TELA){
+  const svg=A.duckSVG(kacka,{[A.BODY_LAYER]:telo.id});
+  if(/NaN|undefined/.test(svg)) bsay('SVG problem u '+telo.id);
+  if((svg.match(/</g)||[]).length!==(svg.match(/>/g)||[]).length) bsay('rozbite tagy u '+telo.id);
+}
+if(A.duckSVG(kacka,{})!==A.duckSVG(kacka,{[A.BODY_LAYER]:zdarmaTelo.id}))
+  bsay('kacenka bez ulozeneho tela nevypada jako klasicka');
+if(A.duckSVG(kacka,{})!==A.duckSVG(kacka,{[A.BODY_LAYER]:'db_neexistuje'}))
+  bsay('neznamy dil v profilu kacenku rozbije misto toho, aby spadla na klasickou');
+if(A.duckSVG(kacka,{}).indexOf(kacka.c1)<0) bsay('klasicka kacenka uz neni zluta');
+// barvy se musi lisit navzajem i od dlazdice, na ktere stoji
+const ploche=TELA.map(x=>Object.assign({},x,{c1:x.c1||kacka.c1})).filter(x=>!x.grad);
+let nejblizsiTelo=1e9, parTel='';
+for(let i=0;i<ploche.length;i++) for(let j=i+1;j<ploche.length;j++){
+  const d=deLab(ploche[i].c1,ploche[j].c1);
+  if(d<nejblizsiTelo){nejblizsiTelo=d; parTel=ploche[i].id+' a '+ploche[j].id;}
+  if(d<BODY_PRAH) bsay('barvy splyvaji: '+ploche[i].id+' a '+ploche[j].id+' maji '+d.toFixed(1)+' dE');
+}
+for(const telo of ploche){
+  const d=deLab(telo.c1,DLAZDICE);
+  // svetle telo smi zustat svetle, ale pak musi mit obrys, jinak na bile
+  // dlazdici v garazi neni videt
+  if(d<20 && !telo.edge) bsay(telo.id+' je od dlazdice jen '+d.toFixed(1)+' dE a nema obrys');
+}
+// duhove telo je jedine, ktere neni plocha, a to je cely jeho rozdil
+const duhove=TELA.filter(x=>x.grad);
+if(duhove.length!==1) bsay('prechod ma '+duhove.length+' tel, mel jedno');
+else{
+  const st=duhove[0].grad;
+  if(st.length!==5) bsay('duha ma '+st.length+' zastavek, cekano pet');
+  for(let i=1;i<st.length;i++) if(deLab(st[i-1],st[i])<25)
+    bsay('dve sousedni zastavky duhy splyvaji: '+st[i-1]+' a '+st[i]);
+  if(A.duckSVG(kacka,{[A.BODY_LAYER]:duhove[0].id}).indexOf('linearGradient')<0)
+    bsay('duhove telo se nekresli prechodem');
+}
+// model: zdarma ma kazdy, placene jen ten, kdo koupil, a obleknuti jineho
+// dilu nesmi koupeny dil ztratit
+const profilTelo={duckParts:[],duck:{}};
+if(!A.ownsDuckPart(profilTelo,zdarmaTelo)) bsay('telo zdarma neni od zacatku k dispozici');
+if(A.ownsDuckPart(profilTelo,TELA[1])) bsay('placene telo ma i ten, kdo ho nekoupil');
+profilTelo.duckParts.push(TELA[1].id);
+A.wearDuckPart(profilTelo,A.BODY_LAYER,TELA[1].id);
+A.wearDuckPart(profilTelo,A.BODY_LAYER,zdarmaTelo.id);
+if(!profilTelo.duckParts.includes(TELA[1].id)) bsay('vyber jine barvy pripravil dite o koupenou');
+if(!A.ownsDuckPart(profilTelo,TELA[1])) bsay('koupene telo prestalo byt koupene');
+if(profilTelo.duck[A.BODY_LAYER]!==zdarmaTelo.id) bsay('vrstva si nedrzi, co je na ni obleceno');
+// starsi profil dostane obe pole prazdna a nic jineho se mu nestane
+const staryProfil={owned:[],coins:5};
+A.seedDuck(staryProfil);
+if(!Array.isArray(staryProfil.duckParts)||staryProfil.duckParts.length) bsay('seedDuck nezalozil prazdny seznam dilu');
+if(!staryProfil.duck||Object.keys(staryProfil.duck).length) bsay('seedDuck nezalozil prazdnou vystroj');
+if(staryProfil.coins!==5) bsay('seedDuck sahl na neco, co mu nepatri');
+const drziProfil={duckParts:['db_mint'],duck:{body:'db_mint'}};
+A.seedDuck(drziProfil);
+if(drziProfil.duckParts[0]!=='db_mint'||drziProfil.duck.body!=='db_mint') bsay('seedDuck prepsal, co uz profil mel');
+console.log('kacenciny barvy:',bBad?'chyb '+bBad:'v poradku',
+  '| nejblizsi dvojice '+parTel+' '+nejblizsiTelo.toFixed(1)+' dE | vrstva stoji '+cenaTel);
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
 const VALID=new Set();

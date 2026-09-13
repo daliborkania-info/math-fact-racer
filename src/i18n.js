@@ -208,6 +208,13 @@ cs: {
   buyPaintText: "Stojí {0} součástek. Máš jich {1}.",
   notEnoughPartsTitle: "Ještě to nestačí",
   notEnoughPartsText: "Chybí ti {0} součástek. Zajdi do dílny, tam se vydělávají.",
+  duckBodies: "Barvy kačenky",
+  duckBodiesNote: "Barvy pro kačenku se kupují za součástky z dílny, mincemi je nepořídíš. Co jednou koupíš, to ti zůstane, i když si pak vybereš jinou. Na jízdu nemají žádný vliv, jen na to, jak kačenka vypadá.",
+  buyDuckTitle: "Koupit {0}?",
+  buyDuckText: "Stojí {0} součástek. Máš jich {1}.",
+  db_klasik: "Klasická", db_bila: "Sněhová", db_ruzova: "Růžová", db_mint: "Mátová",
+  db_nebeska: "Nebeská", db_limetka: "Jablíčková", db_levandule: "Fialová",
+  db_ohniva: "Ohnivá", db_uhel: "Uhlíková", db_duhova: "Duhová",
 
   /* workshop */
   shopTitle: "Dílna",
@@ -516,6 +523,13 @@ en: {
   buyPaintText: "It costs {0} parts. You have {1}.",
   notEnoughPartsTitle: "Not quite enough",
   notEnoughPartsText: "You are {0} parts short. Head to the workshop, that is where parts come from.",
+  duckBodies: "Duck colours",
+  duckBodiesNote: "Duck colours are bought with parts from the workshop, never with coins. Once you buy one it is yours, even after you pick another. They change nothing about the racing, only how the duck looks.",
+  buyDuckTitle: "Buy {0}?",
+  buyDuckText: "It costs {0} parts. You have {1}.",
+  db_klasik: "Classic", db_bila: "Snow", db_ruzova: "Pink", db_mint: "Mint",
+  db_nebeska: "Sky", db_limetka: "Apple", db_levandule: "Purple",
+  db_ohniva: "Fire", db_uhel: "Coal", db_duhova: "Rainbow",
 
   /* workshop */
   shopTitle: "Workshop",
@@ -822,6 +836,13 @@ de: {
   buyPaintText: "Kostet {0} Teile. Du hast {1}.",
   notEnoughPartsTitle: "Reicht noch nicht",
   notEnoughPartsText: "Dir fehlen {0} Teile. Geh in die Werkstatt, dort gibt es sie.",
+  duckBodies: "Farben für die Ente",
+  duckBodiesNote: "Farben für die Ente kauft man mit Teilen aus der Werkstatt, niemals mit Münzen. Was du einmal gekauft hast, bleibt dir, auch wenn du später eine andere nimmst. Am Rennen ändern sie nichts, nur am Aussehen der Ente.",
+  buyDuckTitle: "{0} kaufen?",
+  buyDuckText: "Kostet {0} Teile. Du hast {1}.",
+  db_klasik: "Klassisch", db_bila: "Schnee", db_ruzova: "Rosa", db_mint: "Minze",
+  db_nebeska: "Himmel", db_limetka: "Apfel", db_levandule: "Lila",
+  db_ohniva: "Feuer", db_uhel: "Kohle", db_duhova: "Regenbogen",
 
   /* workshop */
   shopTitle: "Werkstatt",

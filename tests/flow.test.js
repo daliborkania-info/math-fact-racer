@@ -378,8 +378,12 @@ console.log('--- dilna ---');
 click(q('[data-act="map"]'));
 ok('dilna je na mape', qa('[data-act="shop"]').length===1 && /Dílna/.test(txt()));
 click(q('[data-act="shop"]'));
-ok('dilna nabizi zakazky obou rocniku', qa('[data-act="jobstart"]').length===2
-   && /Peníze/.test(txt()) && /Počítání dílků/.test(txt()), qa('[data-act="jobstart"]').length+' zakazek');
+// tretak vidi zakazky vsech tri rocniku: pocitani dilku je prvnackovo,
+// penize druhackovy a slovni ulohy jeho vlastni. Krok F to posunul ze
+// dvou na tri.
+ok('dilna nabizi zakazky vsech rocniku az po ten jeho', qa('[data-act="jobstart"]').length===3
+   && /Peníze/.test(txt()) && /Počítání dílků/.test(txt()) && /Slovní úlohy/.test(txt()),
+   qa('[data-act="jobstart"]').length+' zakazek');
 const partsBefore=DBg().profiles[0].parts;
 click(qa('[data-act="jobstart"]').find(b=>b.dataset.id==='money'));
 ok('zakazka ma sest uloh', qa('.pip').length===6, qa('.pip').length+' uloh');
@@ -464,6 +468,60 @@ ok('s par soucastkami neposila utrata dite na natery za tricet',
 ok('vyber stroje uz zpatky k naterum neskace',
    (click(qa('[data-act="use"]')[0]), ev('view.focus')===undefined));
 
+console.log('--- slovni ulohy v dilne ---');
+// Zakazka, ktera se odpovida psanim. Klavesnice je ze zavodu prevzata
+// jako kresba, nikdy jako obsluha: tap() patri zavodu i s merenim casu
+// a body za rychlost, takze se tady hlida, ze se zavodni stav ani
+// nezalozi a ze prumerny cas zustane presne tam, kde byl.
+ev('go("shop")');
+const msPred=DBg().profiles[0].msN, castiPred=DBg().profiles[0].parts;
+click(qa('[data-act="jobstart"]').find(b=>b.dataset.id==='words'));
+ok('slovni uloha je zadani slovy, ne rovnice',
+   q('#jobask').textContent.length>40 && /\?/.test(q('#jobask').textContent),
+   q('#jobask').textContent);
+ok('odpovida se na klavesnici uvnitr dilny, mince nikde',
+   qa('.tray.pad [data-k]').length===12 && qa('[data-coin]').length===0,
+   qa('.tray.pad [data-k]').length+' klaves');
+ok('ani u psane odpovedi nejsou v dilne stopky ani body',
+   qa('.rail,.stage,.hud').length===0 && !/bodů|body/.test(txt()));
+const wans=()=>ev('JOB.items[JOB.idx].answer');
+const wkey=k=>click(qa('.tray.pad [data-k]').find(b=>b.dataset.k===k));
+const wtype=s=>String(s).split('').forEach(wkey);
+// otisk zavodu tesne pred psanim: kdyby klavesy sly pres tap(), zmenil
+// by se, a s nim by v dilne zacaly bezet stopky posledniho zavodu
+const zavodPred=ev('RUN ? [RUN.idx,RUN.typed,RUN.coins,RUN.state,RUN.t0].join("|") : "null"');
+wtype(wans());
+ok('klavesa v dilne se zavodnim stavem nehne',
+   ev('RUN ? [RUN.idx,RUN.typed,RUN.coins,RUN.state,RUN.t0].join("|") : "null"')===zavodPred, zavodPred);
+ok('napsane cislo je videt na pultu', q('#counter').textContent.indexOf(String(wans()))>=0,
+   q('#counter').textContent);
+const predGumou=ev('JOB.typed');
+wkey('del');
+ok('guma bere po jedne cislici', ev('JOB.typed')===predGumou.slice(0,-1), ev('JOB.typed'));
+wtype(predGumou.slice(-1));
+// fajfka na klavesnici musi odevzdat tady, ne v zavode
+wkey('ok');
+ok('fajfka na klavesnici odevzda ulohu dilny', ev('JOB.state')==='done-step' && ev('JOB.ok')===1);
+const wkryto=()=>qa('#reveal path').filter(x=>x.getAttribute('fill')==='#f2e3ca').length;
+ok('kruh se odkryva i u psane odpovedi', wkryto()===5, wkryto()+' zakrytych');
+click(q('[data-act="jobcheck"]'));
+let wn=0;
+while(ev('view.name')==='job' && wn<20){
+  while(ev('JOB.typed').length) wkey('del');
+  wtype(wans());
+  click(q('[data-act="jobcheck"]'));
+  if(ev('view.name')==='job') click(q('[data-act="jobcheck"]'));
+  wn++;
+}
+ok('zakazka se slovnimi ulohami dosla do konce', ev('view.name')==='jobdone',
+   'obrazovka '+ev('view.name'));
+ok('slovni uloha se zapsala do krabicky', !!DBg().profiles[0].facts.ww1);
+ok('psana odpoved v dilne nezmerila zadny cas', DBg().profiles[0].msN===msPred,
+   msPred+' -> '+DBg().profiles[0].msN);
+ok('za slovni ulohy pribyly soucastky', DBg().profiles[0].parts>castiPred,
+   castiPred+' -> '+DBg().profiles[0].parts);
+ev('go("map")');
+
 console.log('--- heatmapa nad vsemi rodinami ---');
 ev('go("map")'); click(q('[data-act="gate"]'));
 d.getElementById('gatein').value='5678'; click(q('[data-act="gatego"]'));
@@ -492,8 +550,10 @@ ok('sbirka ma vlastni obrazovku', /Poklady/.test(txt()) && qa('.tokwrap .toks').
    qa('.tokwrap .toks').length+' sbirek');
 ok('dilna ma sbirku, i kdyz zadna trat neni',
    ev('collectionSpecs(P()).some(s=>s.keys.indexOf("wm1")>=0)'));
+// tri kroky na zakazku a tretak ma tri zakazky; krok F to posunul ze
+// sesti na devet
 ok('sbirka dilny neni velka podle trati, ale podle kroku zakazek',
-   ev('shopSpec(P()).keys.length')===6, ev('shopSpec(P()).keys.length')+' mist');
+   ev('shopSpec(P()).keys.length')===9, ev('shopSpec(P()).keys.length')+' mist');
 ok('ve sbirce uz neco sviti', ev('starsAll(P())')>0, ev('starsAll(P())')+' rozsvicenych');
 // rozsvicene misto nezhasne, i kdyz uroven prikladu spadne
 const zkus=ev(`(function(){

@@ -152,10 +152,11 @@ dělí sice se zbytkem, ale jen v oboru do desetinásobku dělitele. Čtvrtý kb
 `500 - (40 + 30)`, ne `(300 + 60) : 4`; celé je to popsané
 v `PROJECT-STATE.md`, oddíl 4.
 
-Zamčené zůstávají kapitoly 15, 17, 19, 22 a 32. Kapitola 17
-jednotky jen pojmenovává a porovnává, nepřevádí je, takže na ni `unit_convert`
-nestačí a čeká na `compare_units`. Zbytek čeká na poslední vstupní prvek `cmp`
-a na dílnu; pořadí je v `PROJECT-STATE.md`, oddíl 12b.
+Zamčené zůstávají kapitoly 15, 19 a 32. Kapitoly 17 a 22 odemklo 14. září 2026
+porovnávání: v sedmnáctce se jednotky nepřevádějí, jen porovnávají, takže na ni
+`unit_convert` nikdy stačit nemohl a čekala na `compare_units`. Zbylé tři čekají
+na písemné počítání a na zlomky, tedy na vstupní prvky, které hra nemá; pořadí
+je v `PROJECT-STATE.md`, oddíl 12b.
 
 ## Pilot, hotovo
 
@@ -177,6 +178,14 @@ udělaná; podíl se losuje po desetinásobek dělitele, tedy po tu část osy, 
 sešit značí. Bod 2 je hotový. Bod 3 je varianta nad týmiž klíči, ne rodina, bod
 4 patří podle `PROJECT-STATE.md`, oddíl 4b, do dílny, a bod 1 je příprava, ne
 procvičování.
+
+## Slovní úlohy, hotovo
+
+Sešit je jimi prošpikovaný a v mapě stojí u kapitol 1, 12 a 27. Hra je od
+14. září 2026 umí jako zakázku dílny `words`, tedy mimo kapitoly a mimo závod:
+kroky jsou jeden výpočet do sta, dva výpočty a "o kolik" a "kolikrát". Žádnou
+kapitolu tím neodemkly, protože ani jedna na ně nečekala sama o sobě, a do
+závodu se dostat nesmějí; proč, je v `PROJECT-STATE.md`, oddíl 4b a 11.
 
 ## Co se v tomhle ročníku neobjeví
 

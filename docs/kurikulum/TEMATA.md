@@ -24,6 +24,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | --- | --- | --- |
 | `pad` | číselná klávesnice, jedna odpověď | hotovo |
 | `coins` | mince se skládají na pult, odpověď je hrst mincí | hotovo, jen v dílně |
+| `pieces` | jeden velký dílek, odpověď je, kolikrát se na něj klepne | hotovo, jen v dílně |
 | `pad2` | dvě políčka vedle sebe, podíl a zbytek | hotovo |
 | `pad3` | tři políčka, stovky a desítky a jednotky | hotovo |
 | `cmp` | tři velká tlačítka `<` `=` `>` | hotovo jako `pick` s jinými popiskami, **jen uvnitř školní trati** |
@@ -73,14 +74,14 @@ do dílny, protože je to rozvaha, ne vybavení.
 | --- | --- | --- | --- |
 | `insert_parens` | doplnit závorky tak, aby příklad vyšel | `pick` | nové |
 | `expression_choice` | který zápis výpočtu slovní úlohy je správný | `pick` | nové |
-| `word_problem` | slovní úloha se zápisem, výpočtem a odpovědí | `pad` plus zápis | nové |
+| `word_problem` | slovní úloha, jedna operace, dvě operace, o kolik a kolikrát | `pad`, dílna | hotovo |
 | `written_mult` | písemné násobení pod sebou | `col` | nové |
 | `written_add_sub` | písemné sčítání a odčítání pod sebou | `col` | nové |
 | `number_line` | orientace na číselné ose, doplnění a vyznačení čísel | `line` | nové |
 | `unit_pick` | která jednotka se hodí pro danou veličinu | `pick` | nové |
 | `fraction_read` | jaká část celku je vybarvená | `frac` | nové |
 | `fraction_compare` | porovnávání zlomků a částí celku | `cmp` | nové |
-| `count_objects` | spočítání předmětů na obrázku | `pad` | nové |
+| `count_objects` | spočítání předmětů na obrázku | `pieces`, dílna | hotovo |
 
 ## Témata vyšších ročníků, neověřená
 
@@ -286,3 +287,23 @@ Kbelíky jsou exkluzivní a jdou po přesnosti: `c1` celé hodiny, `c2` půl, `c
 čtvrt a tři čtvrtě, `c4` zbylé pětiminutovky, `c5` na minutu, `c6` odpolední
 zápis. Aktuální kbelík nese sedmdesát procent závodu, zbytek je opakování
 hrubších, tedy stejný tvar jako stupně přechodu přes desítku.
+
+**`word_problem`, hotovo 14. září 2026.** Zakázka dílny `words`, třetí ročník,
+tři kroky: `ww1` jeden výpočet do sta, `ww2` dva výpočty, `ww3` "o kolik" a
+"kolikrát". Do dílny patří proto, že hlavní prací je přečíst větu a rozmyslet
+si, co se s ní má udělat; odpovídá se na číselné klávesnici, ale bez stopek
+a bez bodů za rychlost, a obsluhu kláves má dílna vlastní.
+
+**Je to první téma, které negeneruje čísla, ale text.** Šablona je ve slovníku
+pro každý jazyk zvlášť, čísla a předměty se do ní dosazují. Skloňování řeší
+dvě věci: předmět má tři tvary oddělené svislítkem (`jablko|jablka|jablek`)
+a vybírá z nich tatáž `pickForm()`, jakou používají slovní jednotky času, a
+všechno ostatní ve větě je psané tak, aby se s číslem nehýbalo. Proto taky
+žádný počet ve větě není menší než dva a všechny předměty jsou věci, ne živí
+tvorové.
+
+**Každý tvar úlohy si staví čísla tak, aby situace vyšla.** Nerozdá se víc,
+než je v krabici, dělení vyjde beze zbytku a "o kolik míň" je samostatný tvar,
+takže se na míň nikdy nezeptá tam, kde je jich víc. Ověřuje to okruh nad
+tisícem úloh na krok a na jazyk, který odpověď přepočítá z čísel, jež ve větě
+opravdu stojí.

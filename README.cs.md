@@ -25,7 +25,7 @@ Procvičování malé násobilky pro děti zhruba od sedmi do deseti let, hrané
 | Šampionát | všechno odemčené dohromady |
 | Co ti nejde | jen příklady, které dítě opakovaně mine |
 
-Vedle tratí je na mapě **dílna**. Tam se nezávodí: neběží čas a za rychlost nejsou body, protože do dílny patří učivo, kde je hlavní prací rozvaha, ne vybavení z paměti. První zakázka jsou peníze, tedy placení, drobné a vracení, a odpovídá se skládáním mincí na pult. Za hotovou práci jsou součástky, za které se v garáži kupují nátěry strojů. Součástky se nedají vyjezdit a na jízdu nemají žádný vliv.
+Vedle tratí je na mapě **dílna**. Tam se nezávodí: neběží čas a za rychlost nejsou body, protože do dílny patří učivo, kde je hlavní prací rozvaha, ne vybavení z paměti. Zakázky jsou tři a přibývají s ročníkem: počítání dílků v bedýnce, peníze, tedy placení, drobné a vracení, kde se odpovídá skládáním mincí na pult, a slovní úlohy, kde se výsledek píše na klávesnici, ale bez stopek. Za hotovou práci jsou součástky, za které se v garáži kupují nátěry strojů. Součástky se nedají vyjezdit a na jízdu nemají žádný vliv.
 
 Trati se odemykají podle toho, jak dítě zvládá tu předchozí. Rodič může kterékoli odemknutí přebít ručně.
 

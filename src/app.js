@@ -510,10 +510,18 @@ const unitKeys = ids => ids.map(b => "u" + b);
    the number picks one; English and German split the same way and
    simply repeat their plural. */
 const U_WORDS = ["day", "week", "month", "year"];
+/* One noun, three forms, picked by the number standing in front of it.
+   The dictionary entry holds all three separated by bars and this is the
+   only place that splits them, so a second family that counts things in
+   words (the workshop's word problems) asks the same question of the
+   same mechanism rather than growing one of its own. */
+function pickForm(key, n){
+  const forms = t(key).split("|");
+  return forms[n === 1 ? 0 : n < 5 ? 1 : 2] || forms[forms.length - 1];
+}
 function unitLabel(u, n){
   if(U_WORDS.indexOf(u) < 0) return u;
-  const forms = t("unit_" + u).split("|");
-  return forms[n === 1 ? 0 : n < 5 ? 1 : 2] || forms[forms.length - 1];
+  return pickForm("unit_" + u, n);
 }
 
 /* Which of two is more, the second family answered by choosing.
@@ -2145,10 +2153,14 @@ const sum = a => a.reduce((s, x) => s + x, 0);
    so the workshop shows what the class has already met and nothing else.
    Counting parts is the first year's own job: it is the one thing the
    books spend their first three chapters on, and it is no good in a race
-   because the work is the counting, not the recalling. */
+   because the work is the counting, not the recalling.
+   Word problems are the third year's job for the same reason one step
+   up: the work is reading the sentence and deciding what to do with it,
+   and a race would pay for deciding that quickly. */
 const JOBS = [
   {id:"count", keys:["wc1","wc2","wc3"], n:6, grade:1},
-  {id:"money", keys:["wm1","wm2","wm3"], n:6, grade:2}
+  {id:"money", keys:["wm1","wm2","wm3"], n:6, grade:2},
+  {id:"words", keys:["ww1","ww2","ww3"], n:6, grade:3}
 ];
 const jobById = id => JOBS.find(j => j.id === id) || JOBS[0];
 const jobsInGrade = p => JOBS.filter(j => !j.grade || j.grade <= gradeOf(p));
@@ -2261,7 +2273,125 @@ function countItem(key){
     check: picked => picked.length === n
   };
 }
-function jobItemFromKey(key){ return key[1] === "c" ? countItem(key) : moneyItem(key); }
+/* --- word problems, the third year's job ---
+   The first piece of work where what is generated is a sentence and not
+   a number, and the reason it is here rather than on a track: the work
+   in a word problem is reading it carefully, once, and a stopwatch over
+   that teaches a child to guess the operation from the numbers. The
+   answer is written on the number pad all the same, because the answer
+   really is one number; the pad is borrowed as a drawing, not the race's
+   handling of it. See jobKey().
+
+   THE THINGS THE SENTENCES TALK ABOUT.
+   Each is three forms in the dictionary, "one | two to four | five and
+   more", read by the same pickForm() the spoken units of time use.
+   Czech and German need it, English repeats its plural. Everything else
+   in a template is written so that it cannot move with a number: a
+   count is never below two (so no singular is ever asked for), and the
+   boxes the things go into stand in a case that does not change with
+   the count - Czech "do {n} krabic" is genitive whatever n is, German
+   plural after "in", "auf" and a bare accusative is the same word from
+   two upwards. Every one of them is a thing rather than a creature,
+   because a Czech animate noun changes in the accusative and half these
+   sentences would break on it. */
+const W_THINGS = ["apple", "marble", "sticker", "crayon", "chestnut", "screw", "cookie", "card"];
+const thingLabel = (id, n) => pickForm("ww_" + id, n);
+/* The words handed to a template. Three patterns, because a sentence
+   either counts the same thing twice, or counts it once and counts
+   boxes, or counts it three times. The last argument of each is always
+   the form the question itself needs ("how many apples"), which in
+   Czech is the five-and-more one. Resolved here rather than at drawing
+   time, exactly like the unit a race question wears: the language does
+   not change in the middle of a piece of work. */
+const wordsPair  = (n, th) => [n[0], thingLabel(th, n[0]), n[1], thingLabel(th, n[1]), thingLabel(th, 5)];
+const wordsGroup = (n, th) => [n[0], thingLabel(th, n[0]), n[1], thingLabel(th, 5)];
+const wordsThree = (n, th) => [n[0], thingLabel(th, n[0]), n[1], thingLabel(th, n[1]),
+                               n[2], thingLabel(th, n[2]), thingLabel(th, 5)];
+const wordsGroupPlus = (n, th) => [n[0], thingLabel(th, n[0]), n[1], n[2], thingLabel(th, n[2]),
+                                   thingLabel(th, 5)];
+/* One shape of story. `gen` draws the numbers **in the order the
+   sentence says them**, so what the child reads and what the answer is
+   worked out from are the same list; `nounAt` says which of them carry
+   the thing, and `calc` is the line those numbers make, which is what
+   the result screen shows and what the test evaluates against the
+   answer. Every shape builds its numbers so that the situation it
+   describes cannot come out wrong: nothing is ever given away that is
+   not there, nothing is shared out that does not divide, and "how many
+   fewer" is a different shape from "how many more" rather than the same
+   one with a sign. */
+const W_SHAPES = {
+  add: {ask:"wwAdd", args:wordsPair, nounAt:[0,1],
+    gen(){ const a = ri(2, 60); return [a, ri(2, Math.min(40, 100 - a))]; },
+    solve: n => n[0] + n[1], calc: n => n[0] + " + " + n[1]},
+  sub: {ask:"wwSub", args:wordsPair, nounAt:[0,1],
+    gen(){ const a = ri(8, 99); return [a, ri(2, a - 2)]; },
+    solve: n => n[0] - n[1], calc: n => n[0] + " - " + n[1]},
+  times: {ask:"wwTimes", args:wordsGroup, nounAt:[0],
+    gen(){ return [ri(2, 9), ri(2, 9)]; },
+    solve: n => n[0] * n[1], calc: n => n[0] + " × " + n[1]},
+  share: {ask:"wwShare", args:wordsGroup, nounAt:[0],
+    gen(){ const k = ri(2, 9); return [k * ri(2, 9), k]; },
+    solve: n => n[0] / n[1], calc: n => n[0] + " : " + n[1]},
+
+  addsub: {ask:"wwAddSub", args:wordsThree, nounAt:[0,1,2],
+    gen(){ const a = ri(5, 50), b = ri(2, Math.min(45, 100 - a)); return [a, b, ri(2, a + b - 2)]; },
+    solve: n => n[0] + n[1] - n[2], calc: n => n[0] + " + " + n[1] + " - " + n[2]},
+  subsub: {ask:"wwSubSub", args:wordsThree, nounAt:[0,1,2],
+    gen(){ const a = ri(10, 99), b = ri(2, a - 4); return [a, b, ri(2, a - b - 2)]; },
+    solve: n => n[0] - n[1] - n[2], calc: n => n[0] + " - " + n[1] + " - " + n[2]},
+  timesadd: {ask:"wwTimesAdd", args:wordsGroupPlus, nounAt:[0,2],
+    gen(){ const b = ri(2, 9), k = ri(2, 9); return [b, k, ri(2, Math.min(20, 100 - b * k))]; },
+    solve: n => n[0] * n[1] + n[2], calc: n => n[0] + " × " + n[1] + " + " + n[2]},
+  timessub: {ask:"wwTimesSub", args:wordsGroupPlus, nounAt:[0,2],
+    gen(){ const b = ri(2, 9), k = ri(2, 9); return [b, k, ri(2, b * k - 2)]; },
+    solve: n => n[0] * n[1] - n[2], calc: n => n[0] + " × " + n[1] + " - " + n[2]},
+
+  /* "By how much" and "how many times", which is where a third year
+     goes wrong most often. Four shapes rather than two with a flag: the
+     sentence that asks how many fewer are in the blue box is only ever
+     built when there really are fewer in it, so no draw of the numbers
+     can ask a question whose answer would be below zero. */
+  diffMore: {ask:"wwDiffMore", args:wordsPair, nounAt:[0,1],
+    gen(){ const b = ri(2, 97); return [ri(b + 1, 99), b]; },
+    solve: n => n[0] - n[1], calc: n => n[0] + " - " + n[1]},
+  diffLess: {ask:"wwDiffLess", args:wordsPair, nounAt:[0,1],
+    gen(){ const a = ri(2, 97); return [a, ri(a + 1, 99)]; },
+    solve: n => n[1] - n[0], calc: n => n[1] + " - " + n[0]},
+  timesBlue: {ask:"wwTimesBlue", args:wordsPair, nounAt:[0,1],
+    gen(){ const k = ri(2, 9), s = ri(2, Math.floor(99 / k)); return [k * s, s]; },
+    solve: n => n[0] / n[1], calc: n => n[0] + " : " + n[1]},
+  timesRed: {ask:"wwTimesRed", args:wordsPair, nounAt:[0,1],
+    gen(){ const k = ri(2, 9), s = ri(2, Math.floor(99 / k)); return [s, k * s]; },
+    solve: n => n[1] / n[0], calc: n => n[1] + " : " + n[0]}
+};
+/* Three steps: one operation within a hundred, two operations, and the
+   two comparing questions. */
+const W_STEPS = {
+  ww1: ["add", "sub", "times", "share"],
+  ww2: ["addsub", "subsub", "timesadd", "timessub"],
+  ww3: ["diffMore", "diffLess", "timesBlue", "timesRed"]
+};
+function wordItem(key){
+  const step = W_STEPS[key] || W_STEPS.ww1;
+  const id = step[ri(0, step.length - 1)];
+  const sh = W_SHAPES[id];
+  const thing = W_THINGS[ri(0, W_THINGS.length - 1)];
+  const nums = sh.gen();
+  const answer = sh.solve(nums);
+  return {
+    key, kind:"word", input:"pad", maxLen:3,
+    shape:id, nums, thing, answer, calc: sh.calc(nums),
+    ask: sh.ask, askArgs: sh.args(nums, thing),
+    missMsg:"jobWordMiss",
+    solution:[answer],
+    // what was typed rather than a handful of coins, so the workshop's
+    // own key handler fills it; see jobKey()
+    check: typed => String(typed).length > 0 && +typed === answer
+  };
+}
+function jobItemFromKey(key){
+  return key[1] === "c" ? countItem(key) : key[1] === "w" ? wordItem(key) : moneyItem(key);
+}
 /* Six tasks, the current step carrying most of them and the earlier
    steps coming back as review. Same shape as every track, so the
    workshop inherits spaced repetition rather than inventing its own. */
@@ -6544,14 +6674,14 @@ function mountResult(){ document.onkeydown = null; stopAnim(); }
 let JOB = null;
 function startJob(p, jobId){
   const job = jobById(jobId);
-  JOB = {job, items: buildJob(p, job), idx:0, picked:[], state:"ask", ok:0, parts:0,
+  JOB = {job, items: buildJob(p, job), idx:0, picked:[], typed:"", state:"ask", ok:0, parts:0,
          retries:0, missed:[], newStars:0};
   go("job");
 }
 function jobAskText(item){ return t.apply(null, [item.ask].concat(item.askArgs || [])); }
 function moneyStr(v){ return v + " " + t("moneyUnit"); }
 
-const JOB_PIC = {count:"&#128295;", money:"&#128176;"};
+const JOB_PIC = {count:"&#128295;", money:"&#128176;", words:"&#128221;"};
 function viewShop(p){
   const atSchool = chapterJobIds(p);
   // the workshop says where its parts go, because a child who cannot see
@@ -6593,13 +6723,27 @@ function viewShop(p){
   </div>`;
 }
 
+/* How to answer this one, in a sentence. Three input elements, three
+   sentences, and the one that is written rather than laid out says so
+   plainly, because nothing else on the screen would. */
+function jobHintKey(item){
+  return item.input === "pieces" ? "jobTapPieces"
+       : item.input === "pad"    ? "jobTypeAnswer"
+       : "jobTapCoins";
+}
 function viewJob(p){
   const item = JOB.items[JOB.idx];
+  /* A word problem is three sentences where a money task is one, so the
+     question asks for smaller type once it is long, the same way a long
+     line of arithmetic does in a race. It is measured on the text as it
+     is drawn, so the language it is drawn in decides. */
+  const ask = jobAskText(item);
+  const askCls = ask.length > 90 ? " long" : "";
   const pips = JOB.items.map((_, i) => {
     const m = JOB.marks && JOB.marks[i];
     return `<span class="pip ${m === 1 || m === 2 ? "ok" : m === 0 ? "bad" : i === JOB.idx ? "now" : ""}"></span>`;
   }).join("");
-  return `<div class="scr shop">
+  return `<div class="scr shop${item.input === "pad" ? " written" : ""}">
     <div class="topbar">
       <button class="iconbtn" data-act="jobquit" aria-label="${t("back")}">&#10005;</button>
       <h1>${t("job_" + JOB.job.id)}</h1>
@@ -6607,11 +6751,11 @@ function viewJob(p){
     </div>
     <div class="pips dark" style="padding:0 18px 6px">${pips}</div>
     <div class="scr-scroll">
-      <div class="jobask" id="jobask">${jobAskText(item)}</div>
+      <div class="jobask${askCls}" id="jobask">${ask}</div>
       ${item.pic ? `<div class="jobpicbox">${item.pic}</div>` : ""}
       <div class="revealbox" id="reveal">${revealHTML(p)}</div>
       <div class="counter" id="counter">${counterHTML()}</div>
-      <div class="jobhint" id="jobhint">${t(item.input === "pieces" ? "jobTapPieces" : "jobTapCoins")}</div>
+      <div class="jobhint" id="jobhint">${t(jobHintKey(item))}</div>
       ${trayHTML(item)}
       <div class="pad jobgo" style="padding-bottom:calc(18px + var(--safe-b))">
         <button class="btn mint wide" data-act="jobcheck" id="jobok">${t("jobReady")}</button>
@@ -6633,8 +6777,12 @@ function paintReveal(){
 }
 /* What the child answers with. Coins have six values to choose between;
    parts have only one, so the tray is a single big button and the whole
-   answer is how many times it is tapped. */
+   answer is how many times it is tapped. A word problem has a number
+   for an answer and is written on the number pad, which is the race's
+   drawing and nothing else of the race: the keys are the same keys, the
+   handling of them is jobKey() below. */
 function trayHTML(item){
+  if(item.input === "pad") return `<div class="tray pad">${keypadHTML(item)}</div>`;
   if(item.input === "pieces"){
     return `<div class="tray one"><button class="traycoin" data-coin="1" aria-label="${t("jobPiece")}">
       <svg class="coin" viewBox="0 0 64 64" aria-hidden="true">${partSVG("bolt", 32, 30, 1.9, "#f0c063")}</svg>
@@ -6648,7 +6796,16 @@ const pieceSVG = () => `<svg class="coin" viewBox="0 0 64 64" aria-hidden="true"
    child can undo without starting over. Parts are counted rather than
    added up, so the chip on the end says how many, not how much. */
 function counterHTML(){
-  const pieces = (JOB.items[JOB.idx] || {}).input === "pieces";
+  const input = (JOB.items[JOB.idx] || {}).input;
+  /* A written answer goes on the counter too, rather than into a box of
+     its own: it is the one place on this screen where what the child
+     has done so far shows up, whether it was laid out or keyed in. */
+  if(input === "pad"){
+    return JOB.typed
+      ? `<span class="counter-sum">${esc(JOB.typed)}</span>`
+      : `<span class="counter-empty">${t("jobEmptyTyped")}</span>`;
+  }
+  const pieces = input === "pieces";
   if(!JOB.picked.length) return `<span class="counter-empty">${t("jobEmpty")}</span>`;
   return JOB.picked.map((v, i) => `<button class="putcoin" data-drop="${i}">${pieces ? pieceSVG() : coinSVG(v)}</button>`).join("")
     + `<span class="counter-sum">${pieces ? JOB.picked.length : moneyStr(sum(JOB.picked))}</span>`;
@@ -6656,6 +6813,29 @@ function counterHTML(){
 function paintCounter(){
   const c = document.getElementById("counter");
   if(c) c.innerHTML = counterHTML();
+}
+/* THE WORKSHOP'S OWN PLACE FOR A KEY PRESS.
+   The number pad on a word problem is drawn by keypadHTML(), which is
+   only a drawing, but tap() is not: it holds the race's typing, its
+   stopwatch, its points for speed and its car. Sending workshop keys
+   through it would put a clock on a task whose whole point is that
+   there is none, so the workshop has this instead, and the delegated
+   listener decides between the two by which screen is up. It knows
+   about three keys and ignores everything else, because there is
+   nothing else on that pad. */
+function jobKey(k){
+  if(!JOB || JOB.state !== "ask") return;
+  const item = JOB.items[JOB.idx];
+  if(!item || item.input !== "pad") return;
+  if(k === "ok"){ jobCheck(); return; }
+  if(k === "del"){
+    if(!JOB.typed) return;
+    JOB.typed = JOB.typed.slice(0, -1); paintCounter(); return;
+  }
+  if(!/^[0-9]$/.test(k)) return;
+  if(JOB.typed === "0") JOB.typed = "";            // no answer begins with a nought
+  if(JOB.typed.length >= (item.maxLen || 3)) return;
+  JOB.typed += k; sfx.coin(); paintCounter();
 }
 function jobTap(v){
   if(!JOB || JOB.state !== "ask" || JOB.picked.length >= 12) return;
@@ -6666,17 +6846,23 @@ function jobDrop(i){
   JOB.picked.splice(i, 1); paintCounter();
 }
 /* Coins laid out the way the game would do it, shown after a miss so
-   the child sees one right answer rather than being told to try again. */
+   the child sees one right answer rather than being told to try again.
+   A written answer is one number, so it is shown as one number; the
+   sentence above it says to read the task again rather than naming the
+   result twice. */
 function solutionHTML(item){
+  if(item.input === "pad") return `<span class="solnum">${item.answer}</span>`;
   return item.solution.map(v =>
     `<span class="putcoin small">${item.input === "pieces" ? pieceSVG() : coinSVG(v)}</span>`).join("");
 }
 function jobCheck(){
   if(!JOB || JOB.state !== "ask") return;
   const p = P(), item = JOB.items[JOB.idx];
-  if(!JOB.picked.length) return;
-  const correct = item.check(JOB.picked);
-  const near = !correct && item.near && item.near(JOB.picked);
+  // laid out or written down, it is the same answer to the same task
+  const given = item.input === "pad" ? JOB.typed : JOB.picked;
+  if(!given.length) return;
+  const correct = item.check(given);
+  const near = !correct && item.near && item.near(given);
   const isRetry = !!item.retry;
   JOB.state = "done-step";
   JOB.marks = JOB.marks || [];
@@ -6717,6 +6903,7 @@ function jobCheck(){
 function jobNext(){
   JOB.idx++;
   JOB.picked = [];
+  JOB.typed = "";
   if(JOB.idx >= JOB.items.length){ finishJob(); return; }
   JOB.state = "ask";
   go("job");
@@ -6737,6 +6924,10 @@ function viewJobDone(p){
   // Two tasks of the same kind are the same chip only when they really ask
   // the same thing. Counting pieces has no amount, so the amount alone
   // glued every counting task into one chip.
+  // A word problem goes on its chip as the line its numbers make rather
+  // than as the whole story: three sentences in a pill would be a
+  // paragraph with a border round it, and what is worth seeing again is
+  // what the reading came out as.
   const miss = [...new Map(JOB.missed.map(i =>
     [i.key + "|" + (i.answer !== undefined ? i.answer : i.amount), i])).values()].slice(0, 3);
   // the label under the total, and the one decision it carries: while
@@ -6761,7 +6952,7 @@ function viewJobDone(p){
         ${tokenCardHTML(p, shopSpec(p), JOB.newStars)}
         ${miss.length ? `<div class="h2" style="margin-bottom:6px">${t("jobReviewNext")}</div>
           <div class="factchips">${miss.map(i =>
-            `<span class="factchip">${jobAskText(i)}</span>`).join("")}</div>` : ""}
+            `<span class="factchip">${i.calc || jobAskText(i)}</span>`).join("")}</div>` : ""}
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
           <button class="btn mint wide" data-act="jobagain">${t("jobAgain")}</button>
           <button class="btn ghost wide" data-act="shop">${t("jobBackToShop")}</button>
@@ -7358,7 +7549,12 @@ function ask(title, text, okLabel, cb){
 
 document.addEventListener("click", e => {
   const kb = e.target.closest("[data-k]");
-  if(kb){ tap(kb.dataset.k); return; }
+  /* The same keys, two places that handle them. The workshop borrows
+     the drawing of the number pad for a word problem, never tap(): that
+     one belongs to the race and carries its stopwatch, its points for
+     speed and its car. Which of the two is meant is decided by the
+     screen that is up, because the pad is the only thing they share. */
+  if(kb){ view.name === "job" ? jobKey(kb.dataset.k) : tap(kb.dataset.k); return; }
   // an answer written into several boxes: tapping a box moves the keys
   // into it. Its own attribute rather than data-act, because this
   // listener reads data-k first and data-act last.

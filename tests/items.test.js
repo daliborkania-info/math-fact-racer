@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,J_BUCKETS,pickKeys,isPickKey,CMP_BUCKETS,isCmpKey,CMP_EQUAL,surfaceOf,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,J_BUCKETS,pickKeys,isPickKey,CMP_BUCKETS,isCmpKey,CMP_EQUAL,surfaceOf,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,jobAskText,applyLang,W_SHAPES,W_THINGS,thingLabel,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -2523,6 +2523,13 @@ const job=A.jobById('money');
 // na pult, musi uznat svoje vlastni reseni a neuznat o kus vic
 for(const j of A.JOBS) for(const k of j.keys) for(let i=0;i<60;i++){
   const it=A.jobItemFromKey(k); shN++;
+  // slovni uloha se odpovida napsanim cisla, ne skladanim na pult, takze
+  // se overuje ve vlastnim okruhu 11c; tady se hlida jen to, ze zadny
+  // vstupni prvek dilny neni ten treti, ktery by nikdo nekontroloval
+  if(it.input==='pad'){
+    if(it.kind!=='word'){shBad++;if(shBad<6)console.log('  !!  psana uloha dilny neni slovni uloha',k,it.kind);}
+    continue;
+  }
   if(it.input!=='coins'&&it.input!=='pieces'){shBad++;if(shBad<6)console.log('  !!  uloha dilny neni na skladani',k,it.input);continue;}
   if(!it.solution.length){shBad++;if(shBad<6)console.log('  !!  uloha nema reseni',k);continue;}
   if(!it.check(it.solution)){shBad++;if(shBad<6)console.log('  !!  uloha neuznala vlastni reseni',k,it.solution.join('+'));continue;}
@@ -2576,6 +2583,86 @@ if(tp.msN!==0){jbBad++;console.log('  !!  dilna zapocitala cas do prumeru');}
 if(tp.totalAns!==1||tp.totalOk!==1){jbBad++;console.log('  !!  dilna se nezapocitala do uspesnosti');}
 if(tp.facts.wm1.lv!==1){jbBad++;console.log('  !!  spravna odpoved v dilne neposunula uroven',tp.facts.wm1.lv);}
 console.log('chyb v zakazkach dilny:',jbBad);
+
+// 11c. slovni ulohy
+//
+// Tady se negeneruje cislo, ale text, takze se overuje neco jineho nez
+// u minci: ze se uloha da spocitat z toho, co ve vete opravdu stoji, ze
+// ma prave jedno reseni a ze zadna varianta nevyrobi nesmyslnou situaci,
+// tedy zaporny zbytek, deleni, ktere nevyjde, nebo otazku "o kolik min"
+// tam, kde je jich vic. Tisic uloh na krok a na jazyk, protoze chyba
+// muze sedet v jedine sablone jedineho tvaru.
+let slBad=0, slN=0;
+const langWas=A.DB.lang;
+// vypocty psane znovu a nezavisle na generatoru: kdyby se sem opsal
+// solve() z app.js, neoveroval by test nic
+const RESI={
+  add:n=>n[0]+n[1], sub:n=>n[0]-n[1], times:n=>n[0]*n[1], share:n=>n[0]/n[1],
+  addsub:n=>n[0]+n[1]-n[2], subsub:n=>n[0]-n[1]-n[2],
+  timesadd:n=>n[0]*n[1]+n[2], timessub:n=>n[0]*n[1]-n[2],
+  diffMore:n=>n[0]-n[1], diffLess:n=>n[1]-n[0],
+  timesBlue:n=>n[0]/n[1], timesRed:n=>n[1]/n[0]
+};
+const slSay=(k,m)=>{slBad++; if(slBad<10) console.log('  !!  '+m+'   ['+k+']');};
+const slJob=A.jobById('words');
+for(const lang of ['cs','en','de']){
+  A.DB.lang=lang; A.applyLang();
+  for(const k of slJob.keys) for(let i=0;i<1000;i++){
+    const it=A.jobItemFromKey(k); slN++;
+    const sh=A.W_SHAPES[it.shape], f=RESI[it.shape];
+    if(!sh||!f){slSay(k,'neznamy tvar slovni ulohy: '+it.shape);continue;}
+    // 1. odpoved vychazi z cisel, ktera ve vete stoji
+    if(f(it.nums)!==it.answer){slSay(k,'odpoved nesedi s cisly v zadani: '+it.nums.join(',')+' -> '+it.answer);continue;}
+    // 2. a sedi i s radkem, ktery se ukazuje na vysledku zakazky
+    const spoctene=eval(it.calc.replace(/×/g,'*').replace(/:/g,'/'));
+    if(spoctene!==it.answer){slSay(k,'vypocet na vysledku nesedi: '+it.calc+' je '+spoctene+', ma byt '+it.answer);continue;}
+    // 3. prave jedno reseni: svoje uzna a zadne jine ne
+    if(!it.check(String(it.answer))){slSay(k,'uloha neuznala vlastni odpoved '+it.answer);continue;}
+    if(it.check(String(it.answer+1))||it.check(String(it.answer-1))||it.check('')){
+      slSay(k,'uloha uznala i jinou odpoved nez svou');continue;}
+    // 4. nic nesmyslneho: kazde cislo ve vete aspon dve, protoze pod
+    //    dvema by se cesky a nemecky musel sklonovat i zbytek vety;
+    //    odpoved cele kladne cislo do sta
+    if(it.nums.some(n=>!Number.isInteger(n)||n<2||n>100)){slSay(k,'cislo v zadani mimo rozsah: '+it.nums.join(','));continue;}
+    if(!Number.isInteger(it.answer)||it.answer<1||it.answer>100){slSay(k,'odpoved mimo rozsah: '+it.answer);continue;}
+    // 5. smer otazky sedi s cisly: na "o kolik min" se nikdy nezepta
+    //    tam, kde je jich vic, a delit musi vzdycky vyjit
+    if(it.shape==='diffMore'&&!(it.nums[0]>it.nums[1])){slSay(k,'pta se, o kolik vic, a vic jich neni');continue;}
+    if(it.shape==='diffLess'&&!(it.nums[0]<it.nums[1])){slSay(k,'pta se, o kolik min, a min jich neni');continue;}
+    if(it.shape==='timesBlue'&&it.nums[0]%it.nums[1]!==0){slSay(k,'kolikrat vic nevychazi cele');continue;}
+    if(it.shape==='timesRed'&&it.nums[1]%it.nums[0]!==0){slSay(k,'kolikrat vic nevychazi cele');continue;}
+    if(it.shape==='share'&&it.nums[0]%it.nums[1]!==0){slSay(k,'rozdeleni nevyjde beze zbytku');continue;}
+    // 6. a ted veta sama, ve vsech trech jazycich: obsahuje presne ta
+    //    cisla a v tom poradi, ve kterem je uloha spocitana, nezustal
+    //    v ni nedosazeny placeholder a u kazdeho cisla stoji spravny
+    //    tvar predmetu
+    const veta=A.jobAskText(it);
+    const cisla=(veta.match(/\d+/g)||[]).map(Number);
+    if(cisla.join(',')!==it.nums.join(',')){
+      slSay(k,lang+': cisla ve vete nesedi se zadanim: ['+cisla.join(',')+'] vs ['+it.nums.join(',')+'] | '+veta);continue;}
+    if(/\{\d\}/.test(veta)){slSay(k,lang+': ve vete zustal nedosazeny placeholder: '+veta);continue;}
+    let tvarBad=false;
+    for(const at of sh.nounAt){
+      const tvar=A.thingLabel(it.thing,it.nums[at]);
+      if(veta.indexOf(tvar)<0){tvarBad=true;slSay(k,lang+': chybi tvar predmetu pro '+it.nums[at]+' ('+tvar+'): '+veta);break;}
+    }
+    if(tvarBad) continue;
+    // 7. a otazka sama predmet jmenuje taky, tedy v tvaru pro pet a vic
+    if(veta.indexOf(A.thingLabel(it.thing,5))<0){
+      slSay(k,lang+': v otazce chybi predmet: '+veta);continue;}
+  }
+}
+console.log('zkontrolovano slovnich uloh:',slN,'| chyb:',slBad);
+// tvary predmetu se musi lisit tam, kde se lisit maji: cesky jinak dve
+// az ctyri a jinak pet a vic, jinak by prosla veta "5 jablka"
+A.DB.lang='cs'; A.applyLang();
+let slFormBad=0;
+for(const th of A.W_THINGS){
+  if(!A.thingLabel(th,5)){slFormBad++;console.log('  !!  predmet nema tvar',th);continue;}
+  if(A.thingLabel(th,3)===A.thingLabel(th,5)){slFormBad++;console.log('  !!  cesky predmet nema zvlastni tvar pro pet a vic',th);}
+}
+console.log('chyb ve tvarech predmetu:',slFormBad);
+A.DB.lang=langWas; A.applyLang();
 
 // 12. sbirka vazana na Leitnerovu krabicku
 //
@@ -3207,10 +3294,10 @@ for(const [w,h,cols,ori] of [[375,812,2,'tall'],[812,375,3,'wide'],[768,1024,3,'
 global.window.innerWidth=375; global.window.innerHeight=812; A.layoutClass();
 console.log('chyb v rozvrzeni mapy:',mBad);
 
-// 11c. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
+// 11d. kazda zakazka a kazdy nater ma jmeno ve vsech trech jazycich
 let trBad=0;
 for(const l of ['cs','en','de']){
-  for(const j of A.JOBS) for(const k of ['job_'+j.id, 'job_'+j.id+'s'])
+  for(const j of A.JOBS) for(const k of ['job_'+j.id, 'job_'+j.id+'s'].concat(j.keys.map(x=>'heat_'+x)))
     if(!A.I18N[l][k]){trBad++;console.log('  !!  chybi preklad',l,k);}
   for(const pa of A.PAINTS) if(!A.I18N[l][pa.id]){trBad++;console.log('  !!  chybi jmeno nateru',l,pa.id);}
 }

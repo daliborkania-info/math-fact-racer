@@ -25,7 +25,7 @@ Times tables practice for children of roughly seven to ten, played as a lap arou
 | Championship | everything unlocked, mixed |
 | Trouble spots | only the facts the child keeps missing |
 
-Beside the tracks sits the **workshop**. Nothing is timed there and speed earns no points, because the workshop is for material where the work is reasoning rather than recall. The first job is money: paying, change and coins, answered by putting coins on a counter. Finished work pays in parts, which buy paints for the machines in the garage. Parts cannot be earned by racing and change nothing about how a race runs.
+Beside the tracks sits the **workshop**. Nothing is timed there and speed earns no points, because the workshop is for material where the work is reasoning rather than recall. There are three jobs and more of them open with the school year: counting parts in a tray, money, that is paying, change and coins, answered by putting coins on a counter, and word problems, where the answer is written on a keypad but nothing is timed. Finished work pays in parts, which buy paints for the machines in the garage. Parts cannot be earned by racing and change nothing about how a race runs.
 
 Tracks unlock as the previous one is learned. A parent can override any of that.
 

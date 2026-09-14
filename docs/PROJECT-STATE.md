@@ -682,6 +682,7 @@ podle téhož filtru, takže prvňák nevidí tři šedivá místa za peníze.
 | --- | --- | --- |
 | `count` | 1 | `wc1` do pěti, `wc2` do deseti, `wc3` dva druhy dohromady |
 | `money` | 2 | `wm1` zaplať přesně, `wm2` nejmenším počtem mincí, `wm3` kolik se vrátí |
+| `words` | 3 | `ww1` jeden výpočet do sta, `ww2` dva výpočty, `ww3` o kolik a kolikrát |
 
 **Zakázka** je šest úloh. Aktuální krok nese většinu, dřívější se vracejí jako
 opakování, tedy stejný tvar jako u stupňovaných tratí, `focusAndReview()` sdílí
@@ -716,6 +717,57 @@ a `items.test.js` to ověřuje proti dynamickému programování do dvou set.
 klepnutí na minci na pultu ji vezme zpátky. Vstupní prvek se jmenuje `coins`
 a žije celý uvnitř dílny, nesahá na `tap()` ani na klávesnici závodu.
 
+**Slovní úlohy jsou zakázka třetího ročníku a je to první místo, kde se
+generuje text, ne čísla.** Patří do dílny ze stejného důvodu jako počítání
+dílků: hlavní prací je přečíst větu a rozmyslet si, co se s ní má udělat,
+a odměňovat rychlost u téhle práce učí dítě hádat operaci podle čísel. Kroky
+jsou `ww1` jeden výpočet do sta, `ww2` dva výpočty a `ww3` "o kolik" a
+"kolikrát", což je nejčastější chyba třetí třídy. Zakázka **neodemyká žádnou
+kapitolu**; přidává dovednost, kterou závod držet nesmí.
+
+**Odpověď je číslo, takže se píše na klávesnici, a klávesnice ze závodu se
+smí půjčit jen jako kresba.** `keypadHTML()` se volá uvnitř `viewJob()`, ale
+`tap()` patří závodu i se stopkami, body za rychlost a autem, takže má dílna
+vlastní obslužné místo `jobKey()` a delegovaný posluchač se mezi nimi rozhoduje
+podle toho, která obrazovka stojí (`view.name === "job"`). Je to jediná věc,
+kterou obě části sdílejí, a jediné místo, kde se to rozhoduje. Napsané číslo
+drží `JOB.typed`, ne `RUN.typed`; `jobCheck()` bere podle vstupního prvku buď
+je, nebo hrst mincí. V dílně se ani u psané odpovědi neměří čas, `record()` se
+pořád volá s `ms = null`.
+
+**Skloňování řeší dvě věci, ne sto výjimek.** Předmět, o kterém věta mluví,
+má ve slovníku tři tvary oddělené svislítkem (`jablko|jablka|jablek`) a vybírá
+z nich `pickForm()` podle čísla, které u něj stojí; je to tentýž mechanismus
+a tatáž funkce, jakou si krok D3 postavil pro slovní jednotky času, ne druhý
+vedle něj. Všechno ostatní ve větě je psané tak, aby se s číslem nehýbalo:
+krabice stojí vždycky v "do {n} krabic", tedy ve druhém pádě, který je pro
+všechny počty stejný, německá množná čísla se od dvou nemění ani po "in"
+a "auf", a **žádný počet ve větě není menší než dva**, takže se na úloze nikdy
+nepoužije první tvar a nevznikne "1 samolepku". Předměty jsou schválně věci,
+ne živí tvorové: česky by se živý rod ve čtvrtém pádě změnil a půlka šablon by
+se rozsypala.
+
+**Úloha musí mít právě jedno řešení a nesmí popsat nesmyslnou situaci.** Je to
+obdoba pravidla o obrázku u počítání dílků, jen se hlídá text: každý tvar
+úlohy si čísla staví tak, aby situace vyšla, tedy nikdy se nerozdává víc, než
+je v krabici, dělení vždycky vyjde beze zbytku a **"o kolik míň" je vlastní
+tvar úlohy, ne tentýž se znaménkem**, takže se na míň nikdy nezeptá tam, kde
+je jich víc. `items.test.js` k tomu má okruh nad tisícem úloh na krok a na
+jazyk: odpověď se přepočítá nezávisle z čísel, která ve větě opravdu stojí,
+věta musí obsahovat právě ta čísla a v tom pořadí, ve kterém se úloha počítá,
+nesmí v ní zůstat nedosazený zástupný znak a u každého čísla musí stát správný
+tvar předmětu.
+
+**Dlouhý text si řekne o menší písmo, stejně jako dlouhá otázka v závodě.**
+`.jobask` dostane od devadesáti znaků třídu `long`, tedy 16 až 19 px a
+zarovnání doleva, protože odstavec na střed se špatně čte. Na telefonu 375 ×
+812 zabere nejdelší úloha tři řádky a celý sloupec i s klávesnicí a tlačítkem
+Hotovo končí kolem 760 px, tedy se vejde; po chybě naroste o řádek s řešením
+a kousek se roluje. **Na šířku má psaná odpověď vlastní rozvržení**: pravý
+sloupec je jenom pult a klávesnice, zadání, věta o tom, jak se odpovídá,
+kruhové okno i Hotovo jdou pod sebou vlevo. S Hotovem vpravo, jak ho mají
+mince, by spodní řada kláves spadla pod okraj.
+
 **Platí se v součástkách.** Dva za vyřešenou úlohu, jeden za opravenou nebo za
 `wm2` se správnou částkou ale zbytečně mnoha mincemi, tři za dokončenou zakázku.
 Plná zakázka dá patnáct. Za součástky se v garáži kupují **nátěry**, tedy barevné
@@ -742,7 +794,8 @@ který by se přepočítal, by zmenšil už odkrytý díl.
 
 **Dílna má vlastní sbírku.** Platí pro ni pravidlo z oddílu 6 beze změny: klíč
 dílny, který se v krabičce dostane na úroveň 4, rozsvítí místo ve sbírce. Sbírka
-dílny je dneska třímístná, `wm1` až `wm3`, a s každou další zakázkou povyroste.
+dílny má tři místa na zakázku, tedy pro třeťáka od kroku F devět, a s každou
+další zakázkou povyroste.
 Velikost si říká `shopSpec()` sama, protože dílna žádná trať není a `trackKeys()`
 by ji minulo, přesně jako ji jednou minula rodičovská heatmapa.
 
@@ -2169,7 +2222,10 @@ do něj jen to, co se má zautomatizovat a kde je jedna krátká odpověď. Slov
 úlohy, geometrie, písemné algoritmy a čtení z tabulek potřebují druhý režim bez
 stopek a bez bodů za rychlost, protože odměňovat rychlost u úlohy, kde je hlavní
 práce pečlivé čtení, učí dítě hádat. Ten druhý režim se jmenuje **dílna**
-a od září 2026 existuje, viz oddíl 4b.
+a od září 2026 existuje, viz oddíl 4b. **Slovní úlohy v něm od kroku F
+opravdu jsou**, jako zakázka `words` třetího ročníku; odpovídá se v nich
+sice na číselné klávesnici, ale uvnitř dílny, tedy bez stopek a bez bodů za
+rychlost.
 
 **Autorská práva.** Z učebnice se přebírá výhradně struktura, tedy jaká témata,
 v jakém pořadí, v jakém rozsahu a jakým typem úlohy. Zadání ani obrázky se
@@ -2261,9 +2317,11 @@ zlomky a písemné počítání.
 
 **Dílna měla být až po tom všem, ale předběhla**, protože se ukázalo, že čtyři
 kapitoly nečekají na nic jiného a že bez ní nejde říct, kam patří slovní úlohy.
-Stojí, takže další témata dílny jsou od téhle chvíle jen další zakázka:
-`word_problem` pro slovní úlohy, kterých je třetí ročník plný. `count_objects`
-pro první ročník je hotové, viz oddíl 4b.
+Stojí, takže další témata dílny jsou od téhle chvíle jen další zakázka.
+`count_objects` pro první ročník je hotové a `word_problem` taky, od 14. září
+2026, zakázka `words`; obojí viz oddíl 4b. Slovní úlohy žádnou kapitolu
+neodemkly, protože žádná na ně nečekala sama o sobě, ale je jich třetí ročník
+plný a závod je držet nesmí.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
 to dál **s jedinou výjimkou, která je sama pravidlem**: rodina, u které se
@@ -2734,6 +2792,12 @@ nehnula vůbec; kapitola 6 dostala generátor, tedy zamčených bylo pět.
 důvodu: porovnávání trať taky nemá, mapa se opět nehnula, a generátor dostaly
 naráz kapitoly 17 a 22. Zamčené zůstávají kapitoly 15, 19 a 32.
 
+**Krok F neposunul z těchhle čísel ani jedno a posunul zato dvě čísla dílny.**
+Slovní úlohy jsou zakázka, ne trať, takže mapa stojí, a žádnou kapitolu
+neodemykají, takže zamčené zůstávají tři. Třeťák ale vidí v dílně tři zakázky
+místo dvou a jeho sbírka dílny má devět míst místo šesti, tedy tři na zakázku;
+obě čísla sedí natvrdo ve `flow.test.js`.
+
 **Krok H mapu taky neposunul a posunul zato garáž.** Startovních závodníků je
 sedm místo šesti (přibyla kačenka) a dvě místa, která počítají závodníky profilu
 po jednom nákupu, jsou na devíti; garáž ukazuje osmadvacet zvířat místo dvanácti
@@ -2746,6 +2810,12 @@ a s komentářem, viz `tests/README.md`.
 `jobItemFromKey()`, texty `job_*`, `heat_w*` a zadání úlohy ve třech jazycích,
 a pokud potřebuje jiný vstupní prvek než mince a dílky, větev v `trayHTML()`,
 `counterHTML()` a `solutionHTML()`.
+
+**A pokud si ten prvek půjčuje něco ze závodu, patří sem sedmý bod: vlastní
+obslužné místo.** Krok F si vzal klávesnici, tedy `keypadHTML()`, ale ne
+`tap()`, protože v `tap()` běží stopky, body za rychlost a auto. Dílna má
+proto `jobKey()` a delegovaný posluchač se rozhoduje podle `view.name`.
+Kreslit se ze závodu půjčit dá cokoli; obsluha ne.
 
 ### Kontrolní seznam pro nový kus kačenčí výstroje
 

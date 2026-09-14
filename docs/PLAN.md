@@ -1340,7 +1340,7 @@ na kapitole 22 porovnávání dostat musí.
 
 ---
 
-## Krok F. Vlna C, slovní úlohy v dílně
+## Krok F. Vlna C, slovní úlohy v dílně — HOTOVO 14. září 2026
 
 `word_problem` je první zakázka, kde se generuje text, ne čísla. Šablony ve
 třech jazycích s placeholdery pro čísla a předměty (`{0} jablek`), skloňování
@@ -1352,6 +1352,43 @@ patří závodu. Zakázka `words`, `grade:3`, kroky `ww1` jedna operace do sta,
 `ww2` dvě operace, `ww3` "o kolik" a "kolikrát", což je nejčastější chyba
 třetí třídy podle `TEMATA.md`. Neodemkne žádnou kapitolu; přidá dovednost,
 kterou závod držet nesmí.
+
+**Co se proti plánu upřesnilo.** Skloňování se nakonec dělá obojím naráz a obě
+poloviny se navzájem drží: slovník tří tvarů má jen **předmět**, o kterém věta
+mluví, a čte ho tatáž `pickForm()`, kterou si pro slovní jednotky času postavil
+krok D3 (`unitLabel()` je od téhle chvíle jen její volání), a **zbytek věty je
+psaný tak, aby se s číslem nehýbal**: krabice stojí vždycky ve druhém pádě po
+"do", německá množná čísla se od dvou nemění ani po "in" a "auf", a hlavně
+**žádný počet ve větě není menší než dva**, takže se první tvar na úloze nikdy
+nepoužije a nevznikne "1 samolepku". Předměty jsou proto schválně věci, ne živí
+tvorové.
+
+**Vlastní obslužné místo se jmenuje `jobKey()`** a delegovaný posluchač se mezi
+ním a `tap()` rozhoduje podle `view.name`, protože klávesnice je jediné, co obě
+části sdílejí. Napsané číslo drží `JOB.typed`, `jobCheck()` si podle vstupního
+prvku vezme buď je, nebo hrst mincí, a `record()` se pořád volá s `ms = null`.
+Ve `flow.test.js` je na to kontrola, která si vezme otisk závodního stavu těsně
+před psaním a porovná ho po něm.
+
+**Tvarů úlohy je dvanáct, ne šest, a je to kvůli jednoznačnosti.** "O kolik
+míň" je vlastní tvar se svým vlastním losováním čísel, ne tentýž tvar se
+znaménkem, takže se na míň nikdy nezeptá tam, kde je jich víc; stejně tak se
+"kolikrát víc" ptá zvlášť na modrou a zvlášť na červenou krabici, aby němčina
+nemusela říkat "wie viele Mal weniger". Každý tvar si čísla staví tak, aby
+situace vyšla, a `items.test.js` to kontroluje nad tisícem úloh na krok a na
+jazyk: odpověď se přepočítá nezávisle z čísel, která ve větě opravdu stojí,
+a věta musí obsahovat právě je, v tom pořadí a se správným tvarem předmětu.
+
+**Na obrazovku dílny přibyla dvě rozvržení.** Zadání dostane od devadesáti
+znaků menší písmo a zarovnání doleva, jako dlouhá otázka v závodě, a **na
+šířku má psaná odpověď vlastní mřížku**: pravý sloupec je jen pult a
+klávesnice, zadání, věta o odpovídání, kruhové okno i Hotovo jdou pod sebou
+vlevo. S Hotovem vpravo, jak ho mají mince, by spodní řada kláves spadla pod
+okraj. Na telefonu 375 × 812 končí celý sloupec kolem 760 px.
+
+**Čísla, která se posunula:** žádné z mapy. Třeťák vidí v dílně tři zakázky
+místo dvou a jeho sbírka dílny má devět míst místo šesti. Zamčené kapitoly
+zůstaly tři, protože zakázka žádnou neodemyká.
 
 ---
 

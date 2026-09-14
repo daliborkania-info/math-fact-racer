@@ -728,6 +728,13 @@ html[data-o="wide"] .pickscroll{max-height:42vh}
   font-family:var(--font-display);font-size:calc(var(--tx) * clamp(19px,5.4vw,24px));line-height:1.3;
   text-wrap:balance;text-align:center;padding:16px 18px 10px;
 }
+/* A task that is three sentences rather than one asks for smaller type,
+   the same way a long line of arithmetic does in a race and for the same
+   reason: what does not fit would otherwise push the counter and the
+   keys off the bottom of a phone. A word problem in the third year runs
+   to about a hundred and forty characters at the longest, which is two
+   to four lines here instead of the five it would be above. */
+.jobask.long{font-size:calc(var(--tx) * clamp(16px,4.4vw,19px));line-height:1.35;text-align:left}
 /* The round window above the counter. It is the only thing on this
    screen that changes as the work goes on, so it stands alone and
    centred rather than sharing a line with anything. */
@@ -742,11 +749,19 @@ html[data-o="wide"] .pickscroll{max-height:42vh}
   border:3px dashed var(--line);padding:10px;display:flex;flex-wrap:wrap;gap:6px;
   align-items:center;justify-content:center;
 }
+/* a counter that holds one written number needs less room than one that
+   fills up with coins, and on this screen the keys below want every
+   pixel it gives back */
+.shop.written .counter{min-height:64px}
 .counter-empty{color:var(--ink-soft);font-size:calc(14.5px * var(--tx));font-weight:700}
 .counter-sum{
   margin-left:6px;font-family:var(--font-display);font-size:calc(22px * var(--tx));font-variant-numeric:tabular-nums;
   background:var(--grape-soft);color:var(--grape-dark);border-radius:999px;padding:4px 14px;
 }
+/* the written answer is the only thing on the counter, so it is read at
+   the size the right answer is shown in rather than at the size of a
+   sum in the corner of a handful of coins */
+.shop.written .counter-sum{font-size:calc(30px * var(--tx));margin-left:0;padding:2px 18px}
 .putcoin{width:44px;height:44px;display:block}
 .putcoin.small{width:36px;height:36px;display:inline-block}
 .putcoin .coin,.traycoin .coin{width:100%;height:100%;display:block}
@@ -754,9 +769,19 @@ html[data-o="wide"] .pickscroll{max-height:42vh}
   line-height:1.4;font-weight:700;padding:10px 18px 0}
 .jobhint b{font-family:var(--font-display);font-size:calc(18px * var(--tx));color:var(--ink)}
 .solrow{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+/* the right answer to a word problem, which is one number and not a
+   handful of coins, shown at the size the answer box of a race is read */
+.solnum{font-family:var(--font-display);font-size:calc(30px * var(--tx));color:var(--ink);
+  background:var(--grape-soft);border-radius:999px;padding:2px 18px}
 .tray{
   display:grid;grid-template-columns:repeat(6,1fr);gap:7px;padding:12px 14px 14px;
 }
+/* The number pad standing where the coins stand. The tray is a grid of
+   six and the pad is a grid of its own, so the slot holds the pad and
+   nothing else; the pad's own band of colour is dropped, because in here
+   it would be a strip of the race's shell pasted onto warm paper. */
+.tray.pad{display:block;padding:2px 4px 0}
+.shop .keypad{background:none;padding:6px 14px calc(10px + var(--safe-b))}
 /* one kind of part instead of six values of coin: the whole answer is
    how many times this is tapped, so it gets the room of three coins */
 .tray.one{grid-template-columns:1fr;padding:10px 26%}
@@ -783,6 +808,21 @@ html[data-o="wide"] .shop .scr-scroll{
 }
 .jobask{grid-area:ask} .jobpicbox{grid-area:pic} .revealbox{grid-area:reveal}
 .counter{grid-area:counter} .jobhint{grid-area:hint} .tray{grid-area:tray} .jobgo{grid-area:go}
+/* A written answer on a screen held on its side. Four rows of keys need
+   the height a tray of coins does not, so on this one screen the right
+   column is nothing but the counter and the keys: the task, the word
+   about how to answer, the round window and Done all go down the left,
+   and the keys take every row beside them. On an 812 x 375 phone that
+   leaves the pad about 195 px, which is what its four rows and three
+   gaps come to; with the hint and Done above it, as the coins have
+   them, the bottom row of keys would have been under the edge. The
+   longest task on the shortest screen held sideways still scrolls a
+   little, which is what scrolling is for. */
+html[data-o="wide"] .shop.written .scr-scroll{
+  grid-template-areas:"ask counter" "ask tray" "hint tray" "reveal tray" "go tray";
+  grid-template-rows:auto auto auto minmax(0,1fr) auto;
+}
+html[data-o="wide"] .shop.written .jobhint{min-height:0}
 /* half a screen is narrower than a screen, so the single big part does
    not need a quarter of it as margin */
 html[data-o="wide"] .tray.one{padding:10px 18%}

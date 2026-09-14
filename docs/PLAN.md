@@ -1162,7 +1162,25 @@ Otazníky u formátu odpovědi to nesundá, ty pořád potřebují stránky.
 
 ---
 
-## Krok H. Gumové kačenky a opravdová zvířata
+## Krok H. Gumové kačenky a opravdová zvířata — HOTOVO 14. září 2026
+
+Celý krok je hotový v osmi commitech, H1 až H8, a proti plánu se souhrnně
+upřesnilo pět věcí. **Ceny nesedí se souhrnem, sedí s katalogem:** všech 65 dílů
+stojí 934 součástek, ne 939, protože vrstva Tělo je o 25 levnější (120 místo
+145) a vrstva Na hlavu o 20 dražší (314 místo 294); testy si zapisují součet
+vypsaných cen, nikdy souhrn. **Zvířata stojí 1820 mincí**, ne odhadovaných 1700,
+a nová se do `PETS` vetkala podle ceny místo za konec, aby byl katalog jedna
+řada. **R10 padlo ano, ale bez změny identity**, takže Lupi zůstal žlutým
+špičatouchým tvorem a Hvězdík žlutým tvorem s rohem a žirafa s křečkem přišly
+v H7 jako nová id. **Kresba se posuzuje přes `cairosvg`, ne přes `convert`**;
+past z H1 se potvrdila v plné šíři a stálo to nejvíc času z celého kroku, viz
+`PROJECT-STATE.md` oddíl 2. A **přibyla kontrola, se kterou plán nepočítal**,
+tedy `partInk()` a okruh 3f: dvojic díl a tělo je 550 a splývání dvou barev se
+na obrázku přehlédne.
+
+Otevřené po kroku zůstalo jedno, a je z něj rozhodnutí **R11** v oddílu 9: garáž
+má 115 dlaždic, z toho 70 celých kačenek, a past z H5 je tedy o čtvrtinu horší,
+než jak ji plán odhadoval.
 
 **Na pořadí s krokem G nezávisí.** G je učivo a kurikula, H je jen to, co se
 dá vlastnit a na co se dá koukat; nesdílejí jediný soubor kromě `app.js`
@@ -1496,6 +1514,11 @@ to, čemu se tam vyhýbalo. Pokud se to na telefonu projeví, řešení je menš
 náhled dlaždice nebo kreslit v dlaždici jen vybíranou vrstvu nad šedou
 siluetou, ne zmenšit katalog.
 
+**Past se potvrdila a je o čtvrtinu horší:** dlaždic je 115, ne devadesát,
+a sedmdesát z nich je celá kačenka. Leží to jako rozhodnutí **R11** v oddílu 9;
+změřeno na telefonu zatím není a katalog se v žádné z navržených cest
+nezmenšuje.
+
 ### H6. Zvířata: přesnější kresba dvanácti dnešních — HOTOVO 14. září 2026
 
 Proti plánu se upřesnilo tohle: R10 padlo **ano, ale bez změny identity**, takže
@@ -1601,21 +1624,41 @@ nová řada vypadala jako zeď.
   jsou generické mytologické nebo skutečné bytosti a nesmí být nakreslené
   podle konkrétní filmové podoby.
 
-### H8. Dokumentace
+### H8. Dokumentace — HOTOVO 14. září 2026
 
-- `PROJECT-STATE.md`: **stav v číslech** (dnes mluví o 341 klíčích a šesti
-  testových souborech; po H1 je klíčů 344), oddíl 4b (kam jdou součástky,
-  odpověď na 3b), oddíl 6 (`duckParts`, `duck`, `seedDuck()`, nová fixture),
-  oddíl 7 bod 4 (kresba: `DUCK` a jeho kotvy, `duckSVG`, vrstvy, `isPet()`,
-  `PET_SHAPES`), oddíl 8 (počty kontrol ve `flow.test.js` a nové okruhy
-  `items.test.js`). Oddíl 5 beze změny, trati se to netýká.
-- **Oddíl 2 `PROJECT-STATE.md`**: k poznámce o `convert` dopsat, že v tomhle
-  stroji chybí delegát `rsvg-convert`, takže se ignoruje i `opacity`, ne jen
-  `linearGradient` a `stroke-dashoffset`.
-- `ROADMAP.md`: nový obsah do rytmu z oddílu 3, tedy do okna mezi třetím
+Proti plánu se upřesnilo tohle: srovnání čísel bylo větší práce než dopsání
+nového, protože dokumentace zaostávala už před krokem H. Klíčů v `i18n.js` je
+**443 ve všech třech jazycích**, ne 427, jak stálo v oddílu 2; okruhů
+v `items.test.js` je **pětačtyřicet**, ne šestadvacet, a šestadvacet jich
+nebylo už dávno před krokem H (před ním jich bylo 39, krok H přidal šest);
+`flow.test.js` má **231 kontrol**, ne 191, protože zápis se naposledy srovnával
+u D3 a nezachytil ani D4. Oddíl 6 mluvil o startovní **šestce** závodníků,
+od H1 je jich sedm. A oddíl 4b popisoval tlačítko „utrať součástky“ tak, jak se
+chovalo do posledního commitu kroku H, tedy že míří do první neprázdné sekce;
+dnes míří do první, na kterou dítě má.
+
+Nad rámec srovnání přibyl **oddíl 7f**, celý kačenčí model psaný jako 7b až 7e,
+tedy proč a ne jen co: co je vrstva, kotvy a proč se počítají při každém
+kreslení, ořez vzoru staženým `clipPath`, kontrola kontrastu `partInk()`,
+z-order a **pravidlo o autorských právech u kresby** s kontrolní otázkou „když
+se u dílu dá říct jméno postavy, je špatně“. Oddíl 9 dostal tři chyby kroku H,
+oddíl 14 dva nové kontrolní seznamy (nový kus výstroje, nové zvíře) a oddíl 2
+se srovnal do jednoho odstavce o tom, že se dnes renderuje přes `cairosvg`.
+Nové je taky **rozhodnutí R11** v oddílu 9 tohohle plánu, tedy počet dlaždic
+v garáži; past z H5 se potvrdila a je o čtvrtinu horší, než plán čekal.
+
+- `PROJECT-STATE.md`: **stav v číslech**, oddíl 2 (renderování a počet klíčů),
+  oddíl 4b (kam jdou součástky, odpověď na 3b), oddíl 6 (`duckParts`, `duck`,
+  `seedDuck()`, `seedStarters()`, fixture `v12-pred-kacenkami`), oddíl 7 bod 4
+  (`duckSVG`, `DUCK` a jeho kotvy, `isPet()`, `PET_SHAPES`), **nový oddíl 7f**,
+  oddíl 8 (počty kontrol a šest nových okruhů), oddíl 9 (tři opravené chyby),
+  oddíl 14 (dva nové kontrolní seznamy a posunutá čísla). Oddíl 5 beze změny,
+  trati se to netýká.
+- `ROADMAP.md`: kačenka dopsaná do rytmu z oddílu 3, tedy do okna mezi třetím
   a šestým týdnem.
-- `docs/PLAN.md`: krok 3b označit za dořešený a krok H za hotový.
-- `tests/README.md`: nové okruhy a posunutá čísla.
+- `docs/PLAN.md`: krok H označený za hotový, nové rozhodnutí R11. Krok 3b byl
+  za dořešený označený už v `PLAN-2026-09-12.md` u H5.
+- `tests/README.md`: osmadvacet zvířat místo dvanácti a posunutá čísla.
 
 ### Co se kde mění, souhrnně
 
@@ -1784,6 +1827,56 @@ Pokud ne, zůstává dnešní kresba a H6 se vypustí; H7 pak přidá šestnáct
 poznatelných zvířat vedle dvanácti obecných a s tím rozdílem se bude muset žít.
 Střední cesta, tedy překreslit jen ta zvířata, která dnes vypadají nejhůř,
 se nedoporučuje: to je právě ten stav dvou kresebných řečí v jedné mřížce.
+
+**R11. Garáž má po kroku H sto patnáct dlaždic a sedmdesát z nich je celá
+kačenka.** Past z H5 se potvrdila a je horší, než jak ji plán odhadoval: čekalo
+se devadesát dlaždic, skutečnost je 115, tedy o čtvrtinu víc. Rozpad je osm
+strojů, osmadvacet zvířat, jedna kačenka, devět nátěrů (osm plus prázdná
+dlaždice) a devětašedesát kačenčích dílů (65 plus čtyři prázdné, kterými se
+vrstva sundá). **A každá z těch sedmdesáti kačenčích dlaždic je vlastní SVG**,
+protože dlaždice ukazuje celou kačenku s tím jedním dílem, ne barevný čtvereček;
+to je správně, barevný čtvereček dítěti neřekne nic o tom, jak to bude vypadat,
+a stejný důvod má dnešní `paintCells()`. Cena za to je počet uzlů na jedné
+obrazovce.
+
+**Proč to stojí za rozhodnutí a ne za tichou opravu.** Přesně tomuhle se
+v projektu už jednou vyhýbalo: **sbírka nálezů je schválně jedna kresba místo
+jednoho prvku na místo**, protože do dvacítky jich padne sto dvaaosmdesát a přes
+všechny tratě přes čtyři sta; je to napsané v `PROJECT-STATE.md` oddílu 7 bodu 4
+u `tokenGridSVG()`. Garáž ten princip porušuje, a porušuje ho vědomě, protože
+sbírka nálezů je jedna kresba téhož tvaru v mřížce, kdežto tady je každá
+dlaždice jiná kačenka. Sloučit je do jedné kresby tedy nejde; jde jen zmenšit
+to, co se kreslí, nebo kdy se to kreslí. **Změřeno to na telefonu zatím není**,
+takže první krok je změřit, ne opravovat.
+
+Čtyři cesty, které se nabízejí, od nejlevnější:
+
+- **Sbalitelné sekce.** Každá z pěti vrstev plus nátěry začne složená a rozbalí
+  se klepnutím; složená sekce se nekreslí vůbec. Dítě uvidí nejvýš jednu vrstvu
+  naráz, tedy nejhůř dvacet dlaždic. Je to nejmenší zásah, nic se neztratí
+  a mechanika skládání a rozbalování v aplikaci už je, na mapě za dveřmi
+  minulých let.
+- **Náhled jen hlavy místo celé kačenky.** Vzor, klobouk a oční díl sedí na
+  hlavě, takže by dlaždici stačil výřez kolem hlavy; ubere to zhruba dvě
+  třetiny uzlů. Nefunguje ale na vrstvě Výbava a na Tělo, kde je vidět právě
+  to, co je na těle, takže by garáž kreslila dvěma různými způsoby a to je
+  přesně ta dvojí kresebná řeč v jedné mřížce, kterou zakázalo R10.
+- **Líné kreslení.** Dlaždice se vykreslí, teprve až se přiblíží k zornému poli
+  (`IntersectionObserver`). Nejúčinnější a zároveň jediná cesta, která přidává
+  do kódu stav a možnost prázdné dlaždice; hra je dnes celá „vykresli obrazovku
+  z profilu“ a tohle je první místo, které by to porušilo.
+- **Stránkování vrstev.** Vrstva by měla vlastní obrazovku a garáž jen šest
+  odkazů. Nejméně uzlů, nejvíc klepání a dítě ztratí přehled o tom, co všechno
+  existuje, což je u katalogu, který je celý vidět od první chvíle, ztráta.
+
+**Doporučení: nejdřív změřit, pak sbalitelné sekce, a líné kreslení až tehdy,
+když sbalení nestačí.** Sbalení řeší problém tam, kde vzniká, tedy že se kreslí
+sto patnáct dlaždic naráz, přitom dítě se dívá na jednu vrstvu; nepřidává do
+kódu žádný nový stav, nic neschovává natrvalo a dá se vydat samostatně. Náhled
+jen hlavy se nedoporučuje vůbec, protože rozbíjí jednotu mřížky, a stránkování
+je až poslední možnost. **Katalog se v žádném případě nezmenšuje**; dílů je 65,
+protože z nich má jít poskládat 392 700 kačenek, a zmenšit katalog kvůli
+výkonu by bylo řešení opačným koncem.
 
 ---
 

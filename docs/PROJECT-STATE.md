@@ -1,7 +1,7 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 13. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
-**celém kroku D** nového plánu, opravě řazení mapy (C3b) a opravě
+Poslední aktualizace: 14. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
+celém kroku D a **celém kroku H** nového plánu, opravě řazení mapy (C3b) a opravě
 nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
@@ -14,7 +14,9 @@ a rozdělení prvního ročníku na šest číselných oborů.
 
 **Stav v číslech.** Pětadvacet tratí ve čtyřech světech, 100 palet prostředí,
 dvě zakázky v dílně, 86 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 25/33), tři jazyky, šest testových souborů.
+třetí 25/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
+osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934 součástek v pěti
+vrstvách, 443 klíčů rozhraní ve třech jazycích, šest testových souborů.
 
 **Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
 okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
@@ -127,6 +129,17 @@ ani krabička, ani sbírka, ani heatmapa, vlastní trať nevzniká a jede se př
 zkouška v sešitě je na klávesnici tatáž otázka. Proti plánu se upřesnilo
 měření délky řádku, viz oddíl 7 a `docs/PLAN.md`.
 
+**Krok H je hotový** (14. září), v osmi commitech, a je to první krok, který se
+netýká učiva. Sedmým startovním závodníkem je gumová kačenka zdarma a kupuje se
+u ní jen to, co má na sobě: pět nezávislých vrstev, 65 dílů, 392 700 kombinací,
+a platí se výhradně součástkami z dílny. Tím dostaly součástky druhé odbytiště
+a dořešila se otevřená otázka kroku 3b starého plánu, viz oddíl 4b. K tomu se
+dnešních dvanáct zvířat překreslilo tak, aby to byla poznatelná zvířata, a
+přibylo šestnáct nových, takže jich je osmadvacet; kreslí je tabulka funkcí,
+jedna na zvíře, ne jeden tvar s přepínači. Celý kačenčí model je v novém
+oddílu 7f, včetně pravidla o autorských právech, které musí znát každý, kdo
+sáhne na kresbu.
+
 **Na řadě je krok E**, tedy nové vstupní prvky, počínaje `pad2` a dělením se
 zbytkem, a dál podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
@@ -166,7 +179,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 427 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 443 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -192,36 +205,36 @@ Po každé změně ve `src/` je nutné spustit `python3 build.py`. Editovat př�
 
 **Kresbu si jde prohlédnout, aniž by se otevírala hra.** Zdroje se dají načíst
 do node se zaslepeným `document`, jak to dělá `tests/items.test.js`, zavolat
-`sceneSVG()`, `sceneThumb()`, `tokenSVG()` nebo `partsTraySVG()`, výsledek uložit
-do souboru a převést na obrázek přes `convert`. Tímhle se chytila hnědá obloha,
-rudé moře i fialová louka, a žádný test by je nenašel. Pozor, `convert`
-ignoruje `stroke-dashoffset`, takže čára postupu vypadá vždycky dojetá až do
-konce; v prohlížeči je to správně. **A `convert` ignoruje `opacity`**, protože
-v tomhle stroji chybí delegát `rsvg-convert` a kreslí vlastní renderer
-ImageMagicku: bílé bříško s `opacity=".2"` vyjde čistě bílé a vypadá jako
-louže, přestože v prohlížeči je to jemný odlesk. Než se taková kresba
-posoudí, musí se průhlednost pro tu jednu kontrolu zamíchat do plné barvy
-(`fill` spočítaný jako `barva * (1-a) + bílá * a`), jinak se posuzuje něco,
-co prohlížeč nikdy neukáže. **A `convert` neumí `clip-path`**, což se ukázalo
-u vzorů na kačence (krok H3): ořezanou skupinu nakreslí celou, takže puntíky
-vyletí mimo tělo, a uvnitř ji naopak umí i vynechat. Ořez se proto pro tu jednu
-kontrolu složí ručně: kresba se vyrenderuje dvakrát, jednou bez ořezané skupiny
-a jednou s ní bez `clip-path`, a druhá se do první vloží přes masku
-vyrobenou z ořezových tvarů. **A `convert` nekreslí `linearGradient`**,
-vezme první zarážku a vyplní jí celou plochu, takže krajina vyjde jednolitá
-a přechod `hill1` → `hill2` v ní není vidět. Paleta se proto posuzuje tak, že
-se z SVG vyřízne podkladový obdélník, scéna se vyrenderuje s průhledným
-pozadím a podloží se přechodem složeným v ImageMagicku
-(`convert -size 400x205 gradient:hill1-hill2 scena.png -composite`).
+`sceneSVG()`, `sceneThumb()`, `tokenSVG()`, `partsTraySVG()`, `petSVG()` nebo
+`duckSVG()`, výsledek uložit do souboru a převést na obrázek. Tímhle se chytila
+hnědá obloha, rudé moře i fialová louka, a žádný test by je nenašel.
 
-**Všechny tři obcházky odpadnou, když je po ruce opravdový renderer SVG.**
-V kroku H4 se ukázalo, že stačí `pip install cairosvg` a pak
+**Renderovat se má přes `cairosvg`, ne přes `convert`, a je to poučení kroku H,
+které stálo hodně času.** `convert` v tomhle stroji nemá delegáta `rsvg-convert`,
+takže kreslí vlastním rendererem ImageMagicku a ten mlčky ignoruje čtyři věci
+naráz: `stroke-dashoffset` (čára postupu vypadá vždycky dojetá až do konce),
+`opacity` (bílé bříško s `opacity=".2"` vyjde čistě bílé a vypadá jako louže,
+a skafandr místo skla udělá mléčný disk), `clip-path` (ořezanou skupinu nakreslí
+celou, takže puntíky vzoru vyletí mimo tělo) a `linearGradient` (vezme první
+zarážku a vyplní jí celou plochu, takže duhová kačenka je jednobarevná a krajina
+jednolitá). Nic z toho nehlásí, takže se člověk dívá na obrázek, který prohlížeč
+nikdy neukáže, a překresluje podle něj. Přesně tak proklouzly tři palety trati
+`chain`, viz oddíl 9. Dnešní cesta je proto `pip install cairosvg` a pak
 `cairosvg.svg2png(url=..., write_to=..., output_width=..., background_color="white")`:
-přechody, průhlednost i `clip-path` vyjdou tak, jak je nakreslí prohlížeč, takže
-se kresba posuzuje na tom, co uvidí dítě, a ne na náhradě. Skládat obrázky vedle
-sebe do jedné mřížky s popisky umí dál `montage`. Jestli cairosvg na stroji není
-a nejde doinstalovat, platí postup s `convert` výš; ověřit, který z obou právě
-běží, je dobré dřív, než se podle obrázku něco překreslí.
+přechody, průhlednost i ořez vyjdou tak, jak je nakreslí prohlížeč. Skládat
+obrázky vedle sebe do jedné mřížky s popisky umí dál `montage`.
+
+**Když cairosvg na stroji není a nejde doinstalovat**, dá se každá ta věc obejít,
+ale je to práce navíc a je dobré vědět, že se dívám na náhradu. Průhlednost se
+pro tu jednu kontrolu zamíchá do plné barvy (`fill` spočítaný jako
+`barva * (1-a) + bílá * a`). Ořez se složí ručně: kresba se vyrenderuje dvakrát,
+jednou bez ořezané skupiny a jednou s ní bez `clip-path`, a druhá se do první
+vloží přes masku vyrobenou z ořezových tvarů. Přechod se podloží zvlášť: z SVG
+se vyřízne podkladový obdélník, scéna se vyrenderuje s průhledným pozadím
+a podloží přechodem složeným v ImageMagicku
+(`convert -size 400x205 gradient:hill1-hill2 scena.png -composite`). Který
+z obou rendererů právě běží, se ověřuje dřív, než se podle obrázku něco
+překreslí.
 
 ---
 
@@ -578,15 +591,22 @@ Velikost si říká `shopSpec()` sama, protože dílna žádná trať není a `t
 by ji minulo, přesně jako ji jednou minula rodičovská heatmapa.
 
 **Součástky jsou pořád jediná měna dílny** a mají podle roadmapy, oddíl 4,
-správný tvar, tedy klíč k obsahu místo platu za výkon. Kupují se za ně dvě věci,
-nátěry na stroje (390 součástek) a výstroj gumové kačenky (65 dílů za 934), a nic
-z toho nejde koupit za mince ani vyjezdit.
+správný tvar, tedy klíč k obsahu místo platu za výkon. **Od kroku H kupují dvě
+různé věci**, nátěry na stroje (osm kusů za 390 součástek) a výstroj gumové
+kačenky (65 dílů za 934), a nic z toho nejde koupit za mince ani vyjezdit.
+Druhé odbytiště je tam schválně: nátěry jsou po šestadvaceti plných zakázkách
+vykoupené a do té chvíle bylo číslo v dílně peněženka bez obchodu.
 
 **Dílna říká, kam součástky jdou, a od kroku H5 taky to, kdy už nejdou nikam.**
-Věta dole na obrazovce dílny jmenuje obojí, nátěry i kačenku, a tlačítko „utrať
-součástky“ po zakázce míří do první sekce garáže, ve které ještě něco zbývá, tedy
-nejdřív na nátěry a po posledním z nich rovnou do kačenčích vrstev; rozhoduje
-o tom `partsShelves(p)`. Je to seznam míst, nikdy počet zbývajících kusů: číslo
+Věta dole na obrazovce dílny jmenuje obojí, nátěry i kačenku. Tlačítko „utrať
+součástky“ po zakázce míří **do první sekce garáže, na kterou dítě opravdu má**,
+tedy do nejlevnější z těch, kde ještě něco zbývá a kde je nejlevnější kus
+v dosahu dnešních součástek; rozhoduje o tom `spendTarget(p)` nad
+`shelvesLeft(p)`, které vrací sekce i s cenou toho nejlevnějšího v nich. Sekce
+jsou v garáži řazené od nejlevnějšího dílu, takže první dlaždice, kterou dítě
+uvidí, je ta, na kterou dosáhne. Když nestačí na nic, tlačítko se nenabízí
+vůbec, protože nabídnout cestu, která nic neudělá, je přesně to, co hra nedělá;
+viz princip v oddílu 3. Je to seznam míst, nikdy počet zbývajících kusů: číslo
 „devět z pětašedesáti“ by z police na koukání udělalo cíl k honění a v dílně se
 nic honit nemá.
 
@@ -711,6 +731,8 @@ profil = {
   parts: 0,                              // mena dilny, zavodem se nevydela
   paints: ["pa_neon"],                   // koupene natery
   paint: { "ri_auto": "pa_neon" },       // ktery nater je na kterem stroji
+  duckParts: ["db_bila", "dh_ksilt"],    // koupene dily kacenky, taky za soucastky
+  duck: { body: "db_bila", head: "dh_ksilt" },  // vrstva -> dil, ktery ma kacenka na sobe
   jobRuns: { "money": 3 },               // hotove zakazky
   force: {}, autoUnlock, qCount, speedMode,
   curriculum: null,                      // id z CURRICULA, null = adaptivní režim
@@ -725,11 +747,26 @@ profil = {
 PIN je uložený jen jako hash funkcí `hashPin`. Není to skutečné zabezpečení,
 jen zábrana proti dítěti, a je to tak napsané i v rozhraní.
 
-Migrace při načtení: každý profil dostane startovní šestku závodníků a jazyk,
-pokud je nemá, `normalizeChapter()` srovná kapitolu, `seedOpened()` doplní
-seznam otevřených tratí, `seedShop()` prázdnou dílnu, `seedStars()` sbírku
-`seedWorld()` svět a `seedGrade()` ročník. Nové migrace patří do `load()`, a pokud se týkají
-profilu jako celku, taky do větve `import`.
+Migrace při načtení: `seedStarters()` dá každému profilu startovní sedmičku
+závodníků včetně kačenky, jazyk se doplní, pokud chybí, `normalizeChapter()`
+srovná kapitolu, `seedOpened()` doplní seznam otevřených tratí, `seedShop()`
+prázdnou dílnu, `seedDuck()` prázdnou kačenčí výstroj, `seedStars()` sbírku,
+`seedWorld()` svět a `seedGrade()` ročník. Nové migrace patří do `load()`, a pokud
+se týkají profilu jako celku, **taky do větve `import`**; obnovená záloha je
+cizí profil, ne ten, který právě běží.
+
+**Kačenka přidala do profilu dvě pole a nic víc.** `duckParts` je seznam id
+koupených dílů, `duck` je mapa vrstva → id dílu, který má kačenka zrovna na
+sobě. Obojí zakládá `seedDuck(p)` jako prázdné, takže starší profil nic
+neztratí: **chybějící `duck.body` znamená klasickou žlutou**, ne kačenku bez
+barvy, takže dítě otevře garáž a vidí kačenku hotovou. Díl zdarma patří všem od
+začátku a v `duckParts` nestojí, přesně jako startovní závodníci v `owned`;
+`duckParts` umí jenom růst. Zamrazený profil těsně před kačenkou je fixture
+`v12-pred-kacenkami` v `tests/fixtures/legacy-profiles.json` a `migration.test.js`
+u něj hlídá, že obě pole vzniknou prázdná, že kačenka přibude mezi závodníky,
+že se bez uloženého těla kreslí klasická žlutá a že se součástky ani nátěry
+nezměnily. Byla to jediná věc kroku H, která šla udělat jen tehdy; profil dnešní
+verze se zpětně zamrazit nedá.
 
 **Sbírka je vlastní pole, ne pohled do krabičky.** Místo se rozsvítí ve chvíli,
 kdy se příklad dostane na úroveň 4, a **už nikdy nezhasne**. Kdyby se počítalo
@@ -768,7 +805,16 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
    `itemFromKey` nikdo nesmí předpokládat, že odpověď je číslo.
    **Vzorec sedmdesát ku třiceti je na jednom místě**, `focusAndReview()`,
    a stupňování taky, `stageIndex()`. Nová rodina je volá, nepíše znovu.
-4. Závodníci a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
+4. Závodníci a kresba postaviček. Všechno parametricky, `petSVG`, `rideSVG`
+   a `duckSVG`; vybírá mezi nimi `itemSVG(p, id)`.
+   **Závodníci jsou tři druhy, ne dva.** Stroj (`it.kind`), zvíře a gumová
+   kačenka (`it.duck`). Kačenka se nemaluje a neroste, takže `isPet(it) =
+   !it.kind && !it.duck` a všechna místa, která se dřív ptala jen „je to
+   stroj“, se ptají tímhle; kdyby ne, kačenka by tiše sbírala zkušenosti
+   a vyrostla do stupně, ke kterému žádná druhá kresba neexistuje.
+   **Kačenka se skládá z pěti vrstev a kreslí ji `duckSVG(it, outfit)`**
+   podle kotev v `DUCK`. Celý model má vlastní oddíl 7f, včetně pravidla
+   o autorských právech u nových dílů.
    **Zvíře se kreslí vlastní funkcí, ne jedním tvarem s přepínači.**
    `PET_SHAPES` je tabulka kreseb, jedna na zvíře, a `petSVG()` je jen
    dispatcher plus společný obal: měřítko podle stupně, oči, úsměv a hvězda
@@ -1234,6 +1280,116 @@ nevejde, se nikdy neuřízne.
 
 ---
 
+## 7f. Gumová kačenka a jejích pět vrstev
+
+Postavené v kroku H, 13. a 14. září 2026. Je to první obsah hry, který není
+učivo: kačenka je sedmý startovní závodník, je zdarma a **sama se nekupuje**.
+Kupuje se to, co má na sobě.
+
+**Proč vrstvy a ne hotové kačenky.** Kdyby byla každá kombinace vlastní
+položkou, byl by katalog nekonečný a dítě by pořád kupovalo něco skoro
+stejného. Takhle je v katalogu 65 dílů v pěti nezávislých vrstvách a poskládat
+se z nich dá 392 700 kačenek, přičemž **každý koupený díl je vidět hned a beze
+zbytku**. Vrstvy jsou Tělo (10 barev), Vzor (10), Na hlavu (20), Oči (9)
+a Výbava (16). Platí se výhradně součástkami z dílny, nikdy mincemi, viz
+oddíl 4b.
+
+**Vrstva je jedno místo na kačence, na kterém smí být právě jeden díl.**
+V profilu je to `duck`, mapa vrstva → id dílu. Tělo je jediná vrstva, která
+nesmí být prázdná, protože kačenka nemůže být bez barvy; zbylé čtyři mají
+v garáži první dlaždici prázdnou a tou se díl zase sundá. **Žádná pravidla
+vylučování nejsou**: přes brýle jde nasadit skafandr a je to legrační, a
+legrační je v pořádku. Zakazovat kombinace by znamenalo nabízet něco, co se pak
+tiše nestane, což je přímo proti principu „co hra neumí, to nenabízí“ z oddílu 3.
+Do které vrstvy díl patří, se pozná **z jeho id** (`db`, `dp`, `dh`, `de`, `dg`),
+ne z ručně vyplněného pole, takže se žádná položka nedá zapsat pod špatnou
+vrstvu. A díl, který je nasazený ve vrstvě, kam nepatří, nebo id, které tahle
+verze nezná, nechá vrstvu holou místo aby rozbil kresbu: profil oblečený novější
+verzí se musí dát otevřít.
+
+**Kotvy, a proč se počítají při každém kreslení.** `DUCK` je šest bodů, tedy
+tělo, hlava, oko, křídlo, zobák a ocásek, plus výška hladiny. Klobouk patří na
+hlavu, brýle na oko, kruh kolem těla. Kdyby si každý z pětašedesáti dílů nesl
+vlastní kopii toho, kde hlava je, byl by den, kdy se hlava pohne, dnem, kdy
+z ní všech dvacet klobouků sjede. Proto se souřadnice **nikdy nepíšou do dílu**
+a `duckFit()` je spočítá znovu **při každém kreslení**, ne jednou při načtení.
+Rozdíl je vidět až v testu: ten `DUCK.HEAD` posune a chce, aby se všech dvacet
+klobouků posunulo s ní. Kdyby se kotvy spočítaly jednou předem, neměla by ta
+kontrola jak proběhnout, protože posunutá hlava by se do kresby vůbec nedostala
+a díl s natvrdo napsanou souřadnicí by od poslušného nešel odlišit. `duckFit()` k tomu dává
+pomocníky, kterými je psaná většina katalogu: `at(úhel)` bod na hlavě,
+`band(y1, y2)` pás mezi dvěma výškami s boky uříznutými hlavou, `dome(y)`
+všechno nad výškou, `neck` místo, kde hlava sedí na těle, a **`brim`**, tedy
+čára, kde klobouk končí. Pod `brim` je oko, takže klobouk, který na `brim`
+dosáhne, zakryl obličej; každý klobouk proto končí tam nebo výš a všechno
+z vrstev Oči a Výbava zůstává pod ní.
+
+**Ořez vzoru staženým `clipPath`.** Vzor se kreslí přes tělo i hlavu naráz,
+takže by bez ořezu puntíky vylétly do vzduchu vedle kačenky. Ořezová cesta je
+elipsa těla a kruh hlavy, ale **stažené o 1,5 dovnitř**, ne jejich přesný
+okraj. Důvod je ten, že světlá značka ležící přesně na okraji sebere obrys
+kačenky, a klasická žlutá kačenka žádný vlastní obrys nemá, jen svou barvu
+proti bílé dlaždici; jedna hvězdička na kraji by jí ukousla kus zad. Pozice
+značek jsou vždycky pevný seznam, nikdy losované: dvě stejně oblečené kačenky
+musí vypadat stejně dnes i zítra.
+
+**Kontrola kontrastu `partInk()` a proč vznikla.** Černá pneumatika na uhlové
+kačence byla jedna tmavá skvrna s obličejem někde uvnitř a zlaté kulaté
+obroučky na klasické žluté nebyly vidět vůbec. Dílů je 65 a těl deset, takže
+dvojic je 550 a na obrázku se prostě přehlédnou; tohle je přesně ten druh
+chyby, kterou musí hlídat stroj. `partInk(kresba, rim, barvy těla)` se podívá,
+jestli má díl aspoň jednu barvu, která stojí **od všech barev těla dál než
+25 ΔE** v Lab. Když ano, vrátí kresbu beze změny. Když ne, podloží ji **jen
+obrysem**, tedy týmiž tvary o 2,4 širším tahem, bez výplně, v kontrastní barvě,
+kterou si nese tělo (světlé tělo dostane tmavou linku, tmavé světlou). Obrys,
+ne druhá vyplněná kopie: skafandr je sklo, přes které musí být vidět, a
+vyplněný duch pod ním by na kačence udělal šedý disk místo obličeje. Hlídá to
+okruh 3f v `items.test.js` přes všech 550 dvojic, počítá si vzdálenost sám a
+kromě kontrastu kontroluje i to, že obrys nerozbil tagy a že ho hotová kresba
+kačenky opravdu volá, tedy že `partInk` nevisí ve vzduchu vedle kódu.
+Vedle toho má několik těl vypsanou výjimku na jednom poli, protože je to věc
+jednoho těla, ne pravidlo do kresby: `edge` obrys pro sněhovou, která by na
+bílé dlaždici zmizela celá, `eyeRing` světlá skvrna, na které sedí oko uhlové,
+protože tmavé oko by se do tmavého těla propadlo, `belly` silnější bříško
+tamtéž, `beakEdge` linka kolem zobáku ohnivé, do které by se oranžový zobák
+jinak ztratil, a `beak` růžový zobák jediné kačenky z fotky.
+
+**Z-order, a každé místo v něm je kvůli něčemu, čeho by si dítě všimlo.**
+Pořadí je: zadní půlka výbavy, ocásek, tělo, hlava, **vzor**, bříško, křídlo,
+zobák, oko, oční díl, hlavový díl, přední půlka výbavy. Vzor je pod bříškem,
+křídlem a zobákem, takže žádný puntík nikdy neskončí na obličeji. Oční díl je
+pod kloboukem, takže kšilt překryje sklo přesně tak, jako to dělá doopravdy.
+A výbava je **jediná vrstva rozdělená na dvě půlky**, `back` a `front`: plovací
+kruh musí kačenku obepnout, ne stát před ní, batoh a dýchací nádrž visí za
+ocáskem a surf je celý vzadu, protože kačenka na něm sedí. Zadních půlek má
+pět dílů z šestnácti. Pořadí není jen komentář, čte ho zpátky z hotového SVG
+okruh 3e v `items.test.js`.
+
+**Autorská práva, a tohle je nejdůležitější odstavec celé kresby.** Je to
+rozvedení nedotknutelného principu z oddílu 3, tedy zákazu licencovaných
+postaviček, na díly a na zvířata. Gumová kačenka sama je generický předmět,
+vyráběný od devatenáctého století desítkami firem, a je v pořádku. **Žádný
+jednotlivý díl ale nesmí být převzatá postava, maskot ani značková kačenka.**
+Každý díl je věc, ne bytost: klobouk, brýle, kruh, šála. Nejcitlivější jsou tři,
+u kterých se sklouzne nejsnáz, a proto stojí vypsané: maska přes oči
+(`de_maska`) je karnevalová maska se stužkou, ne domino v barvách konkrétního
+hrdiny, a plášť do katalogu nepatří vůbec; ke kulatým obroučkám (`de_dioptr`)
+nikdy nepřibude jizva; klapka na oko (`de_klapka`) je klapka, ne ničí znak.
+Totéž platí pro zvířata: kočka, liška, panda ani tučňák nejsou ničí a kreslí se
+podle skutečného zvířete, a drak, jednorožec a axolotl jsou generické bytosti,
+ne konkrétní filmová podoba. **Kontrolní otázka je jediná a platí pro každý díl
+i pro každé zvíře: když se u kresby dá říct jméno postavy, je špatně.** Ptát se
+na ni je potřeba dřív, než se nový díl nakreslí, ne až potom.
+
+**Žádný díl nemá jiný atribut než kresbu a cenu.** Vzhled nemá na jízdu vliv,
+soupeřem zůstává vlastní nejlepší jízda a celý katalog i s cenami je vidět od
+první chvíle: nic se nelosuje, nic se nedá ztratit ani zdražit. Zdarma je jedině
+klasické žluté tělo, zbylých 64 dílů stojí 6 až 30 součástek; nejlevnější je
+levnější než polovina jedné zakázky, takže dítě, které dokončí jednu jedinou
+zakázku, si má vždycky co koupit.
+
+---
+
 ## 8. Testy
 
 V `tests/` je jich šest, spouštějí se přes node, potřebují jen `jsdom`.
@@ -1252,7 +1408,7 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá šestadvacet okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá pětačtyřicet okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
 stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
@@ -1300,6 +1456,34 @@ definici proti sobě samé a nechytila nic; jede pro měřítko 1 i 1,25, pro de
 šířek okna, pro nejdelší skutečná jména tratí ve všech třech jazycích a pro
 všechny čtyři tvary karty, a porovnává i to, že `TX_BY_GRADE` v `app.js` říká
 totéž co `--tx` v CSS.
+
+**Krok H přidal šest okruhů a všechny čtou hotovou kresbu zpátky**, protože
+samotnou kresbu žádný test neuvidí a prohlédnout ji musí člověk. Okruh 3a jde
+přes osmadvacet zvířat: id, tvar, obě barvy, cenu a české jméno má zamrazené
+v tabulce, protože na id visí zkušenosti a vlastnictví a na ceně to, na co dítě
+šetří, a každé zvíře kreslí ve všech třech stupních, hlídá rám i s tahy, polohu
+očí a úsměvu podle toho, co si tvar sám řekl, hvězdu třetího stupně a to, že se
+nikde neotáčí a nepoužívá relativní příkaz v cestě, jinak by se body z kresby
+nedaly přečíst zpátky. Okruh 3b je holá kačenka, tedy že je zdarma, startovní,
+ani stroj ani zvíře, že žádná kotva nevyjede z rámu a že nad hlavou zbývá místo
+na klobouk. Okruh 3c je deset těl, tedy že se každá barva opravdu vykreslí, že
+si těla nejsou navzájem barevně blízko ani nesplývají s bílou dlaždicí garáže
+(zase v Lab, práh 25 ΔE), a že obléknutí jiné barvy nesahá na seznam koupených
+dílů.
+Okruhy 3d a 3e jsou zbylé čtyři vrstvy, tedy všech 55 vzorů, klobouků, očních
+dílů a kusů výbavy vykreslených na kačenku a přečtených zpátky: žádný díl
+nesmí vyjet z rámu, žádný klobouk sedět na oku (měřeném jako kolečko) ani na
+zobáku (měřeném jako klín ze tří obdélníků, protože obdélník, do kterého se
+vejdou, zakazoval i to, co leží vedle nich), každý klobouk se musí dotýkat
+hlavy, vzor musí ležet pod okem a zobákem a uvnitř staženého ořezu, skafandr
+musí být jediný díl, který něco zakrývá, a musí to zakrývat přes sklo, všechno
+z vrstvy Oči musí sedět na oku a zůstat pod `brim`, nic z výbavy nesmí nad
+`brim` vylézt ani viset ve vzduchu mimo tělo, a **hotové SVG se čte v pořadí**,
+takže zadní půlka výbavy musí stát před tělem a přední za vším ostatním.
+K tomu kontrola, kterou žádná jiná nenahradí: `DUCK.HEAD` se v testu posune
+a všech dvacet klobouků se musí pohnout s ní. Okruh 3f je kontrast dílu proti
+tělu přes všech 550 dvojic, viz oddíl 7f.
+
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
 profil v krabičce, a že souhrn nahoře není jen z násobilky. Projde taky celou
@@ -1321,8 +1505,18 @@ zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má od kroku D3 191 kontrol, po kroku D2 jich bylo 188, po kroku
+`flow.test.js` má od kroku H 231 kontrol, po kroku D4 jich bylo 196, po kroku
+D3 191, po kroku D2 188, po kroku
 D1 186, po kroku C 184, po kroku B0b 175, po kroku B0 170 a po kroku A 153.
+Pětatřicet přibylo v kroku H a nejsou to kontroly učiva: že profil dostane
+startovní sedmičku a kačenka je mezi ní zdarma, že ji nejde koupit za mince ani
+jí narůst stupeň, že se dá nasadit a stojí v nabídce před startem, že garáž
+ukazuje osmadvacet zvířat a má sekci kačenky, že se díl koupí za součástky a ne
+za mince a že ho kačenka hned nese, že se dá obléknout všech pět vrstev naráz,
+že jsou police řazené od nejlevnějšího a utrata míří na tu, na kterou dítě
+opravdu má, že štítek pod celkovým číslem přepnou teprve nátěry a díly dohromady
+ve všech čtyřech kombinacích, a že se s tím přepnutím do dílny nedostaly stopky
+ani body za rychlost.
 Tři přibyly v D3: převody stojí na mapě hned za tisícovkou, kapitoly 18 a 29 už
 jdou vybrat a kapitola 17, která jednotky jen pojmenovává, zamčená zůstala.
 Dvě přibyly v D2:
@@ -1515,6 +1709,40 @@ na obrázku platí jen tehdy, když se na obrázku opravdu kreslí to, co se
 posuzuje**, a barva je věc, kterou v kódu nepozná nikdo: sousední řádek má
 tentýž tvar a jiná čísla. Zbytek dluhu je změřený a zapsaný, nejblíž si jsou
 `sk_hilltop` a `sk_kite` s 5,3 ΔE.
+
+**Po obnovení zálohy se kačenka tvářila jako zamčená.** Startovní sestavu
+dopisoval `load()` přímo v cyklu přes profily, kdežto větev `import` si seznam
+závodníků ze zálohy prostě přepsala do profilu. Záloha udělaná dřív, než kačenka
+existovala, ten seznam nese bez ní, takže dítě, které si obnovilo zálohu,
+najednou vidělo v garáži svého závodníka s cenovkou. Doplňování startovní
+sestavy je od kroku H funkce `seedStarters(p)` a volá se na obou místech, stejně
+jako všechny ostatní seedy. Poučení je pravidlo, které v oddílu 6 stálo už
+předtím a jen se na ně zapomnělo: **migrace, která se týká profilu jako celku,
+patří do `load()` i do větve `import`**, protože obnovená záloha je cizí profil,
+ne ten, který zrovna běží.
+
+**Tlačítko „utrať součástky“ posílalo dítě do sekce, na kterou nemá.** Mířilo
+do první police, kde ještě něco zbývalo, a tou byly nátěry: nejlevnější stojí
+třicet součástek, kdežto nejlevnější kačenčí díl šest. Dítě s patnácti
+součástkami po jedné zakázce tedy dostalo nabídku a za ní stěnu cen, na které
+nedosáhne. Rozhoduje o tom od kroku H `spendTarget(p)`, tedy nejlevnější police,
+ze které jde **dnešními součástkami opravdu zaplatit**, a když nejde zaplatit
+z žádné, tlačítko se nenabídne vůbec. Je to princip „co hra neumí, to nenabízí“
+z oddílu 3 přenesený na odkaz: cesta, která vede ke zdi, je slib, který hra
+nesplní.
+
+**Tmavý díl na tmavém těle splýval a nikdo to neviděl.** Černá pneumatika na
+uhlové kačence byla jedna tmavá skvrna s obličejem někde uvnitř a zlaté kulaté
+obroučky na klasické žluté nebyly vidět vůbec. Nešlo o chybu v kódu, obě kresby
+byly správně; chyba byla v tom, že se dvě správné barvy na dlaždici potkaly.
+Dvojic díl a tělo je 550 a na obrázku se přehlédnou, takže se od kroku H každá
+z nich měří v Lab a díl, který nemá ani jednu barvu dál než 25 ΔE od všech
+barev těla, dostane od `partInk()` kontrastní obrys, viz oddíl 7f. Poučení je
+totéž jako u palet trati `chain`, jen o kus dál: **splývání dvou barev není
+vlastnost jedné z nich, ale jejich dvojice, a dvojic je vždycky řádově víc než
+věcí.** Ruční prohlídka takové mřížky je neproveditelná, a proto to musí počítat
+stroj; hlídá to okruh 3f v `items.test.js` a hlídá i to, že `partInk()` opravdu
+volá hotová kresba kačenky, ne jen test vedle ní.
 
 ---
 
@@ -1977,11 +2205,73 @@ Dál sedí počet tratí v ukázce druhého ročníku (10) a počet zamčených 
 třetí třídy (8 z 33). Krok D4 mapu neposunul, protože varianta vlastní trať
 nemá; posunul jen ten poslední počet, z devíti na osm.
 
+**Krok H mapu taky neposunul a posunul zato garáž.** Startovních závodníků je
+sedm místo šesti (přibyla kačenka) a dvě místa, která počítají závodníky profilu
+po jednom nákupu, jsou na devíti; garáž ukazuje osmadvacet zvířat místo dvanácti
+a 64 kačenčích dílů k odemčení plus pět dlaždic zdarma, tedy klasickou žlutou
+a čtyři prázdné, kterými se vrstva zase sundá. Každý ten posun je vědomý
+a s komentářem, viz `tests/README.md`.
+
 **Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
 `grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v
 `jobItemFromKey()`, texty `job_*`, `heat_w*` a zadání úlohy ve třech jazycích,
 a pokud potřebuje jiný vstupní prvek než mince a dílky, větev v `trayHTML()`,
 `counterHTML()` a `solutionHTML()`.
+
+### Kontrolní seznam pro nový kus kačenčí výstroje
+
+Deset bodů, a první z nich se odbaví dřív, než se něco nakreslí. Podrobnosti
+k celému modelu jsou v oddílu 7f.
+
+1. **Autorská práva.** Kontrolní otázka zní: dá se u té kresby říct jméno
+   postavy? Když ano, je špatně a dál se nepokračuje. Díl je věc, ne bytost.
+2. Katalog: položka do `DUCK_BODY`, `DUCK_PAT`, `DUCK_HEAD`, `DUCK_EYE` nebo
+   `DUCK_GEAR`. Vrstva se pozná z předpony id (`db`, `dp`, `dh`, `de`, `dg`),
+   takže id musí sedět s tím seznamem, do kterého se píše.
+3. Cena mezi 6 a 30 součástkami a položka zařazená **podle ceny**, protože
+   sekce jsou v garáži řazené od nejlevnějšího a podle toho se rozhoduje, kam
+   dítě pošle tlačítko „utrať součástky“.
+4. Jméno pod id ve všech třech jazycích v `src/i18n.js`.
+5. Kresba jako funkce `draw(g, rim)`, u výbavy případně i `back(g, rim)` pro
+   půlku, která patří za tělo.
+6. **Kotvy.** Žádná souřadnice hlavy, oka ani těla napsaná natvrdo, všechno
+   z `g`, tedy z `duckFit()`. Klobouk končí na `brim` nebo výš, oční díl a
+   výbava zůstávají pod ní.
+7. **Z-order.** Ověřit, že díl vychází ve své vrstvě a že se zadní půlka výbavy
+   kreslí před tělem a přední za vším ostatním.
+8. **Kontrast.** Díl musí mít aspoň jednu barvu dál než 25 ΔE od **všech** barev
+   všech deseti těl, jinak mu `partInk()` podloží obrys; pokud ani ten nestačí,
+   je potřeba změnit barvu dílu.
+9. **Strojová kontrola** v okruhu 3d nebo 3e `items.test.js` (rám, kotvy, oko,
+   zobák, pořadí vrstev) a v okruhu 3f (kontrast); u nové vrstvy taky posun
+   kotvy a kontrola, že se díl pohne s ní.
+10. **Render a prohlédnutí.** Vykreslit díl na všech deset těl přes `cairosvg`
+    podle oddílu 2 a podívat se; kresbu žádný test neuvidí a `convert` ji
+    ukáže špatně.
+
+### Kontrolní seznam pro nové zvíře
+
+Kratší, protože zvíře nemá vrstvy, ale první bod je tentýž.
+
+1. **Autorská práva.** Zvíře se kreslí podle skutečného zvířete, nikdy podle
+   filmové podoby. Když se u kresby dá říct jméno postavy, je špatně.
+2. Katalog: položka v `PETS` **vetknutá podle ceny**, ne přidaná za konec, aby
+   byl katalog jedna souvislá řada; cena v mincích, dnes od 25 do 200.
+3. Jméno ve všech třech jazycích v `src/i18n.js`.
+4. Tvarová funkce v `PET_SHAPES` pod týmž id. Vrací kresbu a říká, kam patří
+   oči a pusa; `mouth:"own"` tehdy, když je pusa sama ta kresba (zobák, čelist
+   se zuby, úsměv obcházející chobot).
+5. **Bez otáčení a jen absolutními příkazy v cestách**, jinak si test nedokáže
+   body přečíst zpátky a rám nepohlídá.
+6. Hvězda třetího stupně: ověřit, že jí v pravém dolním rohu nestojí v cestě
+   ocas, chapadla ani pera; když ano, přestěhovat ji.
+7. **Strojová kontrola** v okruhu 3a `items.test.js`: řádek do zamrazené
+   tabulky (id, tvar, obě barvy, cena, české jméno), platnost sprajtu ve všech
+   třech stupních, rám i s tahy, poloha očí a úsměvu.
+8. **Render a prohlédnutí ve všech třech stupních.** Je to jediné místo, kde se
+   pozná, jestli zvíře vypadá jako to zvíře; v kroku H7 se po prvním renderu
+   předělávalo šest zvířat ze šestnácti.
+9. Posunuté počty ve `flow.test.js`, viz níž a `tests/README.md`.
 
 ### Prompt pro nejbližší krok
 
@@ -1995,13 +2285,17 @@ sepsala `docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava
 B0b, celý krok C (responzivita ve dvou commitech, druhý s písmem podle ročníku
 a šestým testovým souborem) a **celý krok D**: D1 (pořadí operací, trať `ops`),
 D2 (kulatá čísla, trať `tens`), D3 (převody jednotek, trať `units`) a D4
-(chybějící člen, varianta bez vlastní trati). Nejbližší je krok E, tedy nové
+(chybějící člen, varianta bez vlastní trati). **Hotový je i celý krok H**, tedy
+gumová kačenka s pěti vrstvami výstroje a osmadvacet zvířat, v osmi commitech;
+učiva se netýká a na mapu nesáhl. Nejbližší je krok E, tedy nové
 vstupní prvky, počínaje `pad2` a dělením se zbytkem. Z rozhodnutí
 v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
 nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px), R5 (měřítka
-písma 1,25 / 1,12 / 1,04 / 1,0) a R3 (chybějící člen pod původním klíčem),
-všechna podle doporučení. R1 (žebřík minulých
-let) je odložené a po B0b už není naléhavé, viz hlavička.
+písma 1,25 / 1,12 / 1,04 / 1,0), R3 (chybějící člen pod původním klíčem)
+a R10 (překreslit dnešních dvanáct zvířat, ale bez změny identity Lupi
+a Hvězdíka), všechna podle doporučení. R1 (žebřík minulých
+let) je odložené a po B0b už není naléhavé, viz hlavička. Nová je **R11**,
+tedy počet dlaždic v garáži, viz oddíl 9 plánu.
 
 **Co je čerstvě hotové a nesmí se rozbít.** Chybějící člen je varianta, ne
 rodina: klíč se nemění, variantu si vyžádá kapitola a předává ji jediné místo,
@@ -2012,6 +2306,9 @@ v zadání i v odpovědi, do tisíce a jednotku nesou jako údaj na položce, ta
 o ní mimo `itemFromKey`, `questionHTML()` a `rightAnswerText()` nikdo neví
 (D3). Kulatá čísla staví součin tak, aby
 nikdy nepřelezl tisíc, a dělí jen tím, čím násobila (D2).
+Kačenka se skládá z pěti nezávislých vrstev, kde
+se nic nevylučuje, díly se platí výhradně součástkami, kotvy se počítají při
+každém kreslení a žádný díl si nesmí nést souřadnice hlavy (H, viz 7f).
 Sbírka vázaná na krabičku se nikdy
 nevrací (oddíl 6), tvar cesty se řídí světem a `atU()` o něm neví (7c), mapa se
 skládá podle ročníku, za dveřmi je jen učivo, ke kterému se třída už nevrací,

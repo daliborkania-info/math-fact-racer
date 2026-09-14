@@ -929,9 +929,9 @@ console.log('oci a vybava:',eBad?'chyb '+eBad:'v poradku',
 // Dil nakresleny v barve, kterou uz ma telo pod nim, je dil, ktery neni
 // videt: cerna pneumatika na uhlikove kacence byla jedna tmava skvrna
 // s oblicejem nekde uvnitr a kulate zlate obroucky na klasicke zlute
-// nebyly videt vubec. Kacenka ma pet vrstev a deset tel, takze dvojic je
-// 550 a na obrazku se prehlednou; tohle je presne ten druh chyby, ktery
-// musi hlidat stroj.
+// nebyly videt vubec. Dilu mimo telo je 102 a tel deset, takze dvojic je
+// 1020 a na obrazku se prehlednou; tohle je presne ten druh chyby, ktery
+// musi hlidat stroj. Bylo jich 550, nez prisly vlajky.
 // Meri se v Lab, stejne jako u palet z okruhu 15 a u samotnych tel
 // v okruhu 3c, protoze dve barvy, ktere v kodu vypadaji odlisne, mohou
 // na dlazdici splynout. Prah je tychz 25 dE, kterym se drzi deset tel od

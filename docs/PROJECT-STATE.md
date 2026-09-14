@@ -1,7 +1,8 @@
 # Stav projektu a předávací dokument
 
 Poslední aktualizace: 14. září 2026, po dojetí celého `docs/PLAN.md` verze 2
-kromě kroku G a po rozhodnutí R11 (police v garáži a líné kreslení)
+kromě kroku G, po rozhodnutí R11 (sbalitelné police v garáži a líné kreslení)
+a po osmačtyřiceti vlajkách ve vrstvě Vzor
 
 **Kde se přestalo.** Z `docs/PLAN.md` verze 2 jsou hotové kroky **A** (opravy
 z revize), **B0** s opravou **B0b** (předěl ročníků na mapě), **B** (řetězec
@@ -58,15 +59,20 @@ pokynu.
 doporučení, a jsou v oddílu 9 plánu označená datem i krokem, ve kterém se
 udělala. **R11**, tedy tehdejších 115 dlaždic garáže, padlo jako poslední: nejdřív se
 změřilo, pak přišly sbalitelné police, a protože samo sbalení na padesát
-chystaných vlajek nestačilo, i líné kreslení. Viz oddíl 7f a čísla v oddílu 9
-plánu.
+chystaných vlajek nestačilo, i líné kreslení. Model je v oddílu 7g, naměřená
+čísla u R11 v oddílu 9 plánu.
 
 **Stav v číslech.** Sedmadvacet tratí ve čtyřech světech, 108 palet prostředí,
 tři zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý
 43/44, třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová
 kačenka), osm nátěrů za 390 součástek a 112 dílů kačenčí výstroje za 1302
-součástek v pěti vrstvách, z toho 48 vlajek, 576 klíčů rozhraní ve třech
-jazycích, šest testových souborů.
+součástek v pěti vrstvách, z toho 48 vlajek za 384; poskládat se z těch pěti
+vrstev dá 2 070 600 kačenek. K tomu 576 klíčů rozhraní ve třech jazycích a šest
+testových souborů nad devatenácti zamrazenými profily.
+
+Kačenčí vrstvy po jednom dílu: Tělo 10 za 120 součástek, Vzor 57 za 482 (z toho
+devět kreslených vzorů za 98 a 48 vlajek po osmi), Na hlavu 20 za 314, Oči 9 za
+108 a Výbava 16 za 278. Zdarma je jediný díl, klasické žluté tělo.
 
 Mapa má podle ročníku 8 míst u prvňáka, 18 u druháka, 21 složeně a 28 rozbaleně
 u třeťáka a 27 u čtvrťáka; dílna je v každém z těch počtů jedno místo a za
@@ -75,7 +81,7 @@ devět nátěrů i s prázdnou dlaždicí a 121 kačenčích dílů i s devíti 
 ale **naráz kreslí jen jednu polici a z ní zprvu osm dlaždic**: od rozhodnutí
 R11 jsou nátěry a kačenčí vrstvy sbalitelné police, otevřená je vždycky jedna
 a zbytku jejích dlaždic se kresba doplní, až se přiblíží k zornému poli, viz
-oddíl 7f. Polic je jedenáct, protože
+oddíl 7g. Polic je jedenáct, protože
 vrstva Vzor jich má šest: kreslené vzory a pět polic vlajek podle světadílu.
 Sbalená garáž má 992 až 1104 uzlů podle toho, kolik toho dítě má a jak je
 kačenka oblečená, s největší otevřenou policí nejvýš 1519; před R11 jich měla
@@ -83,7 +89,8 @@ kačenka oblečená, s největší otevřenou policí nejvýš 1519; před R11 j
 dlaždic dělalo 6875.
 
 Testy jsou všechny zelené, tedy bez `!!`: `flow.test.js` 337 kontrol,
-`migration.test.js` 290, `style.test.js` 29, `items.test.js` pětapadesát okruhů,
+`migration.test.js` 290 nad devatenácti fixturami, `style.test.js` 29,
+`items.test.js` pětapadesát okruhů,
 z nichž první sám ověří 14 240 vygenerovaných příkladů, `i18n.test.js` 576 klíčů
 ve všech třech jazycích bez děr a `names.test.js` jména závodníků, dílů
 i cedulek sbalených polic ve třech jazycích.
@@ -152,19 +159,29 @@ police**, tedy nátěry a pět kačenčích vrstev, otevřená vždycky jedna, z
 nikdy. A protože vlajky jdou do jediné vrstvy a police vzorů by měla
 jednašedesát dlaždic a 2591 uzlů, tedy víc, než má dnes celá garáž, přidalo se
 k tomu i **líné kreslení**: dlaždice otevřené police dostane kresbu, až se
-přiblíží k zornému poli. Celý model je v oddílu 7f, čísla a zdůvodnění v oddílu
+přiblíží k zornému poli. Celý model je v oddílu 7g, čísla a zdůvodnění v oddílu
 9 plánu u R11. Datový model se nezměnil a katalog se nezmenšil ani o dlaždici.
 
 **A pak přišly samy vlajky, taky ze zadání uživatele.** Osmačtyřicet vlajek
-západní a střední Evropy a celé Ameriky je vzor na kačenku, visí na pěti
-policích podle světadílu a každá stojí osm součástek. Dnešní díl `dp_pasy`, tedy
+střední, západní a severní Evropy a celé Ameriky je vzor na kačenku, visí na
+pěti policích podle světadílu a každá stojí osm součástek, dohromady 384; kačenčí
+katalog tím vyrostl ze 64 dílů za 918 součástek na 112 dílů za 1302. Dnešní díl
+`dp_pasy`, tedy
 tři pásy kolem kačenky, byl červený, bílý a modrý, tedy nizozemská vlajka
 nakreslená, aniž by to někdo řekl, a tou při té příležitosti zůstal: id se nemaže
-ani nepřepisuje v profilu, jen odpoví svým nástupcem, takže kdo tři pásy koupil,
-má nizozemskou vlajku. Patnáct vlajek se od jiné vlajky v seznamu liší jenom
+ani nepřepisuje v profilu, jen odpoví svým nástupcem přes `DUCK_HEIR`, takže kdo
+tři pásy koupil, má nizozemskou vlajku. Patnáct vlajek se od jiné vlajky
+v seznamu liší jenom
 znakem uprostřed, a znak se v dlaždicové velikosti nakreslit nedá, takže žádná
 z nich znak nenese a nese místo něj jednu jednoduchou značku; jestli to stačí,
 se **měří** okruhem 3g v `items.test.js`, ne odhaduje. Podrobně v oddílu 7f.
+
+**Tenhle zápis je poslední věc téže session a nesáhl na jediný řádek v `src/`.**
+Srovnala se čísla, která vlajky posunuly, vlajky a police dostaly své místo
+v oddílech 7f a 7g, do kontrolních seznamů v oddílu 14 přibylo to, co se dneska
+naučilo, a prompt pro další session je přepsaný na to, co uživatel ohlásil, tedy
+na podklady pro čtvrtou a pátou třídu. Všech šest testů běželo znovu a jsou
+zelené.
 
 **Co zůstalo neověřené okem, a je to jediná věc, kterou tahle session udělat
 nemohla.** Rozvržení obrazovek se v sandboxu prohlédnout nedá: prohlížeč tam
@@ -192,6 +209,13 @@ Tohle si tedy musí uživatel projít na skutečném zařízení:
   ukázat nedají, protože ani jedno neumí `display:grid` a zorné pole tam
   neexistuje vůbec; čísla za rozhodnutím R11 se proto měřila na uzlech, ne
   okem
+- police vlajek na telefonu, tedy jestli se na dlaždici vejde jméno země
+  i cena vedle sebe (nejdelší je německy "Dominikanische Rep."), jestli se
+  vlajka na kačence v dlaždicové velikosti čte jako ta vlajka, a hlavně jestli
+  dvojice, které okruh 3g změřil jako nejtěsnější, obstojí i oku: Nizozemsko
+  proti Paraguayi, Honduras proti Argentině, Polsko proti Chile, Česko proti
+  Polsku a Dánsko proti Norsku. Měření říká, že se liší; jestli to stačí
+  osmiletému na malém displeji, řekne jen displej
 - karta o podpoře v rodičovské sekci, tedy jestli se značka drží prvního řádku
   nadpisu a odkaz míří tam, kam má
 
@@ -846,7 +870,7 @@ jsou v garáži řazené od nejlevnějšího dílu, takže první dlaždice, kte
 uvidí, je ta, na kterou dosáhne. Když nestačí na nic, tlačítko se nenabízí
 vůbec, protože nabídnout cestu, která nic neudělá, je přesně to, co hra nedělá;
 viz princip v oddílu 3. Je to seznam míst, nikdy počet zbývajících kusů: číslo
-„devět z pětašedesáti“ by z police na koukání udělalo cíl k honění a v dílně se
+„devět ze sto dvanácti“ by z police na koukání udělalo cíl k honění a v dílně se
 nic honit nemá.
 
 **Až je koupené všechno, číslo přestane být peněženka.** Tohle je dořešená
@@ -1020,6 +1044,13 @@ u něj hlídá, že obě pole vzniknou prázdná, že kačenka přibude mezi zá
 nezměnily. Byla to jediná věc kroku H, která šla udělat jen tehdy; profil dnešní
 verze se zpětně zamrazit nedá.
 
+**A `duckParts` může obsahovat id, které dnešní katalog už nezná, a je to
+v pořádku.** Když díl skončí, nemaže se a nepřepisuje se v profilu, jen dostane
+nástupce v `DUCK_HEIR`; katalog pak odpovídá za profil a staré id v něm zůstává
+ležet napořád. Dneska je takové id jediné, `dp_pasy`, a odpovídá za ně
+nizozemská vlajka. Celý mechanismus je v oddílu 7f, fixtura je
+`v15-pred-vlajkami`.
+
 **Sbírka je vlastní pole, ne pohled do krabičky.** Místo se rozsvítí ve chvíli,
 kdy se příklad dostane na úroveň 4, a **už nikdy nezhasne**. Kdyby se počítalo
 z `facts`, zhaslo by při každém zapomenutí, a zhasínající sbírka trestá přesně
@@ -1092,8 +1123,9 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
    jedna kresba proto, že je to týž tvar v mřížce; v garáži je každá dlaždice
    jiná kačenka, takže sloučit se nedají a jde jen zmenšit, **kdy** se kreslí.
    Od rozhodnutí R11 se proto police garáže skládají a dlaždice otevřené police
-   dostane kresbu, teprve až se přiblíží k zornému poli. Model je v oddílu 7f,
-   funkce jsou `shelfHTML()`, `mountCollection()` a `drawTile()`.
+   dostane kresbu, teprve až se přiblíží k zornému poli. Model je v oddílu 7g,
+   funkce jsou `shelfHTML()`, `garageShelves()`, `shelfInfo()`,
+   `mountCollection()` a `drawTile()`.
 5. Cesta jednoho závodu. Bézierova křivka z osazeného generátoru, geometrie se
    počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `route(svět, id)`
    vrací uzavřenou smyčku v okruhu a otevřenou cestu se zastávkami v ostatních
@@ -1718,7 +1750,7 @@ verzí se musí dát otevřít.
 
 **Kotvy, a proč se počítají při každém kreslení.** `DUCK` je šest bodů, tedy
 tělo, hlava, oko, křídlo, zobák a ocásek, plus výška hladiny. Klobouk patří na
-hlavu, brýle na oko, kruh kolem těla. Kdyby si každý z pětašedesáti dílů nesl
+hlavu, brýle na oko, kruh kolem těla. Kdyby si každý ze sto dvanácti dílů nesl
 vlastní kopii toho, kde hlava je, byl by den, kdy se hlava pohne, dnem, kdy
 z ní všech dvacet klobouků sjede. Proto se souřadnice **nikdy nepíšou do dílu**
 a `duckFit()` je spočítá znovu **při každém kreslení**, ne jednou při načtení.
@@ -1744,16 +1776,16 @@ musí vypadat stejně dnes i zítra.
 
 **Kontrola kontrastu `partInk()` a proč vznikla.** Černá pneumatika na uhlové
 kačence byla jedna tmavá skvrna s obličejem někde uvnitř a zlaté kulaté
-obroučky na klasické žluté nebyly vidět vůbec. Dílů je 65 a těl deset, takže
-dvojic je 550 a na obrázku se prostě přehlédnou; tohle je přesně ten druh
-chyby, kterou musí hlídat stroj. `partInk(kresba, rim, barvy těla)` se podívá,
+obroučky na klasické žluté nebyly vidět vůbec. Dílů mimo tělo je 102 a těl
+deset, takže dvojic je 1020 a na obrázku se prostě přehlédnou; tohle je přesně
+ten druh chyby, kterou musí hlídat stroj. `partInk(kresba, rim, barvy těla)` se podívá,
 jestli má díl aspoň jednu barvu, která stojí **od všech barev těla dál než
 25 ΔE** v Lab. Když ano, vrátí kresbu beze změny. Když ne, podloží ji **jen
 obrysem**, tedy týmiž tvary o 2,4 širším tahem, bez výplně, v kontrastní barvě,
 kterou si nese tělo (světlé tělo dostane tmavou linku, tmavé světlou). Obrys,
 ne druhá vyplněná kopie: skafandr je sklo, přes které musí být vidět, a
 vyplněný duch pod ním by na kačence udělal šedý disk místo obličeje. Hlídá to
-okruh 3f v `items.test.js` přes všech 550 dvojic, počítá si vzdálenost sám a
+okruh 3f v `items.test.js` přes všech 1020 dvojic, počítá si vzdálenost sám a
 kromě kontrastu kontroluje i to, že obrys nerozbil tagy a že ho hotová kresba
 kačenky opravdu volá, tedy že `partInk` nevisí ve vzduchu vedle kódu.
 Vedle toho má několik těl vypsanou výjimku na jednom poli, protože je to věc
@@ -1860,60 +1892,40 @@ diakritiky, ne přes prohlížeč, aby police vyšla stejně na každém telefon
 Všech šest polic vrstvy Vzor má prázdnou dlaždici, takže vlajka jde sundat
 z té, na které dítě zrovna stojí.
 
-**`dp_pasy` neskončil, jen dostal jméno.** Tři pásy kolem kačenky byly červený,
-bílý a modrý, tedy nizozemská vlajka nakreslená, aniž by to někdo řekl; při
-příchodu vlajek zůstala ta vlajka. Pravidlo z oddílu 3 říká, že koupený díl se
-nesmí ztratit, a tohle je způsob, jak to udělat, aniž by se cokoli přepsalo:
-`DUCK_HEIR` je mapa staré id → nástupce, `duckPartById()` na staré id odpoví
-nástupcem a `ownsDuckPart()` považuje nástupce za zaplacený, když má profil
-kterékoli z id, která k němu vedou. **Do profilu se nesahá vůbec**, takže staré
-id v něm zůstává a dvojí načtení nic nezmění; hlídá to fixtura
-`v15-pred-vlajkami` v `migration.test.js`, která nese profil s `dp_pasy`
-koupeným i nasazeným.
+**Když díl skončí, dostane nástupce. Nikdy se nemaže a nikdy se nepřepisuje
+v profilu.** Je to obecný mechanismus, ne jednorázová oprava po vlajkách, a bude
+potřeba pokaždé, když nějaký kus výstroje z katalogu odejde: přejmenuje se,
+rozpadne se na několik jiných, nebo se ukáže, že je ve skutečnosti něco jiného.
+Nedotknutelný princip z oddílu 3 říká, že koupený díl se nesmí ztratit, a přímé
+řešení, tedy projít uložené profily a staré id v nich přepsat, je právě to, co
+se dělat nesmí: migrace, která sahá na cizí data, se dá udělat jen jednou
+a špatně.
 
-**Garáž se skládá do polic a kreslí líně, a je to rozhodnutí R11 ze 14. září
-2026.** Dlaždic bylo 115 a sedmdesát z nich je celá kačenka, protože barevný
-čtvereček dítěti neřekne, jak to bude vypadat; cena za to byl jeden pohled
-o 2368 uzlech a 159 kB, a s padesáti chystanými vlajkami by to bylo 3713 uzlů.
-Řeší to dvě věci najednou.
+Cesta je proto opačná, tedy **katalog odpoví za profil**. `DUCK_HEIR` je mapa
+staré id → id nástupce. `duckPartById()` na staré id vrátí nástupce, takže
+kresba i cena přijdou od něj. `ownsDuckPart()` považuje nástupce za zaplacený,
+když má profil kterékoli z id, která k němu vedou, takže se za tutéž věc
+nezaplatí dvakrát. A `duckPaidAs()` řekne, pod jakým id to dítě skutečně má.
+**Do profilu se nesahá vůbec**: staré id v něm zůstává ležet, dvojí načtení
+nezmění nic a i profil zálohovaný před tou verzí se pořád otevře správně. Řetěz
+se dá prodloužit, tedy nástupce může mít vlastního nástupce, a mapa může vést víc
+starých id na jedno nové; opačným směrem to nejde a nemá.
 
-**Police.** Nátěry a pět kačenčích vrstev je šest polic, které se skládají
-klepnutím na cedulku, a **otevřená je vždycky jedna**. Od příchodu vlajek je
-polic jedenáct, protože vrstva Vzor jich má šest; police není totéž co vrstva
-a všech šest vrstvě Vzor obléká tutéž vrstvu. Sbalená police se
-nekreslí vůbec, ne že by se schovala: `shelfHTML()` dostává buňky jako funkci,
-kterou u zavřené police nezavolá. Závodníci, tedy stroje, zvířata a kačenka,
-se **neskládají nikdy**; je to výběr závodníka, který se jen řadí a nikdy
-nefiltruje, a koupený stroj, na který se nedá klepnout, je horší než jakýkoli
-počet uzlů. Sbalená police o sobě řekne na jednom řádku, co v ní je, kolik toho
-je, kolik už toho dítě má a od kolika, a na druhém to, co z ní má dítě na sobě,
-takže katalog s cenami je vidět dál a police, ze které dítě něco nosí, nikdy
-nečte jako prázdná. Utrata součástek z dílny cílovou polici rovnou otevře.
-**Sbalení je způsob koukání, ne postup**, takže drží proměnná `SHELF` s id
-profilu, přesně jako `PEEK` a `BACK` na mapě: do profilu se nedostane a zavření
-hry i přepnutí hráče polici složí.
+Pravidla k tomu jsou tři. Nové id musí být opravdu **nové**, ne recyklované po
+jiném dílu, jinak by nástupnictví ukazovalo na něco jiného, než si dítě koupilo.
+Nástupce má být **totéž, jen líp pojmenované nebo líp nakreslené**, ne jiná věc:
+přeznačit klobouk na brýle by dítěti výstroj vyměnilo, což je přesně ta ztráta,
+před kterou princip chrání. A **každý zápis do `DUCK_HEIR` si žádá fixturu**,
+protože je to dotek datového modelu: zamrazený profil se starým id koupeným
+i nasazeným, a v `migration.test.js` kontrola, že po načtení díl pořád má a pořád
+ho nosí.
 
-**Líné kreslení.** Samo sbalení na vlajky nestačilo, protože vlajky jdou do
-jedné vrstvy a ta by měla šestapadesát dlaždic na jedné polici, tedy víc uzlů,
-než měla tehdy celá garáž; rozdělení do pěti polic to zmenšilo, líné kreslení
-zbytek. Dlaždice otevřené police se proto píše ve dvou kusech: tlačítko se
-jménem a cenou, tedy to, co dítě čte a na co klepá, a kresba, kterou doplní
-`IntersectionObserver`, až se dlaždice přiblíží k zornému poli. Prvních osm
-dlaždice police se kreslí rovnou (`SHELF_EAGER`), aby police neotevřela řadu
-děr. **Žádný nový stav to nepřidává**: co se má nakreslit, stojí na samotné
-dlaždici jako `data-draw`, takže obrazovka se pořád kreslí z profilu a `drawTile()`
-kreslí přesně to, co by nakreslila buňka. Prohlížeč bez `IntersectionObserver`
-dostane všechny kresby při připojení obrazovky, tedy přesně chování před R11.
-
-Čísla: dlaždic je po vlajkách 167, tedy o polovinu víc než před R11, a přesto
-má sbalená garáž 992 až 1104 uzlů podle toho, kolik toho dítě má a jak je
-kačenka oblečená, a s největší otevřenou policí nejvýš 1519. Největší police
-není nejdelší, ale nejhustší, tedy kreslené vzory: dlaždic má deset, ale
-šachovnice i mapa světa jsou samy o sobě dvacet tvarů. Hlídá to `flow.test.js`
-stropem **1800 uzlů**, měřeným na skutečném DOM se zaslepeným pozorovatelem;
-bez skládání a líného kreslení by dnešní garáž dělala 6875 uzlů a spadla by
-šestkrát. Strop spadne, až garáž povyroste o další takový kus, a je to výzva
-podívat se na ni znovu, ne důvod strop zvednout.
+Dneska je v mapě jediný řádek, `dp_pasy` → `dp_flag_nl`. Tři pásy kolem kačenky
+byly červený, bílý a modrý, tedy nizozemská vlajka nakreslená, aniž by to někdo
+řekl; při příchodu vlajek se to jen pojmenovalo, takže kdo tři pásy koupil, má
+nizozemskou vlajku. Hlídá to fixtura `v15-pred-vlajkami`, která nese profil
+s `dp_pasy` koupeným i nasazeným, a okruh 3g v `items.test.js`, který ověří, že
+se přitom do profilu nesáhlo.
 
 **Žádný díl nemá jiný atribut než kresbu a cenu.** Vzhled nemá na jízdu vliv,
 soupeřem zůstává vlastní nejlepší jízda a celý katalog i s cenami je vidět od
@@ -1924,6 +1936,111 @@ dítě, které dokončí jednu jedinou zakázku, si má vždycky co koupit, a sv
 vlajku si koupí po první zakázce. Celý katalog stojí 1302 součástek, z toho
 vlajky 384, takže posbírat je všechny je dlouhá cesta: zhruba pětadvacet
 zakázek jen na ně.
+
+---
+
+## 7g. Garáž: sbalitelné police a líné kreslení
+
+Rozhodnutí **R11**, udělané 14. září 2026 podle doporučení, a to obojí naráz.
+Týká se celé garáže, tedy i nátěrů, ne jen kačenky; proto stojí zvlášť vedle
+oddílu 7f.
+
+**Odkud problém je.** Garáž kreslí celé věci a nikdy barevné čtverečky: nátěr je
+vidět na stroji, kterým dítě zrovna jezdí, a kačenčí díl na celé kačence
+oblečené tak, jak ji dítě má. Je to správně, protože barevný čtvereček dítěti
+neřekne nic o tom, jak to bude vypadat, ale platí se za to tím, že **počet
+dlaždic je rovnou počet uzlů**. Po kroku H jich bylo 115, z toho sedmdesát celých
+kačenek, což je jeden pohled o 2368 uzlech a 159 kB HTML; s padesáti chystanými
+vlajkami by to bylo 3713 uzlů a 251 kB. Sbírka nálezů se témuž vyhýbá tak, že je
+celá jedna kresba (oddíl 7, bod 4), jenže to jde jen proto, že je to týž tvar
+v mřížce. V garáži je každá dlaždice jiná kačenka, takže sloučit se nedají a jde
+zmenšit jen to, **kdy** se kreslí.
+
+**Police, tedy co se kreslí.** Nátěry a kačenčí vrstvy jsou sbalitelné police,
+které se skládají klepnutím na cedulku, a **otevřená je vždycky jedna**. Polic je
+jedenáct, protože police není totéž co vrstva: vrstva Vzor jich má šest, tedy
+kreslené vzory a pět polic vlajek podle světadílu, a všech šest obléká tutéž
+jednu vrstvu. Ostatní vrstvy mají po jedné polici, nátěry taky jednu. Sbalená
+police se **nekreslí vůbec**, ne že by se schovala: `shelfHTML()` dostává buňky
+jako funkci, kterou u zavřené police nezavolá, takže z ní v dokumentu nezůstane
+ani prázdný obal.
+
+**Jak sbalená police vypadá a co o sobě říká.** Je to celý řádek, ne úzká šipka:
+trojúhelník ukazující doprava (otevřená ho má dolů), název police a pod ním dva
+řádky drobného textu. První řádek říká, **co v ní je, kolik toho je, kolik už
+toho dítě má a od jaké ceny**, tedy „20 dílů · 3 už máš · od 6 ⚙“; když už je
+koupené všechno, poslední kus se změní na „máš všechny“, aby tam nezůstala cena,
+která nikam nevede. Druhý řádek říká, **co z ní má dítě na sobě** („vybráno:
+…“), a je vlastní proto, že první je na telefonu tak dlouhý, jak jen jde;
+zalomení uprostřed věty by četlo hůř než dva krátké řádky. Vrstva visící na víc
+policích řekne, co je vybrané, **jen na té polici, kde ta věc opravdu leží**,
+takže pět polic vlajek si nenárokuje tutéž vlajku. Oba řádky jsou tam kvůli jedné
+věci: katalog i s cenami musí být vidět od první chvíle, což je pravidlo
+z oddílu 7f, a police, ze které dítě něco nosí, nesmí nikdy číst jako prázdný
+řádek. Jména polic i ty věty jdou přes `t()`, počet dílů se skloňuje přes
+`pickForm()`, a hlídá je `names.test.js` ve všech třech
+jazycích. Utrata součástek z dílny cílovou polici rovnou otevře, aby dítě
+nepřistálo na zavřeném seznamu.
+
+**Závodníci se neskládají nikdy.** Stroje, zvířata a kačenka stojí nad policemi
+a jsou vždycky vidět celé, i když je to sedmatřicet dlaždic, tedy víc než
+kterákoli police. Je to výběr závodníka, tedy jediné místo, které se jen řadí
+a nikdy nefiltruje, a **koupený stroj, na který se nedá klepnout, je horší než
+jakýkoli počet uzlů**. Sbalit by je znamenalo schovat dítěti, čím jezdí.
+
+**Stav je mimo profil, protože sbalení není postup.** Drží ho proměnná `SHELF`
+s id profilu, přesně jako `PEEK` a `BACK` na mapě. Do uložených dat se nedostane
+ani bajt, takže zavření hry i přepnutí hráče polici složí a garáž se vždycky
+otevírá sbalená. Kdyby se sbalení ukládalo, byl by to první kus vzhledu
+v datovém modelu a každá další verze by ho musela umět načíst; takhle je to
+pohled, který se dá kdykoli zahodit. Hlídá to `flow.test.js` otiskem
+`localStorage` vzatým před otevřením police a porovnaným po něm.
+
+**Líné kreslení, tedy kdy se kreslí.** Samo sbalení na vlajky nestačilo a je to
+vidět z měření: vlajky jdou do jediné vrstvy, takže by police vzorů měla
+jednašedesát dlaždic a garáž s ní otevřenou 2591 uzlů, tedy víc, než měla tehdy
+celá garáž. Rozdělení do pěti polic ubralo většinu, líné kreslení zbytek.
+Dlaždice otevřené police se proto píše ve dvou kusech: **tlačítko se jménem
+a cenou**, tedy to, co dítě čte a na co klepá, a **kresba, která se doplní,
+teprve až se dlaždice přiblíží k zornému poli** (`IntersectionObserver`,
+`rootMargin` 400 px, tedy zhruba půl obrazovky dopředu). Prvních osm dlaždic
+police se kreslí rovnou (`SHELF_EAGER`); osm je jeden řádek nejširší mřížky
+a skoro tři řádky na telefonu, takže to, na co se police otevře, je nakreslené
+už při otevření a pozorovatel jen dohání palec.
+
+**Žádný nový stav to nepřidává.** Co se má nakreslit, stojí na samotné dlaždici
+jako `data-draw` ve tvaru druh:vrstva:id, takže obrazovka se pořád kreslí
+z profilu a `drawTile()` nakreslí přesně to, co by nakreslila buňka, kdyby se
+kreslila rovnou. Čekající dlaždice není prázdná: má jméno, cenu i svou akci,
+takže se na ni dá klepnout a koupit z ní, i když na ní ještě není obrázek.
+
+**Prohlížeč bez `IntersectionObserver` dostane všechny kresby naráz** při
+připojení obrazovky, tedy přesně chování před R11. Je to záměrně ta pomalejší
+větev, ne chybová: `mountCollection()` se na existenci pozorovatele zeptá a bez
+něj projde seznam čekajících dlaždic sám. Starý telefon tím nepřijde o nic než
+o úsporu, a celý zbytek `flow.test.js` běží právě takhle, bez pozorovatele,
+takže se ta větev zkouší při každém běhu.
+
+**Čísla a strop.** Dlaždic je po vlajkách 167, tedy o polovinu víc než před R11,
+a přesto má sbalená garáž 992 až 1104 uzlů podle toho, kolik toho dítě má a jak
+je kačenka oblečená, a s největší otevřenou policí nejvýš 1519. Největší police
+není nejdelší, ale nejhustší, tedy kreslené vzory: dlaždic má deset, ale
+šachovnice i mapa světa jsou samy o sobě dvacet tvarů. Hlídá to `flow.test.js`
+stropem **1800 uzlů**, měřeným na skutečném DOM se zaslepeným pozorovatelem,
+a to na obou stavech, sbaleném i s největší otevřenou policí. **Proč zrovna
+1800:** je to zhruba dvacet procent nad dnešním maximem, tedy rezerva na to, aby
+strop nespadl po přidání jednoho dílu, ale spadl, až garáž povyroste zhruba
+o dalších sedmdesát dlaždic v jedné polici, nebo až někdo skládání či líné
+kreslení vypne, protože bez nich by dnešní garáž dělala 6875 uzlů a strop by
+překročila šestkrát. **Když spadne, je to výzva podívat se na garáž znovu, ne
+důvod strop zvednout.**
+
+Co se z původních čtyř navržených cest **neudělalo**: náhled jen hlavy místo
+celé kačenky, protože nefunguje na vrstvách Tělo a Výbava a garáž by kreslila
+dvěma různými způsoby, což je ta dvojí kresebná řeč v jedné mřížce, kterou
+zakázalo R10; a stránkování vrstev do vlastních obrazovek, protože u katalogu,
+který má být celý vidět od první chvíle, je ztráta přehledu horší než uzly.
+**Katalog se nezmenšil ani o dlaždici** a datový model se nezměnil.
 
 ---
 
@@ -2077,8 +2194,12 @@ z nich. Jak počet kontrol ve `flow.test.js` rostl: po kroku A 153, po B0 170,
 po B0b 175, po C 184, po D1 186, po D2 188, po D3 191, po D4 196, po celém
 kroku H 231, po E1 250 (z toho 246 po samotných dvou políčkách a čtyři až
 s dělením se zbytkem), po E2 261, po E3 272, po E4 280, po F 292, po kartě
-o dobrovolné podpoře 306, po stropu na výběr z nabídky 311 a po R11, tedy po
-policích v garáži a líném kreslení, 329.
+o dobrovolné podpoře 306, po stropu na výběr z nabídky 311, po R11, tedy po
+policích v garáži a líném kreslení, 329, a po vlajkách 337.
+Osmnáct přibylo s R11 a jsou to kontroly garáže, ne učiva; osm s vlajkami
+a hlídají pět polic podle světadílu, řazení podle jména, jméno i cenu na
+dlaždici nekoupené vlajky, nákup vlajky za součástky a sundání vzoru
+z kterékoli police vrstvy.
 Devatenáct přibylo v kroku E a jsou to kontroly vstupních prvků, ne učiva:
 psaní do dvou a tří políček, předávání kláves mezi nimi, mazání přes hranici,
 šipka, klepnutí do políčka, odeslání až s vyplněnými políčky, porovnání hodnot
@@ -2696,7 +2817,7 @@ jsou nad klíčem skutečně obecné a nepotřebují sáhnout vůbec.
 volná, a od kroku E1 to platí i pro rodinu na `pad2`. Heatmapa v rodičovské
 sekci je hotová, viz oddíl 7b.
 
-## 12d. Pilot pro `pad2` a `pad3` — hotovo 14. září 2026
+## 12d. Pilot pro `pad2` a `pad3`, hotovo 14. září 2026
 
 **Dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
 osmého dílu. Je to jádrová látka třetí třídy, sešit jí věnuje tři dvoustrany,
@@ -2748,7 +2869,7 @@ ve třetí třídě.
 
 ---
 
-## 12e. Výběr z nabídky a hranice, na které stojí — hotovo 14. září 2026
+## 12e. Výběr z nabídky a hranice, na které stojí, hotovo 14. září 2026
 
 **Tohle je jediné učivo ve hře, které jde proti prvnímu z nedotknutelných
 principů, a celý oddíl je o tom, proč je to v pořádku a čím je to udržené.**
@@ -3095,10 +3216,22 @@ obě čísla sedí natvrdo ve `flow.test.js`.
 
 **Krok H mapu taky neposunul a posunul zato garáž.** Startovních závodníků je
 sedm místo šesti (přibyla kačenka) a dvě místa, která počítají závodníky profilu
-po jednom nákupu, jsou na devíti; garáž ukazuje osmadvacet zvířat místo dvanácti
-a 64 kačenčích dílů k odemčení plus pět dlaždic zdarma, tedy klasickou žlutou
-a čtyři prázdné, kterými se vrstva zase sundá. Každý ten posun je vědomý
+po jednom nákupu, jsou na devíti; garáž ukazuje osmadvacet zvířat místo dvanácti.
+Počet kačenčích dílů k odemčení se pak posunul ještě dvakrát a obojí vědomě:
+krokem H4 z 39 na 64 a **s příchodem vlajek na 111**, protože tři pásy odešly
+(zůstaly jako nizozemská vlajka) a osmačtyřicet vlajek přišlo. Dlaždic bez
+placení je **deset**, tedy klasická žlutá a devět prázdných, kterými se vrstva
+sundá; devět proto, že prázdnou dlaždici má každá police, ze které jde díl
+sundat, a polic vzorů je šest. Polic je dohromady jedenáct, z toho pět
+vlajkových, a celá garáž nabízí 167 dlaždic. Každý ten posun je vědomý
 a s komentářem, viz `tests/README.md`.
+
+**R11 a vlajky přidaly do `flow.test.js` ještě dvě čísla natvrdo.** Sbalená garáž
+kreslí 37 dlaždic, tedy jen závodníky, a police Na hlavu má po otevření
+21 dlaždic, z toho osm nakreslených hned a třináct čekajících. K tomu **strop
+1800 uzlů** na celé obrazovce, sbalené i s největší otevřenou policí; ten se
+neposouvá s každým dílem, ale spadne, až do jedné police přibude zhruba sedmdesát
+dlaždic, a pak se má podívat na garáž, ne na strop. Viz oddíl 7g.
 
 **Nová zakázka do dílny** je jiný seznam a je kratší: záznam v `JOBS` včetně
 `grade`, generátor úlohy vedle `moneyItem()` a `countItem()`, větev v
@@ -3121,8 +3254,8 @@ píše totéž, co v závodě.
 
 ### Kontrolní seznam pro nový kus kačenčí výstroje
 
-Deset bodů, a první z nich se odbaví dřív, než se něco nakreslí. Podrobnosti
-k celému modelu jsou v oddílu 7f.
+Třináct bodů, a první z nich se odbaví dřív, než se něco nakreslí. Podrobnosti
+k celému modelu jsou v oddílu 7f, garáž sama má oddíl 7g.
 
 1. **Autorská práva.** Kontrolní otázka zní: dá se u té kresby říct jméno
    postavy? Když ano, je špatně a dál se nepokračuje. Díl je věc, ne bytost.
@@ -3155,7 +3288,22 @@ k celému modelu jsou v oddílu 7f.
     co vrstva: visí na šesti a nová police je jeden řádek v `DUCK_LAYERS`. Jediné, co nový díl posune, je **strop uzlů**
     ve `flow.test.js`: dokud se do jedné vrstvy nepřidá víc než zhruba
     sedmdesát dlaždic, drží, a když spadne, je to výzva podívat se na garáž
-    znovu, ne důvod strop zvednout. Viz oddíl 7f.
+    znovu, ne důvod strop zvednout. Viz oddíl 7g.
+12. **Nový kus se změří proti ostatním, neposoudí okem.** Je to poučení
+    z vlajek a platí na každou vrstvu, ne jen na ně. Oko dvě podobné věci
+    v mřížce nerozliší a člověk, který díl právě nakreslil, ví, čím se liší,
+    takže ho vidí i tam, kde ho dítě neuvidí; u 57 vzorů je dvojic 1596
+    a prohlédnout je nejde. Měří to okruh 3g v `items.test.js` vzorkováním
+    kačenky a prahem 25 ΔE na dvanácti procentech plochy. **Když měření
+    spadne, překresluje se díl, ne práh**, a když nový díl do měřeného
+    okruhu nespadá, je to důvod ten okruh rozšířit, ne se spolehnout na
+    pohled.
+13. **Díl, který končí, se nemaže: dostane nástupce.** Přejmenování, sloučení
+    ani „ten vzor už tam nechceme“ nesmí sáhnout do uložených profilů. Řádek
+    do `DUCK_HEIR` (staré id → nové), nové id musí být opravdu nové a nástupce
+    musí být táž věc, jen líp pojmenovaná nebo líp nakreslená. Je to dotek
+    datového modelu, takže k němu patří zamrazený profil se starým id koupeným
+    i nasazeným a kontrola v `migration.test.js`. Viz oddíl 7f.
 
 ### Kontrolní seznam pro novou vlajku
 
@@ -3217,7 +3365,10 @@ ročníků na mapě), B (řetězec tří čísel), C ve dvou částech a s oprav
 mapy C3b (responzivita a písmo podle ročníku), D1 až D4, E1 až E4, F (slovní
 úlohy v dílně) a H1 až H8 (kačenka a zvířata). **Tím je hotová celá vlna A**,
 tedy všechno, co jde na `pad`, **i celá vlna B**, tedy nové vstupní prvky.
-Nic nezůstalo rozpracované a všech šest testů je zelených, tedy bez `!!`.
+Za plánem k tomu přišly ze zadání uživatele ještě dvě věci, rozhodnutí **R11**
+(sbalitelné police v garáži a líné kreslení, oddíl 7g) a **osmačtyřicet vlajek**
+ve vrstvě Vzor (oddíl 7f). Nic nezůstalo rozpracované a všech šest testů je
+zelených, tedy bez `!!`.
 
 **Dalším úkolem je krok G, tedy čtvrtý a pátý ročník**, a dělá se ve dvou
 částech, které na sobě nezávisí, v tomhle pořadí.
@@ -3248,7 +3399,17 @@ udělalo.
 **Co se musí prohlédnout okem**, je vypsané v hlavičce pod "Co zůstalo
 neověřené okem". Sandbox to udělat nemohl a žádný test to nenahradí.
 
-**Co je čerstvě hotové a nesmí se rozbít.** Slovní úloha v dílně se píše na
+**Co je čerstvě hotové a nesmí se rozbít.** Garáž se **otevírá sbalená**
+a kreslí jen závodníky; otevřená police je vždycky jedna, sbalená se nekreslí
+vůbec, závodníci se neskládají nikdy a stav drží `SHELF` mimo profil, takže
+otevření police nesmí zapsat ani bajt. Dlaždice otevřené police dostane kresbu
+až od `IntersectionObserver`, prvních osm hned, a prohlížeč bez pozorovatele
+dostane všechny naráz; strop 1800 uzlů ve `flow.test.js` se nezvedá (R11, oddíl
+7g). Vlajka je vzor jako každý jiný, kreslí se **na plovák a ne na hlavu**, nese
+místo znaku jednu značku, smí použít jen tvary, které si vzorkovač přečte, a její
+odlišitelnost **se měří** okruhem 3g, ne posuzuje okem; police vlajek jdou podle
+jména v jazyce dítěte a `dp_pasy` neskončil, jen odpovídá nástupcem přes
+`DUCK_HEIR`, aniž by se sáhlo do profilu (oddíl 7f). Slovní úloha v dílně se píše na
 číselné klávesnici závodu, ale **obsluhu si závod nechává**: dílna má vlastní
 `jobKey()` a delegovaný posluchač i posluchač `keydown` se rozhodují podle
 `view.name`, takže se do dílny nedostaly stopky ani body za rychlost (F, oddíl
@@ -3293,72 +3454,108 @@ a ukázka dalšího roku se nikam nezapisuje (7d), první ročník
 je žebřík šesti oborů bez přechodu přes desítku (4) a zakázka v dílně patří do
 ročníku (4b).
 
+**Tenhle prompt je napsaný na to, co uživatel ohlásil**, tedy že příští
+konverzaci přinese podklady pro čtvrtou a pátou třídu. Podklady v repozitáři
+zatím nejsou a session je dostane od uživatele v té konverzaci; první, co má
+udělat, je proto zjistit, co vlastně dostala.
+
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
 >
-> Tvoje role je **orchestrátor**, ne programátor. Přečti si celý
+> **Nesu podklady pro čtvrtou a pátou třídu.** Začni tím, že zjistíš, co jsi
+> dostala, protože podle toho se celý dnešek liší. Může to být vypracovaná
+> Matýskova matematika pro 4. a 5. ročník, odkaz do čtečky nakladatelství, fotky
+> nebo skeny stránek, tematický plán, nebo něco úplně jiného. Podívej se, co
+> v konverzaci a v připojených složkách doopravdy leží, řekni mi jednou větou,
+> za co to považuješ, a teprve pak se zařiď:
+>
+> - **Vypracované mapy ročníků nebo tematický plán.** Srovnej je s
+>   `docs/kurikulum/nns-matysek-4.md` a `-5.md`, které vznikly jen z obsahů,
+>   doplň, co je v nich otazník, a uveď je do tvaru ostatních map podle
+>   `docs/kurikulum/README.md`. Tím padá to, na čem visí G1.
+> - **Odkaz do čtečky.** Řekni mi, co přesně potřebuješ otevřít a na které
+>   stránce; přihlásit se musím já, ty do placené čtečky nelezeš.
+> - **Fotky nebo skeny stránek.** Přečti je a zapiš z nich mapu; u čeho si
+>   nejsi jistá, nech otazník a řekni mi, která stránka chybí.
+> - **Něco jiného, než čekáš.** Nedomýšlej si obsah učebnice. Řekni mi, co
+>   z toho jde použít a co ne, a zeptej se.
+>
+> Co se o státním kurikulu ví, je zapsané v `docs/kurikulum/ZDROJE-RVP.md`, tedy
+> i to, které číselné rozsahy jdou sundat z RVP závazně a bez učebnice. Souvisí
+> s tím otevřené **rozhodnutí R8** z oddílu 9 plánu, tedy jestli se mezitím má
+> stavět hrubší mapa z modelového ŠVP, nebo se rovnou použijí nové podklady;
+> doporučení je ano, ale s podklady v ruce se to může změnit, takže mi to
+> předlož a nerozhoduj to sama.
+>
+> Cílem je **krok G** z `docs/PLAN.md`, jediný nedodělaný krok celého plánu.
+> Dělí se na dvě části. **G0** je mapa `npi-msvp-1st` z modelového ŠVP, tedy nová
+> mapa v `docs/kurikulum/`, řádky v `src/curricula.js` včetně popisu poolu, název
+> kurikula ve třech jazycích a fixture pro novou volbu kurikula; do enginu se
+> nesahá. **G1** je zapnutí ročníků, tedy `MAX_GRADE` na 5 nebo 6, a **je to
+> změna datového modelu**: starší profily mají `grade: 4` ve významu „všechno“
+> a nová hodnota „všechno“ bude jiná, takže `seedGrade()` musí starou čtyřku
+> přeložit a do `tests/fixtures/legacy-profiles.json` přibude další zamrazený
+> profil. Pořadí obou částí není dané, na sobě nezávisí; když podklady stačí na
+> G1, dělej G1, jinak G0.
+>
+> Tvoje role je **orchestrátor**, ne programátor, protože `src/app.js` má přes
+> osm tisíc řádků a ty ho nemáš číst celý. Přečti si celý
 > `docs/PROJECT-STATE.md` kvůli stavu a mechanice a celý `docs/PLAN.md` kvůli
-> tomu, co se dělá, v jakém pořadí a kde v kódu se sahá. **`src/app.js` ani
-> testy nečti celé**, šetři si kontext; do zdrojů se dívej jen přes grep, když
-> potřebuješ něco ověřit. Implementaci každého kroku zadej jednomu subagentovi
-> podle oddílu 10 plánu, kde je šablona zadání i rozdělení kroků; subagent
-> si zdroje přečte sám. Po návratu subagenta sám pusť `python3 build.py`
-> a `node tests/items.test.js | grep '  !!  '`, u kroků sahajících na
-> obrazovky nebo profil i `flow.test.js` a `migration.test.js`, prohlédni
-> `git log -1 --stat`, a teprve pak zadej další krok. Po každé rodině pusť
-> kontrolního subagenta podle oddílu 10 a jeho nálezy dej opravit dalšímu
-> subagentovi, než půjdeš dál. Když subagent hlásí rozpor s plánem, rozhodni
-> autonomně podle plánu.
+> tomu, co se dělá a kde v kódu se sahá; **`src/app.js` ani testy nečti celé**,
+> do zdrojů se dívej jen přes grep, když potřebuješ něco ověřit. Implementaci
+> zadej subagentům podle **oddílu 10 plánu**, kde je šablona zadání i rozdělení
+> kroků; subagent si zdroje přečte sám. Po návratu subagenta sám pusť
+> `python3 build.py` a `node tests/items.test.js | grep '  !!  '`, u kroků
+> sahajících na obrazovky nebo profil i `flow.test.js` a `migration.test.js`,
+> prohlédni `git log -1 --stat`, a teprve pak zadej další krok. Po velkém kroku
+> pusť kontrolního subagenta podle oddílu 10 a jeho nálezy dej opravit dalšímu
+> subagentovi. Když subagent hlásí rozpor s plánem, rozhodni podle plánu.
 >
-> Dneska chci **krok G, tedy čtvrtý a pátý ročník**; z celého plánu je to
-> jediný nedodělaný krok, všechno ostatní je hotové. Dělá se na dvakrát:
-> nejdřív **G0**, tedy mapa `npi-msvp-1st` z modelového ŠVP (nová mapa
-> v `docs/kurikulum/`, řádky v `src/curricula.js`, název ve třech jazycích,
-> fixture pro novou volbu kurikula, do enginu se nesahá), a pak **G1**, tedy
-> zapnutí ročníků přes `MAX_GRADE`, což **je změna datového modelu** a znamená
-> překlad staré čtyřky v `seedGrade()` a nový zamrazený profil ve
-> `fixtures/legacy-profiles.json`. Každý subagent má vlastní commit.
+> **Zbylá otevřená rozhodnutí R1 a R9 nech na mně a nedělej je.** R2 až R7, R10
+> a R11 už padla, ta ber jako hotová.
 >
-> **G0 visí na rozhodnutí R8** z oddílu 9 plánu, tedy jestli stavět mapu ze
-> státního zdroje dřív, než dorazí ověřený Matýsek; doporučení je ano, ale
-> zeptej se mě dřív, než to zadáš. **G1 visí na tom, že mapy
-> `nns-matysek-4.md` a `-5.md` nejsou ověřené ze skutečných stránek**, jen
-> z obsahů; to je na mně, pošlu odkaz nebo se přihlásím v prohlížeči. Čísla
-> rozsahů v obou mapách jdou sundat z RVP i bez toho. Zbylá otevřená
-> rozhodnutí R1 a R9 nech na mně a nedělej je.
+> Pravidla, která platí každý den a patří do každého zadání subagentovi: zdroje
+> se editují v `src/`, nikdy `index.html`; po každé změně `python3 build.py` a
+> šest testů z `tests/`, čisté je bez `!!` ve výstupu; nové chování má vlastní
+> kontrolu v testu, ne jen kód; **žádná změna nesmí připravit existující profil
+> o postup**, hlídá to `tests/migration.test.js`, a dotek datového modelu znamená
+> další zamrazený profil v `tests/fixtures/legacy-profiles.json`; cokoli
+> kresleného se vyrenderuje a prohlédne podle oddílu 2, tedy `cairosvg`, ne
+> `convert`; nedotknutelné principy z oddílu 3 se nemění; kód a komentáře
+> anglicky, commit anglicky jednou větou; push ne.
 >
-> Každá nová rodina si vyrenderuje své čtyři palety a prohlédne je na obrázku
-> podle oddílu 2; `cairosvg`, ne `convert`, protože `convert` nekreslí přechody,
-> průhlednost ani ořez. Rozvržení obrazovek se v sandboxu prohlédnout nedá,
-> jsdom ho nemá; co mám prohlédnout sám, je v hlavičce pod "Co zůstalo
-> neověřené okem".
->
-> Pravidla, která patří do každého zadání subagentovi: zdroje se editují
-> v `src/`, nikdy `index.html`; po každé změně `python3 build.py` a testy
-> z `tests/`, hlídá se `!!` ve výstupu; nové chování patří do testů; žádná
-> změna nesmí připravit existující profil o postup, hlídá to
-> `tests/migration.test.js`, a dotek datového modelu znamená další zamrazený
-> profil v `tests/fixtures/legacy-profiles.json`; cokoli kresleného se
-> vyrenderuje a prohlédne; nedotknutelné principy z oddílu 3 se nemění; kód
-> a komentáře anglicky, commit anglicky jednou větou; push ne.
+> **Rozvržení obrazovek v sandboxu prohlédnout nejde**, jsdom ho nemá a prohlížeč
+> se tam nenainstaluje, takže tohle si musím projít na telefonu sám a je to
+> jediné, co předchozí session udělat nemohla: mapa prvňáka na 375 × 812 při
+> měřítku písma 1,25, závod na 360 × 640, závod a dílna na 812 × 375, mapa na
+> 768 × 1024 a 1024 × 768, řádek se dvěma a se třemi políčky s vyplněnými čísly,
+> plocha s velkými tlačítky proti klávesnici, slovní úloha na úzkém telefonu,
+> garáž se sbalenými policemi a líným kreslením, police vlajek i s nejtěsnějšími
+> dvojicemi, a karta o podpoře v rodičovské sekci. Celý seznam i s důvody je
+> v hlavičce tohohle souboru pod „Co zůstalo neověřené okem“; co na něm přibude
+> nebo ubude, tam zapiš.
 >
 > Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
 > které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
-> hlavičku "Kde se přestalo", stav v číslech a tenhle prompt, a ověř, že
+> hlavičku „Kde se přestalo“, stav v číslech a tenhle prompt, a ověř, že
 > subagenti označili hotové kroky v `docs/PLAN.md` značkou HOTOVO s datem.
 
 ### Prompt pro autonomní dokončení celého plánu
 
 Varianta bez průběžných otázek: session dojede zbytek plánu sama a rozhodnutí
 z oddílu 9 plánu bere podle doporučení. Použij, když nechceš být u toho.
-**Z celého plánu zbývá jediný krok, G**, a jeho druhá polovina se bez tebe
-neobejde, takže autonomní běh dojede G0 a G1 jen připraví.
+**Z celého plánu zbývá jediný krok, G**, takže tohle už není prompt na dojetí
+plánu, ale na jeho poslední kus. Autonomní běh z něj navíc zvládne jen půlku:
+**G0 dojede celé, G1 jen připraví**, protože G1 stojí na podkladech k učebnicím
+čtvrtého a pátého ročníku, které musíš dodat ty. Když podklady přinášíš, je
+správný prompt ten předchozí, ne tenhle.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
 > Tentokrát pracuješ **autonomně až do konce plánu**, bez otázek na mě.
 >
-> Tvoje role je **orchestrátor**. Přečti si celý `docs/PROJECT-STATE.md` a celý
+> Tvoje role je **orchestrátor**, protože `src/app.js` má přes osm tisíc řádků.
+> Přečti si celý `docs/PROJECT-STATE.md` a celý
 > `docs/PLAN.md`. **`src/app.js` ani testy nečti celé**, do zdrojů se dívej
 > jen přes grep. Každý krok zadej jednomu subagentovi přesně podle oddílu 10
 > plánu (šablona zadání, rozdělení kroků, kontrolní subagent); po jeho návratu
@@ -3367,7 +3564,8 @@ neobejde, takže autonomní běh dojede G0 a G1 jen připraví.
 > přepiš v tomhle souboru hlavičku "Kde se přestalo" jednou větou, aby šlo
 > po případném přerušení navázat.
 >
-> **Kroky A až F a H jsou hotové, nedělej z nich nic znovu.** Zbývá jediný
+> **Kroky A až F a H jsou hotové, nedělej z nich nic znovu; hotové je i
+> rozhodnutí R11 a osmačtyřicet vlajek, které přišly za plánem.** Zbývá jediný
 > krok, G, a ten se dělí na dvě části. **G0 udělej**, tedy mapu
 > `npi-msvp-1st` z modelového ŠVP podle zadání kroku G0 v plánu: nová mapa
 > v `docs/kurikulum/`, řádky v `src/curricula.js` včetně poolu, název ve třech

@@ -1559,8 +1559,8 @@ a nová se do `PETS` vetkala podle ceny místo za konec, aby byl katalog jedna
 v H7 jako nová id. **Kresba se posuzuje přes `cairosvg`, ne přes `convert`**;
 past z H1 se potvrdila v plné šíři a stálo to nejvíc času z celého kroku, viz
 `PROJECT-STATE.md` oddíl 2. A **přibyla kontrola, se kterou plán nepočítal**,
-tedy `partInk()` a okruh 3f: dvojic díl a tělo je 550 a splývání dvou barev se
-na obrázku přehlédne.
+tedy `partInk()` a okruh 3f: dvojic díl a tělo bylo tehdy 550, po vlajkách 1020,
+a splývání dvou barev se na obrázku přehlédne.
 
 Otevřené po kroku zůstalo jedno, a je z něj rozhodnutí **R11** v oddílu 9: garáž
 má 115 dlaždic, z toho 70 celých kačenek, a past z H5 je tedy o čtvrtinu horší,
@@ -1581,8 +1581,9 @@ tedy nizozemská vlajka nakreslená, aniž by to někdo řekl, a tou zůstaly, t
 staré id odpoví nástupcem a v profilu se nic nepřepisuje. Patnáct vlajek se od
 jiné v seznamu liší jen znakem uprostřed; znaky se nekreslí a nahrazuje je
 jedna jednoduchá značka, a jestli to stačí, se **měří** okruhem 3g
-v `items.test.js`. Celý model a naměřená čísla jsou v `PROJECT-STATE.md`
-oddíl 7f.
+v `items.test.js`; je to zároveň obecný mechanismus, protože `DUCK_HEIR` umí
+dát nástupce každému dílu, který skončí. Model vlajek je v `PROJECT-STATE.md`
+oddílu 7f, garáž i s naměřenými čísly v oddílu 7g.
 
 **Na pořadí s krokem G nezávisí.** G je učivo a kurikula, H je jen to, co se
 dá vlastnit a na co se dá koukat; nesdílejí jediný soubor kromě `app.js`
@@ -2286,6 +2287,17 @@ povyroste zhruba o dalších sedmdesát dlaždic, nebo až někdo skládání č
 kreslení vypne. Náhled jen hlavy se neudělal, jak plán říkal, a stránkování
 taky ne. Katalog se nezmenšil ani o dlaždici.
 
+**Jak to dopadlo, když vlajky opravdu přišly** (14. září 2026, pár hodin po
+tomhle rozhodnutí): vlajek je osmačtyřicet, ne padesát, a nevisí na jedné polici,
+ale **na pěti podle světadílu**, takže nejdelší otevřená police má pořád
+jednadvacet dlaždic jako před nimi a odhad 1537 uzlů se nenaplnil. Garáž má dnes
+**167 dlaždic**, tedy o polovinu víc než 115 před R11, a přesto sbalená dělá
+**992 až 1104 uzlů** a s největší otevřenou policí **nejvýš 1519**. Největší
+police není nejdelší, ale nejhustší, tedy kreslené vzory: dlaždic má deset, ale
+šachovnice i mapa světa jsou samy o sobě dvacet tvarů. Bez skládání a líného
+kreslení by dnešní garáž dělala **6875 uzlů** a strop by překročila šestkrát.
+Model celé garáže je v `PROJECT-STATE.md` oddílu 7g.
+
 Původní zadání rozhodnutí: past z H5 se potvrdila a je horší, než jak ji plán odhadoval: čekalo
 se devadesát dlaždic, skutečnost je 115, tedy o čtvrtinu víc. Rozpad je osm
 strojů, osmadvacet zvířat, jedna kačenka, devět nátěrů (osm plus prázdná
@@ -2339,8 +2351,9 @@ výkonu by bylo řešení opačným koncem.
 
 ## 10. Jak s plánem pracovat: hlavní session řídí, subagenti implementují
 
-`src/app.js` má skoro čtyři tisíce řádků, `i18n.js` devět set, testy další
-dva a půl tisíce. Session, která si to všechno načte a pak implementuje tři
+`src/app.js` má k 14. září 2026 **přes osm tisíc řádků**, `i18n.js` čtrnáct set
+a testy dalších pět a půl tisíce; když tenhle plán vznikal, byla to necelá
+polovina. Session, která si to všechno načte a pak implementuje tři
 kroky za sebou, dojede s plným kontextem uprostřed třetího. Proto se pracuje
 ve dvou rolích.
 

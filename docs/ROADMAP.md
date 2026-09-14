@@ -11,9 +11,9 @@ zjištění je odkaz. Kde přímý důkaz není, je to napsané.
 
 ## 1. Stav
 
-Sedmadvacet tratí ve čtyřech světech, 88 hratelných kapitol z 95, dvě zakázky
-v dílně, tři jazyky. K tomu sedmatřicet závodníků a 65 dílů kačenčí výstroje.
-První ročník je pokrytý celý, druhý skoro celý.
+Sedmadvacet tratí ve čtyřech světech, 91 hratelných kapitol z 95, tři zakázky
+v dílně, tři jazyky. K tomu sedmatřicet závodníků a 112 dílů kačenčí výstroje,
+z toho osmačtyřicet vlajek. První ročník je pokrytý celý, druhý skoro celý.
 
 Oddíly 2 až 4 níž jsou z rešerše z 12. září 2026 a jsou pořád platné, jen už
 nejsou návrhem: volba světa, sbírky vázané na krabičku i mapa jako svět stojí,
@@ -73,14 +73,16 @@ prostředí a nová sbírka.
 
 **Gumová kačenka je obsah přesně do toho okna a záměrně není učivo.** Přibyla
 v září 2026 jako sedmý startovní závodník zdarma a kupuje se u ní jen to, co má
-na sobě: pět nezávislých vrstev, 65 dílů, 392 700 kombinací, placených výhradně
+na sobě: pět nezávislých vrstev, 112 dílů, 2 070 600 kombinací, placených výhradně
 součástkami z dílny. Proti nové rodině příkladů má dvě vlastnosti, kvůli kterým
 sem patří. Za prvé se **nedá vyčerpat**: dítě, které má všechny díly, má pořád
 co skládat, kdežto dojetá trať je dojetá. Za druhé se **platí za práci v dílně,
 ne za rychlost v závodě**, takže drží tvar odměny jako klíče k obsahu z oddílu 4
 a nestává se z ní plat za výkon. K tomu se dvanáct zvířat překreslilo tak, aby
-to byla poznatelná zvířata, a přibylo šestnáct nových. Podrobnosti
-v `PROJECT-STATE.md`, oddíly 4b a 7f.
+to byla poznatelná zvířata, a přibylo šestnáct nových. V září 2026 k tomu
+přibylo osmačtyřicet vlajek jako vzor na kačenku, tedy obsah téhož druhu: dítě
+si koupí tu svou po první zakázce. Podrobnosti v `PROJECT-STATE.md`, oddíly 4b,
+7f a 7g.
 
 **Nejsilnější doložený efekt je intrinsic integration.** Habgood a Ainsworth,
 děti 7 až 11 let, dvě verze téže hry: když byla matematika součástí herní

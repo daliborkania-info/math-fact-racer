@@ -1496,7 +1496,19 @@ to, čemu se tam vyhýbalo. Pokud se to na telefonu projeví, řešení je menš
 náhled dlaždice nebo kreslit v dlaždici jen vybíranou vrstvu nad šedou
 siluetou, ne zmenšit katalog.
 
-### H6. Zvířata: přesnější kresba dvanácti dnešních
+### H6. Zvířata: přesnější kresba dvanácti dnešních — HOTOVO 14. září 2026
+
+Proti plánu se upřesnilo tohle: R10 padlo **ano, ale bez změny identity**, takže
+Lupi zůstává žlutým špičatouchým tvorem se skvrnami a Hvězdík žlutým tvorem
+s rohem a žirafa s křečkem přijdou v H7 jako nová id; společný obal musel umět
+o dvě věci víc, než plán čekal, tedy tvar si řekne, kam patří oči a pusa, a dvě
+zvířata (sova a krokodýl) kreslí pusu vlastní, protože zobák a zubatá čelist
+**jsou** ta pusa; hvězda stupně se odstěhovala zpod nebe nad hlavou do pravého
+dolního rohu, protože vršek rámu zabraly uši, rohy a hřebínky; delfín a krokodýl
+se musí kreslit z boku, zepředu je poznat nejde; a celá tabulka je psaná bez
+jediného otočení a jen absolutními příkazy v cestách, což je to jediné, díky
+čemu si test umí body přečíst zpátky z kresby a ohlídat rám ve všech třech
+stupních.
 
 **Nejdřív rozhodnutí R10 z oddílu 9. Bez něj se tahle část nedělá.**
 

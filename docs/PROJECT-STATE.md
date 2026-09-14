@@ -769,6 +769,13 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
    **Vzorec sedmdesát ku třiceti je na jednom místě**, `focusAndReview()`,
    a stupňování taky, `stageIndex()`. Nová rodina je volá, nepíše znovu.
 4. Závodníci a kresba postaviček. Všechno parametricky, `petSVG` a `rideSVG`.
+   **Zvíře se kreslí vlastní funkcí, ne jedním tvarem s přepínači.**
+   `PET_SHAPES` je tabulka kreseb, jedna na zvíře, a `petSVG()` je jen
+   dispatcher plus společný obal: měřítko podle stupně, oči, úsměv a hvězda
+   třetího stupně. Tvar vrátí hotovou kresbu a řekne, kam patří oči a pusa;
+   sova a krokodýl mají `mouth:"own"`, protože zobák a zubatá čelist jsou
+   ta pusa. Nic se neotáčí a všechny cesty jsou psané absolutně, takže si
+   `items.test.js` umí body přečíst zpátky z kresby a ohlídat rám.
    Tady je i sbírka nálezů: `tokenShape()` se sedmi tvary, `tokenSVG()` pro jedno
    místo a `tokenGridSVG()` pro celou sbírku. **Celá sbírka je jedna kresba**,
    ne jeden prvek na místo; dvacítka jich má sto dvaaosmdesát a přes všechny

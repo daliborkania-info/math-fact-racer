@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -164,6 +164,136 @@ A.RIDES.forEach(x=>{const v=A.rideSVG(x); if(/NaN|undefined/.test(v)){svgBad++;c
 A.DUCKS.forEach(x=>{const v=A.duckSVG(x); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  SVG problem',x.id);}});
 Object.keys(A.ENVS).forEach(e=>{const v=A.sceneSVG('circuit',e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  ENV problem',e);}});
 console.log('vadnych SVG:',svgBad);
+
+// 3a. dvanact zvirat
+//
+// Krok H6 nahradil jeden parametricky tvar dvanacti vlastnimi kresbami
+// a slibil u toho jednu vec: kresba je jedine, co se smi zmenit. Na id
+// visi zkusenosti a vlastnictvi, na cene to, na co dite setri, a jmeno
+// i barva jsou duvod, proc si dite zvire vybralo. Proto je tabulka niz
+// zamrazena: kdyz se v ni cokoli hne, nekomu se zmenilo neco, co uz ma.
+//
+// Samotnou kresbu test neuvidi, tu je nutne vyrenderovat a prohlednout.
+// Spocitat se da zbytek: ze zadne zvire nevyjede z ramu v zadnem ze tri
+// stupnu, ze oci a usmev sedi tam, kam si je tvar rekl, a ze se kazde
+// zvire kresli vlastni funkci, ne nahradnikem.
+let zvBad=0;
+const zvsay=m=>{zvBad++;console.log('  !!  '+m);};
+const ZVTAB=[
+  ['pet_bimbo','dolphin', '#7ad3ff','#3ea8e0', 25,'Bimbo'],
+  ['pet_lupi', 'critter', '#ffd166','#e3a521', 30,'Lupi'],
+  ['pet_mecha','bear',    '#c79b73','#9c7350', 30,'Méďa'],
+  ['pet_kiki', 'rabbit',  '#ff9ec4','#e56d9d', 40,'Kiki'],
+  ['pet_zub',  'croc',    '#a4e768','#6fbb34', 40,'Zoubek'],
+  ['pet_duha', 'unicorn', '#d3a4ff','#9a6ae0', 60,'Duháček'],
+  ['pet_puk',  'axolotl', '#8ee6d5','#4bb8a4', 60,'Puk'],
+  ['pet_flek', 'dog',     '#ffb3a1','#e0705a', 70,'Flíček'],
+  ['pet_sova', 'owl',     '#b9a4ff','#7d63d8', 80,'Sovík'],
+  ['pet_drak', 'dragon',  '#6fe0a8','#2ba36c',100,'Dráček'],
+  ['pet_hvezd','hornling','#ffe17a','#e0ab1f',120,'Hvězdík'],
+  ['pet_noc',  'bat',     '#6d7cff','#3a44b8',150,'Noční']
+];
+if(A.PETS.length!==ZVTAB.length) zvsay('zvirat uz neni '+ZVTAB.length+', ale '+A.PETS.length);
+ZVTAB.forEach((z,i)=>{
+  const [id,shape,c1,c2,cost,cz]=z, p=A.PETS[i];
+  if(!p||p.id!==id){zvsay('zvire '+i+' uz neni '+id);return;}
+  if(p.cost!==cost) zvsay(id+' stoji '+p.cost+' misto '+cost+', dite setrilo na jinou cenu');
+  if(p.c1!==c1||p.c2!==c2) zvsay(id+' zmenilo barvu, a podle barvy si ho dite vybralo');
+  if(p.shape!==shape) zvsay(id+' kresli '+p.shape+' misto '+shape);
+  if(A.I18N.cs[id]!==cz) zvsay(id+' se cesky uz nejmenuje '+cz);
+  ['cs','en','de'].forEach(j=>{ if(!A.I18N[j][id]) zvsay(id+' nema jmeno v jazyce '+j); });
+});
+// kazde zvire ma vlastni kresbu; nahradnik `plain` je jen pojistka pro
+// tvar, o kterem tahle verze nikdy neslysela, a nesmi kreslit nikoho
+const tvaryZ=A.PETS.map(p=>p.shape);
+if(new Set(tvaryZ).size!==tvaryZ.length) zvsay('dve zvirata sdileji tvar: '+tvaryZ.join(','));
+tvaryZ.forEach(t=>{ if(!A.PET_SHAPES[t]) zvsay('tvar '+t+' v PET_SHAPES neexistuje, kresli se nahradnik'); });
+if(tvaryZ.includes('plain')) zvsay('nekdo se kresli nahradnikem plain');
+// nahradnik ale musi fungovat, protoze na nej spadne starsi profil
+// s tvarem z novejsi verze
+if(/NaN|undefined/.test(A.petSVG({id:'x',shape:'neexistuje',c1:'#ffd166',c2:'#e3a521'},2)))
+  zvsay('nezname zvire rozbije kresbu misto toho, aby spadlo na nahradnika');
+
+// ram je 100 x 118 a kresba je v nem zvetsena skupinovou transformaci.
+// Zadny tvar se neotaci a vsechnyZ cesty jsou psane absolutne, takze se
+// body daji precist primo z kresbyZ a prepocitat stejne, jako je
+// prepocita prohlizec; tloustka tahu se pricita, protoze tah lezi na
+// obe strany cesty.
+const sn=v=>+(+v).toFixed(2);
+function bodyKresby(svg){
+  const out=[], el=/<(circle|ellipse|path)\b[^>]*>/g;
+  let m;
+  while((m=el.exec(svg))){
+    const s=m[0], sw=/stroke-width="([\d.]+)"/.exec(s);
+    const pad=sw?+sw[1]/2:0, add=(x,y)=>out.push([x,y,pad]);
+    if(m[1]==='circle'){
+      const cx=+/cx="(-?[\d.]+)"/.exec(s)[1], cy=+/cy="(-?[\d.]+)"/.exec(s)[1], r=+/ r="(-?[\d.]+)"/.exec(s)[1];
+      add(cx-r,cy);add(cx+r,cy);add(cx,cy-r);add(cx,cy+r);
+    } else if(m[1]==='ellipse'){
+      const cx=+/cx="(-?[\d.]+)"/.exec(s)[1], cy=+/cy="(-?[\d.]+)"/.exec(s)[1],
+            rx=+/rx="(-?[\d.]+)"/.exec(s)[1], ry=+/ry="(-?[\d.]+)"/.exec(s)[1];
+      add(cx-rx,cy);add(cx+rx,cy);add(cx,cy-ry);add(cx,cy+ry);
+    } else {
+      const d=/ d="([^"]+)"/.exec(s)[1], n=d.match(/-?[\d.]+/g)||[];
+      // rizeni bezierovy krivky lezi vzdycky vne krivky, takze je to
+      // odhad na jistotu, nikdy ne naopak
+      for(let i=0;i+1<n.length;i+=2) add(+n[i],+n[i+1]);
+    }
+  }
+  return out;
+}
+const vsechnyZ=[];
+A.PETS.forEach(p=>[1,2,3].forEach(st=>{
+  const svg=A.petSVG(p,st);
+  vsechnyZ.push(svg);
+  const f=/translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+)\) translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(svg);
+  if(!f){zvsay(p.id+' ztratilo skupinovou transformaci, kotvy uz nesedi s ramem');return;}
+  const [tx,ty,sc,ox,oy]=f.slice(1).map(Number);
+  // stupen se pozna i bez hvezdy: zvire roste
+  if(sc!==(st===1?.84:st===2?1:1.12)) zvsay(p.id+' ma ve stupni '+st+' meritko '+sc);
+  for(const [x,y,pad] of bodyKresby(svg)){
+    const px=tx+sc*(x+ox), py=ty+sc*(y+oy), q=pad*sc;
+    if(px-q<0||px+q>100||py-q<0||py+q>118){
+      zvsay(p.id+' stupen '+st+' vyjelo z ramu: '+x+','+y+' -> '+px.toFixed(1)+','+py.toFixed(1));
+      break;
+    }
+  }
+  // oci a usmev jsou spolecny obal, ne vec kazdeho tvaru, takze musi
+  // sedet presne tam, kam si tvar rekl
+  const d=A.PET_SHAPES[p.shape](p,st);
+  if(!d.eye||!d.eye.xs||!d.eye.xs.length) zvsay(p.id+' nerika, kam patri oci');
+  else{
+    d.eye.xs.forEach(cx=>{
+      if(svg.indexOf('<ellipse cx="'+sn(cx)+'" cy="'+sn(d.eye.y)+'" rx="'+sn(d.eye.r)+'"')<0)
+        zvsay(p.id+' stupen '+st+': oko nesedi na '+cx+','+d.eye.y);
+    });
+    if(d.eye.xs.length>2) zvsay(p.id+' ma '+d.eye.xs.length+' oci');
+  }
+  if(d.mouth===undefined) zvsay(p.id+' nerika, kde ma pusu');
+  else if(d.mouth!=='own'){
+    if(svg.indexOf('M'+sn(d.mouth.x-d.mouth.w/2)+' '+sn(d.mouth.y)+' Q')<0)
+      zvsay(p.id+' stupen '+st+': usmev nesedi na '+d.mouth.x+','+d.mouth.y);
+    if(d.mouth.y<=d.eye.y) zvsay(p.id+' ma pusu nad ocima');
+  }
+  // hvezda stupne sviti jen ve tretim stupni a nesmi padnout na oko
+  const hvezdZ=(svg.match(/fill="#ffd166" stroke="#e0ab1f"/g)||[]).length;
+  if(st===3&&hvezdZ!==1) zvsay(p.id+' ma ve tretim stupni '+hvezdZ+' hvezdZ misto jedne');
+  if(st<3&&hvezdZ) zvsay(p.id+' sviti hvezdou uz ve stupni '+st);
+  if(st===3){
+    const [hx,hy]=d.star||A.PET.STAR;
+    d.eye.xs.forEach(cx=>{ if(Math.hypot(hx-cx,hy-d.eye.y)<8.5+d.eye.r)
+      zvsay(p.id+': hvezda stupne leze na oko'); });
+  }
+}));
+// na obojim stoji kontrola ramu: otoceny tvar schova, kde skoncil,
+// a relativni prikaz v ceste se necha precist jen po rade
+const kresbyZ=vsechnyZ.join('');
+if(/rotate\(/.test(kresbyZ)) zvsay('nektere zvire se otaci, kontrola ramu tim prestava platit');
+for(const dm of kresbyZ.match(/ d="[^"]+"/g)||[]){
+  if(/[a-z]/.test(dm.slice(4).replace(/[MLCQZAHVS\d.\s-]/g,'')))
+    zvsay('relativni prikaz v ceste: '+dm.slice(0,40));
+}
+console.log('zvirata:',zvBad?'chyb '+zvBad:'v poradku');
 
 // 3b. kacenka
 //

@@ -3897,19 +3897,26 @@ function record(p, item, correct, ms){
    Every sprite is drawn from parameters, so the whole set costs a few
    hundred bytes instead of a folder full of images.
    ================================================================= */
+/* Twelve animals, and every one of them names the animal it is. `shape`
+   points at its drawing in PET_SHAPES; the id, the price and the name
+   never change, because a child's experience and savings hang off them,
+   and neither do the two colours, because the animal was picked to match
+   them. Two of the twelve are deliberately not a species: Lupi and
+   Hvězdík stay the creatures they already were, so nobody's friend turns
+   into somebody else overnight. */
 const PETS = [
-  {id:"pet_bimbo",   body:"blob",  c1:"#7ad3ff", c2:"#3ea8e0", ear:"round",  ex:"none",    pat:"none",   cost:25},
-  {id:"pet_lupi",    body:"round", c1:"#ffd166", c2:"#e3a521", ear:"pointy", ex:"none",    pat:"spots",  cost:30},
-  {id:"pet_mecha",    body:"round", c1:"#c79b73", c2:"#9c7350", ear:"round",  ex:"none",    pat:"none",   cost:30},
-  {id:"pet_kiki",    body:"tall",  c1:"#ff9ec4", c2:"#e56d9d", ear:"long",   ex:"none",    pat:"none",   cost:40},
-  {id:"pet_zub",  body:"blob",  c1:"#a4e768", c2:"#6fbb34", ear:"pointy", ex:"fin",     pat:"stripes",cost:40},
-  {id:"pet_duha", body:"tall",  c1:"#d3a4ff", c2:"#9a6ae0", ear:"long",   ex:"horn",    pat:"none",   cost:60},
-  {id:"pet_puk",     body:"round", c1:"#8ee6d5", c2:"#4bb8a4", ear:"none",   ex:"antenna", pat:"spots",  cost:60},
-  {id:"pet_flek",  body:"blob",  c1:"#ffb3a1", c2:"#e0705a", ear:"round",  ex:"none",    pat:"spots",  cost:70},
-  {id:"pet_sova",   body:"round", c1:"#b9a4ff", c2:"#7d63d8", ear:"pointy", ex:"wings",   pat:"none",   cost:80},
-  {id:"pet_drak",  body:"tall",  c1:"#6fe0a8", c2:"#2ba36c", ear:"pointy", ex:"wings",   pat:"stripes",cost:100},
-  {id:"pet_hvezd", body:"blob",  c1:"#ffe17a", c2:"#e0ab1f", ear:"none",   ex:"horn",    pat:"none",   cost:120},
-  {id:"pet_noc",  body:"tall",  c1:"#6d7cff", c2:"#3a44b8", ear:"long",   ex:"wings",   pat:"spots",  cost:150}
+  {id:"pet_bimbo", shape:"dolphin",   c1:"#7ad3ff", c2:"#3ea8e0", cost:25},
+  {id:"pet_lupi",  shape:"critter",   c1:"#ffd166", c2:"#e3a521", cost:30},
+  {id:"pet_mecha", shape:"bear",      c1:"#c79b73", c2:"#9c7350", cost:30},
+  {id:"pet_kiki",  shape:"rabbit",    c1:"#ff9ec4", c2:"#e56d9d", cost:40},
+  {id:"pet_zub",   shape:"croc",      c1:"#a4e768", c2:"#6fbb34", cost:40},
+  {id:"pet_duha",  shape:"unicorn",   c1:"#d3a4ff", c2:"#9a6ae0", cost:60},
+  {id:"pet_puk",   shape:"axolotl",   c1:"#8ee6d5", c2:"#4bb8a4", cost:60},
+  {id:"pet_flek",  shape:"dog",       c1:"#ffb3a1", c2:"#e0705a", cost:70},
+  {id:"pet_sova",  shape:"owl",       c1:"#b9a4ff", c2:"#7d63d8", cost:80},
+  {id:"pet_drak",  shape:"dragon",    c1:"#6fe0a8", c2:"#2ba36c", cost:100},
+  {id:"pet_hvezd", shape:"hornling",  c1:"#ffe17a", c2:"#e0ab1f", cost:120},
+  {id:"pet_noc",   shape:"bat",       c1:"#6d7cff", c2:"#3a44b8", cost:150}
 ];
 const RIDES = [
   {id:"ri_raketa",   kind:"rocket", c1:"#ff6b6b", c2:"#ffd166", cost:50},
@@ -4684,75 +4691,391 @@ function stageOf(p, id){
   return xp >= EVO[2] ? 3 : xp >= EVO[1] ? 2 : 1;
 }
 
-/* --- sprite drawing --- */
-function eyes(cx1, cx2, cy, r, look){
-  const p = look ? 1.6 : 0;
-  return `
-   <ellipse cx="${cx1}" cy="${cy}" rx="${r}" ry="${r*1.1}" fill="#fff"/>
-   <ellipse cx="${cx2}" cy="${cy}" rx="${r}" ry="${r*1.1}" fill="#fff"/>
-   <circle cx="${cx1+p}" cy="${cy+.5}" r="${r*.55}" fill="#22314f"/>
-   <circle cx="${cx2+p}" cy="${cy+.5}" r="${r*.55}" fill="#22314f"/>
-   <circle cx="${cx1+p-r*.22}" cy="${cy-r*.28}" r="${r*.2}" fill="#fff"/>
-   <circle cx="${cx2+p-r*.22}" cy="${cy-r*.28}" r="${r*.2}" fill="#fff"/>`;
+/* --- sprite drawing ---
+
+   An animal is drawn by its own function, never by one shape with
+   switches. Twelve switched shapes are twelve copies of the same
+   creature, and the whole point of an animal here is that an eight year
+   old names it on sight, on a garage tile the size of a thumbnail, with
+   the label covered up. So PET_SHAPES is a table of drawings, one per
+   animal, and petSVG() is a dispatcher plus the wrapper all of them
+   share: the growth scale, the eyes, the smile and the star of the third
+   stage. A shape hands back what it drew and says where its eyes and its
+   mouth belong; the two whose mouth is the animal - a beak, a jaw full
+   of teeth - draw their own and say so with mouth:"own".
+
+   Two rules hold the whole table together. Nothing is rotated and every
+   path is written in absolute commands, so the test can read the points
+   straight back out of the drawing and check that no animal leaves the
+   frame at any of the three stages. And no drawing may be nameable as a
+   character: these are a bear, a rabbit, a dragon, never somebody's
+   mascot. If a name can be put to the picture, the picture is wrong. */
+const PET = {
+  CX: 50,          // the middle of the frame, and of every animal in it
+  HEAD: 45,        // where the head of a standing animal sits
+  BODY: 80,        // where its body sits
+  FLOOR: 96,       // where its feet meet the ground
+  STAR: [78, 98]   // the growth star: bottom right, the one corner no
+};                 // animal reaches into, and not where the tile's chip is
+
+/* A lighter and a darker relative of a colour, so a muzzle, a belly or a
+   paw is the animal's own colour rather than a second palette to keep. */
+function tint(hex, k){
+  const v = parseInt(hex.slice(1), 16);
+  return "#" + [(v >> 16) & 255, (v >> 8) & 255, v & 255]
+    .map(c => Math.round(c + (255 - c) * k).toString(16).padStart(2, "0")).join("");
+}
+function shade(hex, k){
+  const v = parseInt(hex.slice(1), 16);
+  return "#" + [(v >> 16) & 255, (v >> 8) & 255, v & 255]
+    .map(c => Math.round(c * (1 - k)).toString(16).padStart(2, "0")).join("");
+}
+/* --- the parts more than one animal is built from --- */
+function paws(cx, y, dx, rx, ry, c){
+  return `<ellipse cx="${svgn(cx - dx)}" cy="${svgn(y)}" rx="${rx}" ry="${ry}" fill="${c}"/>`
+       + `<ellipse cx="${svgn(cx + dx)}" cy="${svgn(y)}" rx="${rx}" ry="${ry}" fill="${c}"/>`;
+}
+function earRound(x, y, r, c, inner){
+  return `<circle cx="${svgn(x)}" cy="${svgn(y)}" r="${r}" fill="${c}"/>`
+       + `<circle cx="${svgn(x)}" cy="${svgn(y + r * .14)}" r="${svgn(r * .52)}" fill="${inner}"/>`;
+}
+// a pointed ear, given the two corners of its base and its tip
+function earTri(bx1, by1, bx2, by2, tx, ty, c, inner){
+  const mid = (a, b, k) => svgn(a + (b - a) * k);
+  return `<path d="M${svgn(bx1)} ${svgn(by1)} L${svgn(tx)} ${svgn(ty)} L${svgn(bx2)} ${svgn(by2)} Z" fill="${c}"/>`
+       + `<path d="M${mid(bx1, bx2, .24)} ${mid(by1, by2, .24)} L${mid(tx, (bx1 + bx2) / 2, .32)} ${mid(ty, (by1 + by2) / 2, .32)}`
+       + ` L${mid(bx2, bx1, .3)} ${mid(by2, by1, .3)} Z" fill="${inner}"/>`;
+}
+/* A row of spikes along an arc: a dragon's crest and a crocodile's back
+   are the same shape seen twice, and working it out from the arc rather
+   than writing the triangles down keeps both readable. */
+function ridge(cx, cy, r, a0, a1, count, h, fill){
+  const P = (deg, q) => { const a = deg * Math.PI / 180;
+    return `${svgn(cx + q * Math.cos(a))} ${svgn(cy + q * Math.sin(a))}`; };
+  let out = "";
+  for(let i = 0; i < count; i++){
+    const s = a0 + (a1 - a0) * i / count, e = a0 + (a1 - a0) * (i + 1) / count;
+    out += `<path d="M${P(s, r)} L${P((s + e) / 2, r + h)} L${P(e, r)} Z" fill="${fill}"/>`;
+  }
+  return out;
+}
+/* A wing of skin with three fingers in it, which is what tells a bat and
+   a dragon from a bird. `dir` is which side of the body it grows on. */
+function membrane(x, y, dir, w, h, fill, op){
+  const P = (fx, fy) => `${svgn(x + dir * w * fx)} ${svgn(y + h * fy)}`;
+  return `<path d="M${P(0, 0)} C ${P(.45, -.62)} ${P(.9, -.5)} ${P(1, -.2)}`
+       + ` Q ${P(.8, .2)} ${P(.71, -.08)}`
+       + ` Q ${P(.53, .4)} ${P(.45, .09)}`
+       + ` Q ${P(.26, .56)} ${P(.2, .24)}`
+       + ` Q ${P(.08, .56)} ${P(0, .46)} Z" fill="${fill}"`
+       + (op ? ` opacity="${op}"` : "") + `/>`;
+}
+// a row of teeth along a jaw
+function toothRow(x0, x1, y, h, count, up, fill){
+  const w = (x1 - x0) / count;
+  let out = "";
+  for(let i = 0; i < count; i++){
+    const a = x0 + i * w, b = a + w * .8;
+    out += `<path d="M${svgn(a)} ${svgn(y)} L${svgn(b)} ${svgn(y)}`
+         + ` L${svgn((a + b) / 2)} ${svgn(y + (up ? -h : h))} Z" fill="${fill || "#fff"}"/>`;
+  }
+  return out;
+}
+// one feathery gill: a stalk with three lobes on the end of it
+function gill(x, y, tx, ty, c){
+  const back = tx < x ? 4.2 : -4.2;
+  return `<path d="M${svgn(x)} ${svgn(y)} Q ${svgn((x + tx) / 2)} ${svgn((y + ty) / 2 - 3)} ${svgn(tx)} ${svgn(ty)}"`
+       + ` stroke="${c}" stroke-width="3.4" fill="none" stroke-linecap="round"/>`
+       + `<circle cx="${svgn(tx)}" cy="${svgn(ty)}" r="3.8" fill="${c}"/>`
+       + `<circle cx="${svgn(tx + back)}" cy="${svgn(ty - 4.6)}" r="3.2" fill="${c}"/>`
+       + `<circle cx="${svgn(tx + back)}" cy="${svgn(ty + 4.6)}" r="3.2" fill="${c}"/>`;
+}
+
+/* --- the twelve animals ---
+   Each one is told its colours and its stage and hands back
+   {g, eye, mouth} and, when the default corner is taken, star. */
+const PET_SHAPES = {
+  /* A bear is its ears: round, set high and far apart. Then a pale
+     muzzle with a small dark nose, small eyes close together, and no
+     tail at all - the eyes and the missing tail are what stop it from
+     reading as a cat. */
+  bear(it){
+    const g = earRound(30, 28, 10, it.c2, tint(it.c1, .3))
+      + earRound(70, 28, 10, it.c2, tint(it.c1, .3))
+      + `<ellipse cx="50" cy="80" rx="25" ry="20" fill="${it.c1}"/>`
+      + paws(50, 96, 15, 9.5, 6.5, it.c2)
+      + `<ellipse cx="50" cy="83" rx="15" ry="13" fill="#fff" opacity=".28"/>`
+      + `<circle cx="50" cy="45" r="22" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="55" rx="13.5" ry="9.5" fill="${tint(it.c1, .45)}"/>`
+      + `<ellipse cx="50" cy="50" rx="4.8" ry="3.6" fill="#3b2a1e"/>`;
+    return {g, eye: {xs: [43.5, 56.5], y: 40, r: 5.2}, mouth: {x: 50, y: 56, w: 11, d: 5}};
+  },
+
+  /* An owl is one egg, not a head on a body, and what says owl is the
+     heart-shaped veil round the face, two huge ringed eyes and the
+     little hooked beak between them. The beak is the mouth. */
+  owl(it){
+    const veil = tint(it.c1, .78);
+    const wing = shade(it.c2, .18);
+    const g = `<path d="M30 52 C 16 60, 16 80, 27 89 C 33 80, 33 63, 32 52 Z" fill="${wing}"/>`
+      + `<path d="M70 52 C 84 60, 84 80, 73 89 C 67 80, 67 63, 68 52 Z" fill="${wing}"/>`
+      + `<path d="M32 38 L28 24 L44 31 Z" fill="${it.c2}"/>`
+      + `<path d="M68 38 L72 24 L56 31 Z" fill="${it.c2}"/>`
+      + `<ellipse cx="50" cy="62" rx="28" ry="34" fill="${it.c1}"/>`
+      + paws(50, 95, 9, 6.5, 3.6, "#ffb020")
+      + `<path d="M50 82 C 41 82, 38 76, 39 71 C 44 76, 56 76, 61 71 C 62 76, 59 82, 50 82 Z" fill="${veil}" opacity=".55"/>`
+      + `<path d="M50 70 C 34 63, 31 45, 38 39 C 44 35, 48 40, 50 46 C 52 40, 56 35, 62 39 C 69 45, 66 63, 50 70 Z" fill="${veil}"/>`
+      + `<circle cx="41" cy="51" r="10" fill="#fff"/>`
+      + `<circle cx="59" cy="51" r="10" fill="#fff"/>`
+      + `<circle cx="41" cy="51" r="10" fill="none" stroke="${it.c2}" stroke-width="1.8"/>`
+      + `<circle cx="59" cy="51" r="10" fill="none" stroke="${it.c2}" stroke-width="1.8"/>`
+      + `<path d="M50 59 L45.5 63 L50 70 L54.5 63 Z" fill="#ffb020"/>`
+      + `<path d="M50 65 L46.6 64.5 L50 70 L53.4 64.5 Z" fill="#e08a10"/>`;
+    return {g, eye: {xs: [41, 59], y: 51, r: 7.5}, mouth: "own", star: [50, 18]};
+  },
+
+  /* A dragon: five spikes running from the crown down the back, wings of
+     skin with fingers in them, and a tail that ends in a point. The
+     wings are folded at the first stage and open from the second, which
+     is the one growth an animal here has always had. */
+  dragon(it, s){
+    const dark = shade(it.c2, .14);
+    const wing = s >= 2
+      ? membrane(36, 58, -1, 26, 32, dark) + membrane(64, 58, 1, 26, 32, dark)
+      : membrane(38, 62, -1, 15, 20, dark) + membrane(62, 62, 1, 15, 20, dark);
+    const g = `<path d="M42 92 C 32 102, 19 102, 13 92 C 22 93, 32 88, 38 80 Z" fill="${it.c2}"/>`
+      + `<path d="M13 92 L13 82 L21 89 Z" fill="${it.c2}"/>`
+      + wing
+      + ridge(50, 38, 17.5, -108, 8, 5, 8, dark)
+      + `<ellipse cx="50" cy="76" rx="21" ry="24" fill="${it.c1}"/>`
+      + paws(50, 98, 12, 9.5, 6.5, it.c2)
+      + `<ellipse cx="50" cy="80" rx="12.5" ry="15" fill="${tint(it.c1, .5)}"/>`
+      + `<circle cx="50" cy="37" r="18" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="49" rx="15.5" ry="10.5" fill="${tint(it.c1, .45)}"/>`
+      + `<path d="M36 52 Q 50 60, 64 52" stroke="${dark}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
+      + `<ellipse cx="44.5" cy="44.5" rx="2" ry="1.5" fill="${shade(it.c2, .35)}"/>`
+      + `<ellipse cx="55.5" cy="44.5" rx="2" ry="1.5" fill="${shade(it.c2, .35)}"/>`;
+    return {g, eye: {xs: [42.5, 57.5], y: 33, r: 5.6}, mouth: {x: 50, y: 50, w: 12, d: 4.5}};
+  },
+
+  /* A crocodile can only be told side on: a long flat snout full of
+     triangular teeth, eyes sitting on top of the head rather than in it,
+     and a sawtooth back. The jaw is the mouth. */
+  croc(it){
+    const dark = shade(it.c2, .18);
+    const g = `<path d="M28 55 C 16 52, 12 63, 15 77 C 21 69, 27 67, 34 70 Z" fill="${it.c1}"/>`
+      + ridge(42, 70, 22, -168, -80, 4, 8, dark)
+      + `<ellipse cx="42" cy="68" rx="26" ry="18" fill="${it.c1}"/>`
+      + paws(42, 86, 15, 8.5, 5.5, it.c2)
+      + `<ellipse cx="42" cy="76" rx="18" ry="7.5" fill="${tint(it.c1, .5)}"/>`
+      + `<ellipse cx="64" cy="56" rx="17" ry="13" fill="${it.c1}"/>`
+      + `<path d="M55 46 L85 51 Q92 56, 85 61 L55 64 Z" fill="${it.c1}"/>`
+      + `<path d="M57 61 L85 61 Q91 63.5, 85 66 L57 67 Z" fill="${tint(it.c1, .35)}"/>`
+      + toothRow(59, 84, 61, 5.4, 6, false, "#fff")
+      + toothRow(60, 83, 61, 5, 5, true, "#fff")
+      + `<path d="M55 60 L88 58.5" stroke="${dark}" stroke-width="1.8" stroke-linecap="round"/>`
+      + `<ellipse cx="84" cy="53" rx="2.2" ry="1.6" fill="${dark}"/>`
+      + `<circle cx="59" cy="42" r="9" fill="${it.c1}"/>`;
+    return {g, eye: {xs: [59], y: 41, r: 5.4}, mouth: "own"};
+  },
+
+  /* A rabbit: two long ears with pink inside them, a triangular nose,
+     two front teeth and a white bobtail. */
+  rabbit(it){
+    const inner = "#ffd6e6";
+    const g = `<path d="M44 33 C 37 24, 35 15, 39 14 C 44 13, 46 22, 48 31 Z" fill="${it.c1}"/>`
+      + `<path d="M44.6 31 C 39.5 24, 38 17.5, 40.4 17 C 43 17, 44.4 23, 46 30 Z" fill="${inner}"/>`
+      + `<path d="M56 33 C 63 24, 65 15, 61 14 C 56 13, 54 22, 52 31 Z" fill="${it.c1}"/>`
+      + `<path d="M55.4 31 C 60.5 24, 62 17.5, 59.6 17 C 57 17, 55.6 23, 54 30 Z" fill="${inner}"/>`
+      + `<circle cx="69" cy="74" r="7.5" fill="${tint(it.c1, .45)}"/>`
+      + `<circle cx="76" cy="78" r="6.8" fill="${tint(it.c1, .45)}"/>`
+      + `<circle cx="70" cy="82" r="6.8" fill="${tint(it.c1, .45)}"/>`
+      + `<circle cx="69.5" cy="76" r="4.2" fill="#fff" opacity=".7"/>`
+      + `<ellipse cx="50" cy="80" rx="20" ry="18" fill="${it.c1}"/>`
+      + paws(50, 95, 12, 9, 6, it.c2)
+      + `<ellipse cx="50" cy="83" rx="12" ry="11" fill="#fff" opacity=".32"/>`
+      + `<circle cx="50" cy="45" r="19" fill="${it.c1}"/>`
+      + `<path d="M50 53 L45.6 48 L54.4 48 Z" fill="${it.c2}"/>`
+      + `<path d="M46.7 58 L49.4 58 L49.4 63 Q48 64.4 46.7 63 Z" fill="#fff"/>`
+      + `<path d="M50.6 58 L53.3 58 L53.3 63 Q52 64.4 50.6 63 Z" fill="#fff"/>`;
+    return {g, eye: {xs: [42.5, 57.5], y: 43, r: 6}, mouth: {x: 50, y: 55, w: 9, d: 3.4}};
+  },
+
+  /* Lupi is not a species and is deliberately left as one: a round
+     yellow creature with pointed ears and spots, exactly what it has
+     always been. Redrawing it as a giraffe would not have been a better
+     drawing of the same animal, it would have been a different animal,
+     and a child who owns it should find the same friend it had
+     yesterday. The giraffe the catalogue wants arrives as a new id. */
+  critter(it){
+    const g = earTri(37, 32, 48, 27, 32, 15, it.c2, tint(it.c1, .3))
+      + earTri(63, 32, 52, 27, 68, 15, it.c2, tint(it.c1, .3))
+      + `<ellipse cx="50" cy="80" rx="23" ry="18" fill="${it.c1}"/>`
+      + paws(50, 95, 13, 9, 6, it.c2)
+      + `<circle cx="38" cy="82" r="5.5" fill="${it.c2}" opacity=".5"/>`
+      + `<circle cx="60" cy="77" r="4.2" fill="${it.c2}" opacity=".5"/>`
+      + `<circle cx="54" cy="88" r="4.6" fill="${it.c2}" opacity=".5"/>`
+      + `<circle cx="50" cy="45" r="20" fill="${it.c1}"/>`
+      + `<circle cx="36" cy="40" r="4" fill="${it.c2}" opacity=".45"/>`
+      + `<ellipse cx="50" cy="55" rx="11.5" ry="8" fill="${tint(it.c1, .45)}"/>`
+      + `<ellipse cx="50" cy="50.5" rx="4.2" ry="3.2" fill="${shade(it.c2, .4)}"/>`;
+    return {g, eye: {xs: [43, 57], y: 41, r: 5.8}, mouth: {x: 50, y: 56, w: 10, d: 4.5}};
+  },
+
+  /* A dolphin only works side on, and what makes it one is the long
+     rostrum, the curved dorsal fin and the tail that ends in a V. One
+     eye, because side on there is one eye. */
+  dolphin(it){
+    const g = `<path d="M26 70 L11 54 L18 70 L11 86 Z" fill="${it.c2}"/>`
+      + `<path d="M45 41 C 49 25, 62 22, 64 28 C 58 30, 51 37, 49 45 Z" fill="${it.c2}"/>`
+      + `<path d="M22 72 C 19 48, 44 35, 62 43 C 72 47, 80 54, 89 58 Q 92.5 60.5, 88 64`
+      + ` C 78 67, 70 68, 64 70 C 58 81, 36 88, 22 72 Z" fill="${it.c1}"/>`
+      + `<path d="M26 77 C 42 86, 60 80, 68 66 C 63 79, 40 85, 26 77 Z" fill="${tint(it.c1, .62)}"/>`
+      + `<path d="M52 74 C 47 84, 40 90, 44 92 C 51 89, 58 81, 60 75 Z" fill="${it.c2}"/>`;
+    return {g, eye: {xs: [69], y: 55, r: 4}, mouth: {x: 77, y: 60, w: 21, d: 2.6}};
+  },
+
+  /* An axolotl is three feathery gills on each side of a wide flat head
+     and a mouth that grins from one side of it to the other. */
+  axolotl(it){
+    const frill = "#ff8fb8";
+    const g = `<path d="M40 88 C 28 99, 16 97, 13 87 C 22 89, 32 84, 38 75 Z" fill="${it.c2}"/>`
+      + `<path d="M40 88 C 30 97, 20 96, 15 89" stroke="${frill}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+      + `<ellipse cx="50" cy="78" rx="19" ry="19" fill="${it.c1}"/>`
+      + paws(50, 92, 17, 7.5, 5, it.c2)
+      + paws(50, 68, 22, 7, 4.6, it.c2)
+      + `<ellipse cx="50" cy="82" rx="11" ry="10" fill="#fff" opacity=".3"/>`
+      + gill(30, 39, 16, 32, frill) + gill(28, 47, 13, 45, frill) + gill(30, 55, 16, 58, frill)
+      + gill(70, 39, 84, 32, frill) + gill(72, 47, 87, 45, frill) + gill(70, 55, 84, 58, frill)
+      + `<ellipse cx="50" cy="47" rx="23" ry="17" fill="${it.c1}"/>`
+      + `<circle cx="36" cy="53" r="4.5" fill="${frill}" opacity=".3"/>`
+      + `<circle cx="64" cy="53" r="4.5" fill="${frill}" opacity=".3"/>`;
+    return {g, eye: {xs: [40, 60], y: 43, r: 4}, mouth: {x: 50, y: 52, w: 22, d: 5.5}};
+  },
+
+  /* A dog: one ear down and one up, which no other animal here has, a
+     black nose, a dark patch over one eye and a tail held high. */
+  dog(it){
+    const patch = shade(it.c2, .3);
+    const g = `<path d="M63 80 C 74 80, 80 72, 79 63 C 79 57.5, 86 57.5, 86 64 C 87 77, 77 86, 64 86 Z" fill="${it.c2}"/>`
+      + `<ellipse cx="50" cy="82" rx="21" ry="16" fill="${it.c1}"/>`
+      + paws(50, 95, 12, 9, 6, it.c2)
+      + `<ellipse cx="50" cy="85" rx="12" ry="10" fill="#fff" opacity=".3"/>`
+      + `<path d="M34 33 C 23 35, 19 50, 24 62 C 31 61, 35 52, 37 43 Z" fill="${it.c2}"/>`
+      + `<path d="M63 33 L71 15 L75 39 Z" fill="${it.c2}"/>`
+      + `<circle cx="50" cy="46" r="20" fill="${it.c1}"/>`
+      + `<path d="M40 28 C 30 31, 28 44, 33 53 C 41 53, 46 44, 47 34 Z" fill="${patch}"/>`
+      + `<ellipse cx="50" cy="57" rx="12.5" ry="8.5" fill="${tint(it.c1, .5)}"/>`
+      + `<path d="M47 62 Q50 69 53 62 Z" fill="#ff8fa3"/>`
+      + `<ellipse cx="50" cy="51.5" rx="5" ry="3.8" fill="#2f2a2a"/>`;
+    return {g, eye: {xs: [41, 58], y: 44, r: 5.5}, mouth: {x: 50, y: 59, w: 10, d: 4.5}};
+  },
+
+  /* A unicorn is the horn, and this one is called Rainbow, so the mane
+     and the tail are the rainbow: three strands, three colours. Hooves
+     rather than paws, because a hoof is the other half of the word. */
+  unicorn(it){
+    const rb = ["#ff6b6b", "#ffd166", "#6fe0a8"];
+    const g = `<path d="M33 73 C 22 78, 16 88, 18 99" stroke="${rb[0]}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+      + `<path d="M34 78 C 24 83, 19 91, 21 101" stroke="${rb[1]}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+      + `<path d="M35 83 C 27 88, 23 94, 25 103" stroke="${rb[2]}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+      + `<ellipse cx="50" cy="80" rx="21" ry="17" fill="${it.c1}"/>`
+      + `<path d="M41 92 L47 92 L46 104 L42 104 Z" fill="${it.c1}"/>`
+      + `<path d="M53 92 L59 92 L58 104 L54 104 Z" fill="${it.c1}"/>`
+      + `<path d="M41.7 100 L46.3 100 L46 104 L42 104 Z" fill="${shade(it.c2, .35)}"/>`
+      + `<path d="M53.7 100 L58.3 100 L58 104 L54 104 Z" fill="${shade(it.c2, .35)}"/>`
+      + `<path d="M54 26 C 66 28, 70 36, 68 45" stroke="${rb[0]}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+      + `<path d="M58 31 C 69 35, 72 43, 70 52" stroke="${rb[1]}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+      + `<path d="M62 39 C 71 45, 72 54, 68 62" stroke="${rb[2]}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+      + earTri(37, 32, 46, 28, 32, 18, it.c1, tint(it.c1, .4))
+      + earTri(63, 32, 54, 28, 68, 18, it.c1, tint(it.c1, .4))
+      + `<circle cx="50" cy="44" r="18" fill="${it.c1}"/>`
+      + `<path d="M50 12 L46.4 31 L53.6 31 Z" fill="#fff6d8" stroke="${shade(it.c2, .1)}" stroke-width="1.7" stroke-linejoin="round"/>`
+      + `<path d="M47.4 26.5 L52.8 25" stroke="${shade(it.c2, .1)}" stroke-width="1.5" stroke-linecap="round"/>`
+      + `<path d="M48.2 21.5 L52 20.4" stroke="${shade(it.c2, .1)}" stroke-width="1.5" stroke-linecap="round"/>`
+      + `<path d="M48.9 17 L51.3 16.3" stroke="${shade(it.c2, .1)}" stroke-width="1.5" stroke-linecap="round"/>`
+      + `<ellipse cx="50" cy="54" rx="11.5" ry="8" fill="${tint(it.c1, .5)}"/>`
+      + `<ellipse cx="46.5" cy="51.5" rx="1.7" ry="1.3" fill="${shade(it.c2, .3)}"/>`
+      + `<ellipse cx="53.5" cy="51.5" rx="1.7" ry="1.3" fill="${shade(it.c2, .3)}"/>`;
+    return {g, eye: {xs: [43, 57], y: 42, r: 6}, mouth: {x: 50, y: 56, w: 9, d: 4}};
+  },
+
+  /* Hvezdik is the second one left alone. A round yellow creature with a
+     single horn is what it has always been, and turning it into a hamster
+     would have taken somebody's friend away rather than drawn it better.
+     The hamster the catalogue wants arrives as a new id. */
+  hornling(it){
+    const g = `<ellipse cx="50" cy="70" rx="25" ry="27" fill="${it.c1}"/>`
+      + paws(50, 94, 13, 9.5, 6.5, it.c2)
+      + `<ellipse cx="50" cy="78" rx="15" ry="14" fill="#fff" opacity=".3"/>`
+      + `<path d="M50 19 L43.6 44 L56.4 44 Z" fill="#fff8d6" stroke="${it.c2}" stroke-width="2.4" stroke-linejoin="round"/>`
+      + `<path d="M45.4 37 L54.4 35.4" stroke="${it.c2}" stroke-width="1.8" stroke-linecap="round"/>`
+      + `<path d="M46.9 31 L52.9 29.9" stroke="${it.c2}" stroke-width="1.8" stroke-linecap="round"/>`
+      + `<circle cx="34" cy="70" r="5" fill="${it.c2}" opacity=".35"/>`
+      + `<circle cx="66" cy="70" r="5" fill="${it.c2}" opacity=".35"/>`;
+    return {g, eye: {xs: [42, 58], y: 62, r: 6.5}, mouth: {x: 50, y: 76, w: 11, d: 5}};
+  },
+
+  /* A bat: wings of skin with fingers, ears taller than its head, a nose
+     shaped like a V and feet too small to stand on. The wings open
+     further from the second stage, the way the dragon's do. */
+  bat(it, s){
+    const w = s >= 2 ? 27 : 21, h = s >= 2 ? 34 : 27;
+    const g = membrane(38, 60, -1, w, h, it.c2) + membrane(62, 60, 1, w, h, it.c2)
+      + `<path d="M40 52 C 32 40, 28 25, 32 21 C 38 24, 44 38, 47 48 Z" fill="${it.c1}"/>`
+      + `<path d="M40.6 48 C 35.5 39, 33 29, 35 27 C 39 30, 42.6 39, 45 46 Z" fill="${shade(it.c2, .1)}"/>`
+      + `<path d="M60 52 C 68 40, 72 25, 68 21 C 62 24, 56 38, 53 48 Z" fill="${it.c1}"/>`
+      + `<path d="M59.4 48 C 64.5 39, 67 29, 65 27 C 61 30, 57.4 39, 55 46 Z" fill="${shade(it.c2, .1)}"/>`
+      + `<circle cx="50" cy="64" r="20" fill="${it.c1}"/>`
+      + paws(50, 84, 6, 4.5, 3.4, it.c2)
+      + `<ellipse cx="50" cy="69" rx="13.5" ry="11" fill="${tint(it.c1, .35)}"/>`
+      + `<path d="M45.5 68 L54.5 68 L50 74 Z" fill="${shade(it.c2, .25)}"/>`
+      + `<path d="M46.6 77 L49 77 L47.8 81.5 Z" fill="#fff"/>`
+      + `<path d="M51 77 L53.4 77 L52.2 81.5 Z" fill="#fff"/>`;
+    return {g, eye: {xs: [43, 57], y: 61, r: 5.5}, mouth: {x: 50, y: 76, w: 9, d: 3.4}, star: [50, 26]};
+  },
+
+  /* A stand-in, so an animal whose shape this version has never heard of
+     still draws something instead of breaking the garage. */
+  plain(it){
+    const g = `<ellipse cx="50" cy="76" rx="24" ry="22" fill="${it.c1}"/>`
+      + paws(50, 94, 13, 9, 6, it.c2)
+      + `<circle cx="50" cy="46" r="20" fill="${it.c1}"/>`;
+    return {g, eye: {xs: [43, 57], y: 43, r: 6}, mouth: {x: 50, y: 56, w: 10, d: 4.5}};
+  }
+};
+
+/* --- the wrapper every animal shares --- */
+function eyesAt(e, look){
+  const p = look ? 1.6 : 0, r = e.r;
+  return e.xs.map(cx =>
+      `<ellipse cx="${svgn(cx)}" cy="${svgn(e.y)}" rx="${svgn(r)}" ry="${svgn(r * 1.1)}" fill="#fff"/>`
+    + `<circle cx="${svgn(cx + p)}" cy="${svgn(e.y + .5)}" r="${svgn(r * .55)}" fill="#22314f"/>`
+    + `<circle cx="${svgn(cx + p - r * .22)}" cy="${svgn(e.y - r * .28)}" r="${svgn(r * .2)}" fill="#fff"/>`).join("");
+}
+function smileAt(m){
+  const d = m.d === undefined ? m.w * .5 : m.d;
+  return `<path d="M${svgn(m.x - m.w / 2)} ${svgn(m.y)} Q ${svgn(m.x)} ${svgn(m.y + d)} ${svgn(m.x + m.w / 2)} ${svgn(m.y)}"`
+       + ` stroke="#22314f" stroke-width="${m.sw || 2.6}" fill="none" stroke-linecap="round"/>`;
+}
+function petStar(x, y){
+  const R = 8.5, r = R * .44, pts = [];
+  for(let i = 0; i < 10; i++){
+    const a = (-90 + i * 36) * Math.PI / 180, q = i % 2 ? r : R;
+    pts.push(svgn(x + q * Math.cos(a)) + " " + svgn(y + q * Math.sin(a)));
+  }
+  return `<path d="M${pts.join(" L")} Z" fill="#ffd166" stroke="#e0ab1f" stroke-width="1.6" stroke-linejoin="round"/>`;
 }
 function petSVG(it, stage){
   const s = stage || 1;
   const sc = s === 1 ? .84 : s === 2 ? 1 : 1.12;
-  const w = it.body === "tall" ? 34 : it.body === "blob" ? 40 : 37;
-  const h = it.body === "tall" ? 44 : it.body === "blob" ? 34 : 37;
-  const cy = 62;
-  let g = "";
-
-  if(it.ex === "wings" && s >= 2){
-    g += `<ellipse cx="${50-w*.95}" cy="${cy-6}" rx="15" ry="20" fill="${it.c2}" opacity=".75" transform="rotate(-22 ${50-w*.95} ${cy-6})"/>
-          <ellipse cx="${50+w*.95}" cy="${cy-6}" rx="15" ry="20" fill="${it.c2}" opacity=".75" transform="rotate(22 ${50+w*.95} ${cy-6})"/>`;
-  }
-  if(it.ex === "fin"){
-    g += `<path d="M50 ${cy-h-6} L${50+w*.7} ${cy-h*.2} L${50-w*.1} ${cy-h*.35} Z" fill="${it.c2}"/>`;
-  }
-  if(it.ear === "round"){
-    g += `<circle cx="${50-w*.62}" cy="${cy-h*.82}" r="${9*sc}" fill="${it.c2}"/>
-          <circle cx="${50+w*.62}" cy="${cy-h*.82}" r="${9*sc}" fill="${it.c2}"/>`;
-  } else if(it.ear === "pointy"){
-    g += `<path d="M${50-w*.72} ${cy-h*.55} L${50-w*.5} ${cy-h*1.28} L${50-w*.18} ${cy-h*.72} Z" fill="${it.c2}"/>
-          <path d="M${50+w*.72} ${cy-h*.55} L${50+w*.5} ${cy-h*1.28} L${50+w*.18} ${cy-h*.72} Z" fill="${it.c2}"/>`;
-  } else if(it.ear === "long"){
-    g += `<ellipse cx="${50-w*.42}" cy="${cy-h*1.05}" rx="6.5" ry="17" fill="${it.c2}" transform="rotate(-12 ${50-w*.42} ${cy-h*1.05})"/>
-          <ellipse cx="${50+w*.42}" cy="${cy-h*1.05}" rx="6.5" ry="17" fill="${it.c2}" transform="rotate(12 ${50+w*.42} ${cy-h*1.05})"/>`;
-  }
-  // nozky
-  g += `<ellipse cx="${50-w*.42}" cy="${cy+h*.92}" rx="9" ry="6" fill="${it.c2}"/>
-        <ellipse cx="${50+w*.42}" cy="${cy+h*.92}" rx="9" ry="6" fill="${it.c2}"/>`;
-  // telo
-  if(it.body === "blob"){
-    g += `<path d="M50 ${cy-h} C ${50+w*1.15} ${cy-h*.75}, ${50+w*1.1} ${cy+h*.85}, 50 ${cy+h}
-                   C ${50-w*1.1} ${cy+h*.85}, ${50-w*1.15} ${cy-h*.75}, 50 ${cy-h} Z" fill="${it.c1}"/>`;
-  } else {
-    g += `<ellipse cx="50" cy="${cy}" rx="${w}" ry="${h}" fill="${it.c1}"/>`;
-  }
-  if(it.pat === "spots"){
-    g += `<circle cx="${50-w*.45}" cy="${cy+h*.2}" r="6" fill="${it.c2}" opacity=".55"/>
-          <circle cx="${50+w*.5}" cy="${cy-h*.15}" r="4.5" fill="${it.c2}" opacity=".55"/>
-          <circle cx="${50+w*.2}" cy="${cy+h*.5}" r="5" fill="${it.c2}" opacity=".55"/>`;
-  } else if(it.pat === "stripes"){
-    g += `<path d="M${50-w*.9} ${cy-h*.2} q ${w*.9} 8 ${w*1.8} 0" stroke="${it.c2}" stroke-width="5" fill="none" opacity=".5" stroke-linecap="round"/>
-          <path d="M${50-w*.75} ${cy+h*.3} q ${w*.75} 8 ${w*1.5} 0" stroke="${it.c2}" stroke-width="5" fill="none" opacity=".5" stroke-linecap="round"/>`;
-  }
-  // bricho
-  g += `<ellipse cx="50" cy="${cy+h*.34}" rx="${w*.55}" ry="${h*.42}" fill="#fff" opacity=".38"/>`;
-  if(it.ex === "horn"){
-    g += `<path d="M50 ${cy-h-2} l7 16 l-14 0 Z" fill="#fff8d6" stroke="${it.c2}" stroke-width="2.5" stroke-linejoin="round"/>`;
-  }
-  if(it.ex === "antenna"){
-    g += `<path d="M50 ${cy-h+2} q 4 -16 12 -19" stroke="${it.c2}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-          <circle cx="${62}" cy="${cy-h-17}" r="6" fill="${it.c2}"/>`;
-  }
-  g += eyes(50 - w*.32, 50 + w*.32, cy - h*.18, 7.6 * (s===3?1.05:1), s >= 2);
-  g += `<path d="M${50-6} ${cy+h*.16} q 6 7 12 0" stroke="#22314f" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
-  if(s === 3){
-    g += `<path d="M50 ${cy-h-14} l3.5 7.5 8 1 -6 5.5 1.6 8-7.1-4-7.1 4 1.6-8-6-5.5 8-1 Z" fill="#ffd166" stroke="#e0ab1f" stroke-width="1.6" stroke-linejoin="round"/>`;
-  }
-  return `<svg viewBox="0 0 100 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g transform="translate(50 62) scale(${sc}) translate(-50 -62)">${g}</g></svg>`;
+  const draw = PET_SHAPES[it.shape] || PET_SHAPES.plain;
+  const d = draw(it, s);
+  let g = d.g + eyesAt(d.eye, s >= 2);
+  if(d.mouth !== "own") g += smileAt(d.mouth);
+  if(s === 3) g += petStar.apply(null, d.star || PET.STAR);
+  return `<svg viewBox="0 0 100 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`
+       + `<g transform="translate(50 62) scale(${sc}) translate(-50 -62)">${g}</g></svg>`;
 }
 function rideSVG(it){
   const {c1, c2} = it;

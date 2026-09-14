@@ -416,6 +416,16 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
   min-width:calc(74px * var(--tx));height:52px;padding:0 12px;
   font-size:calc(22px * var(--tx));letter-spacing:0;
 }
+/* A row whose answer is the sign between two things, "3 m ▢ 280 cm".
+   The box holds one sign, so unlike the row above it keeps the size a
+   number is read at and only gives up the width three digits would need;
+   at that width the widest line of the family, a count of months against
+   a count of years, comes to 324 px of the 339 a 375 px phone has in the
+   third year, where this material lives. The gaps close up a little for
+   the same reason they do on a row of boxes: there are two of them here
+   and the line carries a unit on either side. */
+.question.q-cmp{gap:8px}
+.question.q-cmp .answerbox{min-width:calc(64px * var(--tx));padding:0 10px}
 /* the words between and after the boxes, "(zb." and ")", read at the
    size of the rest of the line; only the wide letter spacing of the
    numbers would look wrong around a bracket */
@@ -487,6 +497,16 @@ html:not([data-o="wide"]) .keypad-pick[data-opts="4"] .key{height:var(--keyh)}
    smaller. It is kept on one line, because a choice that wraps looks
    like two choices. */
 .key.opt{font-size:calc(26px * var(--tx));padding:0 10px;white-space:nowrap}
+/* A choice that is a single sign is set larger, for the same reason a
+   word is set smaller than a digit: a sign has to be read at a glance
+   and there is nothing else on the button. Measured on a 375 px phone in
+   the third year, where this material lives: three of them come to
+   347 x 88 px each, which is the height four rows of keys come to, and
+   the sign itself is 25 px wide, so it is a small mark on a large
+   target. At 26 px it was a small mark on a large empty target. The
+   surface says which it is through what stands on its buttons, so the
+   stylesheet never has to know which family is asking. */
+.keypad-pick[data-glyph] .key.opt{font-size:calc(48px * var(--tx))}
 /* The key grows with the letters on it: a larger digit in a key of the
    old height would sit in a box it no longer fits, so the floor of the
    height carries the same scale as the type. It is written here once,

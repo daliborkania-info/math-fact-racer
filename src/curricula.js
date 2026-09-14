@@ -51,6 +51,14 @@
  *                                 chapter that asks for this is the only
  *                                 way such a question ever reaches a
  *                                 race; see J_BUCKETS in app.js
+ *   cmp   [bucket ids]            c1, c2 for comparing two numbers,
+ *                                 u1, u3, u4 for comparing two
+ *                                 quantities of length, volume or time,
+ *                                 which is a conversion before it is a
+ *                                 comparison. Answered by choosing as
+ *                                 well, so the same rule holds: a
+ *                                 chapter asking for it is the only way
+ *                                 it reaches a race. See CMP_BUCKETS
  *   units [bucket ids]            1..4, converting units by the kind of
  *                                 measure: length, weight, volume, time.
  *                                 One field, unlike past the tables: a
@@ -88,6 +96,8 @@ const ALL_G = ["1","2"];
 const ALL_R = ["1","2","3","4","5"];
 const ALL_V = ["1","2","3"];
 const ALL_J = ["p1","p2","d1"];
+const ALL_CMP_U = ["u1","u3"];
+const ALL_CMP_N = ["c1","c2"];
 
 const CURRICULA = [
   {
@@ -206,18 +216,28 @@ const CURRICULA = [
       {n:14, name:"Násobení mimo rozsah malé násobilky",  src:"7. díl, s. 34–37", pool:{multBeyond:["1","2"]}},
       {n:15, name:"Písemné násobení",                     src:"7. díl, s. 36–39", pool:null},
       {n:16, name:"Dělení mimo rozsah malé násobilky",    src:"7. díl, s. 38–41", pool:{divBeyond:["1","2"]}},
-      {n:17, name:"Jednotky délky, hmotnosti a objemu",   src:"7. díl, s. 40–43", pool:null},
       // the seventh part names the units of length, weight and volume
-      // (chapter 17) but does not yet convert them, so that one stays
-      // without a pool; the clock and the calendar are converted here
-      {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45", pool:{units:["4"]}},
+      // and puts two quantities side by side to be compared, which is a
+      // conversion done in the head; it does not yet ask for the
+      // conversion written down, that is chapter 29. Weight is not
+      // compared and CMP_BUCKETS in app.js says why
+      {n:17, name:"Jednotky délky, hmotnosti a objemu",   src:"7. díl, s. 40–43",
+             pool:{cmp:ALL_CMP_U}},
+      // the clock and the calendar are converted here, and the same
+      // pages put two lengths of time next to each other
+      {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45",
+             pool:{units:["4"], cmp:["u4"]}},
       {n:19, name:"Zlomky, úvodní seznámení",             src:"7. díl, s. 46–47", pool:null},
       {n:20, name:"Opakování celého pololetí",            src:"7. díl, s. 48–49", pool:{mult:ALL_TABLES, div:ALL_TABLES, as100:ALL_H}},
       // the book derives the thousand here, from the hundred the class
       // already has, and the pages walk the places of a number before a
       // single sum is done in the new range
       {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:{split:ALL_V}},
-      {n:22, name:"Porovnávání čísel do tisíce",          src:"8. díl, s. 4–5",   pool:null},
+      // the other double page answered by choosing, and the only one
+      // about comparing numbers rather than quantities: two of a size,
+      // decided by their places rather than by how many figures they have
+      {n:22, name:"Porovnávání čísel do tisíce",          src:"8. díl, s. 4–5",
+             pool:{cmp:ALL_CMP_N}},
       {n:23, name:"Sčítání a odčítání po stovkách",       src:"8. díl, s. 6–7",   pool:{as1000:["b1"]}},
       // the book walks these twenty pages through all six steps in order
       {n:24, name:"Přičítání a odčítání do tisíce",       src:"8. díl, s. 8–27",  pool:{as1000:ALL_K}},

@@ -1046,7 +1046,7 @@ Po E1 je na 26 z 33.
 
 ---
 
-## Krok E. Vlna B, nové vstupní prvky
+## Krok E. Vlna B, nové vstupní prvky — HOTOVO 14. září 2026
 
 ### E1. `pad2` a dělení se zbytkem, kapitola 27 — HOTOVO 14. září 2026
 
@@ -1267,9 +1267,76 @@ kapitola 6 ho dostat musí.
   a výška zůstává, a v měkkém režimu je výběr menšinou otázek; podmínku
   v `buildRun()` a `reachedKeys()` proto nepotřebujeme.
 
-### E4. `cmp`, `compare_numbers` a `compare_units`, kapitoly 22 a 17
+### E4. `cmp`, `compare_numbers` a `compare_units`, kapitoly 22 a 17 — HOTOVO 14. září 2026
 
-Poslední schválně, viz `PROJECT-STATE.md`, oddíl 12d.
+Poslední schválně, viz `PROJECT-STATE.md`, oddíl 12d. **Tímhle je hotový celý
+krok E a celá vlna B.**
+
+**Hranice se držela a nezdvojila se.** Plán ji u porovnávání říká důrazněji než
+u E3 a zůstala přesně stejná, protože porovnávání dostalo **tutéž hlavičku
+klíče `j`**: klíče jsou `jc1`, `jc2` (čísla) a `ju1`, `ju3`, `ju4` (jednotky),
+takže `isPickKey` je pořád jedna funkce a drží obě rodiny naráz. Nevznikla
+druhá skoro stejná hlídka v `mix`, v `weak`, v `lightStar()` ani na konci
+`buildRun()`; vznikla jen jedna nová věta v komentáři u `isPickKey`, která říká,
+že hlavička znamená "odpovídá se výběrem", ne "sudé a liché". Rodina nemá
+záznam v `TRACKS`, nemá sbírku a místa nerozsvěcuje. Okruh 7x v
+`items.test.js` projíždí každou trať včetně šampionátu a trati "co ti nejde"
+s krabičkou plnou obou rodin a s kapitolou 22, a naopak ověřuje, že školní trať
+na kapitole 22 porovnávání dostat musí.
+
+**Co se proti plánu upřesnilo.**
+
+- **`cmp` je zvláštní případ `pick`, ne třetí cesta.** Položka má
+  `input:"pick"` a na tlačítkách místo slov tři znaky, takže `SLOTS`,
+  `keypadHTML()`, větev v `tap()`, `surfaceOf()`, `defaultCheck()`,
+  `paintBoxes()` i `submit()` zůstaly beze změny. Přibyly dvě věci: čtvrtý tvar
+  řádku `layout:"mid"`, tedy **políčko mezi dvěma stranami** (`3 m ▢ 280 cm`),
+  a `data-glyph` na ploše, když je každá volba jeden znak, aby se znak sázel
+  větší. Ani jedno nejmenuje rodinu, takže se CSS nemusí ptát, kdo se ptá.
+- **Znaky jdou přes slovník, i když je dnes všechny tři jazyky píšou stejně.**
+  Je to tentýž mechanismus jako `rel` u zaokrouhlování (`≐` česky, `≈` jinde):
+  znak, který dítě zná ze sešitu, nemusí být všude týž, a `cmpLt`, `cmpEq`
+  a `cmpGt` dávají jazyku, kde by to platilo, kam to napsat.
+- **Rovnost vychází v jedné čtvrtině otázek**, `CMP_EQUAL`. Rozhodnutí táhnou
+  dvě věci proti sobě: tlačítko, které je správně skoro nikdy, se dítě naučí
+  přeskakovat (přesně proto má "kolik číslic" kbelík, který dosáhne na tři
+  číslice), ale rovnost je v sešitě menšina a všimnout si jí je ten výkon.
+  Čtvrtina je největší podíl, který se pořád čte jako menšina, a drží los
+  nejblíž rovnoměrnému: na menší a větší zbývá po třech osminách, takže hádat
+  nejpravděpodobnější polohu vynáší 37,5 % proti 33,3 % u rovnoměrné trojice,
+  a **rovnítko je z těch tří tipů ten nejhorší**, ne nejlepší.
+- **Porovnávání jednotek bere tabulku převodů z kroku D3**, `U_BUCKETS`, druhá
+  nevznikla; kbelíky se z ní odvozují. **Hmotnost z toho vypadla a je to
+  správně:** do tisíce gramy nepřelezou kilo ani kila tunu, takže by o všem
+  rozhodla jednotka a dítě by nic nepřevádělo. Říká to jedna konstanta,
+  `CMP_MAX_F = 100`, a tatáž vyhodí kilometr, mililitr a tunu z kbelíků, které
+  zůstaly. Zbývá délka (`u1`), objem (`u3`) a čas (`u4`).
+- **Která strana nese větší jednotku, se losuje zvlášť od toho, která strana
+  vyhrává.** Bez toho by stačilo číst popisky. Hlídá to okruh 7y na třech
+  tisících otázkách na kbelík, spolu s podílem rovnosti a s tím, že se
+  nevyplatí hádat pořád tutéž polohu.
+- **Obě strany zůstávají do jedné velké jednotky od sebe**, tedy `3 m` proti
+  `280 cm`, ne proti `12 cm`. Staví se konstrukcí: nejdřív počet velké
+  jednotky, pak počet malé z okna, které už drží vylosovanou odpověď.
+  U čísel je to totéž jinak: **obě čísla mají stejný počet číslic** a shodují se
+  až do místa, kde se poprvé liší, a to místo se losuje rovnoměrně. Dvojciferné
+  proti trojcifernému rozhodne počet číslic, což je kapitola 6, ne tahle.
+- **Kapitoly.** 17 (jednotky délky a objemu) a 22 (čísla do tisíce) dostaly
+  generátor a přestaly být zamčené, kapitola 18 dostala k převodu času i jeho
+  porovnání. Zamčených kapitol třetího ročníku je pět mínus dvě, tedy **tři**:
+  písemné násobení a dvě o zlomcích.
+- **Násobitele prahů jsou dva**, protože jsou to dvě práce: 1,6 u čísel, tedy
+  přečíst dvě místo jednoho a stisknout, a 2,2 u jednotek, tedy tolik co
+  převod, protože co se ušetří na ťukání, to se utratí na druhé straně.
+- **Naměřeno na telefonu 375 px ve třetím ročníku** (339 px k dispozici):
+  nejširší řádek rodiny je `227 months > 18 years` s 324 px, česky
+  `235 měsíců < 20 let` 289 px, německy 318 px; čísla jsou nejvýš 244 px.
+  Prvnímu a druhému ročníku se nejširší časový řádek zalomí, stejně jako se jim
+  zalomí rozklad čísla, a trať patří třetímu ročníku. Tlačítko se znakem je na
+  telefonu na výšku 347 × 88 px, tedy tři tlačítka a dvě mezery dají přesně
+  280 px, což je výška čtyř řad kláves; na šířku je široké 410 px na telefonu
+  812 × 375 a 525 px na tabletu 1024 × 768 a výšku si dělí stejně jako
+  klávesnice. Znak sám je 25 px široký, proto se sází 48 px a ne 26 jako slovo.
 
 ---
 

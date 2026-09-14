@@ -49,8 +49,8 @@ Sloupec **témata** odkazuje na `id` z [TEMATA.md](TEMATA.md). Téma uvedené ja
 | 14 | Násobení mimo rozsah malé násobilky | 34 až 37 | `mult_beyond` |
 | 15 | Písemné násobení, vyvození | 36 až 39 | `written_mult` |
 | 16 | Dělení mimo rozsah malé násobilky | 38 až 41 | `div_beyond`, `compare_numbers` |
-| 17 | Jednotky délky, hmotnosti, objemu, času, teploty a rychlosti | 40 až 43 | `unit_pick`, `compare_units`, `add_sub_100` |
-| 18 | Jednotky času, základní převody | 44, 45 | `time_convert`, `compare_units` |
+| 17 | Jednotky délky, hmotnosti, objemu, času, teploty a rychlosti | 40 až 43 | `unit_pick`, `compare_units` ✓, `add_sub_100` |
+| 18 | Jednotky času, základní převody | 44, 45 | `time_convert`, `compare_units` ✓ |
 | 19 | Zlomky, úvodní seznámení | 46, 47 | `fraction_read`, `fraction_compare` |
 | 20 | Opakování | 48, 49 | vše z 7. dílu |
 
@@ -59,7 +59,7 @@ Sloupec **témata** odkazuje na `id` z [TEMATA.md](TEMATA.md). Téma uvedené ja
 | # | kapitola | strany | témata |
 | --- | --- | --- | --- |
 | 21 | Vyvození číselného oboru, orientace na číselné ose | 2 až 5 | **`place_value`**, `number_line` |
-| 22 | Porovnávání čísel do 1000 | 4, 5 | `compare_numbers`, `compare_units` |
+| 22 | Porovnávání čísel do 1000 | 4, 5 | `compare_numbers` ✓, `compare_units` |
 | 23 | Sčítání a odčítání po stovkách | 6, 7 | `add_sub_1000`, `inverse_check` |
 | 24 | Přičítání a odčítání jedno- a dvojciferných čísel | 8 až 27 | `add_sub_1000`, `number_line`, `written_add_sub` |
 | 25 | Opakování oboru do tisíce | 28, 29 | `add_sub_1000`, `place_value`, `compare_units`, `inverse_check` |
@@ -131,6 +131,19 @@ zrovna je, a do šampionátu ani do trati "co ti nejde" se nedostane. Kbelíky j
 tři: sudá a lichá do sta, sudá a lichá trojciferná, a kolik má číslo číslic přes
 všechny tři velikosti. Tím je třetí ročník na osmadvaceti kapitolách
 z třiatřiceti; podrobně v `PROJECT-STATE.md`, oddíl 12e.
+
+**Kapitoly 17 a 22 otevřela 14. září 2026 dvojice `compare_units`
+a `compare_numbers`** a jde o totéž: odpovídá se výběrem, takže ani ony trať
+nedostaly a nedostanou, a platí pro ně tatáž hranice i tatáž jediná hlídka jako
+pro kapitolu 6, protože sdílejí hlavičku klíče. Porovnávají se buď dvě čísla
+o stejném počtu číslic, tedy dva kbelíky, do sta a do tisíce, nebo dvě veličiny
+v různých jednotkách, tedy `3 m` a `280 cm`, což je nejdřív převod a teprve pak
+porovnání; tam jsou kbelíky tři, délka, objem a čas. Hmotnost mezi nimi není:
+do tisíce gramy nepřelezou kilo ani kila tunu, takže by o všem rozhodla
+jednotka a dítě by nic nepřevádělo. Kapitola 18 dostala k převodu času i jeho
+porovnání, protože to sešit má na týchž dvou stranách. Tím je třetí ročník na
+třiceti kapitolách z třiatřiceti a nehratelné zůstávají už jen písemné
+násobení a dvě kapitoly o zlomcích.
 
 Násobí a dělí se v `ops` jen v oboru malé násobilky a dělení vždycky vyjde
 beze zbytku; `tens` dělí sice i za ní, ale jen kulatými čísly, a `div_remainder`

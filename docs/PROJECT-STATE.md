@@ -1,7 +1,7 @@
 # Stav projektu a předávací dokument
 
 Poslední aktualizace: 14. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
-celém kroku D, **celém kroku H** a **krocích E1 a E2** nového plánu, opravě řazení mapy (C3b)
+celém kroku D, **celém kroku H** a **celém kroku E** nového plánu, opravě řazení mapy (C3b)
 a opravě nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
@@ -13,10 +13,10 @@ zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalš�
 a rozdělení prvního ročníku na šest číselných oborů.
 
 **Stav v číslech.** Sedmadvacet tratí ve čtyřech světech, 108 palet prostředí,
-dvě zakázky v dílně, 89 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 28/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
+dvě zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
+třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
 osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934 součástek v pěti
-vrstvách, 471 klíčů rozhraní ve třech jazycích, šest testových souborů.
+vrstvách, 484 klíčů rozhraní ve třech jazycích, šest testových souborů.
 
 **Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
 okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
@@ -165,7 +165,26 @@ do tří. Na mapě stojí těsně před `a1000`, protože je to zem, na které t
 teprve stojí. Proti plánu se upřesnil směr otázky a nejširší řádek hry, viz
 oddíl 4 a `docs/PLAN.md`.
 
-**Na řadě je zbytek kroku E**, tedy `pick` (E3) a `cmp` (E4), a dál podle
+**Krok E3 je hotový** (14. září), v jednom commitu. Vstupní prvek **`pick`**,
+tedy dvě až čtyři velká tlačítka pod sebou, a s ním první učivo, které se
+odpovídá výběrem z nabídky: **sudé a liché a kolik má číslo číslic**, kapitola 6
+třetího ročníku, klíče `jp1`, `jp2` a `jd1` s hlavičkou `j`. Je to jediné místo
+ve hře, kde odpověď nevzniká v hlavě, takže **vlastní trať nemá a mít nesmí**
+a existuje jen jako doplněk uvnitř školní trati; hranici drží pět míst a celý
+oddíl 12e je o tom, proč je to v pořádku.
+
+**Krok E4 je hotový** (14. září), a s ním **celý krok E a celá vlna B**:
+**porovnávání**, kapitoly 17 a 22 třetího ročníku. Znak mezi dvěma stranami,
+tedy `348 ▢ 350` a `3 m ▢ 280 cm`, kde druhé je nejdřív převod a teprve pak
+porovnání. `cmp` **není třetí cesta**: je to `pick` se třemi znaky místo slov,
+takže přibyl jen čtvrtý tvar řádku (`layout:"mid"`, políčko mezi dvěma stranami)
+a větší písmo pro jednoznakovou volbu. Klíče jsou `jc1`, `jc2` (čísla) a `ju1`,
+`ju3`, `ju4` (délka, objem, čas) a **mají tutéž hlavičku `j`**, takže je hlídá
+táž jediná hlídka; druhá skoro stejná nevznikla. Proti plánu se upřesnilo, jak
+často vychází rovnost, proč se neporovnává hmotnost a proč obě strany zůstávají
+blízko u sebe, viz oddíl 4 a `docs/PLAN.md`.
+
+**Na řadě je krok F**, tedy slovní úlohy v dílně, a dál podle
 `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
@@ -591,6 +610,41 @@ dva až čtyři a pět a víc. Tvar vybírá číslo, které u jednotky stojí, 
 `14 dní` i `2 dny` vyjdou správně; pokyn nad klávesnicí bere vždycky prostý
 plurál, protože "Převeď na dní" není česky.
 
+**Porovnávání.** Kapitoly 17 a 22 třetího ročníku, druhá rodina, která se
+odpovídá výběrem, a proto **taky bez vlastní trati**; hranice je tatáž a drží ji
+tatáž hlavička klíče `j`, viz oddíl 12e. Odpovědí jsou tři znaky, menší, rovná
+se a větší, a stojí **mezi dvěma stranami**, ne za nimi: `348 ▢ 350`. Dva druhy,
+a nejsou to dvě podoby téhož. **Porovnání dvou čísel** (`jc1` do sta, `jc2` do
+tisíce) je čtení míst: obě čísla mají stejný počet číslic a shodují se až do
+místa, kde se poprvé liší, a to místo se losuje rovnoměrně, takže lehké
+porovnání podle první číslice a těžké podle poslední chodí stejně často.
+Dvojciferné proti trojcifernému by rozhodl počet číslic, což je kapitola 6, ne
+tahle. **Porovnání dvou veličin** (`ju1` délka, `ju3` objem, `ju4` čas) je
+nejdřív převod: `3 m` proti `280 cm`. Bere **tutéž tabulku převodů jako trať
+`units`**, druhá nevznikla, a kbelíky se z ní odvozují.
+
+**Hmotnost se neporovnává a je to rozhodnutí s důvodem.** Do tisíce, tedy
+v oboru třetí třídy, gramy nepřelezou kilo ani kila tunu, takže by o každém
+porovnání rozhodla jednotka sama a dítě by nikdy nic nepřevádělo. Říká to jedna
+konstanta, `CMP_MAX_F`: porovnávají se jen dvojice, u kterých má šanci vyhrát
+i menší jednotka, a veličina, které žádná taková nezbude, prostě kbelík nemá.
+Tatáž konstanta vyhodí kilometr, mililitr a tunu z kbelíků, které zůstaly.
+Která strana nese větší jednotku, se losuje **zvlášť od toho, která strana
+vyhrává**; bez toho by stačilo číst popisky. Obě strany zůstávají do jedné
+velké jednotky od sebe, tedy `3 m` proti `280 cm`, ne proti `12 cm`, protože
+jinak se neporovnává, jen kouká.
+
+**Rovnost vychází v jedné čtvrtině otázek**, `CMP_EQUAL`, a je to rozhodnutí
+stejného druhu jako pětina u dělení beze zbytku. Tlačítko, které je správně
+skoro nikdy, se dítě naučí přeskakovat, ale rovnost je v sešitě menšina
+a všimnout si jí je ten výkon. Čtvrtina je největší podíl, který se pořád čte
+jako menšina, a drží los nejblíž rovnoměrnému: na menší a větší zbývá po třech
+osminách, takže hádat nejpravděpodobnější polohu vynáší 37,5 % proti 33,3 %
+u rovnoměrné trojice, a **rovnítko je z těch tří tipů ten nejhorší**, ne
+nejlepší. Staví se konstrukcí: nejdřív se losuje odpověď, pak se k ní obě
+strany postaví, a tlačítka přitom stojí pořád ve stejném pořadí na stejném
+místě.
+
 **Prahy rychlé odpovědi.** Pomalu 5,2 s, normálně 3,8 s, rychle 2,8 s. Bleskově
 je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u počítání do
 tisíce 2,2, u zaokrouhlování 2,0, u řetězce taky 2,0, protože jsou to dvě
@@ -601,7 +655,10 @@ s přeskokem mezi nimi, u rozkladu čísla 2,2, protože samotná úvaha je prav
 ale píše se až do tří políček s přeskoky, u kulatých čísel 1,8, protože je to
 spíš pravidlo než počítání, u převodů 2,2, protože se musí nejdřív rozhodnout,
 kterým směrem jednotka jde, a teprve pak počítat, u hodin taky 2,4, protože přečíst ciferník a
-naťukat čtyři číslice trvá déle než vybavit si spoj, a za násobilkou 2,6,
+naťukat čtyři číslice trvá déle než vybavit si spoj, u porovnávání čísel 1,6,
+protože se místo jednoho čísla čtou dvě a pak se jednou stiskne, u porovnávání
+veličin 2,2, tedy tolik co převod, protože co se ušetří na ťukání, to se utratí
+na druhé straně, u výběru z nabídky 1,4 a za násobilkou 2,6,
 protože rozložit číslo a vynásobit obě půlky je víc práce než jeden přechod.
 Všechno je na jednom místě, `thresholds()`.
 
@@ -772,10 +829,13 @@ heatmapy se pořád ptají na `grade`, protože to je rok, ve kterém učivo za�
 Mapa ukazuje letošní ročník a všechny dřívější; co je dál, je za dílnou pod
 ukázkou. Podrobnosti v oddílu 7d.
 
-**Jedna rodina schválně žádnou trať nemá.** Otázky, které se odpovídají
-výběrem z nabídky (`jp1`, `jp2`, `jd1`, tedy sudé a liché a kolik číslic), jsou
+**Dvě rodiny schválně žádnou trať nemají.** Otázky, které se odpovídají
+výběrem z nabídky (`jp1`, `jp2`, `jd1`, tedy sudé a liché a kolik číslic,
+a `jc1`, `jc2`, `ju1`, `ju3`, `ju4`, tedy porovnávání čísel a veličin), jsou
 poznávání, ne vybavování, takže jdou proti prvnímu principu z oddílu 3. Existují
 jen jako doplněk uvnitř trati `school` a nikde jinde; podrobně v oddílu 12e.
+Obě nesou **tutéž hlavičku klíče `j`** právě proto, že je tak drží jedna jediná
+hlídka na každém z pěti míst místo dvou skoro stejných.
 
 Trať `school` se na mapě objeví jen tehdy, když je v profilu zvolená učebnice
 a kapitola, a jde vždy na první místo. Nese název kapitoly jako podtitulek.
@@ -787,7 +847,9 @@ a `kn{bucket}` do tisíce, `xm{bucket}` a `xd{bucket}` za násobilkou,
 `o1` až `o3` zaokrouhlování, `q{bucket}` řetězec tří čísel, `z{bucket}` pořadí
 operací, `gm{bucket}` a `gd{bucket}` kulatá čísla, `u1` až `u4` převody
 jednotek, `r2` až `r10` dělení se zbytkem, `v1` až `v3` rozklad čísla,
-`jp1`, `jp2` a `jd1` otázky, které se odpovídají výběrem z nabídky,
+`jp1`, `jp2` a `jd1` otázky, které se odpovídají výběrem z nabídky, `jc1`,
+`jc2`, `ju1`, `ju3` a `ju4` porovnávání, které se odpovídá stejně a proto má
+touž hlavičku,
 `c1` až `c6` hodiny. Kanonicky vždy `a <= b`,
 komutativita se sbaluje. U dvacítky smí být
 druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
@@ -882,11 +944,13 @@ za to, na čem celá hra stojí. Rozsvěcuje to jediné místo, konec `record()`
 zhasnout to neumí nikde nic. Starší profil se seeduje z toho, co umí teď, tedy
 za každý klíč s `lv >= 4`; co uměl dřív, o tom záznam neexistuje.
 
-**Rodina bez trati sbírku nemá a místo nerozsvěcuje.** Výběr z nabídky je
-jediné učivo, které nestojí na žádné trati, takže se z čeho počítat velikost
+**Rodina bez trati sbírku nemá a místo nerozsvěcuje.** Odpovídání výběrem
+z nabídky, tedy sudé a liché, kolik číslic a porovnávání, je jediné učivo, které
+nestojí na žádné trati, takže se z čeho počítat velikost
 sbírky nemá; místo, které by se rozsvítilo tam, kam se nedá podívat, by slibovalo
 víc, než Poklady ukážou. Drží to `lightStar()`, jediná brána, která místo
-rozsvěcuje, a od kroku E3 jde přes ni i `seedStars()`.
+rozsvěcuje, a od kroku E3 jde přes ni i `seedStars()`. Protože se obě rodiny
+poznají podle jedné hlavičky, je to pořád jedna podmínka.
 
 **Velikost sbírky je `trackKeys(p, tr).length`**, takže násobilková trať má
 kolem čtyřiceti míst a kbelíková dvanáct. **Dílna žádná trať není**, takže si
@@ -1000,9 +1064,11 @@ zaokrouhlení, převod s jednotkou a řetězec tří čísel projdou nedotčené
 potřeba, protože závod podle kapitoly pouští variantu i na opakování
 z dřívějších kapitol. Násobitel prahů 1,6 **násobí** násobitel rodiny.
 
-**Řádek otázky má tři tvary, ne jeden.** Vedle běžného `zadání = [políčko]`
+**Řádek otázky má čtyři tvary, ne jeden.** Vedle běžného `zadání = [políčko]`
 existuje `layout:"lead"`, kde políčko stojí vlevo a zbytek řádku za ním,
-`[políčko] × 7 = 42`, a od kroku E1 řádek s víc políčky, viz níž. Kreslí je
+`[políčko] × 7 = 42`, od kroku E1 řádek s víc políčky a od kroku E4
+`layout:"mid"`, kde políčko stojí uprostřed mezi dvěma stranami,
+`3 m [políčko] 280 cm`, viz níž. Kreslí je
 všechny totéž
 `questionHTML()`. Vedoucí řádek příplatek na délku **nedostal a nemá ho dostat**:
 obě ta rozvržení kreslí právě jedno políčko, takže se políčko vykrátí, a vedoucí
@@ -1099,6 +1165,31 @@ Technicky:
   nemá schválně: řádek přečtený zpátky nad ní už říká všechno, co se dalo
   přepočítat.
 
+**`cmp` je `pick` s jinými popiskami, ne třetí cesta k témuž.** Porovnávání se
+odpovídá týmž prvkem, jen na tlačítkách stojí tři znaky místo slov, takže
+`SLOTS`, `keypadHTML()`, větev v `tap()`, `surfaceOf()`, `defaultCheck()`,
+`paintBoxes()` i `submit()` zůstaly beze změny; `surfaceOf()` navíc plochu se
+znaky sám odliší od plochy se slovy, protože skládá jméno prvku s nabídkou.
+Přibyly dvě věci a ani jedna nejmenuje rodinu:
+
+- **Čtvrtý tvar řádku, `layout:"mid"`.** Políčko stojí **mezi** dvěma stranami,
+  `3 m ▢ 280 cm`, a před ním se nekreslí nic, protože to, co tam jindy stojí, je
+  znak, a tady je znak odpověď. Co stojí za políčkem, je druhá strana, a nese se
+  na položce jako hotový text v poli `tail`, stejně jako slova mezi políčky
+  u dělení se zbytkem. `questionSize()` ji počítá do délky řádku, políčko ne,
+  protože drží jeden znak a je užší než políčko na číslice.
+  `rightAnswerText()` přečte řádek s doplněným znakem, tedy `3 m > 280 cm`.
+- **`data-glyph` na ploše**, když je každá volba jeden znak. CSS podle toho sází
+  znak 48 px místo 26, protože znak sám je 25 px široký a na tlačítku 347 × 88 px
+  by se v písmu slova ztratil. Říká to nabídka, ne rodina, takže se styl nemusí
+  ptát, kdo se ptá.
+- Znaky jdou přes slovník (`cmpLt`, `cmpEq`, `cmpGt`), i když je dnes všechny
+  tři jazyky píšou stejně. Je to tentýž mechanismus jako `rel` u zaokrouhlování
+  a ze stejného důvodu: znak, který dítě zná ze sešitu, nemusí být všude týž.
+- Chyba má dvě hlášky. U čísel `cmpMiss`, tedy pravidlo, kam ukazuje špička
+  znaménka. U veličin `cmpUnitMiss`, které jmenuje **obě strany v téže
+  jednotce**, protože tam byla práce; položka si k tomu nese pole `same`.
+
 **Chyba v rozkladu má vlastní hlášku.** `missHint()` u `kind:"split"` pozná
 jedinou chybu, o kterou v téhle rodině jde: napsanou číslici místo toho, kolik
 doopravdy platí, tedy 4 tam, kam patří čtyřicet. Každá část odpovědi je číslice
@@ -1144,7 +1235,9 @@ sloupce; rozvržení číselné klávesnice se jmenuje `.keypad-pad`, ať se ot�
 odpovídá do kolika políček chce. Od kroku E3 existuje vedle něj druhá
 odpovídací plocha `.keypad-pick`, a jméno má podle vstupního prvku, ne podle
 toho, kolik má tlačítek; kolik jich má, říká `data-opts`, protože podle toho
-se dělí výška.
+se dělí výška, a jestli na nich stojí znaky místo slov, říká `data-glyph`,
+protože podle toho se sází písmo. Obojí je vlastnost nabídky, ne rodiny, takže
+v CSS nikde nestojí jméno učiva.
 
 ---
 
@@ -2046,13 +2139,15 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 89 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 91 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
 `as100`, `as1000`, `multBeyond`, `divBeyond`, `round`, `clock`, `chain`, `ops`,
-`multTens`, `divTens`, `units`, `divrem`, `split` a `pick`,
-a `poolKeys()` to překládá na klíče příkladů. Vedle toho smí kapitola říct
+`multTens`, `divTens`, `units`, `divrem`, `split`, `pick` a `cmp`,
+a `poolKeys()` to překládá na klíče příkladů. `pick` a `cmp` jsou dvě pole,
+i když z nich vznikají klíče téže hlavičky: je to dvojí učivo na dvou různých
+dvoustranách, ne dvojí druh klíče. Vedle toho smí kapitola říct
 `variant`, což není pool, ale **tvar otázky**: tytéž klíče položené jinak, dnes
 `"missing"`, viz oddíl 7. Do `poolKeys()` nevstupuje. Násobení a dělení za násobilkou jsou dvě pole,
 a ne jedno jako u stovky, protože je učebnice učí jako dvě samostatné
@@ -2087,16 +2182,15 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po výběru z nabídky je 89 hratelných
-kapitol z 95, po ročnících 18/18, 43/44 a 28/33; první ročník je tím celý,
-**vlna A, tedy všechno, co jde na `pad`, je hotová celá** a z vlny B jsou hotové
-tři vstupní prvky, `pad2`, `pad3` a `pick`. Zbylých pět
-zamčených kapitol třetí třídy čeká na další vstupní prvek nebo na dílnu, tedy
-na zbytek kroku E a na krok F plánu.
+dojmu. Stav po porovnávání je 91 hratelných
+kapitol z 95, po ročnících 18/18, 43/44 a 30/33; první ročník je tím celý
+a **vlna A i vlna B jsou hotové celé**, tedy všechno, co jde na `pad`, `pad2`,
+`pad3` a na tlačítka. Zbylé tři
+zamčené kapitoly třetí třídy čekají na dílnu a na dva vstupní prvky, které
+nemá, tedy na krok F plánu a dál.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
-| `compare_numbers` + `compare_units` | `cmp` | 2 | g3: 17, 22 |
 | `fraction_read` | `frac`, dílna | 2 | g3: 19, 32 |
 | `written_mult` | `col`, dílna | 1 | g3: 15 |
 
@@ -2112,7 +2206,9 @@ nedostal**, protože to není rodina, ale varianta nad existujícími klíči, v
 oddíl 7. Z téhle tabulky pak vypadl `parity` s `digit_count`, hotový 14. září
 2026, kapitola 6; **taky bez trati**, tentokrát ne proto, že to není rodina, ale
 proto, že se odpovídá výběrem z nabídky a vlastní trať by platila za hádání,
-viz oddíl 12e.
+viz oddíl 12e. A jako poslední z ní vypadlo `compare_numbers`
+s `compare_units`, hotové 14. září 2026, kapitoly 17 a 22; **taky bez trati**
+a ze stejného důvodu, protože se odpovídá týmiž tlačítky.
 
 **Hlavní zjištění platilo.** Poslední z devíti zamčených kapitol třetí třídy,
 která nepotřebovala na vstupu nic nového, byla kapitola 5, a třetí třída je
@@ -2121,8 +2217,11 @@ patří: jednotky jen pojmenovává a porovnává, takže na ni `unit_convert`
 nestačí. Devátou odemklo až dělení se zbytkem, tedy první nový vstupní prvek,
 a třetí třída je od 14. září 2026 na 26/33. Hned po ní přišel rozklad čísla,
 tedy druhý nový vstupní prvek, `pad3`, a s kapitolou 21 je třetí třída na
-27/33. Třetí prvek, `pick`, přidal kapitolu 6 a třetí třída je na 28/33;
-zamčených zůstává pět, kapitoly 15, 17, 19, 22 a 32.
+27/33. Třetí prvek, `pick`, přidal kapitolu 6 a třetí třída je na 28/33.
+Čtvrtý, `cmp`, není nový prvek, ale `pick` s jinými popiskami, a přidal naráz
+kapitoly 17 a 22, tedy i tu, o které tenhle odstavec od začátku psal, že na ni
+`unit_convert` nestačí: nestačil, protože se v ní nepřevádí, ale porovnává.
+Třetí třída je tím na 30/33 a zamčené zůstávají tři, kapitoly 15, 19 a 32.
 
 **`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
@@ -2152,12 +2251,13 @@ byl schválně až na konci, protože to nejsou samostatné rodiny, ale
 modifikátory existujících, a byl to jiný typ zásahu: ne nová trať a nové
 klíče, ale druhý parametr `itemFromKey()` a druhý tvar řádku otázky.
 
-**Další na řadě jsou nové vstupní prvky**, tedy krok E plánu: `pad2`
-a `div_remainder` a `pad3` s `place_value` (obojí **hotovo 14. září 2026**, viz
-oddíl 12d) a `pick` s dvojicí `parity` a `digit_count` (**hotovo 14. září
-2026**, viz oddíl 12e), úplně nakonec `cmp` a porovnávání. Od téhle chvíle každá
-další kapitola čeká buď na ně, nebo na dílnu, což je jiný druh práce než
-celá vlna A: sahá se na klávesnici a na `tap()`, ne jen na generátor.
+**Pak přišly nové vstupní prvky**, tedy krok E plánu, a **od 14. září 2026 je
+hotový celý**: `pad2` s `div_remainder` a `pad3` s `place_value` (oddíl 12d),
+`pick` s dvojicí `parity` a `digit_count` a nakonec `cmp` s porovnáváním
+(oddíl 12e). Byl to jiný druh práce než celá vlna A: sahalo se na klávesnici
+a na `tap()`, ne jen na generátor. **Od téhle chvíle čeká každá další kapitola
+na dílnu**, tedy na krok F, nebo na vstupní prvek, který hra nemá, tedy na
+zlomky a písemné počítání.
 
 **Dílna měla být až po tom všem, ale předběhla**, protože se ukázalo, že čtyři
 kapitoly nečekají na nic jiného a že bez ní nejde říct, kam patří slovní úlohy.
@@ -2167,8 +2267,9 @@ pro první ročník je hotové, viz oddíl 4b.
 
 **Každá nová rodina dostane vlastní trať**, tak jsme se rozhodli u hodin a platí
 to dál **s jedinou výjimkou, která je sama pravidlem**: rodina, u které se
-odpovídá výběrem z nabídky, trať nedostane, protože by platila za hádání; viz
-oddíl 12e. Hranice patnácti tratí, u které svislý seznam přestával být mapou, padla
+odpovídá výběrem z nabídky, trať nedostane, protože by platila za hádání. Jsou
+dnes dvě, sudé a liché s počtem číslic a porovnávání, a je to jedna výjimka, ne
+dvě: mají tutéž hlavičku klíče a drží je tatáž hlídka; viz oddíl 12e. Hranice patnácti tratí, u které svislý seznam přestával být mapou, padla
 po zaokrouhlování a krok 4 ji vyřešil: mapa je od září 2026 krajina s cestou,
 takže další trať je jen další místo na ní. Cenou za to je, že nová rodina musí
 dostat prostředí ve všech čtyřech světech, ne v jednom.
@@ -2364,12 +2465,13 @@ v `poolKeys()`, kapitoly 21 a 25 v `src/curricula.js`, texty ve třech jazycích
 včetně tří zadání nad klávesnicí a vlastní hlášky `splitDigits`. Podrobnosti
 v oddílu 4, rozhodnutí o směru otázky v `docs/PLAN.md`, krok E2.
 
-**Porovnávání zůstává poslední úmyslně.** `cmp` a `pick` vypadaly jako levný
-způsob, jak odemknout hodně naráz, ale změřeno to nesedí, jsou to tři kapitoly
+**Porovnávání zůstalo poslední úmyslně.** `cmp` a `pick` vypadaly jako levný
+způsob, jak odemknout hodně naráz, ale změřeno to nesedělo, jsou to tři kapitoly
 dohromady. Navíc je porovnávání poznávání, ne vybavování, takže porušuje první
 z nedotknutelných principů a patří dovnitř jen jako doplněk, nikdy jako celá
-trať. `pick` je od 14. září 2026 hotový přesně za těchhle podmínek, viz oddíl
-12e; `cmp` je poslední krok vlny B a půjde stejnou cestou.
+trať. Obojí je od 14. září 2026 hotové přesně za těchhle podmínek, viz oddíl
+12e, a `cmp` šel opravdu toutéž cestou: ukázalo se, že je to `pick` s jinými
+popiskami, ne třetí vstupní prvek.
 
 **Zlomky mají zvláštní poznámku.** V druhé třídě se objevují jako vedlejší
 produkt dělení, tedy poloviny u dvojky, třetiny u trojky, čtvrtiny u čtyřky.
@@ -2382,6 +2484,9 @@ ve třetí třídě.
 
 **Tohle je jediné učivo ve hře, které jde proti prvnímu z nedotknutelných
 principů, a celý oddíl je o tom, proč je to v pořádku a čím je to udržené.**
+Rodiny jsou dnes dvě, sudé a liché s počtem číslic (krok E3) a porovnávání
+(krok E4), ale hranice je jedna jediná a drží je obě, protože sdílejí hlavičku
+klíče; o tom je celá druhá polovina tohohle oddílu.
 
 Sudé a liché a kolik má číslo číslic jsou kapitola 6 mapy třetího ročníku,
 strany 14 a 15 sedmého dílu. Odpověď na obojí je slovo, ne číslo, takže se
@@ -2420,7 +2525,8 @@ výběr menšina otázek.
 z trati; viz oddíl 6. **V heatmapě rodina vidět je**, a je to záměr: rodič má
 vidět, co dítě v krabičce má, ne které cesty existují. Protože se nemá koho
 zeptat na odemčení, ukáže se blok tehdy, když ho vybraná kapitola chce nebo
-když už dítě něco z něj odpovídalo.
+když už dítě něco z něj odpovídalo. Bloky jsou od kroku E4 dva, protože jsou to
+dvě různé dvoustrany: "Jaké to číslo je" a "Co je víc".
 
 **Kolik tlačítek a jak se losují** je rozhodnutí, ne výchozí nastavení. Sudé
 a liché má dvě, protože otázka má dvě odpovědi; kolik číslic má tři, protože
@@ -2437,6 +2543,46 @@ kapitola 6 v `src/curricula.js`, vstupní prvek `pick` s vlastní plochou
 `.keypad-pick` a řádkem `.q-pick`, násobitel prahů 1,4, blok v heatmapě a texty
 ve třech jazycích, které obcházejí "cifru" i "řád" a mluví o číslicích.
 Podrobnosti k prvku v oddílu 7, rozhodnutí v `docs/PLAN.md`, krok E3.
+
+### Porovnávání jde toutéž cestou a toutéž hlídkou
+
+**Druhá rodina za hranicí je porovnávání**, kapitoly 17 a 22, krok E4. Plán
+u ní hranici říká ještě důrazněji a platí beze změny: znak mezi dvěma čísly se
+dá trefit, u tří tlačítek v nejlepším případě ve 37,5 % případů, takže vlastní
+trať by zase platila za hádání.
+
+**Nezdvojila se ani jedna z těch pěti pojistek, a to je na tom to hlavní.**
+Porovnávání dostalo **tutéž hlavičku klíče `j`** (`jc1`, `jc2` pro čísla, `ju1`,
+`ju3`, `ju4` pro veličiny), takže `isPickKey` je pořád jedna funkce a drží obě
+rodiny na všech pěti místech naráz: chybí v `TRACKS`, `mix` ji odfiltruje,
+`weak` taky, `lightStar()` jí nerozsvítí místo a hlídka na konci `buildRun()`
+spadne, kdyby se octla mimo školní trať. Dvě skoro stejné hlídky na dvou
+místech by byly past samy o sobě: ta druhá by se zapomněla první den, kdy se
+sáhne na tu první. Hlavička `j` proto neznamená "sudé a liché", ale **"odpovídá
+se výběrem"**, a stojí to napsané u ní v kódu. Okruh 7x v `items.test.js` od
+téhle chvíle plní krabičku oběma rodinami a projíždí všechny tratě dvakrát,
+jednou s kapitolou 6 a jednou s kapitolou 22.
+
+Vlastní je jen to, co se opravdu liší: druhá tabulka kbelíků `CMP_BUCKETS`,
+protože jsou to dvě různé dvoustrany a rodič je má v heatmapě číst jako dva
+bloky, a `isCmpKey`, které se ptá úžeji a používá ho **jedině heatmapa**, aby
+věděla, do kterého bloku klíč patří. Nic z toho není hlídka.
+
+**Kolik tlačítek a jak často je které správné** je tady rozhodnutí stejného
+druhu jako u sudých a lichých, jen s jiným závěrem. Tlačítka jsou tři, protože
+znaky jsou tři, a žádné z nich není návnada. Rovnost ale nevychází ve třetině,
+nýbrž ve čtvrtině: kdyby vycházela stejně často jako nerovnost, přestala by být
+tím, čeho si má dítě všimnout, a kdyby vycházela vzácně, naučilo by se
+rovnítko přeskakovat. Čtvrtina drží obojí a navíc dělá z rovnítka **nejhorší ze
+tří tipů**, ne nejlepší; podrobně v oddílu 4. Tlačítka stojí pořád ve stejném
+pořadí na stejném místě, stejně jako u slov.
+
+**Hotovo je:** klíče `jc1`, `jc2`, `ju1`, `ju3` a `ju4` pod toutéž hlavičkou,
+`cmp` v `poolKeys()`, kapitoly 17, 18 a 22 v `src/curricula.js`, čtvrtý tvar
+řádku `layout:"mid"` s třídou `.q-cmp`, `data-glyph` na odpovídací ploše,
+násobitele prahů 1,6 a 2,2, druhý blok v heatmapě a texty ve třech jazycích
+včetně tří znaků, které jdou přes slovník. Podrobnosti k prvku v oddílu 7,
+k učivu v oddílu 4, rozhodnutí v `docs/PLAN.md`, krok E4.
 
 ---
 
@@ -2524,8 +2670,11 @@ v `questionHTML()`. Viz oddíl 7.
    nikomu; a `thru`, pokud se učivo opakuje i v dalších ročnících, jinak
    spadne po roce za dveře do minulých let. **Rodina, která trať vědomě nemá,
    přeskakuje body 6 až 8 a musí místo nich udělat opak: odfiltrovat se z `mix`
-   a z `weak` a postavit si hlídku v `buildRun()`.** Zatím je taková jedna,
-   výběr z nabídky; viz oddíl 12e
+   a z `weak` a postavit si hlídku v `buildRun()`. A pokud taková rodina
+   existuje a nová jde za touž hranicí, vezme si **tutéž hlavičku klíče**
+   a nepíše druhou hlídku; dvě skoro stejné hlídky jsou past.** Dnes jsou
+   takové dvě rodiny pod jednou hlavičkou, výběr z nabídky a porovnávání;
+   viz oddíl 12e
 7. paleta v `ENVS` a **prostředí ve všech třech zbylých světech ve `WORLDS`**,
    jinak bude nová trať ve stezce, na obloze i v hlubině vypadat jako v okruhu;
    paleta si přes `tok` řekne, co se v ní sbírá, a přes `dark`, jestli je noční
@@ -2540,8 +2689,9 @@ v `questionHTML()`. Viz oddíl 7.
     v každé mezeře, takže jedno slovo stačí na dvě políčka i na tři. Počet
     políček smí říkat kbelík, ne jen rodina. Odpovídá-li se tlačítky, patří
     sem `input:"pick"`, `opts` jako hotová slova ve všech třech jazycích,
-    `answer` jako index správného tlačítka a `rel` jako slovo místo rovnítka;
-    viz oddíl 7
+    `answer` jako index správného tlačítka a `rel` jako slovo místo rovnítka.
+    Jsou-li ty volby znaky a mají-li stát mezi dvěma stranami, je to
+    `layout:"mid"` a druhá strana v `tail`, ne další vstupní prvek; viz oddíl 7
 11. blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí
 
 **Dál:** kapitoly v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech
@@ -2579,7 +2729,10 @@ a kapitola 27 dostala generátor, takže zamčených bylo sedm. Krok E2 posunul
 tytéž dvě věci o jedno dál, ze stejného důvodu: `split` je taky třetiročníková
 trať a kapitola 21 dostala generátor. **Krok E3 posunul jen ten druhý počet,
 ze šesti na pět**, protože výběr z nabídky žádnou trať nemá a mapa se po něm
-nehnula vůbec; kapitola 6 dostala generátor, tedy zamčených je pět.
+nehnula vůbec; kapitola 6 dostala generátor, tedy zamčených bylo pět.
+**Krok E4 posunul tentýž počet rovnou o dvě, z pěti na tři**, a ze stejného
+důvodu: porovnávání trať taky nemá, mapa se opět nehnula, a generátor dostaly
+naráz kapitoly 17 a 22. Zamčené zůstávají kapitoly 15, 19 a 32.
 
 **Krok H mapu taky neposunul a posunul zato garáž.** Startovních závodníků je
 sedm místo šesti (přibyla kačenka) a dvě místa, která počítají závodníky profilu
@@ -2663,9 +2816,11 @@ a šestým testovým souborem) a **celý krok D**: D1 (pořadí operací, trať 
 D2 (kulatá čísla, trať `tens`), D3 (převody jednotek, trať `units`) a D4
 (chybějící člen, varianta bez vlastní trati). **Hotový je i celý krok H**, tedy
 gumová kačenka s pěti vrstvami výstroje a osmadvacet zvířat, v osmi commitech;
-učiva se netýká a na mapu nesáhl. **Hotové jsou i kroky E1 a E2**, tedy vstupní
-prvky `pad2` a `pad3` a rodiny dělení se zbytkem a rozklad čísla, ve třech
-commitech. Nejbližší je zbytek kroku E: E3 (`pick`) a E4 (`cmp`).
+učiva se netýká a na mapu nesáhl. **Hotový je i celý krok E**, tedy vstupní
+prvky `pad2`, `pad3` a `pick` a rodiny dělení se zbytkem, rozklad čísla, sudé
+a liché s počtem číslic a porovnávání, v pěti commitech; `cmp` se ukázal být
+`pick` s jinými popiskami, ne pátý prvek. **Tím je hotová celá vlna B.**
+Nejbližší je krok F, tedy slovní úlohy v dílně.
 Z rozhodnutí
 v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
 nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px), R5 (měřítka
@@ -2676,7 +2831,17 @@ všechna podle doporučení. R1 (žebřík minulých
 let) je odložené a po B0b už není naléhavé, viz hlavička. Nová je **R11**,
 tedy počet dlaždic v garáži, viz oddíl 9 plánu.
 
-**Co je čerstvě hotové a nesmí se rozbít.** Odpověď smí mít víc než jedno
+**Co je čerstvě hotové a nesmí se rozbít.** Porovnávání je druhá rodina za
+hranicí výběru z nabídky a drží ji **tatáž hlavička klíče `j` a tatáž jediná
+hlídka na pěti místech**; druhá skoro stejná hlídka by byla past, takže nová
+rodina za touž hranicí si vezme touž hlavičku (E4, oddíl 12e). `cmp` není
+vstupní prvek, ale `pick` se třemi znaky, plus čtvrtý tvar řádku `layout:"mid"`,
+tedy políčko mezi dvěma stranami (E4, oddíl 7). Rovnost vychází ve čtvrtině
+otázek, hmotnost se neporovnává a která strana nese větší jednotku, se losuje
+zvlášť od toho, která vyhrává (E4, oddíl 4).
+Výběr z nabídky nemá trať, nemá sbírku a do šampionátu ani do trati "co ti
+nejde" se nedostane; plochu pozná `surfaceOf()` podle nabídky, ne podle jména
+prvku (E3, oddíl 12e). Odpověď smí mít víc než jedno
 políčko: `RUN.typed` je pole, jakmile jich je víc, sahá se na něj jen přes
 `typedAt()` a spol., a `check` porovnává hodnoty zvlášť, nikdy je neslepuje do
 jednoho čísla (E1). Kolik políček to je, říká tabulka `SLOTS` a všechno kolem
@@ -2723,9 +2888,8 @@ ročníku (4b).
 > subagentovi, než půjdeš dál. Když subagent hlásí rozpor s plánem, rozhodni
 > autonomně podle plánu.
 >
-> Dneska chci zbytek kroku E, tedy E3 (`pick`, sudá a lichá, kapitola 6) a E4
-> (`cmp`, porovnávání, kapitoly 22 a 17); E1 (`pad2` a dělení se zbytkem) i E2
-> (`pad3` a rozklad čísla) jsou hotové. Každý subagent má vlastní commit.
+> Dneska chci krok F, tedy slovní úlohy v dílně; celý krok E je hotový.
+> Každý subagent má vlastní commit.
 > Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentovi
 > v zadání; R1 (žebřík minulých let) zatím nedělej.
 >
@@ -2745,8 +2909,8 @@ ročníku (4b).
 > Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
 > které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
 > hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
-> úkolem byl krok F (slovní úlohy v dílně), a ověř, že subagenti označili
-> hotové kroky v `docs/PLAN.md`.
+> úkolem byl krok G (čtvrtý a pátý ročník) a rozhodnutí R1, a ověř, že
+> subagenti označili hotové kroky v `docs/PLAN.md`.
 
 ### Prompt pro autonomní dokončení celého plánu
 

@@ -478,8 +478,11 @@ const J_BUCKETS = [
   {id:"d1", kind:"digits", upto:3}           // one, two or three figures
 ];
 const pickKeys = ids => ids.map(id => "j" + id);
-/* The one family that may never be raced outside the chapter it belongs
-   to, asked in the places that have to keep it out. */
+/* What may never be raced outside the chapter it belongs to, asked in
+   the places that have to keep it out. Every family answered by
+   choosing wears this head, even and odd and how many figures here and
+   comparing further down, so that this one line is the whole of the
+   boundary rather than one line per family. */
 const isPickKey = k => !!k && k[0] === "j";
 
 /* Converting units, one bucket per kind of measure. The seventh part
@@ -512,6 +515,69 @@ function unitLabel(u, n){
   const forms = t("unit_" + u).split("|");
   return forms[n === 1 ? 0 : n < 5 ? 1 : 2] || forms[forms.length - 1];
 }
+
+/* Which of two is more, the second family answered by choosing.
+
+   THE SAME BOUNDARY, said more firmly here than above. Comparing is
+   recognising rather than recalling, so it goes against the first of the
+   untouchable principles and belongs inside as a supplement, never as a
+   track of its own. It is held to that by the same five things the
+   family above is held to and, on purpose, by the same code: the key
+   head is `j` here as well, so `isPickKey` already covers comparing in
+   the championship, in the trouble spots, in `lightStar()` and in the
+   guard at the end of `buildRun()`. A second, almost identical set of
+   guards would be the trap rather than the safeguard; one head means one
+   guard, and a new family that forgets to join it falls over out loud.
+
+   TWO KINDS, and they are not one question. Comparing two numbers is
+   reading the places of both, which is what chapter 22 is about.
+   Comparing two quantities is converting one of them first and only then
+   comparing: "3 m" against "280 cm" is a conversion done in the head
+   before there is anything to compare at all. That is why the pairs
+   below are drawn straight out of the conversion table rather than out
+   of a second one of their own.
+
+   WHY WEIGHT IS NOT HERE. A comparison is worth asking only when either
+   side can turn out to be the larger. Within a thousand, where the third
+   year counts, no number of grams can pass a kilogram and no number of
+   kilograms can pass a tonne, so every weight comparison would be
+   settled by reading the unit alone and the child would never convert
+   anything. `CMP_MAX_F` says that in one line: only pairs whose ratio
+   leaves room on both sides are compared, and a measure left without one
+   simply has no bucket. It is the same line that drops the kilometre,
+   the litre in millilitres and the tonne out of the measures that stay,
+   so what is left is length, volume and time. */
+const CMP_MAX_F = 100;
+const cmpPairs = b => b.pairs.filter(p => p[2] <= CMP_MAX_F);
+const CMP_BUCKETS = [
+  {id:"c1", kind:"cmpnum", digits:2},          // 47 and 52
+  {id:"c2", kind:"cmpnum", digits:3}           // 347 and 352
+].concat(U_BUCKETS.map(b => ({id:"u" + b.id, kind:"cmpunit", pairs: cmpPairs(b)}))
+                  .filter(b => b.pairs.length));
+/* Comparing shares the head with the family above, so the one guard
+   covers both; this asks the narrower question, and only the parent heat
+   map needs it, to know which block a key belongs in. */
+const isCmpKey = k => isPickKey(k) && CMP_BUCKETS.some(b => "j" + b.id === k);
+/* Every fourth question has the two sides equal. It is a decision, the
+   same kind as how often a division comes out even, and it is pulled
+   from two directions at once.
+   Equality has to turn up often enough to stay a real answer: a button
+   that is almost never right is a button a child learns to skip, which
+   is the very reason how many figures got a bucket that reaches three
+   of them. And it has to stay the minority, because the book puts two
+   unequal things side by side far more often than two equal ones and
+   because spotting that they came out the same is the thing worth
+   noticing rather than the thing to expect.
+   A quarter is the largest share that still reads as a minority. It also
+   keeps the whole thing close to an even draw: less and more get three
+   eighths each, so guessing the likeliest single button pays 37.5 per
+   cent against the 33.3 of a perfectly even three, and guessing the
+   equals sign is the worst of the three guesses rather than the best. */
+const CMP_EQUAL = .25;
+/* One bucket table per family, one lookup over both, because the head
+   they share means a key alone does not say which table it came from. */
+const chosenBucket = id => J_BUCKETS.find(b => b.id === id)
+  || CMP_BUCKETS.find(b => b.id === id) || null;
 
 const FIVES = [0,5,10,15,20,25,30,35,40,45,50,55];
 const C_BUCKETS = [
@@ -726,6 +792,10 @@ function poolKeys(spec){
   // that names one, two and three figure numbers is the double page
   // that sorts them into even and odd, so a chapter on it is on both
   if(spec.pick) out.push(...pickKeys(spec.pick));
+  // comparing is answered by choosing as well and wears the same head,
+  // so the same helper builds its keys; a field of its own because it is
+  // a different double page of the book, not a different sort of key
+  if(spec.cmp) out.push(...pickKeys(spec.cmp));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.ops) out.push(...opsKeys(spec.ops));
@@ -1373,8 +1443,9 @@ function splitItem(key){
    the drawn answer is what is drawn from. Nothing is worked out and
    then corrected, and an unknown bucket falls over out loud. */
 function pickItem(key){
-  const b = J_BUCKETS.find(x => x.id === key.slice(1));
+  const b = chosenBucket(key.slice(1));
   if(!b) noBucket("pickItem", key);
+  if(b.kind === "cmpnum" || b.kind === "cmpunit") return cmpItem(key, b);
   if(b.kind === "parity"){
     const a = ri(0, 1);                                  // 0 even, 1 odd, drawn first
     const first = b.lo + ((b.lo % 2) === a ? 0 : 1);     // the first number in the bucket that is it
@@ -1400,6 +1471,112 @@ function pickItem(key){
     opts: [t("pickFig1"), t("pickFig2"), t("pickFig3")].slice(0, b.upto),
     rel: "pickHas", ask: "digitsAsk"
   };
+}
+
+/* Two numbers with the same number of figures, identical down to the
+   place where they first differ. Which place that is is drawn evenly, so
+   the easy comparison decided by the first figure and the hard one
+   decided by the last turn up as often as each other, and the figures
+   after it are free. Built by construction: the two numbers are written
+   figure by figure towards the answer that was drawn, so nothing is
+   worked out and then corrected.
+   Both numbers are the same length on purpose. A two figure number
+   against a three figure one is settled by counting the figures, which
+   is the chapter before this one; this chapter is about the places, so
+   the question has to be one the places decide. */
+function cmpNumbers(b, eq, leftBigger){
+  const d = b.digits;
+  const anyDigit = first => ri(first ? 1 : 0, 9);
+  if(eq){
+    const n = Number(Array.from({length: d}, (_, i) => anyDigit(!i)).join(""));
+    return [n, n];
+  }
+  const at = ri(0, d - 1);                       // where they first differ
+  const hi = [], lo = [];
+  for(let i = 0; i < d; i++){
+    const first = !i;
+    if(i < at){ const same = anyDigit(first); hi.push(same); lo.push(same); }
+    else if(i === at){
+      const up = ri(first ? 2 : 1, 9);           // the bigger figure at that place
+      hi.push(up); lo.push(ri(first ? 1 : 0, up - 1));
+    } else { hi.push(anyDigit(false)); lo.push(anyDigit(false)); }
+  }
+  const more = Number(hi.join("")), less = Number(lo.join(""));
+  return leftBigger ? [more, less] : [less, more];
+}
+/* Two quantities of the same kind in different units, which is a
+   conversion before it is a comparison. Built by construction and in
+   this order: how many of the bigger unit, then how many of the smaller
+   one out of the window that already holds the answer drawn for it.
+   Which side wears the bigger unit is drawn on its own, so the unit
+   never says which side wins; without that the child would read the
+   labels instead of converting, and half of the questions would be free.
+   The two sides stay within one of the bigger unit of each other, which
+   is what the book prints and what makes the question worth the work:
+   "3 m" against "280 cm" is a comparison, "3 m" against "12 cm" is not.
+   Both numbers stay inside a thousand, the range the third year counts
+   in, and a bucket that cannot serve the answer drawn for it falls over
+   with its name rather than quietly handing back something else. */
+function cmpUnits(b, eq, leftBigger){
+  const pair = b.pairs[ri(0, b.pairs.length - 1)];
+  const big = pair[0], small = pair[1], f = pair[2];
+  const top = Math.min(20, Math.floor(1000 / f));      // the ceiling a conversion uses
+  if(top < 1) throw new Error("cmp bucket " + b.id + ": " + big + " does not fit into " + small);
+  const bigLeft = Math.random() < .5;
+  let v, w;
+  if(eq){ v = ri(1, top); w = v * f; }
+  else if(bigLeft === leftBigger){                     // the bigger unit is on the winning side
+    v = ri(1, top);
+    w = ri(Math.max(1, v * f - f + 1), v * f - 1);
+  } else {                                             // and here it is not
+    const vMax = Math.min(top, Math.floor(999 / f));
+    if(vMax < 1) throw new Error("cmp bucket " + b.id + ": " + small + " cannot pass " + big + " inside a thousand");
+    v = ri(1, vMax);
+    w = ri(v * f + 1, Math.min(1000, v * f + f));
+  }
+  const inBig = v + " " + unitLabel(big, v), inSmall = w + " " + unitLabel(small, w);
+  // and the same two sides once they are in the same unit, which is what
+  // a wrong answer is told, because that is where the work was
+  const bigAsSmall = (v * f) + " " + unitLabel(small, v * f);
+  return {
+    left:  bigLeft ? inBig : inSmall,
+    right: bigLeft ? inSmall : inBig,
+    same:  bigLeft ? [bigAsSmall, inSmall] : [inSmall, bigAsSmall]
+  };
+}
+/* Which of two is more. The answer is one of three signs and the sign
+   stands between the two sides, so the row is the fourth shape
+   `questionHTML()` draws: side, box, side. Everything else is the family
+   above: the same input element with different labels on the buttons,
+   the same single box filling with what was chosen, the same `answer` as
+   an index. Three ways to the same thing would have been two too many.
+   The answer is drawn first and the two sides are built to it, exactly
+   as even and odd is; the signs then stand in the same order in the same
+   place every time, so nothing moves under the child's thumb and the
+   position of a button carries nothing beyond the share written at
+   `CMP_EQUAL`. */
+function cmpItem(key, b){
+  const eq = Math.random() < CMP_EQUAL;
+  const leftBigger = !eq && Math.random() < .5;
+  const shared = {
+    key, input: "pick", layout: "mid",
+    // 0 is less, 1 is the same, 2 is more, in the order they stand in
+    answer: eq ? 1 : leftBigger ? 2 : 0,
+    // the signs are finished text on the item like every other word a
+    // question carries, and they go through the dictionary even though
+    // all three languages write them the same today: the rounding sign
+    // is the proof that a sign a child knows from class is not the same
+    // everywhere, and a language that writes one of these differently
+    // then has somewhere to say so
+    opts: [t("cmpLt"), t("cmpEq"), t("cmpGt")]
+  };
+  if(b.kind === "cmpnum"){
+    const [l, r] = cmpNumbers(b, eq, leftBigger);
+    return Object.assign({kind:"cmpnum", text: String(l), tail: String(r), ask:"cmpAsk"}, shared);
+  }
+  const s = cmpUnits(b, eq, leftBigger);
+  return Object.assign({kind:"cmpunit", text: s.left, tail: s.right, same: s.same,
+    ask:"cmpUnitAsk"}, shared);
 }
 
 /* Converting units, the first question whose answer wears a unit. The
@@ -2215,9 +2392,15 @@ function thresholds(p, item){
   // recalling a fact, because the number has to be read before the rule
   // is applied, and far less than anything written down: the answer is
   // one press and there is nothing to key in at all
+  // comparing two numbers is reading two of them instead of one before
+  // the rule is applied, and still one press at the end of it; comparing
+  // two quantities is a conversion first and gets what a conversion
+  // gets, because what it saves on keying it spends on the second side
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
                : item.kind === "divrem" ? 2.4
                : item.kind === "split" ? 2.2
+               : item.kind === "cmpnum" ? 1.6
+               : item.kind === "cmpunit" ? 2.2
                : (item.kind === "parity" || item.kind === "digits") ? 1.4
                : item.kind === "unit" ? 2.2
                : item.kind === "multten" || item.kind === "divten" ? 1.8
@@ -5672,6 +5855,11 @@ function relOf(item){ return item && item.rel ? t(item.rel) : "="; }
 function questionSize(item){
   if(!item || item.svg || !item.text) return "";
   let n = String(item.text).length + (item.unit ? String(item.unit).length + 1 : 0);
+  /* A comparison writes the other side after the box instead of a unit,
+     so that side is counted too. The box between them is not: it holds
+     one sign and is narrower than a box of digits, so it cancels out the
+     way the box of an ordinary row does. */
+  if(item.layout === "mid") n += String(item.tail || "").length;
   /* A second answer box does need an allowance of its own, unlike the
      lead layout above, and for the opposite reason: the one box every
      question draws cancels out, a second one does not. It is the
@@ -5707,6 +5895,15 @@ function questionHTML(item, slot){
   // in the order it is written in the book
   if(item && item.layout === "lead"){
     return `<div class="question${questionSize(item)}" id="qbox">${box(0)}<span id="qtext">${item.text}</span>${unit}</div>`;
+  }
+  /* The fourth shape: the box stands between the two things being
+     compared, "3 m ▢ 280 cm". Nothing is drawn in front of it, because
+     what usually stands there is the sign and here the sign is the
+     answer; what follows it is the other side, finished text on the item
+     like every other word a question carries. */
+  if(item && item.layout === "mid"){
+    return `<div class="question q-cmp${questionSize(item)}" id="qbox">`
+      + `<span id="qtext">${item.text}</span>${box(0)}<span>${item.tail}</span></div>`;
   }
   const inner = !item ? `<span id="qtext"></span>`
     : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
@@ -5770,7 +5967,13 @@ function keypadHTML(item){
      reached. */
   if(kind === "pick"){
     const opts = (item && item.opts) || [];
-    return `<div class="keypad keypad-pick" id="keypad" data-input="pick" data-opts="${opts.length}"${surf}>
+    /* A choice that is one sign rather than a word is set larger, for the
+       same reason a word is set smaller than a digit: what the button
+       says has to be read at a glance and there is room. It is said here
+       by what is on the buttons rather than by which family asked, so
+       nothing in the stylesheet has to know that comparing exists. */
+    const glyph = opts.length && opts.every(o => Array.from(o).length === 1) ? ` data-glyph="1"` : "";
+    return `<div class="keypad keypad-pick" id="keypad" data-input="pick" data-opts="${opts.length}"${glyph}${surf}>
       ${opts.map((o, i) => `<button class="key opt" data-k="opt${i}">${esc(o)}</button>`).join("")}
     </div>`;
   }
@@ -6057,6 +6260,10 @@ function showCombo(n){
 function rightAnswerText(item){
   if(item.kind === "clock") return t("clockIs", item.disp);
   if(item.layout === "lead") return item.answer + " " + item.text;
+  /* A comparison reads back as the line with the sign put in,
+     "3 m > 280 cm", because the sign is the answer and the two sides
+     were already the whole line. */
+  if(item.layout === "mid") return item.text + " " + item.opts[item.answer] + " " + item.tail;
   /* A question answered by choosing reads back as the sentence it is,
      "347 má tři číslice", because the choice is a word and the number
      of the button it stood on would say nothing. */
@@ -6098,6 +6305,13 @@ function missHint(item, typed){
      its own, because the line read back above it already says what the
      number is, which is the only thing there was to miscount. */
   if(item.kind === "parity") return t("parityMiss");
+  /* Two quantities are compared only after one of them has been
+     converted, so the work was the conversion and that is what a wrong
+     answer is handed back: the two sides once they are in the same unit.
+     Two plain numbers have nothing to convert, so there the one rule
+     worth naming is which way the sign opens. */
+  if(item.kind === "cmpunit") return t("cmpUnitMiss", item.same[0], item.same[1]);
+  if(item.kind === "cmpnum") return t("cmpMiss");
   /* The one mistake splitting a number apart is about: writing the
      digit down instead of what it is worth, a 4 where forty belongs.
      Every part of the answer is a digit times what its place is worth,
@@ -6941,7 +7155,18 @@ function heatSpecs(p){
     const k = "j" + b.id;
     return {label: t("heat_" + k), keys:[k], tip: t("heat_" + k)};
   });
-  push(null, heatStrip(t("heatPick"), 3, pickTiles), schoolPool(p).some(isPickKey));
+  push(null, heatStrip(t("heatPick"), 3, pickTiles),
+    schoolPool(p).some(k => isPickKey(k) && !isCmpKey(k)));
+  /* Which of two is more stands right under it: both are answered by
+     choosing, both are reading numbers rather than counting with them,
+     and neither has a track to be asked about, so the same rule decides
+     whether the block is drawn. Two blocks rather than one, because a
+     parent reads two different double pages of the book here. */
+  const cmpTiles = CMP_BUCKETS.map(b => {
+    const k = "j" + b.id;
+    return {label: t("heat_" + k), keys:[k], tip: t("heat_" + k)};
+  });
+  push(null, heatStrip(t("heatCmp"), 5, cmpTiles), schoolPool(p).some(isCmpKey));
   // what each place of a number is worth is the ground the thousand is
   // built on, so the parent reads the two one under the other, which is
   // also how they stand on the map

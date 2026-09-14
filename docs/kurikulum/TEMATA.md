@@ -26,7 +26,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `coins` | mince se skládají na pult, odpověď je hrst mincí | hotovo, jen v dílně |
 | `pad2` | dvě políčka vedle sebe, podíl a zbytek | hotovo |
 | `pad3` | tři políčka, stovky a desítky a jednotky | hotovo |
-| `cmp` | tři velká tlačítka `<` `=` `>` | k dodělání |
+| `cmp` | tři velká tlačítka `<` `=` `>` | hotovo jako `pick` s jinými popiskami, **jen uvnitř školní trati** |
 | `pick` | dvě až čtyři velká tlačítka s volbami, pod sebou přes celou šířku | hotovo, **jen uvnitř školní trati** |
 | `clock` | ciferník k přečtení, odpověď na `pad` | hotovo |
 | `frac` | čitatel a jmenovatel, dvě políčka | k dodělání |
@@ -63,8 +63,8 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `parity` | sudé nebo liché, dva kbelíky: do sta a trojciferná | `pick` | 1 až 999 | hotovo, bez vlastní trati |
 | `digit_count` | jednociferné, dvojciferné, trojciferné | `pick` | 1 až 999 | hotovo, bez vlastní trati |
 | `number_pattern` | doplnění dalšího členu číselné řady, aritmetické i geometrické | `pad` | 0 až 1000 | nové |
-| `compare_numbers` | porovnávání čísel | `cmp` | 0 až 1000 | nové |
-| `compare_units` | porovnávání veličin s jednotkami | `cmp` | podle jednotky | nové |
+| `compare_numbers` | porovnávání čísel, dva kbelíky: do sta a do tisíce | `cmp` | 10 až 999 | hotovo, bez vlastní trati |
+| `compare_units` | porovnávání veličin, tři kbelíky: délka, objem, čas | `cmp` | 1 až 1000 | hotovo, bez vlastní trati |
 | `clock_read` | přečtení analogových hodin na digitální čas | `clock` | 12 i 24 hodin | hotovo |
 
 ## Dílna
@@ -247,9 +247,29 @@ nevyšlo sto čtyřicet dva dní.
 nejčastější zdroj chyb v celé třetí třídě a stojí za samostatné téma, i když
 generátor je triviální.
 
-**`compare_numbers` a `compare_units`.** Tři tlačítka místo klávesnice. Je to
-poznávání, ne vybavování, takže to porušuje první z nedotknutelných principů.
-Proto tam patří jen jako doplněk a nikdy jako celá trať.
+**`compare_numbers` a `compare_units`, hotovo.** Tři tlačítka místo klávesnice.
+Je to poznávání, ne vybavování, takže to porušuje první z nedotknutelných
+principů; patří tam proto jen jako doplněk uvnitř trati podle vybrané kapitoly
+a nikdy jako celá trať, přesně za stejných podmínek jako `parity`
+a `digit_count`. Drží to tatáž hlavička klíče `j` a tatáž jediná hlídka, viz
+`PROJECT-STATE.md`, oddíl 12e.
+
+`cmp` **není třetí vstupní prvek**, je to `pick` se třemi znaky místo slov;
+přibyl k němu jen čtvrtý tvar řádku, tedy políčko mezi dvěma stranami
+(`3 m ▢ 280 cm`), a to, že se jednoznakové volby sázejí větším písmem. Znaky
+jdou přes slovník jako znak zaokrouhlení, i když je dnes všechny tři jazyky
+píšou stejně.
+
+Rovnost vychází v jedné čtvrtině otázek: méně by z rovnítka udělalo tlačítko,
+které se dítě naučí přeskakovat, víc by z něj udělalo tip. Takhle je rovnítko
+z těch tří tipů ten nejhorší, ne nejlepší.
+
+Porovnávání jednotek bere tabulku převodů od `unit_convert`, druhá nevznikla.
+**Hmotnost se neporovnává:** do tisíce gramy nepřelezou kilo ani kila tunu,
+takže by o všem rozhodla jednotka a dítě by nic nepřevádělo. Ze stejného důvodu
+vypadl kilometr, mililitr a tuna z kbelíků, které zůstaly. Obě strany zůstávají
+do jedné velké jednotky od sebe, tedy `3 m` proti `280 cm`, ne proti `12 cm`,
+a která strana nese větší jednotku, se losuje zvlášť od toho, která vyhrává.
 
 **`clock_read`, hotovo.** Ciferník se kreslí parametricky stejně jako okruhy
 a postavičky, žádné obrázky. Odpověď je čas na klávesnici, ne výběr z možností,

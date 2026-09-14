@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,J_BUCKETS,pickKeys,isPickKey,surfaceOf,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,J_BUCKETS,pickKeys,isPickKey,CMP_BUCKETS,isCmpKey,CMP_EQUAL,surfaceOf,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -56,6 +56,7 @@ A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.divremKeys(A.R_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.splitKeys(A.V_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.pickKeys(A.J_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.pickKeys(A.CMP_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 // odpoved je vetsinou jedno cislo, ale vstupni prvek se dvema policky
@@ -982,6 +983,7 @@ A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.divremKeys(A.R_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.splitKeys(A.V_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.pickKeys(A.J_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.pickKeys(A.CMP_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -1688,12 +1690,19 @@ const uCur3=A.CURRICULA.find(c=>c.id==='nns-matysek-3');
 const u18=uCur3.chapters.find(x=>x.n===18), u29=uCur3.chapters.find(x=>x.n===29);
 if(!A.isPlayable(u18)){uStBad++;console.log('  !!  kapitola 18 porad nejde vybrat');}
 if(!A.isPlayable(u29)){uStBad++;console.log('  !!  kapitola 29 porad nejde vybrat');}
-if(A.poolKeys(u18.pool).join()!=='u4'){uStBad++;console.log('  !!  kapitola 18 nema byt o nicem jinem nez o case');}
+// kapitola 18 prevadi jenom cas; od kroku E4 na tychz strankach dve
+// delky casu i porovnava, coz je jiny klic a jina rodina, ale porad nic
+// jineho nez cas
+if(A.poolKeys(u18.pool).filter(k=>k[0]==='u').join()!=='u4'){
+  uStBad++;console.log('  !!  kapitola 18 nema byt o nicem jinem nez o case');}
+if(A.poolKeys(u18.pool).filter(A.isPickKey).join()!=='ju4'){
+  uStBad++;console.log('  !!  kapitola 18 neporovnava cas');}
 if(A.poolKeys(u29.pool).join()!=='u1,u2,u3'){uStBad++;console.log('  !!  kapitola 29 ma mit delku, hmotnost a objem');}
-// kapitola 17 jednotky jen pojmenovava, neprevadi je, takze generator
-// nema a vybrat se nesmi dat
-if(A.isPlayable(uCur3.chapters.find(x=>x.n===17))){
-  uStBad++;console.log('  !!  kapitola 17 se da vybrat, i kdyz se v ni nic neprevadi');}
+// kapitola 17 jednotky jen pojmenovava a porovnava, prevod se v ni
+// nepise, takze prevodni klic v ni nemá co delat
+const u17=uCur3.chapters.find(x=>x.n===17);
+if(A.poolKeys(u17.pool).some(k=>k[0]==='u')){
+  uStBad++;console.log('  !!  kapitola 17 prevadi, i kdyz se v ni prevod nepise');}
 console.log('chyb ve stupnich prevodu:',uStBad);
 
 // 7s. deleni se zbytkem: kazdy kbelik deli tim, co slibuje, zbytek je
@@ -1964,6 +1973,130 @@ let vbPadl=false; try{A.itemFromKey('jz9');}catch(e){vbPadl=true;}
 if(!vbPadl) vbsay('neznamy kbelik vyberu nespadl');
 console.log('zkontrolovano vyberu z nabidky:',vbN,'| chyb:',vbBad);
 
+// 7y. porovnavani: znak mezi dvema stranami
+//
+// Overuje se ze zadani, ne z toho, co si generator mysli: obe strany se
+// z radku precte, u jednotek se prepocitaji na tutez jednotku, a teprve
+// pak se rekne, ktery znak tam patri. Krome toho dve veci, na kterych
+// rodina stoji: jak casto vychazi rovnost (ma byt mensina, ale skutecna
+// odpoved) a ze se odpoved neda uhodnout z polohy tlacitka ani z toho,
+// na ktere strane stoji vetsi jednotka.
+let pmBad=0, pmN=0;
+const pmsay=m=>{pmBad++; if(pmBad<10) console.log('  !!  '+m);};
+const pmLang=A.DB.lang||'cs';
+const pmWord=u=>A.I18N[pmLang]['unit_'+u];
+const pmLabel=(u,n)=>{const w=pmWord(u); if(!w) return u;
+  const f=w.split('|'); return f[n===1?0:n<5?1:2]||f[f.length-1];};
+const pmSplit=s=>{const i=s.indexOf(' '); return i<0?[Number(s),'']:[Number(s.slice(0,i)),s.slice(i+1)];};
+const pmZnaky=A.itemFromKey('jc1').opts;
+if(pmZnaky.join('')!=='<=>') pmsay('znaky nestoji v poradi mensi, rovno, vetsi: '+pmZnaky.join(''));
+for(const b of A.CMP_BUCKETS){
+  const key='j'+b.id;
+  const N=3000, trefy=new Map(); let vetsiJednotka=0, nerovno=0;
+  const jedn=new Set(); (b.pairs||[]).forEach(p=>{jedn.add(p[0]); jedn.add(p[1]);});
+  for(let i=0;i<N;i++){
+    const it=A.itemFromKey(key); pmN++;
+    if(it.input!=='pick'){pmsay('porovnavani se neodpovida tlacitky: '+it.input);break;}
+    if(A.slotsOf(it)!==1){pmsay('porovnavani ma mit jedno policko, ma '+A.slotsOf(it));break;}
+    if(it.layout!=='mid'){pmsay('znak nestoji mezi stranami: '+it.layout);break;}
+    if(it.rel){pmsay('pred polickem stoji jeste znak, i kdyz znak je odpoved');break;}
+    if(!it.tail){pmsay('na radku chybi druha strana');break;}
+    if(!it.ask){pmsay('nerika se slovy, na co se ptame');break;}
+    if(it.opts.join('|')!==pmZnaky.join('|')){pmsay('tlacitka se mezi otazkami zamichala: '+it.opts.join('|'));break;}
+    const a=it.answer;
+    if(!Number.isInteger(a)||a<0||a>2){pmsay('odpoved neukazuje na tlacitko: '+a);break;}
+    // a ted to hlavni: znak musi o tech dvou stranach doopravdy platit
+    let l,r;
+    if(b.kind==='cmpnum'){
+      if(!/^\d+$/.test(it.text)||!/^\d+$/.test(it.tail)){pmsay('strana neni cislo: '+it.text+' / '+it.tail);break;}
+      if(it.text.length!==b.digits||it.tail.length!==b.digits){
+        pmsay('cisla nemaji stejny pocet cislic: '+it.text+' / '+it.tail);break;}
+      l=+it.text; r=+it.tail;
+    }else{
+      const [ln,ll]=pmSplit(it.text), [rn,rl]=pmSplit(it.tail);
+      const lu=[...jedn].find(u=>pmLabel(u,ln)===ll), ru=[...jedn].find(u=>pmLabel(u,rn)===rl);
+      if(!lu||!ru){pmsay('jednotka na radku nepatri do kbeliku: '+it.text+' / '+it.tail);break;}
+      if(lu===ru){pmsay('obe strany maji tutez jednotku, neni co prevadet: '+it.text+' / '+it.tail);break;}
+      const pr=(b.pairs||[]).find(p=>(p[0]===lu&&p[1]===ru)||(p[0]===ru&&p[1]===lu));
+      if(!pr){pmsay('dvojice jednotek neni v prevodni tabulce: '+lu+' / '+ru);break;}
+      // dvojice, do ktere se vejde cely tisic, by se nedala prohrat:
+      // mensi jednotkou uz se do tisice nad vetsi nedostane, takze by o
+      // vsem rozhodla jednotka sama
+      if(pr[2]>=1000){pmsay('kbelik porovnava dvojici, u ktere mensi jednotka nikdy nevyhraje: '+lu+' / '+ru);break;}
+      l=lu===pr[0]?ln*pr[2]:ln; r=ru===pr[0]?rn*pr[2]:rn;
+      if(ln<1||rn<1||ln>1000||rn>1000){pmsay('cislo na radku vypadlo z oboru do tisice: '+it.text+' / '+it.tail);break;}
+      if(Math.abs(l-r)>pr[2]){pmsay('strany jsou dal nez jednu velkou jednotku od sebe: '+it.text+' / '+it.tail);break;}
+      if(l!==r){
+        nerovno++;
+        const velkaVlevo=lu===pr[0];
+        if((l>r)===velkaVlevo) vetsiJednotka++;
+      }
+    }
+    const ma=l<r?0:l>r?2:1;
+    if(ma!==a){pmsay('znak nesedi se stranami: '+it.text+' '+it.opts[a]+' '+it.tail);break;}
+    trefy.set(a,(trefy.get(a)||0)+1);
+    // otazka uzna svou odpoved a zadnou jinou
+    if(!it.check(String(a))){pmsay('otazka neuznala vlastni odpoved: '+A.rightAnswerText(it));break;}
+    let prosla=false;
+    for(let j=0;j<3;j++) if(j!==a&&it.check(String(j))) prosla=true;
+    if(prosla){pmsay('prosel i jiny znak: '+A.rightAnswerText(it));break;}
+    // cely radek se precte zpatky s doplnenym znakem
+    if(A.rightAnswerText(it)!==it.text+' '+it.opts[a]+' '+it.tail){
+      pmsay('odpoved se necte jako cely radek: '+A.rightAnswerText(it));break;}
+  }
+  // rovnost je mensina, ale skutecna odpoved, a zadne tlacitko neni
+  // spravne tak casto, aby se vyplatilo hadat polohu
+  const podil=z=>(trefy.get(z)||0)/N;
+  if(trefy.size!==3) pmsay('kbelik '+b.id+' nepouzil vsechny tri znaky, jen '+trefy.size);
+  if(Math.abs(podil(1)-A.CMP_EQUAL)>0.03)
+    pmsay('rovnost v kbeliku '+b.id+' vychazi v '+Math.round(podil(1)*100)+' % misto '+(A.CMP_EQUAL*100)+' %');
+  for(const z of [0,2]) if(Math.abs(podil(z)-(1-A.CMP_EQUAL)/2)>0.03)
+    pmsay('znak '+z+' v kbeliku '+b.id+' je spravny v '+Math.round(podil(z)*100)+' % pripadu');
+  if(Math.max(podil(0),podil(1),podil(2))>0.42)
+    pmsay('v kbeliku '+b.id+' se vyplati hadat porad tutez polohu');
+  // a u jednotek nesmi vetsi jednotka rikat, ktera strana vyhrala
+  if(b.kind==='cmpunit'&&nerovno&&Math.abs(vetsiJednotka/nerovno-0.5)>0.06)
+    pmsay('v kbeliku '+b.id+' vyhrava strana s vetsi jednotkou v '+Math.round(vetsiJednotka/nerovno*100)+' % pripadu');
+}
+// hmotnost porovnavat nejde: do tisice neprelezou gramy kilo ani kila
+// tunu, takze by o vsem rozhodla jednotka a dite by nic neprevadelo
+if(A.CMP_BUCKETS.some(b=>b.id==='u2')) pmsay('hmotnost dostala kbelik, i kdyz se v ni neda prohrat');
+if(!A.CMP_BUCKETS.some(b=>b.id==='u1')||!A.CMP_BUCKETS.some(b=>b.id==='u4'))
+  pmsay('delka nebo cas prisly o kbelik');
+// radek a odpovidaci plocha
+const pmIt=A.itemFromKey('ju1'), pmH=A.questionHTML(pmIt);
+if(!/q-cmp/.test(pmH)) pmsay('radek porovnavani nema vlastni tridu: '+pmH);
+if(pmH.indexOf('id="abox"')<pmH.indexOf('id="qtext"')) pmsay('policko stoji pred prvni stranou');
+if(pmH.indexOf(pmIt.tail)<pmH.indexOf('id="abox"')) pmsay('druha strana nestoji az za polickem');
+if(/data-slot|q-boxes|q-pick/.test(pmH)) pmsay('radek porovnavani si vzal vybavu jineho tvaru: '+pmH);
+const pmK=A.keypadHTML(pmIt);
+if(!/class="keypad keypad-pick"/.test(pmK)) pmsay('porovnavani si zalozilo treti odpovidaci plochu');
+if(!/data-opts="3"/.test(pmK)) pmsay('plocha nerekne, ze ma tri tlacitka');
+if(!/data-glyph="1"/.test(pmK)) pmsay('plocha se znaky se nepozna podle toho, ze na ni stoji znaky');
+if(/data-act=/.test(pmK)) pmsay('tlacitko znaku si vzalo data-act, ktere posluchac cte az nakonec');
+if(/data-k="ok"|data-k="del"|data-k="next"/.test(pmK)) pmsay('plocha znaku dostala klavesy ciselne klavesnice');
+for(let i=0;i<3;i++) if(pmK.indexOf('data-k="opt'+i+'"')<0) pmsay('chybi tlacitko '+i);
+if(/data-glyph/.test(A.keypadHTML(A.itemFromKey('jd1')))) pmsay('nabidka slov se tvari jako nabidka znaku');
+// plocha se pozna podle nabidky: znaky jsou jina plocha nez slova
+if(A.surfaceOf(pmIt)===A.surfaceOf(A.itemFromKey('jd1'))) pmsay('znaky a slova vypadaji jako tataz plocha');
+if(A.surfaceOf(pmIt)!==A.surfaceOf(A.itemFromKey('jc2'))) pmsay('dve porovnavani vypadaji jako dve plochy');
+// spatna odpoved: u jednotek se rekne obojí v teze jednotce, u cisel pravidlo
+const pmObec=A.missHint(A.itemFromKey('m6x7'),'41');
+const pmHu=A.missHint(pmIt,String((pmIt.answer+1)%3));
+const pmHc=A.missHint(A.itemFromKey('jc2'),'0');
+if(pmHu===pmObec||pmHc===pmObec) pmsay('porovnavani nedostalo vlastni hlasku');
+if(pmHu===pmHc) pmsay('jednotky a cisla dostaly tutez hlasku, i kdyz je chyba jinde');
+if(pmIt.same.some(s=>pmHu.indexOf(s)<0)) pmsay('hlaska u jednotek nerekne obe strany v teze jednotce: '+pmHu);
+// rodina nerozsvecuje misto ve sbirce, protoze zadnou nema
+const pmSb=A.newProfile('C1'); A.DB.profiles=[pmSb]; A.DB.current=pmSb.id;
+for(let i=0;i<8;i++) A.record(pmSb,A.itemFromKey('jc1'),true,900);
+if(pmSb.facts['jc1'].lv<A.STAR_LV) pmsay('kontrola sbirky nedojela na uroven ctyri');
+if(A.starred(pmSb,'jc1')) pmsay('porovnavani rozsvitilo misto ve sbirce, kterou nema');
+// neznamy kbelik pada nahlas
+let pmPadl=false; try{A.itemFromKey('jc9');}catch(e){pmPadl=true;}
+if(!pmPadl) pmsay('neznamy kbelik porovnavani nespadl');
+console.log('zkontrolovano porovnavani:',pmN,'| rovnost',Math.round(A.CMP_EQUAL*100)+'%','| chyb:',pmBad);
+
 // 7x. HRANICE: vyber z nabidky se do zavodu dostane jen pres vybranou
 // kapitolu ucebnice, nikam jinam
 //
@@ -1985,7 +2118,9 @@ for(const tr of A.TRACKS){
   if(tr.op==='school') continue;
   for(const k of A.trackKeys(hr,tr)) hr.facts[k]={lv:4,reps:8,ok:7,bad:1,best:2500,seen:Date.now()};
 }
-for(const k of A.pickKeys(A.J_BUCKETS.map(b=>b.id)))
+// obe rodiny, ktere se odpovidaji vyberem, tedy i porovnavani: hlidka
+// je jedna a musi drzet obe
+for(const k of A.pickKeys(A.J_BUCKETS.concat(A.CMP_BUCKETS).map(b=>b.id)))
   hr.facts[k]={lv:1,reps:9,ok:2,bad:7,best:4000,seen:Date.now()};   // nejhorsi v krabicce
 hr.curriculum='nns-matysek-3'; hr.chapter=6;
 for(const tr of A.TRACKS){
@@ -2016,6 +2151,31 @@ const hrKap6=hrCur3.chapters.find(x=>x.n===6);
 if(!A.isPlayable(hrKap6)) hrsay('kapitola 6 porad nejde vybrat');
 if(A.poolKeys(hrKap6.pool).join()!=='jp1,jp2,jd1') hrsay('kapitola 6 nema cekane klice: '+A.poolKeys(hrKap6.pool).join());
 if(A.poolSize(['jp1'])!==4) hrsay('klic vyberu se nepocita jako rodina');
+/* A totez pro porovnavani, ktere jde stejnou cestou a stejnou hlidkou:
+   kapitoly 17 a 22, tedy jednotky a cisla do tisice. Zkousi se to
+   zvlast, protoze hlidka drzi klic, ne rodinu, a kdyby porovnavani
+   dostalo vlastni hlavicku, tenhle kus by spadl. */
+for(const [kap,ocek] of [[17,'ju1,ju3'],[18,'u4,ju4'],[22,'jc1,jc2']]){
+  const ch=hrCur3.chapters.find(x=>x.n===kap);
+  if(!A.isPlayable(ch)) hrsay('kapitola '+kap+' porad nejde vybrat');
+  if(A.poolKeys(ch.pool).join()!==ocek) hrsay('kapitola '+kap+' nema cekane klice: '+A.poolKeys(ch.pool).join());
+}
+hr.chapter=22;
+for(const tr of A.TRACKS){
+  if(tr.op==='school') continue;
+  for(let i=0;i<20;i++){
+    let run;
+    try{ run=A.buildRun(hr,tr); }
+    catch(e){ hrsay('trat '+tr.id+' spadla na hlidce u porovnavani: '+e.message); break; }
+    if(run.some(it=>A.isCmpKey(it.key))){hrsay('trat '+tr.id+' dostala porovnavani');break;}
+  }
+}
+const hrPor=A.buildRun(hr,A.trackById('school'));
+if(!hrPor.some(it=>A.isCmpKey(it.key))) hrsay('skolni trat na kapitole 22 nedostala porovnavani');
+hr.chapterMode='hard';
+if(!A.buildRun(hr,A.trackById('school')).every(it=>A.isCmpKey(it.key)))
+  hrsay('tvrdy rezim pustil do kapitoly 22 neco jineho');
+hr.chapterMode='soft'; hr.chapter=6;
 // zadne misto ve sbirce, protoze zadna sbirka: misto, ktere se rozsviti
 // tam, kam se neda podivat, slibuje vic, nez obrazovka splni
 const hrSb=A.newProfile('J2'); A.DB.profiles=[hrSb]; A.DB.current=hrSb.id;

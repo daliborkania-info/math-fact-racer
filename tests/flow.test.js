@@ -253,7 +253,9 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===5, zamcene().length+' zamcenych z 33');
+// krok E4 otevrel kapitoly 17 a 22, tedy porovnavani jednotek a cisel,
+// takze zamcene zustavaji uz jen pisemne nasobeni a dve o zlomcich
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===3, zamcene().length+' zamcenych z 33');
 ok('scitani a odcitani vice cisel se da vybrat', !zamcene().includes(11));
 // vyber z nabidky umime od kroku E3, tedy kapitola 6; je to jedina
 // kapitola, ktera se odpovida tlacitky, a jinam nez do skolni trati se
@@ -272,13 +274,17 @@ ok('poceti operace se zavorkami se daji vybrat', !zamcene().includes(13) && !zam
 // nasobeni a deleni deseti a stem umime od kroku D2, tedy kapitola 28
 ok('nasobeni a deleni 10 a 100 se da vybrat', !zamcene().includes(28));
 // prevody jednotek umime od kroku D3: cas v kapitole 18, delka, hmotnost
-// a objem v kapitole 29. Kapitola 17 jednotky jen pojmenovava, takze
-// generator nema a zamcena zustava
+// a objem v kapitole 29
 ok('prevody jednotek se daji vybrat', !zamcene().includes(18) && !zamcene().includes(29));
 // zkouska spravnosti od kroku D4: neni to novy generator, ale latka
 // predchozich kapitol pozpatku, takze kapitola 5 uz zamcena neni
 ok('zkouska spravnosti se da vybrat', !zamcene().includes(5));
-ok('kapitola, ktera jednotky jen pojmenovava, zamcena zustala', zamcene().includes(17));
+// porovnavani umime od kroku E4: jednotky v kapitole 17, cisla do tisice
+// v kapitole 22. Obe se odpovidaji znaky a dal nez do skolni trati se
+// z nich nic nedostane
+ok('porovnavani jednotek a cisel se da vybrat', !zamcene().includes(17) && !zamcene().includes(22));
+ok('pisemne nasobeni a zlomky zamcene zustaly',
+   zamcene().includes(15) && zamcene().includes(19) && zamcene().includes(32));
 // obor do tisice uz umime, takze jeho tri kapitoly zamcene byt nesmi
 ok('obor do tisice se da vybrat', !zamcene().includes(23) && !zamcene().includes(24) && !zamcene().includes(25));
 ok('kapitola s hodinami uz zamcena neni', !zamcene().includes(4));
@@ -1026,6 +1032,35 @@ click(nab()[1-ev('RUN.items[RUN.idx].answer')]);
 await wait(400);
 ok('spatne sude nebo liche rekne pravidlo o posledni cislici',
    /poslední číslice/.test(txt()), txt().slice(0,170));
+await wait(1700);
+console.log('--- porovnavani ---');
+// Tentyz vstupni prvek s jinymi popiskami: tri znaky misto slov. Zkousi
+// se, ze se plocha vymenila i proti nabidce slov, ze znak stoji mezi
+// dvema stranami a ne pred polickem, a ze stisk odpoved rovnou odesle.
+ev("RUN.items[RUN.idx]=itemFromKey('ju1');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+ok('porovnavani kresli tri tlacitka se znaky',
+   nab().length===3 && nab().map(b=>b.textContent.trim()).join('')==='<=>'
+   && q('#keypad').dataset.glyph==='1',
+   nab().map(b=>b.textContent.trim()).join(' / '));
+const pmQ=d.getElementById('qbox');
+ok('policko stoji mezi dvema stranami',
+   pmQ.innerHTML.indexOf('id="qtext"')<pmQ.innerHTML.indexOf('id="abox"')
+   && pmQ.innerHTML.indexOf(ev('RUN.items[RUN.idx].tail'))>pmQ.innerHTML.indexOf('id="abox"'),
+   pmQ.textContent);
+ok('u jednotek je receno, ze se ma nejdriv prevest', /stejnou jednotku/.test(txt()));
+const pmDist=ev('RUN.dist'), pmSpr=ev('RUN.items[RUN.idx].answer');
+click(nab()[pmSpr]);
+ok('stisk znaku rovnou odeslal odpoved', ev('RUN.state')==='feedback', 'stav '+ev('RUN.state'));
+ok('v policku je znak, ne cislo tlacitka', ['<','=','>'].indexOf(bx(0).textContent)>=0, bx(0).textContent);
+ok('spravny znak posunul zavodnika', ev('RUN.dist')>pmDist, pmDist+' -> '+ev('RUN.dist'));
+await wait(900);
+// spatny znak u jednotek rekne obe strany v teze jednotce
+ev("RUN.items[RUN.idx]=itemFromKey('ju4');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+const pmSame=ev('JSON.stringify(RUN.items[RUN.idx].same)');
+click(nab()[(ev('RUN.items[RUN.idx].answer')+1)%3]);
+await wait(400);
+ok('spatne porovnani jednotek ukaze obe strany v teze jednotce',
+   JSON.parse(pmSame).every(s=>txt().indexOf(s)>=0), txt().slice(0,180));
 await wait(1700);
 // a zpatky na ciselnou klavesnici, aniz by se cokoli zaseklo
 ev("RUN.items[RUN.idx]=itemFromKey('m6x7');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");

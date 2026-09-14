@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,J_BUCKETS,pickKeys,isPickKey,CMP_BUCKETS,isCmpKey,CMP_EQUAL,surfaceOf,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,jobAskText,applyLang,W_SHAPES,W_THINGS,thingLabel,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,J_BUCKETS,pickKeys,isPickKey,CMP_BUCKETS,isCmpKey,CMP_EQUAL,surfaceOf,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_PATTERN,DUCK_FLAG,DUCK_FLAG_SHELVES,DUCK_HEIR,duckPaidAs,flagSheet,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,jobAskText,applyLang,W_SHAPES,W_THINGS,thingLabel,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -578,7 +578,13 @@ const bbox=list=>list.reduce((r,s)=>[Math.min(r[0],s.b[0]),Math.min(r[1],s.b[1])
   Math.max(r[2],s.b[2]),Math.max(r[3],s.b[3])],[1e9,1e9,-1e9,-1e9]);
 
 // --- katalog ---
-if(VZORY.length!==10) hsay('vzoru uz neni deset, ale '+VZORY.length);
+// Vrstva Vzor je od 14. zari 2026 devet kreslenych vzoru a osmactyricet
+// vlajek; vlajky maji vlastni okruh 3g, ale vsechno, co plati o vzoru,
+// plati i o nich, takze se sem pocitaji taky.
+if(A.DUCK_PATTERN.length!==9) hsay('kreslenych vzoru uz neni devet, ale '+A.DUCK_PATTERN.length);
+if(A.DUCK_FLAG.length!==48) hsay('vlajek uz neni osmactyricet, ale '+A.DUCK_FLAG.length);
+if(VZORY.length!==A.DUCK_PATTERN.length+A.DUCK_FLAG.length)
+  hsay('vrstva Vzor neni vzory plus vlajky, ale '+VZORY.length);
 if(HLAVA.length!==20) hsay('dilu na hlavu uz neni dvacet, ale '+HLAVA.length);
 if(new Set(A.DUCK_PARTS.map(x=>x.id)).size!==A.DUCK_PARTS.length) hsay('dva dily maji stejne id');
 for(const [list,layer,jm] of [[VZORY,A.PAT_LAYER,'vzor'],[HLAVA,A.HEAD_LAYER,'hlava']]){
@@ -588,7 +594,6 @@ for(const [list,layer,jm] of [[VZORY,A.PAT_LAYER,'vzor'],[HLAVA,A.HEAD_LAYER,'hl
     if(A.duckPartById(x.id)!==x) hsay(x.id+' nejde najit podle id');
     if(typeof x.draw!=='function') hsay(x.id+' nema kresbu');
     if(!x.cost) hsay(x.id+' je zdarma, placene vrstvy zadny dil zdarma nemaji');
-    if(i&&list[i].cost<list[i-1].cost) hsay('katalog '+jm+' neni razeny od nejlevnejsiho: '+list[i-1].id+' pred '+x.id);
     // zadny dil nema jiny atribut nez kresbu, cenu a id; kdyby mel, mohl
     // by na jizdu zacit mit vliv a soupeřem by prestala byt vlastni jizda
     const navic=Object.keys(x).filter(k=>['id','cost','draw','see'].indexOf(k)<0);
@@ -596,9 +601,19 @@ for(const [list,layer,jm] of [[VZORY,A.PAT_LAYER,'vzor'],[HLAVA,A.HEAD_LAYER,'hl
     for(const l of ['cs','en','de']) if(!A.I18N[l][x.id]) hsay(x.id+' nema jmeno v jazyce '+l);
   }
 }
+// razeni podle ceny se hlida po policich, ne po vrstvach: vrstva Vzor
+// visi na sesti policich a police vlajek jsou uvnitr razene podle jmena,
+// protoze v ni kazda vlajka stoji stejne. Police je to, co dite vidi,
+// takze je to i to, co ma byt od nejlevnejsiho.
+for(const spec of A.DUCK_LAYERS) for(let i=1;i<spec.list.length;i++)
+  if(spec.list[i].cost<spec.list[i-1].cost)
+    hsay('police '+spec.sec+' neni razena od nejlevnejsiho: '
+      +spec.list[i-1].id+' '+spec.list[i-1].cost+' pred '+spec.list[i].id+' '+spec.list[i].cost);
 // cena vrstvy je zapsane cislo, ne dopoctene. Plan kroku H3 pocital
 // u vzoru se 114 a u hlavy s 294; soucet vypsanych cen hlavy je 314.
-const CENA_VZOR=114, CENA_HLAVA=314;
+// Vzor stoji od prichodu vlajek 482: devet kreslenych vzoru za 98
+// (tri pasy z nich odesly, viz okruh 3g) a osmactyricet vlajek po osmi.
+const CENA_VZOR=482, CENA_HLAVA=314;
 const cenaVzor=VZORY.reduce((s,x)=>s+x.cost,0), cenaHlava=HLAVA.reduce((s,x)=>s+x.cost,0);
 if(cenaVzor!==CENA_VZOR) hsay('vrstva Vzor stoji '+cenaVzor+', zapsano bylo '+CENA_VZOR);
 if(cenaHlava!==CENA_HLAVA) hsay('vrstva Na hlavu stoji '+cenaHlava+', zapsano bylo '+CENA_HLAVA);
@@ -775,7 +790,14 @@ const CENA_OCI=108, CENA_VYBAVA=278;
 const cenaOci=OCI.reduce((s,x)=>s+x.cost,0), cenaVyb=VYBAVA.reduce((s,x)=>s+x.cost,0);
 if(cenaOci!==CENA_OCI) esay('vrstva Oci stoji '+cenaOci+', zapsano bylo '+CENA_OCI);
 if(cenaVyb!==CENA_VYBAVA) esay('vrstva Vybava stoji '+cenaVyb+', zapsano bylo '+CENA_VYBAVA);
-if(A.DUCK_LAYERS.length!==5) esay('garaz ukazuje '+A.DUCK_LAYERS.length+' vrstev misto peti');
+// garaz ukazuje pet vrstev na deseti policich: vrstva Vzor visi na
+// sesti, protoze sedmapadesat dlazdic na jedne polici je seznam
+// k prohledavani, ne police k prohlizeni
+if(A.DUCK_LAYERS.length!==10) esay('garaz ukazuje '+A.DUCK_LAYERS.length+' polic misto deseti');
+if(new Set(A.DUCK_LAYERS.map(x=>x.layer)).size!==5) esay('police nepokryvaji prave pet vrstev');
+if(new Set(A.DUCK_LAYERS.map(x=>x.sec)).size!==A.DUCK_LAYERS.length) esay('dve police maji stejne id sekce');
+{ const vNich=A.DUCK_LAYERS.filter(x=>x.layer===A.PAT_LAYER).reduce((n,x)=>n+x.list.length,0);
+  if(vNich!==VZORY.length) esay('police vrstvy Vzor ukazuji '+vNich+' dilu z '+VZORY.length); }
 
 // --- kresba kazdeho dilu ---
 const vRamu=(part,bbx)=>{
@@ -967,6 +989,192 @@ if(!sObrysem.length) ktsay('obrys nedostal ani jeden dil, pravidlo je nejspis mr
 console.log('kontrast dilu:',ktBad?'chyb '+ktBad:'v poradku',
   '| nejtesnejsi '+nejhorsiPar+' '+nejhorsi.toFixed(1)+' dE | obrys dostalo '+sObrysem.length
   +' dvojic z '+(A.DUCK_BODY.length*DILY_K.length)+': '+sObrysem.join(', '));
+
+
+// 3g. vlajky a to, jestli je od sebe dite pozna
+//
+// Osmactyricet vlajek je vic, nez mela cela vrstva Vzor predtim, a
+// vlajka na kacence stoji a pada na jedine veci: dite musi tu svou
+// poznat na dlazdici v garazi. Nekolik z nich se od sebe lisi jen
+// erbem uprostred, ktery se v dlazdicove velikosti nakreslit neda,
+// takze zadna vlajka erb nenese a nese misto nej jednu jednoduchou
+// znacku. Jestli to stacilo, se **meri**, ne odhaduje.
+//
+// Merí se takhle: kacenka se navzorkuje na mrizce bodu a u kazdeho se
+// spocita, jakou barvu by na nem vlajka mela. Do vzorku jde jen to, na
+// co dite opravdu kouka, tedy telo a brada, na ktere je vzor oriznuty,
+// bez kridla, ktere se kresli az nad vzorem v barve kacenky, a bez
+// obliceje. Bricho se nevyrezava, ale primichava, protoze je to petina
+// bile pres to, co je pod nim, a presne o tolik rozdil splaskne.
+// Dvojice projde, kdyz se obe vlajky lisi o 25 dE nebo vic aspon na
+// dvanacti procentech te plochy. Prah 25 dE je tyz jako u palet a u tel;
+// dvanact procent je asi trikrat vic, nez byla nejtesnejsi dvojice
+// **pred** predelanim, a s rezervou pod nejtesnejsi dneska.
+let vlBad=0;
+const vsay=m=>{vlBad++;console.log('  !!  '+m);};
+const VLAJKY=A.DUCK_FLAG, POLICE_VLAJEK=A.DUCK_FLAG_SHELVES;
+const VLAJKA_CENA=8, ROZDIL_PRAH=12, ROZDIL_DE=25;
+
+// --- katalog ---
+if(VLAJKY.length!==48) vsay('vlajek uz neni osmactyricet, ale '+VLAJKY.length);
+if(POLICE_VLAJEK.length!==5) vsay('polic s vlajkami uz neni pet, ale '+POLICE_VLAJEK.length);
+if(POLICE_VLAJEK.reduce((n,sh)=>n+sh.list.length,0)!==VLAJKY.length)
+  vsay('police vlajek neobsahuji dohromady vsechny vlajky');
+if(new Set(POLICE_VLAJEK.reduce((a,sh)=>a.concat(sh.list.map(x=>x.id)),[])).size!==VLAJKY.length)
+  vsay('jedna vlajka visi na dvou policich');
+for(const sh of POLICE_VLAJEK){
+  if(sh.list.length<5) vsay('police '+sh.sec+' ma jen '+sh.list.length+' vlajek, to uz je spis seznam nez police');
+  if(sh.list.length>14) vsay('police '+sh.sec+' ma '+sh.list.length+' vlajek, v takove se sve nehleda');
+  for(const l of ['cs','en','de']) if(!A.I18N[l][sh.title]) vsay('police '+sh.sec+' nema nazev v jazyce '+l);
+}
+for(const f of VLAJKY){
+  if(f.id.slice(0,8)!=='dp_flag_') vsay(f.id+' nema id vlajky');
+  if(A.duckLayerOf(f)!==A.PAT_LAYER) vsay(f.id+' nepatri do vrstvy Vzor');
+  // kazda vlajka stoji tolik co kazda jina: zadna zeme neni drazsi nez
+  // jina a dite, jehoz vlajka by vysla draho, by platilo za to, odkud je
+  if(f.cost!==VLAJKA_CENA) vsay(f.id+' stoji '+f.cost+', vlajky stoji '+VLAJKA_CENA);
+  for(const l of ['cs','en','de']) if(!A.I18N[l][f.id]) vsay(f.id+' nema jmeno v jazyce '+l);
+  if(A.I18N.cs[f.id]===A.I18N.en[f.id] && A.I18N.cs[f.id]===A.I18N.de[f.id]
+     && ['dp_flag_ad','dp_flag_mt','dp_flag_mc','dp_flag_li','dp_flag_pt','dp_flag_pe',
+         'dp_flag_cl','dp_flag_py','dp_flag_uy','dp_flag_ve','dp_flag_pa','dp_flag_gt',
+         'dp_flag_hn','dp_flag_ni','dp_flag_ec'].indexOf(f.id)<0)
+    vsay(f.id+' ma ve vsech trech jazycich totez jmeno, to je nejspis nepreloz'+'eno');
+}
+// jmena musi byt ruzna, jinak by dve dlazdice rekly totez
+for(const l of ['cs','en','de']){
+  const jm=VLAJKY.map(f=>A.I18N[l][f.id]);
+  if(new Set(jm).size!==jm.length) vsay('dve vlajky maji v jazyce '+l+' stejne jmeno');
+}
+
+// --- tri pasy neskoncily, jen dostaly jmeno ---
+// Pravidlo z oddilu 3: koupeny dil se nesmi ztratit. `dp_pasy` byly tri
+// pasy kolem kacenky, cervený, bily a modry, tedy nizozemska vlajka
+// nakreslena, aniz by to nekdo rekl; pri prichodu vlajek zustala ta
+// vlajka. Id se proto nemaze a v profilu se ani neprepisuje: odpovi
+// svym nastupcem.
+if(A.DUCK_HEIR.dp_pasy!=='dp_flag_nl') vsay('tri pasy nemaji za nastupce nizozemskou vlajku');
+if(A.DUCK_PAT.some(x=>x.id==='dp_pasy')) vsay('dp_pasy je v katalogu dvakrat, jako dil i jako nastupce');
+const nl=A.duckPartById('dp_flag_nl');
+if(A.duckPartById('dp_pasy')!==nl) vsay('stary dil neodpovida svym nastupcem');
+const staryProfilP={duckParts:['dp_pasy'],duck:{pat:'dp_pasy'}};
+if(!A.ownsDuckPart(staryProfilP,nl)) vsay('kdo koupil tri pasy, neni vlastnikem nastupce');
+if(A.duckSVG(A.DUCKS[0],staryProfilP.duck)!==A.duckSVG(A.DUCKS[0],{pat:'dp_flag_nl'}))
+  vsay('kacenka s koupenymi tremi pasy kresli neco jineho nez nastupce');
+if(A.duckSVG(A.DUCKS[0],staryProfilP.duck)===A.duckSVG(A.DUCKS[0],{}))
+  vsay('kacenka s koupenymi tremi pasy zustala hola, dil se ztratil');
+if(staryProfilP.duckParts.join()!=='dp_pasy'||staryProfilP.duck.pat!=='dp_pasy')
+  vsay('odpoved na stary dil prepsala profil, a nic se prepisovat nemelo');
+if(A.duckPaidAs(nl).indexOf('dp_pasy')<0) vsay('nastupce nevi, cim uz se za nej zaplatilo');
+if(A.DUCK_PARTS.filter(x=>A.duckPaidAs(x).length>1).length!==Object.keys(A.DUCK_HEIR).length)
+  vsay('nastupcu je jiny pocet, nez kolik dilu odeslo');
+
+// --- kde se dite na vlajku diva ---
+const B_VL=A.DUCK.BODY, H_VL=A.DUCK.HEAD, W_VL=A.DUCK.WING;
+const vBezier=(p0,c,p1)=>{const o=[];for(let i=1;i<=12;i++){const t=i/12,u=1-t;
+  o.push([u*u*p0[0]+2*t*u*c[0]+t*t*p1[0], u*u*p0[1]+2*t*u*c[1]+t*t*p1[1]]);}return o;};
+const KRIDLO=[[W_VL.x-16,W_VL.y-10]]
+  .concat(vBezier([W_VL.x-16,W_VL.y-10],[W_VL.x+4,W_VL.y-12],[W_VL.x+10,W_VL.y+2]),
+          vBezier([W_VL.x+10,W_VL.y+2],[W_VL.x-2,W_VL.y+12],[W_VL.x-14,W_VL.y+6]));
+const vPoly=(pts,x,y)=>{let hit=false;
+  for(let i=0,j=pts.length-1;i<pts.length;j=i++){const a=pts[i],b=pts[j];
+    if((a[1]>y)!==(b[1]>y) && x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]) hit=!hit;}
+  return hit;};
+const VZORKY=[];
+for(let x=B_VL.x-B_VL.rx-2;x<=B_VL.x+B_VL.rx+2;x+=.8)
+  for(let y=56;y<=B_VL.y+B_VL.ry+2;y+=.8){
+    const na=((x-B_VL.x)/(B_VL.rx-1.5))**2+((y-B_VL.y)/(B_VL.ry-1.5))**2<=1
+          || (x-H_VL.x)**2+(y-H_VL.y)**2<=(H_VL.r-1.5)**2;
+    if(!na||vPoly(KRIDLO,x,y)) continue;
+    const bricho=((x-(B_VL.x+2))/(B_VL.rx*.75))**2+((y-(B_VL.y+7))/(B_VL.ry*.61))**2<=1;
+    VZORKY.push([x,y,bricho?.2:0]);
+  }
+if(VZORKY.length<1500) vsay('vzorku je jen '+VZORKY.length+', na mereni je to malo');
+// tvary, ktere tenhle vzorkovac umi precist. Vlajka smi kreslit jen
+// jimi, a je to zamerne: kdyby smela krivku, prestalo by jit spocitat,
+// co je pod bodem, a cely tenhle okruh by oslepl.
+const vAttr=/([a-z-]+)="([^"]*)"/g;
+const vNums=s=>(String(s).match(/-?\d*\.?\d+/g)||[]).map(Number);
+const vPary=l=>{const o=[];for(let i=0;i+1<l.length;i+=2)o.push([l[i],l[i+1]]);return o;};
+function vTvary(frag,id){
+  const out=[];
+  for(const tag of frag.match(/<[a-z]+[^>]*\/>/g)||[]){
+    const a={};let m;vAttr.lastIndex=0;while((m=vAttr.exec(tag)))a[m[1]]=m[2];
+    if(!a.fill||a.fill==='none'){vsay(id+' kresli tvar bez vyplne, takovy se nezmeri');continue;}
+    if(/^<rect/.test(tag)) out.push({k:'r',x:+a.x,y:+a.y,w:+a.width,h:+a.height,c:a.fill});
+    else if(/^<circle/.test(tag)) out.push({k:'e',x:+a.cx,y:+a.cy,rx:+a.r,ry:+a.r,c:a.fill});
+    else if(/^<ellipse/.test(tag)) out.push({k:'e',x:+a.cx,y:+a.cy,rx:+a.rx,ry:+a.ry,c:a.fill});
+    else if(/^<polygon/.test(tag)) out.push({k:'p',pts:vPary(vNums(a.points)),c:a.fill});
+    else if(/^<path/.test(tag)){
+      if(/[QACS]/.test(a.d)) vsay(id+' kresli krivkou, vlajka smi jen usecky');
+      out.push({k:'p',pts:vPary(vNums(a.d)),c:a.fill});
+    }
+    else vsay(id+' kresli tvar, ktery se nezmeri: '+tag.slice(0,20));
+  }
+  return out;
+}
+const vUvnitr=(t,x,y)=> t.k==='r' ? (x>=t.x&&x<=t.x+t.w&&y>=t.y&&y<=t.y+t.h)
+  : t.k==='e' ? (((x-t.x)/t.rx)**2+((y-t.y)/t.ry)**2<=1)
+  : vPoly(t.pts,x,y);
+// barvy se prevedou na cisla a vzdalenosti mezi nimi na tabulku, aby
+// se tisic dvojic vlajek nemuselo pocitat po jedne barve
+const vKlic={}, vLab=[];
+function vIndex(hex,bily){
+  const k=hex+'|'+bily;
+  if(vKlic[k]===undefined){
+    const h=hex.length===4?'#'+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3]:hex;
+    const n=parseInt(h.slice(1),16);
+    const mix=v=>Math.round(v*(1-bily)+255*bily);
+    const r=mix((n>>16)&255),g=mix((n>>8)&255),b=mix(n&255);
+    vKlic[k]=vLab.length;
+    vLab.push(labOf('#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')));
+  }
+  return vKlic[k];
+}
+const sedVL=A.duckFit();
+const MAPY=VLAJKY.map(f=>{
+  const tv=vTvary(f.draw(sedVL,'#26324c'),f.id);
+  const out=new Int16Array(VZORKY.length);
+  let prazdno=0;
+  for(let i=0;i<VZORKY.length;i++){
+    const p=VZORKY[i]; let c=-1;
+    for(let k=tv.length-1;k>=0;k--) if(vUvnitr(tv[k],p[0],p[1])){c=vIndex(tv[k].c,p[2]);break;}
+    if(c<0) prazdno++;
+    out[i]=c;
+  }
+  // vlajka, ktera nepokryje celou kacenku, ma v sobe diru a tou je
+  // videt telo; vzor to smel, vlajka ne
+  if(prazdno>VZORKY.length*.02)
+    vsay(f.id+' nechava nepomalovanych '+prazdno+' z '+VZORKY.length+' vzorku');
+  return out;
+});
+const VZD=vLab.map(a=>vLab.map(b=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])>=ROZDIL_DE?1:0));
+const dvojice=[];
+for(let i=0;i<VLAJKY.length;i++) for(let j=i+1;j<VLAJKY.length;j++){
+  const A1=MAPY[i],B1=MAPY[j]; let n=0,d=0;
+  for(let k=0;k<VZORKY.length;k++){
+    if(A1[k]<0||B1[k]<0) continue;
+    n++; d+=VZD[A1[k]][B1[k]];
+  }
+  dvojice.push({a:VLAJKY[i].id.slice(8),b:VLAJKY[j].id.slice(8),p:n?d/n*100:0});
+}
+dvojice.sort((x,y)=>x.p-y.p);
+for(const d of dvojice) if(d.p<ROZDIL_PRAH)
+  vsay('vlajky '+d.a+' a '+d.b+' se lisi jen na '+d.p.toFixed(1)+' % kacenky, prah je '+ROZDIL_PRAH+' %');
+// a dvojice, kvuli kterym tenhle okruh vznikl, se jmenuji nahlas: kdyby
+// nekterou z nich nekdo prestal kreslit, at je videt, ktera to byla
+const HLIDANE=[['nl','lu'],['mc','pl'],['it','mx'],['ie','it'],['sk','si'],['ec','co'],
+               ['co','ve'],['cr','nl'],['hn','sv'],['hn','ni'],['sv','ni'],['gt','hn'],
+               ['ar','uy'],['ar','hn'],['nl','py'],['cz','pl'],['dk','no'],['cl','pl']];
+const parMezi=(x,y)=>dvojice.find(d=>(d.a===x&&d.b===y)||(d.a===y&&d.b===x));
+for(const h of HLIDANE){
+  const d=parMezi(h[0],h[1]);
+  if(!d){vsay('hlidana dvojice '+h.join(' a ')+' v katalogu neni');continue;}
+  if(d.p<ROZDIL_PRAH) vsay('hlidana dvojice '+h.join(' a ')+' je jen '+d.p.toFixed(1)+' %');
+}
+console.log('vlajky:',vlBad?'chyb '+vlBad:'v poradku','| '+VLAJKY.length+' vlajek na '
+  +POLICE_VLAJEK.length+' policich za '+VLAJKY.reduce((n,f)=>n+f.cost,0)+' soucastek'
+  +' | vzorku '+VZORKY.length+', nejtesnejsi dvojice: '
+  +dvojice.slice(0,5).map(d=>d.a+'/'+d.b+' '+d.p.toFixed(1)+' %').join(', '));
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
 const VALID=new Set();

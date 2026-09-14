@@ -63,7 +63,7 @@ Závod je dvacet příkladů a přesně jedno kolo okruhu. Odpovídá se na velk
 
 **Soupeřem je vlastní včerejší jízda.** Auto ve vedlejším pruhu je nejlepší dosavadní jízda na téže trati, umístěná podle aktuálního rozdílu bodů. Žádné žebříčky, žádné cizí děti, proti kterým se dá prohrát.
 
-Mince z každého závodu kupují závodníky do garáže: osm strojů, tedy rakety, závoďáky, robota a buginu, a osmadvacet zvířat, která rostou přes tři stupně podle toho, kolik příkladů s nimi dítě spočítá. Gumová kačenka je zdarma od začátku a sama se nekupuje; kupuje se u ní jen to, co má na sobě, a platí se za to součástkami z dílny, ne mincemi. Vrstev je pět: tělo, vzor, klobouk, oči a výbava, dohromady 65 dílů.
+Mince z každého závodu kupují závodníky do garáže: osm strojů, tedy rakety, závoďáky, robota a buginu, a osmadvacet zvířat, která rostou přes tři stupně podle toho, kolik příkladů s nimi dítě spočítá. Gumová kačenka je zdarma od začátku a sama se nekupuje; kupuje se u ní jen to, co má na sobě, a platí se za to součástkami z dílny, ne mincemi. Vrstev je pět: tělo, vzor, klobouk, oči a výbava, dohromady 112 dílů, a osmačtyřicet z těch vzorů jsou vlajky Evropy a Ameriky.
 
 ---
 

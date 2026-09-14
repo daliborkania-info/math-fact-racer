@@ -616,7 +616,14 @@ html[data-w="tablet"][data-o="tall"] .keypad{width:100%;max-width:480px;margin:0
 .item.sel{border-color:var(--grape);background:var(--grape-soft);box-shadow:0 0 0 3px rgba(91,75,214,.16)}
 .item .pic{width:100%;aspect-ratio:1;display:grid;place-items:center}
 .item .pic svg{width:88%;height:88%}
-.item .nm{font-size:calc(12.5px * var(--tx));font-weight:800;text-align:center;line-height:1.15;color:var(--ink-soft)}
+/* a tile is about a hundred pixels wide and the longest label on one is
+   now a country: Lichtenštejnsko is one word and wider than that, so a
+   label breaks inside a word rather than hanging over the edge */
+.item .nm{font-size:calc(12.5px * var(--tx));font-weight:800;text-align:center;line-height:1.15;color:var(--ink-soft);
+  overflow-wrap:anywhere;hyphens:auto}
+/* the price under a name, on the one shelf where the tile has to carry
+   both: every flag costs the same, so the price alone says nothing */
+.item .nm .cost{display:block;font-weight:700;opacity:.72}
 .item.locked{background:var(--shell-2);border-style:dashed}
 .item.locked .pic{filter:grayscale(1) brightness(1.6) contrast(.35);opacity:.65}
 .item .lvl{position:absolute;top:5px;right:6px;font-size:calc(12.5px * var(--tx));font-weight:900;color:var(--sun-dark);background:#fff5df;border-radius:99px;padding:2px 5px}
@@ -1220,7 +1227,25 @@ cs: {
   duckPatNone: "Bez vzoru",
   dp_puntiky: "Puntíky", dp_pruhy: "Proužky", dp_kostka: "Šachovnice", dp_srdicka: "Srdíčka",
   dp_dres: "Dres", dp_hvezdicky: "Hvězdičky", dp_vlnky: "Vlnky", dp_maskac: "Maskáč",
-  dp_pasy: "Tři pásy", dp_mapa: "Mapa světa",
+  dp_mapa: "Mapa světa",
+  duckFlagsCE: "Vlajky střední Evropy",
+  duckFlagsWE: "Vlajky západní Evropy",
+  duckFlagsNE: "Vlajky severní Evropy",
+  duckFlagsNA: "Vlajky Severní a Střední Ameriky",
+  duckFlagsSA: "Vlajky Jižní Ameriky",
+  duckFlagsNote: "Vlajka se kačence namaluje přes celé tělo. Kupuje se za součástky z dílny, mincemi ne, a každá vlajka stojí stejně, protože žádná země není dražší než jiná. Co jednou koupíš, to ti zůstane, i když si pak dáš jinou.",
+  dp_flag_cz: "Česko", dp_flag_sk: "Slovensko", dp_flag_pl: "Polsko", dp_flag_hu: "Maďarsko",
+  dp_flag_at: "Rakousko", dp_flag_de: "Německo", dp_flag_ch: "Švýcarsko", dp_flag_si: "Slovinsko",
+  dp_flag_fr: "Francie", dp_flag_be: "Belgie", dp_flag_nl: "Nizozemsko", dp_flag_lu: "Lucembursko",
+  dp_flag_gb: "Velká Británie", dp_flag_ie: "Irsko", dp_flag_pt: "Portugalsko", dp_flag_es: "Španělsko",
+  dp_flag_it: "Itálie", dp_flag_mc: "Monako", dp_flag_li: "Lichtenštejnsko", dp_flag_ad: "Andorra",
+  dp_flag_mt: "Malta", dp_flag_dk: "Dánsko", dp_flag_no: "Norsko", dp_flag_se: "Švédsko",
+  dp_flag_fi: "Finsko", dp_flag_is: "Island", dp_flag_us: "Spojené státy", dp_flag_ca: "Kanada",
+  dp_flag_mx: "Mexiko", dp_flag_gt: "Guatemala", dp_flag_sv: "Salvador", dp_flag_hn: "Honduras",
+  dp_flag_ni: "Nikaragua", dp_flag_cr: "Kostarika", dp_flag_pa: "Panama", dp_flag_cu: "Kuba",
+  dp_flag_do: "Dominikánská rep.", dp_flag_jm: "Jamajka", dp_flag_br: "Brazílie", dp_flag_ar: "Argentina",
+  dp_flag_cl: "Chile", dp_flag_pe: "Peru", dp_flag_co: "Kolumbie", dp_flag_uy: "Uruguay",
+  dp_flag_ve: "Venezuela", dp_flag_ec: "Ekvádor", dp_flag_bo: "Bolívie", dp_flag_py: "Paraguay",
   duckHeads: "Na hlavu",
   duckHeadsNote: "Čepice, klobouky a věnečky se kačence posadí na hlavu. Kupují se za součástky z dílny, mincemi ne. Co koupíš, to ti zůstane, a na jízdu to nemá žádný vliv.",
   duckHeadNone: "Nic na hlavě",
@@ -1661,7 +1686,25 @@ en: {
   duckPatNone: "No pattern",
   dp_puntiky: "Dots", dp_pruhy: "Stripes", dp_kostka: "Chequers", dp_srdicka: "Hearts",
   dp_dres: "Team shirt", dp_hvezdicky: "Stars", dp_vlnky: "Waves", dp_maskac: "Camo",
-  dp_pasy: "Three bands", dp_mapa: "World map",
+  dp_mapa: "World map",
+  duckFlagsCE: "Central European flags",
+  duckFlagsWE: "Western European flags",
+  duckFlagsNE: "Northern European flags",
+  duckFlagsNA: "North and Central American flags",
+  duckFlagsSA: "South American flags",
+  duckFlagsNote: "A flag is painted right across the duck's body. Flags are bought with parts from the workshop, never with coins, and every flag costs the same, because no country is dearer than another. Once you buy one it is yours, even after you pick another.",
+  dp_flag_cz: "Czechia", dp_flag_sk: "Slovakia", dp_flag_pl: "Poland", dp_flag_hu: "Hungary",
+  dp_flag_at: "Austria", dp_flag_de: "Germany", dp_flag_ch: "Switzerland", dp_flag_si: "Slovenia",
+  dp_flag_fr: "France", dp_flag_be: "Belgium", dp_flag_nl: "Netherlands", dp_flag_lu: "Luxembourg",
+  dp_flag_gb: "United Kingdom", dp_flag_ie: "Ireland", dp_flag_pt: "Portugal", dp_flag_es: "Spain",
+  dp_flag_it: "Italy", dp_flag_mc: "Monaco", dp_flag_li: "Liechtenstein", dp_flag_ad: "Andorra",
+  dp_flag_mt: "Malta", dp_flag_dk: "Denmark", dp_flag_no: "Norway", dp_flag_se: "Sweden",
+  dp_flag_fi: "Finland", dp_flag_is: "Iceland", dp_flag_us: "United States", dp_flag_ca: "Canada",
+  dp_flag_mx: "Mexico", dp_flag_gt: "Guatemala", dp_flag_sv: "El Salvador", dp_flag_hn: "Honduras",
+  dp_flag_ni: "Nicaragua", dp_flag_cr: "Costa Rica", dp_flag_pa: "Panama", dp_flag_cu: "Cuba",
+  dp_flag_do: "Dominican Rep.", dp_flag_jm: "Jamaica", dp_flag_br: "Brazil", dp_flag_ar: "Argentina",
+  dp_flag_cl: "Chile", dp_flag_pe: "Peru", dp_flag_co: "Colombia", dp_flag_uy: "Uruguay",
+  dp_flag_ve: "Venezuela", dp_flag_ec: "Ecuador", dp_flag_bo: "Bolivia", dp_flag_py: "Paraguay",
   duckHeads: "On the head",
   duckHeadsNote: "Hats, helmets and wreaths sit on the duck's head. They are bought with parts from the workshop, never with coins. What you buy stays yours, and it changes nothing about the racing.",
   duckHeadNone: "Nothing on top",
@@ -2094,7 +2137,25 @@ de: {
   duckPatNone: "Ohne Muster",
   dp_puntiky: "Punkte", dp_pruhy: "Streifen", dp_kostka: "Schachbrett", dp_srdicka: "Herzen",
   dp_dres: "Trikot", dp_hvezdicky: "Sterne", dp_vlnky: "Wellen", dp_maskac: "Tarnmuster",
-  dp_pasy: "Drei Bänder", dp_mapa: "Weltkarte",
+  dp_mapa: "Weltkarte",
+  duckFlagsCE: "Flaggen Mitteleuropas",
+  duckFlagsWE: "Flaggen Westeuropas",
+  duckFlagsNE: "Flaggen Nordeuropas",
+  duckFlagsNA: "Flaggen Nord- und Mittelamerikas",
+  duckFlagsSA: "Flaggen Südamerikas",
+  duckFlagsNote: "Eine Flagge wird der Ente über den ganzen Körper gemalt. Flaggen kauft man mit Teilen aus der Werkstatt, niemals mit Münzen, und jede Flagge kostet gleich viel, denn kein Land ist teurer als ein anderes. Was du einmal gekauft hast, bleibt dir, auch wenn du später eine andere nimmst.",
+  dp_flag_cz: "Tschechien", dp_flag_sk: "Slowakei", dp_flag_pl: "Polen", dp_flag_hu: "Ungarn",
+  dp_flag_at: "Österreich", dp_flag_de: "Deutschland", dp_flag_ch: "Schweiz", dp_flag_si: "Slowenien",
+  dp_flag_fr: "Frankreich", dp_flag_be: "Belgien", dp_flag_nl: "Niederlande", dp_flag_lu: "Luxemburg",
+  dp_flag_gb: "Großbritannien", dp_flag_ie: "Irland", dp_flag_pt: "Portugal", dp_flag_es: "Spanien",
+  dp_flag_it: "Italien", dp_flag_mc: "Monaco", dp_flag_li: "Liechtenstein", dp_flag_ad: "Andorra",
+  dp_flag_mt: "Malta", dp_flag_dk: "Dänemark", dp_flag_no: "Norwegen", dp_flag_se: "Schweden",
+  dp_flag_fi: "Finnland", dp_flag_is: "Island", dp_flag_us: "Vereinigte Staaten", dp_flag_ca: "Kanada",
+  dp_flag_mx: "Mexiko", dp_flag_gt: "Guatemala", dp_flag_sv: "El Salvador", dp_flag_hn: "Honduras",
+  dp_flag_ni: "Nicaragua", dp_flag_cr: "Costa Rica", dp_flag_pa: "Panama", dp_flag_cu: "Kuba",
+  dp_flag_do: "Dominikanische Rep.", dp_flag_jm: "Jamaika", dp_flag_br: "Brasilien", dp_flag_ar: "Argentinien",
+  dp_flag_cl: "Chile", dp_flag_pe: "Peru", dp_flag_co: "Kolumbien", dp_flag_uy: "Uruguay",
+  dp_flag_ve: "Venezuela", dp_flag_ec: "Ecuador", dp_flag_bo: "Bolivien", dp_flag_py: "Paraguay",
   duckHeads: "Auf den Kopf",
   duckHeadsNote: "Mützen, Hüte und Kränze setzt sich die Ente auf den Kopf. Man kauft sie mit Teilen aus der Werkstatt, niemals mit Münzen. Was du kaufst, bleibt dir, und am Rennen ändert es nichts.",
   duckHeadNone: "Nichts auf dem Kopf",
@@ -5330,7 +5391,7 @@ const DUCK_BODY = [
    so are the eye and whatever is on the head, so no pattern can ever
    end up on the face. */
 const PAT_LAYER = "pat";
-const DUCK_PAT = [
+const DUCK_PATTERN = [
   // two colours of dot, so one of them stands out whatever the body is
   {id:"dp_puntiky", cost:6, draw:(g, rim) => {
     const B = g.B, H = g.H;
@@ -5407,13 +5468,6 @@ const DUCK_PAT = [
                    [H.x-8, H.y-8, 8, 6, 1], [H.x+6, H.y+2, 7, 6, 0], [H.x-9, H.y+6, 7, 5, 2]];
     return blobs.map(b => `<ellipse cx="${g.n(b[0])}" cy="${g.n(b[1])}" rx="${b[2]}" ry="${b[3]}" fill="${C[b[4]]}"/>`).join("");
   }},
-  // three bands right round the duck, high enough that the belly does
-  // not wash them out
-  {id:"dp_pasy", cost:16, draw:(g) => {
-    const B = g.B;
-    return [[-21, "#ff5d3b"], [-12, "#fdfdff"], [-3, "#2f6fd0"]].map(b =>
-      `<rect x="${g.n(B.x-B.rx-2)}" y="${g.n(B.y+b[0])}" width="${g.n(B.rx*2+4)}" height="9" fill="${b[1]}"/>`).join("");
-  }},
   // land and islands, the way they sit on a globe: a green dark enough
   // to be land on a pale duck and light enough to be land on a dark one
   {id:"dp_mapa", cost:16, draw:(g, rim) => {
@@ -5436,6 +5490,387 @@ const DUCK_PAT = [
         `<ellipse cx="${g.n(s[0])}" cy="${g.n(s[1])}" rx="${s[2]}" ry="${s[3]}" fill="#3f9e63" stroke="${rim}" stroke-width=".7"/>`).join("");
   }}
 ];
+
+/* --- flags ---
+   A flag is a pattern like any other, but forty eight of them arrive at
+   once and the whole point of them is that a child finds their own, so
+   they are drawn to one set of rules rather than one at a time.
+
+   The sheet. A flag is painted on the float, which is the biggest
+   single piece of the duck and happens to be about three by two, the
+   shape a flag already is. The clip the pattern layer carries takes it
+   the rest of the way: what runs past the float on to the chin goes
+   with it, and what runs past the duck is cut off.
+
+   The wing. The wing is drawn after the pattern, in the duck's own
+   colour, so it punches a hole in the middle left of every flag. That
+   is right, because a flag duck is still a mint duck or a coal duck and
+   the wing and the tail are what say so, but it means the middle of the
+   sheet cannot be relied on. So anything that is not a band goes at
+   `mx`, `my`: the clear field on the head side, where the wing never
+   reaches. Bands themselves keep their true order and direction.
+
+   The hoist goes to the head. Every flag here that carries a canton or
+   a hoist charge -- the stars and stripes, Cuba, Chile, Uruguay -- has
+   horizontal bands, and horizontal bands do not care which end is
+   which. Putting the canton at the head end therefore flips nothing
+   that can be seen, and it is the only end of the duck the wing leaves
+   alone. Flags with vertical bands are never flipped: which side the
+   green of Ireland or of Italy is on is the whole of what the flag
+   says.
+
+   Coats of arms. Fifteen of these flags are told from another flag in
+   the list by the arms in the middle and by nothing else, and an arms
+   drawn at tile size is a smudge. So no flag here carries arms: it
+   carries one simple mark in their place, big enough to read at the
+   size a garage tile is, a shield, a bird, a sun, a wreath, a badge or
+   a crown. The mark is not the arms and does not pretend to be; it is
+   the one shape of them a child can pick out. What matters is only that
+   Mexico cannot be taken for Italy or Slovakia for Slovenia, and that
+   is measured rather than judged: circuit 3g in `items.test.js` paints
+   every pair of flags on the duck sample by sample and fails when two
+   of them agree over too much of it.
+
+   A flag is a state symbol and not anybody's character, so the rule
+   about licensed characters does not reach it. The rule about drawing
+   does: these are flags, not coats of arms and not mascots. */
+const FLAG_COST = 8;
+/* Every flag costs the same, and that is deliberate: one country is not
+   rarer or dearer than another, and a child whose own flag came out
+   expensive would be paying for where they are from. Eight parts is
+   about half a workshop job, so the first flag is one afternoon and all
+   forty eight are a long way off. */
+function flagSheet(g){
+  const B = g.B;
+  return {x: B.x - B.rx - 4, y: B.y - B.ry - 2, w: B.rx * 2 + 8, h: B.ry * 2 + 6,
+          // where a mark can be seen: beside the wing and under the bill
+          mx: B.x + 17, my: B.y - 1,
+          // the same clear field higher up, for a canton
+          tx: B.x + 20, ty: B.y - 13,
+          // the piece of a middle band the wing leaves alone, which is
+          // the top of it: the wing starts at the waist, so a mark for a
+          // vertical flag goes high and comes out wide and shallow
+          cx: B.x + 1, cy: B.y - 14,
+          // and the shoulder, for a middle band wide enough to hold a
+          // mark beside the wing rather than above it
+          sx: B.x + 11, sy: B.y - 6};
+}
+const fRect = (x, y, w, h, c) =>
+  `<rect x="${svgn(x)}" y="${svgn(y)}" width="${svgn(w)}" height="${svgn(h)}" fill="${c}"/>`;
+const fPoly = (pts, c, rim) => `<polygon points="${pts.map(p => svgn(p[0]) + "," + svgn(p[1])).join(" ")}"`
+  + ` fill="${c}"${rim ? ` stroke="${rim}" stroke-width=".6"` : ""}/>`;
+const fDisc = (x, y, r, c, rim) => `<circle cx="${svgn(x)}" cy="${svgn(y)}" r="${svgn(r)}" fill="${c}"`
+  + `${rim ? ` stroke="${rim}" stroke-width=".6"` : ""}/>`;
+const fOval = (x, y, rx, ry, c, rim) => `<ellipse cx="${svgn(x)}" cy="${svgn(y)}" rx="${svgn(rx)}" ry="${svgn(ry)}"`
+  + ` fill="${c}"${rim ? ` stroke="${rim}" stroke-width=".6"` : ""}/>`;
+/* Bands across, top to bottom, and bands along, hoist to fly. The
+   weights are the real ones wherever a flag has them, so Spain keeps
+   its double yellow and Colombia its half of yellow. */
+function flagRows(F, cols, wts){
+  const w = wts || cols.map(() => 1), tot = w.reduce((a, b) => a + b, 0);
+  let y = F.y, out = "";
+  for(let i = 0; i < cols.length; i++){
+    const h = F.h * w[i] / tot;
+    out += fRect(F.x, y, F.w, h + .3, cols[i]);
+    y += h;
+  }
+  return out;
+}
+function flagCols(F, cols, wts){
+  const w = wts || cols.map(() => 1), tot = w.reduce((a, b) => a + b, 0);
+  let x = F.x, out = "";
+  for(let i = 0; i < cols.length; i++){
+    const q = F.w * w[i] / tot;
+    out += fRect(x, F.y, q + .3, F.h, cols[i]);
+    x += q;
+  }
+  return out;
+}
+/* The Nordic cross, with its upright standing toward the hoist, which
+   on a duck is the head end. Five flags are this shape and three of
+   them carry a second colour inside the arms, so the inner cross is
+   nearly half the width of the outer one: a hairline of blue inside
+   white would be Denmark with a smudge on it. */
+function flagCross(F, field, arm, inner){
+  const t = F.h * .23, cx = F.x + F.w * .655, cy = F.y + F.h * .5;
+  let out = fRect(F.x, F.y, F.w, F.h, field)
+    + fRect(F.x, cy - t / 2, F.w, t, arm) + fRect(cx - t / 2, F.y, t, F.h, arm);
+  if(inner){
+    const s = t * .44;
+    out += fRect(F.x, cy - s / 2, F.w, s, inner) + fRect(cx - s / 2, F.y, s, F.h, inner);
+  }
+  return out;
+}
+/* A bar along a diagonal of the sheet, which is how a saltire is built.
+   The thickness is given as the half height up the side rather than
+   across the bar, so the bar comes out about four fifths of it wide. */
+function flagDiag(F, down, v, c){
+  const x0 = F.x, x1 = F.x + F.w;
+  const y0 = down ? F.y : F.y + F.h, y1 = down ? F.y + F.h : F.y;
+  return fPoly([[x0, y0 - v], [x1, y1 - v], [x1, y1 + v], [x0, y0 + v]], c, "");
+}
+const fStar = (x, y, r, c, rim) => `<polygon points="${starPts(x, y, r)}" fill="${c}"`
+  + `${rim ? ` stroke="${rim}" stroke-width=".5"` : ""}/>`;
+/* A sun with rays, which Argentina and Uruguay wear and nobody else
+   does. Twelve rays rather than the real thirty two: at tile size
+   thirty two rays is a circle with a fuzzy edge. */
+function fSun(x, y, r, c, rim){
+  const p = [];
+  for(let i = 0; i < 24; i++){
+    const a = i * 15 * Math.PI / 180, q = i % 2 ? r * .58 : r;
+    p.push([x + q * Math.cos(a), y + q * Math.sin(a)]);
+  }
+  return fPoly(p, c, rim) + fDisc(x, y, r * .5, c, rim);
+}
+/* A shield, and it is the same shield on every flag that needs one, so
+   what tells Slovakia from Slovenia is what is on it and not the
+   outline of it. */
+const fShield = (x, y, r, c, rim) => `<path d="M${svgn(x - r)} ${svgn(y - r * .92)}`
+  + ` L${svgn(x + r)} ${svgn(y - r * .92)} L${svgn(x + r)} ${svgn(y + r * .12)}`
+  + ` L${svgn(x)} ${svgn(y + r)} L${svgn(x - r)} ${svgn(y + r * .12)} Z"`
+  + ` fill="${c}" stroke="${rim}" stroke-width=".7"/>`;
+/* A crown of three points, which is all a crown is at this size. */
+const fCrown = (x, y, r, c, rim) => fPoly([[x - r, y + r * .45], [x - r, y - r * .12],
+  [x - r * .58, y + r * .3], [x - r * .32, y - r * .62], [x, y + r * .18],
+  [x + r * .32, y - r * .62], [x + r * .58, y + r * .3], [x + r, y - r * .12],
+  [x + r, y + r * .45]], c, rim);
+/* A bird with its wings out, for the two flags whose arms hold a bird
+   and little else a child would pick out. It is a bird, not either of
+   those two birds. */
+const fBird = (x, y, r, c, rim) => fPoly([[x, y - r * .34], [x + r * .26, y - r * .5],
+  [x + r * .7, y - r * .74], [x + r, y - r * .42], [x + r * .55, y - r * .18],
+  [x + r * .86, y + r * .12], [x + r * .34, y + r * .06], [x + r * .2, y + r * .56],
+  [x, y + r * .34], [x - r * .2, y + r * .56], [x - r * .34, y + r * .06],
+  [x - r * .86, y + r * .12], [x - r * .55, y - r * .18], [x - r, y - r * .42],
+  [x - r * .7, y - r * .74], [x - r * .26, y - r * .5]], c, rim);
+/* A wreath: a ring of leaf green with whatever the flag puts inside. */
+const fWreath = (x, y, r, c, inner, rim) => fDisc(x, y, r, c, rim) + fDisc(x, y, r * .62, inner, "");
+/* The maple leaf, and the one drawing here that has to be the real
+   shape, because a red blob in the middle of Canada is not Canada. */
+const fLeaf = (x, y, r, c, rim) => fPoly([[0, -1], [.1, -.62], [.4, -.68], [.32, -.44],
+  [.76, -.08], [.62, .02], [.7, .28], [.34, .22], [.3, .36], [.1, .2], [.14, .8],
+  [-.14, .8], [-.1, .2], [-.3, .36], [-.34, .22], [-.7, .28], [-.62, .02],
+  [-.76, -.08], [-.32, -.44], [-.4, -.68], [-.1, -.62]].map(p => [x + p[0] * r, y + p[1] * r]), c, rim);
+
+/* The five shelves the garage hangs the flags on. A flag is a pattern,
+   so it lives in the pattern layer with the dots and the chequers, but
+   forty eight of them on one shelf would be a list to hunt through
+   rather than a shelf to look at. Five shelves by where the country is,
+   so a child opens one and is already most of the way to their own. */
+const DUCK_FLAG_SHELVES = [
+  {sec: "duckflagcesec", title: "duckFlagsCE", flags: [
+    // white over red with the blue wedge at the hoist, and the wedge is
+    // the flag: Poland is the same two bands without it, so it stays at
+    // the tail end, where it belongs, and takes the wing on the chin
+    ["cz", F => flagRows(F, ["#ffffff", "#d7141a"])
+      + fPoly([[F.x, F.y], [F.x + F.w * .54, F.y + F.h / 2], [F.x, F.y + F.h]], "#11457e", "")],
+    // white, blue and red, and the shield is what keeps it clear of
+    // Slovenia: a red one, with the double cross on it
+    ["sk", F => flagRows(F, ["#ffffff", "#0b4ea2", "#ee1c25"])
+      + fShield(F.mx, F.my, 9.6, "#d7132c", "#f4f7ff")
+      + fRect(F.mx - 1.5, F.my - 7.4, 3, 12.2, "#ffffff")
+      + fRect(F.mx - 4.4, F.my - 5.2, 8.8, 2.5, "#ffffff")
+      + fRect(F.mx - 6, F.my - 1.1, 12, 2.7, "#ffffff")
+      + fPoly([[F.mx - 6.4, F.my + 7], [F.mx - 2.2, F.my + 3.4], [F.mx + 2.2, F.my + 3.4],
+               [F.mx + 6.4, F.my + 7]], "#1f6fd0", "")],
+    ["pl", F => flagRows(F, ["#ffffff", "#dc143c"])],
+    ["hu", F => flagRows(F, ["#cd2a3e", "#ffffff", "#43764d"])],
+    ["at", F => flagRows(F, ["#ed2939", "#ffffff", "#ed2939"])],
+    ["de", F => flagRows(F, ["#101014", "#dd0000", "#ffce00"])],
+    // the cross does not reach the edges, and that is the whole
+    // difference between Switzerland and Denmark
+    ["ch", F => fRect(F.x, F.y, F.w, F.h, "#d52b1e")
+      + fRect(F.mx - 3.6, F.my - 10.4, 7.2, 20.8, "#ffffff")
+      + fRect(F.mx - 10.4, F.my - 3.6, 20.8, 7.2, "#ffffff")],
+    // white, blue and red again, and a blue shield with the mountain
+    // and the three stars on it
+    ["si", F => flagRows(F, ["#ffffff", "#1560bd", "#ed1c24"])
+      + fShield(F.tx - 3, F.ty + 3, 9.8, "#123f8c", "#f4f7ff")
+      + fPoly([[F.tx - 9.8, F.ty + 8.4], [F.tx - 5.6, F.ty + .4], [F.tx - 3, F.ty + 4],
+               [F.tx - .4, F.ty + .4], [F.tx + 3.8, F.ty + 8.4]], "#ffffff", "")
+      + fStar(F.tx - 7.4, F.ty - 2.6, 2.7, "#ffd400", "")
+      + fStar(F.tx + 1.4, F.ty - 2.6, 2.7, "#ffd400", "")
+      + fStar(F.tx - 3, F.ty - 5.4, 2.7, "#ffd400", "")]
+  ]},
+  {sec: "duckflagwesec", title: "duckFlagsWE", flags: [
+    ["fr", F => flagCols(F, ["#0055a4", "#ffffff", "#ef4135"])],
+    ["be", F => flagCols(F, ["#191919", "#fdda24", "#ef3340"])],
+    // the deep blue of the Netherlands against the sky blue of
+    // Luxembourg is the only thing between these two, so neither of
+    // them is allowed to drift toward the other
+    ["nl", F => flagRows(F, ["#ae1c28", "#ffffff", "#21468b"])],
+    ["lu", F => flagRows(F, ["#ef3340", "#ffffff", "#4fc3f7"])],
+    ["gb", F => fRect(F.x, F.y, F.w, F.h, "#012169")
+      + flagDiag(F, true, 7.2, "#ffffff") + flagDiag(F, false, 7.2, "#ffffff")
+      + flagDiag(F, true, 3.4, "#c8102e") + flagDiag(F, false, 3.4, "#c8102e")
+      + fRect(F.x, F.y + F.h * .5 - 6.4, F.w, 12.8, "#ffffff")
+      + fRect(F.x + F.w * .5 - 6.4, F.y, 12.8, F.h, "#ffffff")
+      + fRect(F.x, F.y + F.h * .5 - 3.6, F.w, 7.2, "#c8102e")
+      + fRect(F.x + F.w * .5 - 3.6, F.y, 7.2, F.h, "#c8102e")],
+    ["ie", F => flagCols(F, ["#169b62", "#ffffff", "#ff883e"])],
+    // the armillary sphere, drawn as the sphere it is: a gold ball with
+    // rings round it and the little shield over it
+    ["pt", F => flagCols(F, ["#046a38", "#da291c"], [.45, .55])
+      + fDisc(F.x + F.w * .45, F.cy + 2.4, 8.2, "#f6c500", "#7a5200")
+      + fOval(F.x + F.w * .45, F.cy + 2.4, 8.2, 3.1, "#e0ab00", "")
+      + fOval(F.x + F.w * .45, F.cy + 2.4, 3.1, 8.2, "#e0ab00", "")
+      + fShield(F.x + F.w * .45, F.cy + 2.4, 3.8, "#ffffff", "#c0143c")],
+    // the yellow band is twice the red ones, which is half of what
+    // tells Spain from Austria; the crowned shield is the other half
+    ["es", F => flagRows(F, ["#aa151b", "#f1bf00", "#aa151b"], [1, 2, 1])
+      + fShield(F.mx, F.my + 2.2, 9, "#c60b1e", "#fbe9c0")
+      + fRect(F.mx - 8.6, F.my - 1.4, 17.2, 3.4, "#f1bf00")
+      + fCrown(F.mx, F.my - 9.4, 6.4, "#f6c500", "#7a5200")],
+    ["it", F => flagCols(F, ["#008c45", "#ffffff", "#cd212a"])],
+    ["mc", F => flagRows(F, ["#ce1126", "#ffffff"])],
+    ["li", F => flagRows(F, ["#002b7f", "#ce1126"])
+      + fCrown(F.tx - 2, F.ty + 3, 9.6, "#f6c500", "#7a5200")],
+    ["ad", F => flagCols(F, ["#10069f", "#fedd00", "#d50032"])
+      + fShield(F.cx, F.cy - .2, 7.4, "#f6c500", "#7a4a00")
+      + fRect(F.cx - 4.6, F.cy - 6.2, 2.6, 9.6, "#d50032")
+      + fRect(F.cx + 2, F.cy - 6.2, 2.6, 9.6, "#d50032")],
+    // the George Cross sits in the white half at the hoist, small, the
+    // way it does on the real flag
+    ["mt", F => flagCols(F, ["#ffffff", "#cf142b"])
+      + fRect(F.x + 8.6, F.y + 13.4, 12.4, 4.2, "#9aa3b4")
+      + fRect(F.x + 12.7, F.y + 9.3, 4.2, 12.4, "#9aa3b4")]
+  ]},
+  {sec: "duckflagnesec", title: "duckFlagsNE", flags: [
+    ["dk", F => flagCross(F, "#c60c30", "#ffffff", "")],
+    ["no", F => flagCross(F, "#ba0c2f", "#ffffff", "#00205b")],
+    ["se", F => flagCross(F, "#006aa7", "#fecc00", "")],
+    ["fi", F => flagCross(F, "#ffffff", "#003580", "")],
+    ["is", F => flagCross(F, "#02529c", "#ffffff", "#dc1e35")]
+  ]},
+  {sec: "duckflagnasec", title: "duckFlagsNA", flags: [
+    // thirteen stripes is what the flag has, and the canton is given
+    // the whole head end, where the wing is not
+    ["us", F => {
+      let out = "";
+      for(let i = 0; i < 13; i++)
+        out += fRect(F.x, F.y + F.h * i / 13, F.w, F.h / 13 + .3, i % 2 ? "#ffffff" : "#b31942");
+      out += fRect(F.x + F.w * .58, F.y, F.w * .42, F.h * 7 / 13, "#0a3161");
+      for(let r = 0; r < 3; r++) for(let c = 0; c < 4; c++)
+        out += fStar(F.x + F.w * .63 + c * 6.4 + (r % 2 ? 3.2 : 0), F.y + 5.2 + r * 7.4, 2.5, "#ffffff", "");
+      return out;
+    }],
+    // the white half is half the flag, so the leaf fits beside the wing
+    // rather than above it and can be drawn the size it deserves
+    ["ca", F => flagCols(F, ["#d52b1e", "#ffffff", "#d52b1e"], [1, 2, 1])
+      + fLeaf(F.sx, F.sy, 8.4, "#d52b1e", "#7a1109")],
+    // green, white and red like Italy, and the bird on the white band
+    // is the only thing that says which is which, so it is as big as
+    // the band will take
+    ["mx", F => flagCols(F, ["#006341", "#ffffff", "#ce1126"])
+      + fBird(F.cx, F.cy + 1.2, 11, "#6b4423", "#2a1a08")],
+    ["gt", F => flagCols(F, ["#4997d0", "#ffffff", "#4997d0"])
+      + fWreath(F.cx, F.cy - .5, 7.2, "#2f7d32", "#f2f6ff", "#1a4d1c")
+      + fRect(F.cx - 5.6, F.cy - 2, 11.2, 3, "#6fb3e0")],
+    /* Three of these are blue, white, blue with something in the
+       middle, and on a tile the something is a few dozen pixels: on the
+       first measurement they agreed over ninety per cent of the duck.
+       So two things are done about them. The marks are made as unlike
+       one another as they can be -- a triangle, five stars, a round
+       badge -- and the blues are pulled to the ends of the range these
+       three flags are really drawn in: Honduras is the turquoise one,
+       Nicaragua the cobalt, El Salvador the deep one. The shades are
+       not invented, they are chosen, and they are chosen so that no two
+       of the three sit within 25 dE of each other. */
+    ["sv", F => flagRows(F, ["#0a2a68", "#ffffff", "#0a2a68"])
+      + fPoly([[F.mx - 9.8, F.my + 6.8], [F.mx, F.my - 7.8], [F.mx + 9.8, F.my + 6.8]], "#f6c500", "#0a2a68")
+      + fPoly([[F.mx - 5.6, F.my + 3], [F.mx, F.my - 2.6], [F.mx + 5.6, F.my + 3]], "#d7132c", "")],
+    /* Honduras is also the one flag in the list that Argentina could be
+       taken for, and the two really are the same flag in the same pale
+       blue. Argentina's celeste is not going to be washed out to win a
+       measurement, so what separates them here is the middle: a gold
+       sun against five dark stars, both of them drawn as big as the
+       clear field will take. */
+    ["hn", F => flagRows(F, ["#00a0d8", "#ffffff", "#00a0d8"])
+      + fStar(F.mx, F.my, 4.4, "#0a3f8c", "#f6f8ff")
+      + fStar(F.mx - 8.8, F.my - 5.8, 4.4, "#0a3f8c", "#f6f8ff")
+      + fStar(F.mx + 8.8, F.my - 5.8, 4.4, "#0a3f8c", "#f6f8ff")
+      + fStar(F.mx - 8.8, F.my + 5.8, 4.4, "#0a3f8c", "#f6f8ff")
+      + fStar(F.mx + 8.8, F.my + 5.8, 4.4, "#0a3f8c", "#f6f8ff")],
+    ["ni", F => flagRows(F, ["#1565c0", "#ffffff", "#1565c0"])
+      + fDisc(F.mx, F.my, 10, "#f6f8ff", "#0a2a68")
+      + fPoly([[F.mx - 6.8, F.my + 4.8], [F.mx, F.my - 5.6], [F.mx + 6.8, F.my + 4.8]], "#4aa3e8", "")
+      + fRect(F.mx - 5.2, F.my + 5.8, 10.4, 2.6, "#2f7d32")],
+    // five bands and not three, and the red one twice the others: that
+    // is what keeps Costa Rica clear of the Netherlands
+    ["cr", F => flagRows(F, ["#002b7f", "#ffffff", "#ce1126", "#ffffff", "#002b7f"], [1, 1, 2, 1, 1])],
+    ["pa", F => fRect(F.x, F.y, F.w, F.h, "#ffffff")
+      + fRect(F.x, F.y, F.w * .5, F.h * .5, "#da121a")
+      + fRect(F.x + F.w * .5, F.y + F.h * .5, F.w * .5, F.h * .5, "#072357")
+      + fStar(F.x + F.w * .75, F.y + F.h * .25, 6.6, "#072357", "")
+      + fStar(F.x + F.w * .25, F.y + F.h * .75, 6.6, "#da121a", "")],
+    ["cu", F => {
+      let out = "";
+      for(let i = 0; i < 5; i++)
+        out += fRect(F.x, F.y + F.h * i / 5, F.w, F.h / 5 + .3, i % 2 ? "#ffffff" : "#002a8f");
+      return out + fPoly([[F.x + F.w, F.y], [F.x + F.w, F.y + F.h], [F.x + F.w * .46, F.y + F.h * .5]], "#cf142b", "")
+        + fStar(F.x + F.w * .83, F.y + F.h * .5, 6.6, "#ffffff", "");
+    }],
+    // the white cross and the four quarters are the whole of what a
+    // child reads here, and no other flag in the list is quartered, so
+    // the arms in the middle would fall under the wing for nothing
+    ["do", F => fRect(F.x, F.y, F.w, F.h, "#ffffff")
+      + fRect(F.x, F.y, F.w * .44, F.h * .42, "#ce1126")
+      + fRect(F.x + F.w * .56, F.y, F.w * .44, F.h * .42, "#002d62")
+      + fRect(F.x, F.y + F.h * .58, F.w * .44, F.h * .42, "#002d62")
+      + fRect(F.x + F.w * .56, F.y + F.h * .58, F.w * .44, F.h * .42, "#ce1126")],
+    ["jm", F => fRect(F.x, F.y, F.w, F.h, "#1a1a1a")
+      + fPoly([[F.x, F.y], [F.x + F.w, F.y], [F.x + F.w * .5, F.y + F.h * .5]], "#009b3a", "")
+      + fPoly([[F.x, F.y + F.h], [F.x + F.w, F.y + F.h], [F.x + F.w * .5, F.y + F.h * .5]], "#009b3a", "")
+      + flagDiag(F, true, 6.4, "#fed100") + flagDiag(F, false, 6.4, "#fed100")]
+  ]},
+  {sec: "duckflagsasec", title: "duckFlagsSA", flags: [
+    ["br", F => fRect(F.x, F.y, F.w, F.h, "#009739")
+      + fPoly([[F.x + 3, F.y + F.h * .5], [F.x + F.w * .5, F.y + 3],
+               [F.x + F.w - 3, F.y + F.h * .5], [F.x + F.w * .5, F.y + F.h - 3]], "#fedd00", "")
+      + fDisc(F.mx - 4, F.my - 2, 9.8, "#012169", "#f6f8ff")
+      + fPoly([[F.mx - 13.4, F.my - 3.2], [F.mx + 5.2, F.my - 5.8], [F.mx + 5.4, F.my - 2.4],
+               [F.mx - 13.2, F.my - .2]], "#ffffff", "")],
+    ["ar", F => flagRows(F, ["#74acdf", "#ffffff", "#74acdf"])
+      + fSun(F.mx, F.my, 9.6, "#f6b40e", "#9a6b00")],
+    ["cl", F => flagRows(F, ["#ffffff", "#d52b1e"])
+      + fRect(F.x + F.w * .64, F.y, F.w * .36, F.h * .5, "#0039a6")
+      + fStar(F.x + F.w * .82, F.y + F.h * .25, 7.6, "#ffffff", "")],
+    ["pe", F => flagCols(F, ["#d91023", "#ffffff", "#d91023"])],
+    ["co", F => flagRows(F, ["#fcd116", "#003893", "#ce1126"], [2, 1, 1])],
+    ["uy", F => {
+      let out = "";
+      for(let i = 0; i < 9; i++)
+        out += fRect(F.x, F.y + F.h * i / 9, F.w, F.h / 9 + .3, i % 2 ? "#0038a8" : "#ffffff");
+      return out + fRect(F.x + F.w * .58, F.y, F.w * .42, F.h * 5 / 9, "#ffffff")
+        + fSun(F.tx, F.ty + 1, 8.6, "#fcd116", "#9a6b00");
+    }],
+    ["ve", F => flagRows(F, ["#ffcc00", "#00247d", "#cf142b"])
+      + [-2.4, -1.4, -.5, .5, 1.4, 2.4].map(k =>
+          fStar(F.mx + k * 4.6, F.my + .6 + k * k * .7, 3.1, "#ffffff", "")).join("")],
+    // Ecuador and Colombia are the same three bands in the same widths,
+    // so the condor has to be the size of the difference
+    ["ec", F => flagRows(F, ["#ffd100", "#0072ce", "#ef3340"], [2, 1, 1])
+      + fOval(F.mx, F.my + 4.4, 9.6, 5.6, "#f6f8ff", "#0a3161")
+      + fRect(F.mx - 5.2, F.my + 2.6, 10.4, 4, "#5ba3d0")
+      + fBird(F.mx, F.my - 3.6, 10.4, "#3a3f4a", "#f6f8ff")],
+    ["bo", F => flagRows(F, ["#da291c", "#f4e400", "#007a33"])
+      + fWreath(F.mx, F.my, 9.2, "#2f7d32", "#fbe9c0", "#1a4d1c")
+      + fSun(F.mx, F.my, 4.8, "#f6b40e", "#9a6b00")],
+    // red, white and blue across, exactly like the Netherlands, so the
+    // wreath in the middle is the flag
+    ["py", F => flagRows(F, ["#d52b1e", "#ffffff", "#0038a8"])
+      + fWreath(F.mx, F.my, 9.6, "#2f7d32", "#ffffff", "#1a4d1c")
+      + fStar(F.mx, F.my, 5.4, "#f6c500", "#7a5200")]
+  ]}
+].map(sh => ({sec: sh.sec, title: sh.title,
+  list: sh.flags.map(f => ({id: "dp_flag_" + f[0], cost: FLAG_COST,
+                            draw: g => f[1](flagSheet(g))}))}));
+/* Every flag in one list, and then the pattern layer, which is the nine
+   drawn patterns and the forty eight flags together: a flag is bought,
+   worn and taken off exactly like a chequered duck, and nothing outside
+   the garage needs to know which of the two it is. */
+const DUCK_FLAG = DUCK_FLAG_SHELVES.reduce((all, sh) => all.concat(sh.list), []);
+const DUCK_PAT = DUCK_PATTERN.concat(DUCK_FLAG);
 
 /* --- what goes on the head ---
    Twenty things, and every one of them a thing: a hat, a band, a
@@ -6063,7 +6498,27 @@ function partInk(frag, rim, hues){
 /* Every layer's catalogue in one list, so a part can be looked up by
    id without anybody having to know which layer it came from. */
 const DUCK_PARTS = DUCK_BODY.concat(DUCK_PAT, DUCK_HEAD, DUCK_EYE, DUCK_GEAR);
-const duckPartById = id => DUCK_PARTS.find(x => x.id === id) || null;
+/* A part that has left the catalogue and been taken over by another
+   one, and the whole of why this exists is the rule in section 3: a
+   part a child has already bought must never be able to go missing.
+   `dp_pasy` was three bands round the duck, red, white and blue, which
+   is the flag of the Netherlands drawn without saying so, and when the
+   flags arrived it was the flag that stayed. So the id is not deleted
+   and is not rewritten in anybody's profile either -- nothing is
+   written at all. It simply answers with its successor: a child who
+   bought the three bands owns the Dutch flag, wears the Dutch flag if
+   that is what they had on, and reads its name under it.
+   Asked in the other direction, a successor is owned by whoever owns
+   any of the ids that lead to it. */
+const DUCK_HEIR = {dp_pasy: "dp_flag_nl"};
+const duckPartById = id => DUCK_PARTS.find(x => x.id === (DUCK_HEIR[id] || id)) || null;
+/* Which ids count as this part when the question is whether a child
+   has already paid for it. */
+const duckPaidAs = part => [part.id].concat(
+  Object.keys(DUCK_HEIR).filter(old => DUCK_HEIR[old] === part.id));
+/* What to call a part somebody is wearing, when the id they are wearing
+   may be one that has since been taken over. */
+const duckPartName = id => { const q = duckPartById(id); return q ? t(q.id) : ""; };
 /* A part knows which layer it belongs to from its id, so no catalogue
    entry can be filed under the wrong one by hand. */
 const DUCK_LAYER_BY_PREFIX = {db: BODY_LAYER, dp: PAT_LAYER, dh: HEAD_LAYER,
@@ -6071,7 +6526,8 @@ const DUCK_LAYER_BY_PREFIX = {db: BODY_LAYER, dp: PAT_LAYER, dh: HEAD_LAYER,
 const duckLayerOf = part => DUCK_LAYER_BY_PREFIX[part.id.slice(0, 2)];
 /* The free part of a layer belongs to everyone from the start, exactly
    like the starter racers; the rest are paid for once and kept. */
-const ownsDuckPart = (p, part) => part.cost === 0 || (p.duckParts || []).includes(part.id);
+const ownsDuckPart = (p, part) => part.cost === 0
+  || duckPaidAs(part).some(id => (p.duckParts || []).includes(id));
 /* Putting a part on is the only thing that changes; `duckParts` only
    ever grows. An empty id means the layer goes bare, which is how the
    layers after the body will be taken off again. */
@@ -9656,12 +10112,17 @@ function garageShelves(p){
   for(const spec of DUCK_LAYERS){
     // a layer that cannot be empty is wearing its first part when the
     // profile says nothing, the same way the duck is drawn
-    const worn = (p.duck || {})[spec.layer] || (spec.none ? "" : spec.list[0].id);
+    const id = (p.duck || {})[spec.layer] || (spec.none ? "" : spec.list[0].id);
+    // and a layer hanging on more than one shelf says what is worn only
+    // on the shelf the worn part is actually on, so five flag shelves
+    // do not all claim the same flag
+    const part = duckPartById(id);
+    const worn = part && spec.list.indexOf(part) >= 0 ? duckPartName(id) : "";
     out.push({
       sec: spec.sec, title: t(spec.title), note: t(spec.note),
       list: spec.list, word: "shelfPart",
-      owns: part => ownsDuckPart(p, part),
-      worn: worn ? t(worn) : "",
+      owns: q => ownsDuckPart(p, q),
+      worn: worn,
       cells: () => duckPartCells(p, spec)
     });
   }
@@ -9801,7 +10262,8 @@ function paintCells(p){
    dressed the way the child has it, with this one part swapped in, so
    the tile is a preview of their own duck. */
 function duckPartCells(p, spec){
-  const worn = (p.duck || {})[spec.layer] || "";
+  const wornPart = duckPartById((p.duck || {})[spec.layer] || "");
+  const worn = wornPart ? wornPart.id : "";
   let i = 0;
   const tile = (id, label, on, owned) => `<button class="item ${on ? "sel" : ""}"
     data-act="${owned ? "useduck" : "buyduck"}" data-id="${id}" data-layer="${spec.layer}">
@@ -9810,11 +10272,36 @@ function duckPartCells(p, spec){
   </button>`;
   // a layer that can be taken off gets an empty tile first, the way the
   // paints do; the body has none, because a duck cannot be colourless
+  /* An unbought part says what it costs, because the whole catalogue is
+     meant to be readable with its prices from the first day. A flag says
+     what it costs and which country it is: every flag costs the same, so
+     the price on its own tells a child nothing, and the name is the one
+     thing they came to the shelf to look for. */
+  const label = part => ownsDuckPart(p, part) ? t(part.id)
+    : spec.byName ? t(part.id) + `<span class="cost">&#9881; ${part.cost}</span>`
+    : "&#9881; " + part.cost;
   return (spec.none ? tile("", t(spec.none), !worn, true) : "")
-    + spec.list.map(part => tile(part.id,
-        ownsDuckPart(p, part) ? t(part.id) : "&#9881; " + part.cost,
+    + shelfOrder(spec).map(part => tile(part.id, label(part),
         worn === part.id || (!worn && !spec.none && part === spec.list[0]),
         ownsDuckPart(p, part))).join("");
+}
+/* The order the tiles of one shelf come out in. Everywhere the price
+   decides it the catalogue is already written that way, so the list is
+   handed back untouched; a shelf of flags, where every tile costs the
+   same, is put in name order instead, because a child who is looking
+   for one particular country is reading the names and nothing else.
+   The comparison folds accents away by hand rather than asking the
+   browser, so the shelf comes out in the same order on every phone. */
+const NAME_FOLD = {"á":"a","ä":"a","č":"c","ď":"d","é":"e","ě":"e","í":"i","ľ":"l","ĺ":"l",
+  "ň":"n","ó":"o","ö":"o","ô":"o","ř":"r","š":"s","ť":"t","ú":"u","ů":"u","ü":"u",
+  "ý":"y","ž":"z","ß":"ss"};
+const nameKey = s => String(s).toLowerCase().split("").map(c => NAME_FOLD[c] || c).join("");
+function shelfOrder(spec){
+  if(!spec.byName) return spec.list;
+  return spec.list.slice().sort((a, b) => {
+    const x = nameKey(t(a.id)), y = nameKey(t(b.id));
+    return x < y ? -1 : x > y ? 1 : 0;
+  });
 }
 /* Putting the picture into one waiting tile. Everything it needs stands
    on the tile itself, so this draws exactly what the cell would have
@@ -9852,14 +10339,29 @@ function mountCollection(){
    because it is the one that is never empty, then what is painted on,
    what goes on the head, what goes over the eye and what the duck
    carries. Cheapest part first inside each of them, so the first tile
-   a child sees is one they can afford. */
+   a child sees is one they can afford.
+
+   A shelf is not the same thing as a layer any more. The pattern layer
+   holds fifty seven parts, and fifty seven tiles on one shelf is a list
+   to hunt through: so it hangs on six shelves, the drawn patterns and
+   then the flags by where the country is. All six wear into the same
+   layer, so a flag and a chequered pattern take each other off exactly
+   as two patterns always did, and every one of them offers the empty
+   tile, because a child takes a flag off from wherever they are
+   standing. Flags are sorted by name in whichever language the child is
+   reading, which is the only order that can help in all three.
+   (Decided 14 September 2026, when the flags arrived.) */
 const DUCK_LAYERS = [
   {layer: BODY_LAYER, list: DUCK_BODY, sec: "duckbodysec", title: "duckBodies", note: "duckBodiesNote"},
-  {layer: PAT_LAYER,  list: DUCK_PAT,  sec: "duckpatsec",  title: "duckPats",   note: "duckPatsNote",  none: "duckPatNone"},
+  {layer: PAT_LAYER,  list: DUCK_PATTERN, sec: "duckpatsec", title: "duckPats", note: "duckPatsNote", none: "duckPatNone"}
+].concat(DUCK_FLAG_SHELVES.map(sh => ({
+  layer: PAT_LAYER, list: sh.list, sec: sh.sec, title: sh.title,
+  note: "duckFlagsNote", none: "duckPatNone", byName: true
+}))).concat([
   {layer: HEAD_LAYER, list: DUCK_HEAD, sec: "duckheadsec", title: "duckHeads",  note: "duckHeadsNote", none: "duckHeadNone"},
   {layer: EYE_LAYER,  list: DUCK_EYE,  sec: "duckeyesec",  title: "duckEyes",   note: "duckEyesNote",  none: "duckEyeNone"},
   {layer: GEAR_LAYER, list: DUCK_GEAR, sec: "duckgearsec", title: "duckGear",   note: "duckGearNote",  none: "duckGearNone"}
-];
+]);
 /* Where parts go, and the one place that knows it. Parts buy two
    different things now, paints for the machines and an outfit for the
    duck, so the workshop can say what they are for and send the child

@@ -738,15 +738,18 @@ console.log('--- kacenciny barvy ---');
 // dily kacenky se kupuji za tutez menu jako natery, tedy za soucastky
 // z dilny, nikdy za mince; mincim se po nakupu nesmi stat vubec nic
 const minciPred=DBg().profiles[0].coins, soucastekPred=DBg().profiles[0].parts;
-// pet vrstev pod natery: deset barev, deset vzoru, dvacet dilu na
-// hlavu, devet na oci a sestnact kusu vybavy. Cisla se posunula krokem
-// H4 vedome: k 39 placenym dilum z H2 a H3 pribylo 25, tedy 64
-// k odemceni, a k jedinemu dilu zdarma (klasicka zluta) pribyly ctyri
-// prazdne dlazdice, tedy pet dlazdic, na ktere se klepne bez placeni
-// Vrstvy jsou od rozhodnuti R11 police, ktere se sklada a rozbaluje;
-// pocty dilu se tim nezmenily, jen se k nim dochazi po jedne polici.
+// pet vrstev pod natery: deset barev, devet vzoru a osmactyricet
+// vlajek, dvacet dilu na hlavu, devet na oci a sestnact kusu vybavy.
+// Cisla se posunula dvakrat vedome: krokem H4 z 39 na 64 placenych
+// dilu, a prichodem vlajek na 111, protoze tri pasy odesly (zustaly
+// jako nizozemska vlajka) a osmactyricet vlajek prislo.
+// Vrstvy jsou od rozhodnuti R11 police, ktere se sklada a rozbaluje,
+// a vrstva Vzor od prichodu vlajek visi na sesti policich naraz: devet
+// kreslenych vzoru a pet polic vlajek podle svetadilu. Kazda z nich ma
+// svou prazdnou dlazdici, protoze vlajka se sunda odkudkoli.
 const SEC={body:'duckbodysec',pat:'duckpatsec',head:'duckheadsec',eye:'duckeyesec',gear:'duckgearsec'};
-const vrstvy=Object.keys(SEC).map(l=>SEC[l]);
+const vrstvy=JSON.parse(ev('JSON.stringify(DUCK_LAYERS.map(x=>x.sec))'));
+const vlajkovych=vrstvy.filter(x=>/flag/.test(x)).length;
 let kOdemceni=0, bezPlaceni=0, prazdnych=0;
 for(const s of vrstvy){
   shelf(s);
@@ -755,13 +758,17 @@ for(const s of vrstvy){
   prazdnych+=qa('#'+s+' [data-act="useduck"]').filter(b=>b.dataset.id==='').length;
 }
 ok('vrstvy kacenky jsou v garazi pod natery', vrstvy.every(s=>!!d.getElementById(s))
-   && kOdemceni===64, kOdemceni+' k odemceni');
+   && vrstvy.length===10 && vlajkovych===5
+   && kOdemceni===111, kOdemceni+' k odemceni na '+vrstvy.length+' policich');
 // klasicka zluta je zdarma, takze se nekupuje, jen vybira, a vrstvy,
 // ktere jdou sundat, maji prazdnou dlazdici
 shelf(SEC.body);
-ok('telo zdarma a ctyri prazdne dlazdice se nekupuji', bezPlaceni===5
+// prazdna dlazdice je na kazde polici, ze ktere jde dil sundat, tedy na
+// vsech krome tela: sest z nich je vzorovych, protoze vlajku ma jit
+// sundat z te police, na ktere dite zrovna stoji
+ok('telo zdarma a devet prazdnych dlazdic se nekupuji', bezPlaceni===10
    && qa('#'+SEC.body+' [data-act="useduck"]')[0].dataset.id==='db_klasik'
-   && prazdnych===4, bezPlaceni+' dlazdic bez placeni, z toho '+prazdnych+' prazdnych');
+   && prazdnych===9, bezPlaceni+' dlazdic bez placeni, z toho '+prazdnych+' prazdnych');
 const telo=qa('[data-act="buyduck"]')[0].dataset.id;
 const cenaTela=ev('duckPartById("'+telo+'").cost');
 click(qa('[data-act="buyduck"]')[0]); click(q('[data-yes]'));
@@ -836,15 +843,15 @@ click(qa('[data-act="pick"]')[0]);
 click(q('[data-act="collection"]'));
 const uzly=()=>d.getElementById('app').querySelectorAll('*').length;
 ok('prepnuti hrace police slozilo a garaz se otevira slozena',
-   qa('.shelf').length===6 && qa('.shelf.open').length===0 && qa('.shelf .grid').length===0,
+   qa('.shelf').length===11 && qa('.shelf.open').length===0 && qa('.shelf .grid').length===0,
    qa('.shelf.open').length+' otevrenych z '+qa('.shelf').length);
 // slozena police neni prazdne misto: rekne, co v ni je, kolik toho je,
 // kolik uz toho dite ma a od kolika, takze katalog s cenami nezmizel
 ok('slozena police rekne, co v ni je, kolik a od kolika',
-   qa('.shelfsub').length===6
-   && qa('.shelfsub').every(e=>/\d+ (dílů|nátěrů)/.test(e.textContent))
+   qa('.shelfsub').length===11
+   && qa('.shelfsub').every(e=>/\d+ (dílů|díly|nátěrů)/.test(e.textContent))
    && qa('.shelfsub').every(e=>/už máš/.test(e.textContent))
-   && qa('.shelfsub').filter(e=>/od \d+/.test(e.textContent)).length===6,
+   && qa('.shelfsub').filter(e=>/od \d+/.test(e.textContent)).length===11,
    qa('.shelfsub')[0].textContent+' | '+qa('.shelfsub')[1].textContent);
 // a police, ze ktere ma dite neco na sobe, to na sobe rekne, takze
 // slozena nikdy necte jako prazdna
@@ -885,19 +892,70 @@ ok('po priblizeni se dlazdice dokresli a uz neceka',
    qa('#duckheadsec .pic[data-draw]').length===0 && qa('#duckheadsec .pic svg').length===21,
    qa('#duckheadsec .pic svg').length+' kreseb');
 /* Strop poctu uzlu, a je to cele meritko rozhodnuti R11. Pred nim mela
-   garaz 2368 uzlu a 115 celych kreseb naraz. Dneska ma slozena 962 az
-   1009 podle toho, jak je kacenka oblecena, a s nejvetsi otevrenou
-   polici nejvys 1489. Padesat vlajek, ktere prijdou jako vzor na
-   kacenku, udela z police vzoru jednasedesat dlazdic a garaz s ni
-   otevrenou vyjde na 1537 uzlu, tedy porad hluboko pod stavem pred R11.
-   Strop 1800 ma na tech padesat vlajek rezervu zhruba sedmdesati
-   dalsich dlazdic a spadne, az garaz povyroste o dalsi takovy kus, nebo
-   az nekdo skladani ci line kresleni zase vypne: bez nich vyjde garaz
-   s vlajkami na 3713 uzlu. */
+   garaz 2368 uzlu a 115 celych kreseb naraz. Vlajky z ni udelaly 167
+   dlazdic, tedy o polovinu vic, a presto se nic nezhorsilo: slozena
+   garaz ma 992 az 1104 uzlu podle toho, kolik toho dite ma a jak je
+   kacenka oblecena, a s nejvetsi otevrenou polici nejvys 1519. Nejvetsi
+   police neni ta nejdelsi, ale ta nejhustsi, tedy vzory: dlazdic ma
+   deset, ale sachovnice i mapa sveta jsou samy o sobe dvacet tvaru.
+   Osmactyricet vlajek visi na peti policich misto na jedne, takze
+   nejdelsi otevrena police ma porad jednadvacet dlazdic jako pred nimi.
+   Strop 1800 nechava rezervu a spadne, az garaz povyroste o dalsi
+   takovy kus, nebo az nekdo skladani ci line kresleni vypne: bez nich
+   by dnesni garaz delala 6875 uzlu. */
 const STROP=1800;
 ok('slozena garaz drzi pod stropem uzlu', slozeno<=STROP, slozeno+' uzlu, strop '+STROP);
 ok('i s nejvetsi otevrenou polici drzi pod stropem uzlu',
    otevreno<=STROP, otevreno+' uzlu, strop '+STROP);
+console.log('--- vlajky v garazi ---');
+/* Osmactyricet vlajek je vic, nez mela cela vrstva Vzor predtim, a dite
+   v nich hleda jednu jedinou, tu svou. Police jsou proto podle
+   svetadilu a uvnitr podle jmena, a dlazdice nekoupene vlajky rekne
+   jmeno **i** cenu: kazda vlajka stoji stejne, takze samotna cena
+   neveze nic, a jmeno je to, kvuli cemu dite na polici prislo. */
+const flagSecs=JSON.parse(ev('JSON.stringify(DUCK_LAYERS.filter(x=>x.byName).map(x=>x.sec))'));
+ok('vlajky visi na peti policich podle svetadilu, ne na jedne dlouhe',
+   flagSecs.length===5 && flagSecs.every(x=>!!d.getElementById(x)), flagSecs.join(','));
+const ce=shelf('duckflagcesec');
+const ceJmena=qa('#duckflagcesec .item .nm').map(e=>e.textContent.replace(/\s*⚙.*$/,'').trim());
+ok('police vlajek je kratka a zacina prazdnou dlazdicou',
+   qa('#duckflagcesec .item').length===9 && ceJmena[0]==='Bez vzoru', ceJmena.length+' dlazdic');
+const razeno=ceJmena.slice(1);
+const podleJmena=razeno.slice().sort((a,b)=>a.localeCompare(b,'cs'));
+ok('vlajky jsou na polici podle jmena, protoze cena je u vsech stejna',
+   razeno.join('|')===podleJmena.join('|'), razeno.join(', '));
+ok('dlazdice nekoupene vlajky rekne jmeno i cenu',
+   qa('#duckflagcesec .item[data-act="buyduck"]').every(b=>/^\S/.test(b.querySelector('.nm').textContent)
+     && !!b.querySelector('.nm .cost') && /8/.test(b.querySelector('.nm .cost').textContent)),
+   qa('#duckflagcesec .item[data-act="buyduck"]')[0].querySelector('.nm').textContent);
+// a vlajka je vzor jako kazdy jiny: koupi se za soucastky, nasadi se do
+// vrstvy vzoru a sundat ji jde z kterekoli police te vrstvy
+ev('(function(){var p=P();p.parts=40;save();})(); render()');
+shelf('duckflagcesec');
+const ceskoBtn=qa('#duckflagcesec [data-act="buyduck"]').find(b=>b.dataset.id==='dp_flag_cz');
+click(ceskoBtn); click(q('[data-yes]'));
+ok('vlajka se koupi za soucastky a rovnou se nasadi',
+   DBg().profiles[0].duckParts.includes('dp_flag_cz')
+   && DBg().profiles[0].duck.pat==='dp_flag_cz' && DBg().profiles[0].parts===32,
+   DBg().profiles[0].parts+' soucastek, na sobe '+DBg().profiles[0].duck.pat);
+ok('koupena vlajka uz na dlazdici rika jen jmeno, cena z ni zmizela',
+   qa('#duckflagcesec [data-act="useduck"]').some(b=>b.dataset.id==='dp_flag_cz'
+     && !b.querySelector('.nm .cost') && /Česko/.test(b.querySelector('.nm').textContent)));
+// police vzoru i vsech pet polic vlajek jsou tataz vrstva, takze prazdna
+// dlazdice na kterekoli z nich vlajku sundá
+const jina=shelf('duckflagsasec');
+click(qa('#duckflagsasec [data-act="useduck"]').find(b=>b.dataset.id===''));
+ok('vlajku jde sundat i z jine police teze vrstvy',
+   DBg().profiles[0].duck.pat===undefined
+   && DBg().profiles[0].duckParts.includes('dp_flag_cz'),
+   JSON.stringify(DBg().profiles[0].duck));
+// a police rekne, co z ni ma dite na sobe, jen ta jedna, na ktere to je
+ev('(function(){var p=P();p.duck.pat="dp_flag_cz";save();})(); render()');
+ok('o nasazene vlajce mluvi jen police, na ktere opravdu visi',
+   qa('.shelfworn').filter(e=>/Česko/.test(e.textContent)).length===1
+   && q('#duckflagcesec .shelfworn')!==null,
+   qa('.shelfworn').map(e=>e.textContent).join(' | '));
+
 // a zbytek souboru at zase vidi cely katalog, jako ho vidi stary telefon
 ev('delete window.IntersectionObserver; render()');
 
@@ -946,7 +1004,7 @@ ok('s devíti soucastkami miri utrata na dil, ktery si dite koupi',
 // a zadna sekce plna cen, na ktere dite nedosahne
 const nula=stav(false,false,3);
 ok('bez soucastek na cokoli se utrata nenabizi, ale police zustavaji plne',
-   nula.cil===null && !nula.prazdno && nula.police.length===6, nula.police.length+' polic');
+   nula.cil===null && !nula.prazdno && nula.police.length===11, nula.police.length+' polic');
 ev('go("jobdone")');
 ok('na vysledku zakazky pak tlacitko utraty neni, cislo ale zustava penezenkou',
    q('[data-act="spendparts"]')===null && /celkem/.test(txt()), txt().slice(0,90));

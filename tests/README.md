@@ -67,8 +67,12 @@ its largest shelf open. It is written down for the same reason as the rest: the
 garage draws a whole machine, animal or duck per tile, so the number of tiles is
 the number of nodes, and the number has to be looked at when the catalogue grows
 rather than quietly recomputed. Before R11 the garage built 2368 nodes and 115
-whole drawings at once; it now builds 962 to 1489 depending on what the duck is
-wearing, and the fifty flags on their way will take the pattern shelf to 1537.
+whole drawings at once. The forty eight flags took the garage to 167 tiles and
+it still builds 992 to 1104 folded and at most 1519 with its largest shelf
+open, because the flags hang on five shelves by continent rather than on one:
+without folding and lazy drawing the same garage would build 6875. Circuit 3g
+of `items.test.js` owns the other half of the flags, whether a child can tell
+two of them apart, and it is a measurement rather than a look.
 
 A garage check that needs a shelf open has to open it the way a child does, by
 clicking the bar: `shelf(sec)` at the top of `flow.test.js` does that, and it is

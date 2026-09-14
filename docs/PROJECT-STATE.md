@@ -56,7 +56,7 @@ pokynu.
   jazycích.
 **Rozhodnutí R2 až R7, R10 a R11 padla** 13. a 14. září, všechna podle
 doporučení, a jsou v oddílu 9 plánu označená datem i krokem, ve kterém se
-udělala. **R11**, tedy 115 dlaždic garáže, padlo jako poslední: nejdřív se
+udělala. **R11**, tedy tehdejších 115 dlaždic garáže, padlo jako poslední: nejdřív se
 změřilo, pak přišly sbalitelné police, a protože samo sbalení na padesát
 chystaných vlajek nestačilo, i líné kreslení. Viz oddíl 7f a čísla v oddílu 9
 plánu.
@@ -64,22 +64,27 @@ plánu.
 **Stav v číslech.** Sedmadvacet tratí ve čtyřech světech, 108 palet prostředí,
 tři zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý
 43/44, třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová
-kačenka), osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934
-součástek v pěti vrstvách, 523 klíčů rozhraní ve třech jazycích, šest testových
-souborů.
+kačenka), osm nátěrů za 390 součástek a 112 dílů kačenčí výstroje za 1302
+součástek v pěti vrstvách, z toho 48 vlajek, 576 klíčů rozhraní ve třech
+jazycích, šest testových souborů.
 
 Mapa má podle ročníku 8 míst u prvňáka, 18 u druháka, 21 složeně a 28 rozbaleně
 u třeťáka a 27 u čtvrťáka; dílna je v každém z těch počtů jedno místo a za
-dveřmi má třeťák sedm tratí. Garáž **nabízí** 115 dlaždic, tedy 37 závodníků,
-devět nátěrů i s prázdnou dlaždicí a devětašedesát kačenčích dílů i se čtyřmi
-prázdnými, ale **kreslí jich nejvýš 58**: od rozhodnutí R11 jsou nátěry a pět
-kačenčích vrstev sbalitelné police a otevřená je vždycky jedna, viz oddíl 7f.
-Sbalená garáž má 962 až 1009 uzlů podle toho, jak je kačenka oblečená,
-s největší otevřenou policí nejvýš 1489; před R11 jich měla 2368.
+dveřmi má třeťák sedm tratí. Garáž **nabízí** 167 dlaždic, tedy 37 závodníků,
+devět nátěrů i s prázdnou dlaždicí a 121 kačenčích dílů i s devíti prázdnými,
+ale **naráz kreslí jen jednu polici a z ní zprvu osm dlaždic**: od rozhodnutí
+R11 jsou nátěry a kačenčí vrstvy sbalitelné police, otevřená je vždycky jedna
+a zbytku jejích dlaždic se kresba doplní, až se přiblíží k zornému poli, viz
+oddíl 7f. Polic je jedenáct, protože
+vrstva Vzor jich má šest: kreslené vzory a pět polic vlajek podle světadílu.
+Sbalená garáž má 992 až 1104 uzlů podle toho, kolik toho dítě má a jak je
+kačenka oblečená, s největší otevřenou policí nejvýš 1519; před R11 jich měla
+2368 při 115 dlaždicích a bez skládání a líného kreslení by dnešních 167
+dlaždic dělalo 6875.
 
-Testy jsou všechny zelené, tedy bez `!!`: `flow.test.js` 329 kontrol,
-`migration.test.js` 269, `style.test.js` 29, `items.test.js` pětapadesát okruhů,
-z nichž první sám ověří 14 240 vygenerovaných příkladů, `i18n.test.js` 523 klíčů
+Testy jsou všechny zelené, tedy bez `!!`: `flow.test.js` 337 kontrol,
+`migration.test.js` 290, `style.test.js` 29, `items.test.js` pětapadesát okruhů,
+z nichž první sám ověří 14 240 vygenerovaných příkladů, `i18n.test.js` 576 klíčů
 ve všech třech jazycích bez děr a `names.test.js` jména závodníků, dílů
 i cedulek sbalených polic ve třech jazycích.
 
@@ -129,8 +134,8 @@ Klávesnice se dá půjčit, obsluha ne: dílna má vlastní `jobKey()`.
 
 **H1 až H8** jsou první krok, který se netýká učiva. Sedmým startovním
 závodníkem je gumová kačenka zdarma a kupuje se u ní jen to, co má na sobě: pět
-nezávislých vrstev, 65 dílů, 392 700 kombinací, placené výhradně součástkami
-z dílny, čímž součástky dostaly druhé odbytiště. K tomu se dvanáct dnešních
+nezávislých vrstev, dnes 112 dílů a 2 070 600 kombinací, placené výhradně
+součástkami z dílny, čímž součástky dostaly druhé odbytiště. K tomu se dvanáct dnešních
 zvířat překreslilo tak, aby to byla poznatelná zvířata, a přibylo šestnáct
 nových, takže jich je osmadvacet. Celý model je v oddílu 7f.
 
@@ -139,9 +144,9 @@ v `docs/kurikulum/ZDROJE-RVP.md`, ze kterého vznikl krok G0 a rozhodnutí R8.
 A **karta o dobrovolné podpoře projektu** v rodičovské sekci, která splňuje tři
 pravidla z oddílu 13 a v dětské části se neobjeví vůbec nikde.
 
-**A pak padlo R11, protože do hry mají přijít vlajky.** Uživatel chce kolem
+**A pak padlo R11, protože do hry mají přijít vlajky.** Uživatel chtěl kolem
 padesáti vlajek jako vzor na kačenku, čímž by garáž narostla ze 115 dlaždic na
-165. Nejdřív se změřilo, jak plán žádal: garáž dneška 115 dlaždic, 2368 uzlů,
+165. Nejdřív se změřilo, jak plán žádal: garáž tehdejška 115 dlaždic, 2368 uzlů,
 159 kB; s vlajkami 165 dlaždic, 3713 uzlů, 251 kB. Pak se udělaly **sbalitelné
 police**, tedy nátěry a pět kačenčích vrstev, otevřená vždycky jedna, závodníci
 nikdy. A protože vlajky jdou do jediné vrstvy a police vzorů by měla
@@ -149,6 +154,17 @@ jednašedesát dlaždic a 2591 uzlů, tedy víc, než má dnes celá garáž, p�
 k tomu i **líné kreslení**: dlaždice otevřené police dostane kresbu, až se
 přiblíží k zornému poli. Celý model je v oddílu 7f, čísla a zdůvodnění v oddílu
 9 plánu u R11. Datový model se nezměnil a katalog se nezmenšil ani o dlaždici.
+
+**A pak přišly samy vlajky, taky ze zadání uživatele.** Osmačtyřicet vlajek
+západní a střední Evropy a celé Ameriky je vzor na kačenku, visí na pěti
+policích podle světadílu a každá stojí osm součástek. Dnešní díl `dp_pasy`, tedy
+tři pásy kolem kačenky, byl červený, bílý a modrý, tedy nizozemská vlajka
+nakreslená, aniž by to někdo řekl, a tou při té příležitosti zůstal: id se nemaže
+ani nepřepisuje v profilu, jen odpoví svým nástupcem, takže kdo tři pásy koupil,
+má nizozemskou vlajku. Patnáct vlajek se od jiné vlajky v seznamu liší jenom
+znakem uprostřed, a znak se v dlaždicové velikosti nakreslit nedá, takže žádná
+z nich znak nenese a nese místo něj jednu jednoduchou značku; jestli to stačí,
+se **měří** okruhem 3g v `items.test.js`, ne odhaduje. Podrobně v oddílu 7f.
 
 **Co zůstalo neověřené okem, a je to jediná věc, kterou tahle session udělat
 nemohla.** Rozvržení obrazovek se v sandboxu prohlédnout nedá: prohlížeč tam
@@ -215,7 +231,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 523 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 576 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -816,7 +832,7 @@ by ji minulo, přesně jako ji jednou minula rodičovská heatmapa.
 **Součástky jsou pořád jediná měna dílny** a mají podle roadmapy, oddíl 4,
 správný tvar, tedy klíč k obsahu místo platu za výkon. **Od kroku H kupují dvě
 různé věci**, nátěry na stroje (osm kusů za 390 součástek) a výstroj gumové
-kačenky (65 dílů za 934), a nic z toho nejde koupit za mince ani vyjezdit.
+kačenky (112 dílů za 1302), a nic z toho nejde koupit za mince ani vyjezdit.
 Druhé odbytiště je tam schválně: nátěry jsou po šestadvaceti plných zakázkách
 vykoupené a do té chvíle bylo číslo v dílně peněženka bez obchodu.
 
@@ -835,7 +851,7 @@ nic honit nemá.
 
 **Až je koupené všechno, číslo přestane být peněženka.** Tohle je dořešená
 otevřená otázka kroku 3b starého plánu. Podmínka je `shelvesEmpty(p)`, tedy
-koupené **nátěry i všech 65 dílů kačenky**; ani jedna polovina sama nestačí,
+koupené **nátěry i všech 112 dílů kačenky**; ani jedna polovina sama nestačí,
 protože dítě, které má všechny nátěry, má pořád kam dalším součástkám jít. Pak
 se přepne štítek pod celkovým číslem na výsledku zakázky (`statPartsAll` →
 `statPartsWork`) a věta v dílně (`shopPartsNote` → `shopPartsDone`), tlačítko
@@ -1681,11 +1697,11 @@ Kupuje se to, co má na sobě.
 
 **Proč vrstvy a ne hotové kačenky.** Kdyby byla každá kombinace vlastní
 položkou, byl by katalog nekonečný a dítě by pořád kupovalo něco skoro
-stejného. Takhle je v katalogu 65 dílů v pěti nezávislých vrstvách a poskládat
-se z nich dá 392 700 kačenek, přičemž **každý koupený díl je vidět hned a beze
-zbytku**. Vrstvy jsou Tělo (10 barev), Vzor (10), Na hlavu (20), Oči (9)
-a Výbava (16). Platí se výhradně součástkami z dílny, nikdy mincemi, viz
-oddíl 4b.
+stejného. Takhle je v katalogu 112 dílů v pěti nezávislých vrstvách a poskládat
+se z nich dá 2 070 600 kačenek, přičemž **každý koupený díl je vidět hned a beze
+zbytku**. Vrstvy jsou Tělo (10 barev), Vzor (57, z toho 9 kreslených vzorů a 48
+vlajek), Na hlavu (20), Oči (9) a Výbava (16). Platí se výhradně součástkami
+z dílny, nikdy mincemi, viz oddíl 4b.
 
 **Vrstva je jedno místo na kačence, na kterém smí být právě jeden díl.**
 V profilu je to `duck`, mapa vrstva → id dílu. Tělo je jediná vrstva, která
@@ -1774,14 +1790,97 @@ ne konkrétní filmová podoba. **Kontrolní otázka je jediná a platí pro ka�
 i pro každé zvíře: když se u kresby dá říct jméno postavy, je špatně.** Ptát se
 na ni je potřeba dřív, než se nový díl nakreslí, ne až potom.
 
+**Vlajky, a je jich ve vrstvě Vzor víc než kreslených vzorů.** Přišly ze zadání
+uživatele 14. září 2026, po dokončení kroku H: osmačtyřicet vlajek střední,
+západní a severní Evropy a celé Ameriky, tedy to, co uživatel vyjmenoval;
+Rusko, Asie, Blízký východ a Afrika se vynechávají. Chorvatsko v tom výčtu není,
+ačkoli se o něm uživatel zmínil v odstavci o znacích, takže se **nepřidalo**:
+schválený rozsah je ten výčet a přidat zemi do dětské hry není věc, kterou má
+udělat implementace sama. Vlajka je státní symbol, ne chráněné dílo, takže se na
+ni nedotknutelný princip o licencovaných postavičkách nevztahuje; kreslí se ale
+jako vlajka, ne jako znak a ne jako maskot.
+
+**Kreslí se na plovák, ne na celou kačenku.** Tělo je největší jeden kus kačenky
+a má zhruba tři ku dvěma, tedy tvar, který vlajka už je; ořez vrstvy vzoru ji
+dotáhne přes bradu a uřízne tam, kde kačenka končí. Hlava zůstává v barvě
+kačenky, protože oko a zobák musí zůstat čitelné: černá hlava Německa s tmavým
+okem uprostřed by byla kačenka bez obličeje.
+
+**Křídlo je díra uprostřed každé vlajky, a je tam schválně.** Kreslí se až nad
+vzorem a v barvě kačenky, takže vlajková kačenka je pořád mátová nebo uhlová a
+říká to křídlem a ocáskem. Znamená to ale, že na střed plováku se nedá
+spolehnout, a z toho plyne celé rozvržení: **pásy si drží své pravé pořadí
+a směr, a co není pás, jde na volné pole u hlavy**, kam křídlo nedosáhne.
+Vlajky s kantonem nebo s náložím u žerdi, tedy hvězdy a pruhy, Kuba, Chile a
+Uruguay, mají všechny vodorovné pásy, a těm je jedno, který konec je který:
+posunout kanton k hlavě tedy nepřeklopí nic, co je vidět. Vlajky se svislými
+pásy se nepřeklápějí nikdy, protože na které straně je zelená Irska a na které
+zelená Itálie, je celá ta vlajka.
+
+**Znaky se nekreslí a nahrazuje je jedna značka.** Patnáct vlajek se od jiné
+vlajky v seznamu liší jen znakem uprostřed, a znak nakreslený na dlaždici je
+šmouha. Žádná vlajka tady proto znak nenese: nese jednu jednoduchou značku na
+jeho místě, tedy štít, ptáka, slunce, věnec, odznak nebo korunu, dost velkou,
+aby se dala přečíst v dlaždicové velikosti. Značka není znak a netváří se tak;
+je to ten jeden tvar z něj, který dítě pozná. U dvou dvojic to samo nestačilo a
+pomohl odstín: Honduras, Nikaragua a Salvador dostaly tři modře z opačných konců
+rozsahu, ve kterém se ty tři vlajky opravdu kreslí, a slovinský štít sedí
+u žerdi nahoře, kam patří, kdežto slovenský uprostřed, takže ani nestojí na
+témže místě.
+
+**Poznatelnost se měří, ne odhaduje**, a dělá to okruh 3g v `items.test.js`.
+Kačenka se navzorkuje na mřížce 2627 bodů, do kterých jde jen to, na co dítě
+opravdu kouká: tělo a brada, na které je vzor ořezaný, bez křídla a bez
+obličeje, a s bříškem **přimíchaným**, ne vyříznutým, protože je to pětina bílé
+přes to, co je pod ním, a přesně o tolik rozdíl splaskne. Dvojice projde, když
+se obě vlajky liší o 25 ΔE nebo víc aspoň na dvanácti procentech té plochy;
+práh 25 ΔE je týž jako u palet a u těl. Nejtěsnější dvojice dneška jsou
+Nizozemsko a Paraguay (15,6 %) a Honduras a Argentina (15,6 %), pak Polsko
+a Chile (18,5 %), Česko a Polsko (20,4 %) a Dánsko a Norsko (20,5 %). Před
+předěláním byly nejtěsnější Honduras a Nikaragua na 10,2 %. Aby se to dalo
+měřit, smí vlajka kreslit **jen tvary, které si vzorkovač umí přečíst**, tedy
+obdélník, kruh, elipsu, mnohoúhelník a cestu ze samých úseček; křivka by ten
+okruh oslepila a test to hlídá.
+
+**Cena je u všech vlajek stejná**, osm součástek, tedy asi půl zakázky. Je to
+schválně: jedna země není vzácnější ani dražší než druhá a dítě, jehož vlajka by
+vyšla draho, by platilo za to, odkud je. Dohromady vlajky stojí 384 součástek a
+celý kačenčí katalog 1302. Dlaždice nekoupené vlajky proto říká **jméno i cenu**,
+ne jen cenu jako u ostatních dílů: když stojí všechny stejně, cena sama neveze
+nic a jméno je to, kvůli čemu dítě na polici přišlo.
+
+**Police jsou podle světadílu a uvnitř podle jména.** Osmačtyřicet dlaždic na
+jedné polici je seznam k prohledávání, ne police k prohlížení, a police jsou od
+R11 levné, takže vlajky visí na pěti: střední Evropa (8), západní Evropa (13),
+severní Evropa (5), Severní a Střední Amerika (12) a Jižní Amerika (10). Dítě
+tak otevře jednu a je skoro u své. Uvnitř police se řadí **podle jména
+v jazyce, ve kterém dítě čte**, protože cena je u všech stejná a jméno je jediné
+pořadí, které pomůže ve všech třech; srovnává se přes ručně sepsané složení
+diakritiky, ne přes prohlížeč, aby police vyšla stejně na každém telefonu.
+Všech šest polic vrstvy Vzor má prázdnou dlaždici, takže vlajka jde sundat
+z té, na které dítě zrovna stojí.
+
+**`dp_pasy` neskončil, jen dostal jméno.** Tři pásy kolem kačenky byly červený,
+bílý a modrý, tedy nizozemská vlajka nakreslená, aniž by to někdo řekl; při
+příchodu vlajek zůstala ta vlajka. Pravidlo z oddílu 3 říká, že koupený díl se
+nesmí ztratit, a tohle je způsob, jak to udělat, aniž by se cokoli přepsalo:
+`DUCK_HEIR` je mapa staré id → nástupce, `duckPartById()` na staré id odpoví
+nástupcem a `ownsDuckPart()` považuje nástupce za zaplacený, když má profil
+kterékoli z id, která k němu vedou. **Do profilu se nesahá vůbec**, takže staré
+id v něm zůstává a dvojí načtení nic nezmění; hlídá to fixtura
+`v15-pred-vlajkami` v `migration.test.js`, která nese profil s `dp_pasy`
+koupeným i nasazeným.
+
 **Garáž se skládá do polic a kreslí líně, a je to rozhodnutí R11 ze 14. září
-2026.** Dlaždic je 115 a sedmdesát z nich je celá kačenka, protože barevný
+2026.** Dlaždic bylo 115 a sedmdesát z nich je celá kačenka, protože barevný
 čtvereček dítěti neřekne, jak to bude vypadat; cena za to byl jeden pohled
 o 2368 uzlech a 159 kB, a s padesáti chystanými vlajkami by to bylo 3713 uzlů.
 Řeší to dvě věci najednou.
 
 **Police.** Nátěry a pět kačenčích vrstev je šest polic, které se skládají
-klepnutím na cedulku, a **otevřená je vždycky jedna**. Sbalená police se
+klepnutím na cedulku, a **otevřená je vždycky jedna**. Od příchodu vlajek je
+polic jedenáct, protože vrstva Vzor jich má šest; police není totéž co vrstva
+a všech šest vrstvě Vzor obléká tutéž vrstvu. Sbalená police se
 nekreslí vůbec, ne že by se schovala: `shelfHTML()` dostává buňky jako funkci,
 kterou u zavřené police nezavolá. Závodníci, tedy stroje, zvířata a kačenka,
 se **neskládají nikdy**; je to výběr závodníka, který se jen řadí a nikdy
@@ -1794,9 +1893,10 @@ nečte jako prázdná. Utrata součástek z dílny cílovou polici rovnou otevř
 profilu, přesně jako `PEEK` a `BACK` na mapě: do profilu se nedostane a zavření
 hry i přepnutí hráče polici složí.
 
-**Líné kreslení.** Samo sbalení na vlajky nestačí, protože vlajky jdou do jedné
-vrstvy a ta by měla jednašedesát dlaždic, tedy 2591 uzlů, víc, než má dnes celá
-garáž. Dlaždice otevřené police se proto píše ve dvou kusech: tlačítko se
+**Líné kreslení.** Samo sbalení na vlajky nestačilo, protože vlajky jdou do
+jedné vrstvy a ta by měla šestapadesát dlaždic na jedné polici, tedy víc uzlů,
+než měla tehdy celá garáž; rozdělení do pěti polic to zmenšilo, líné kreslení
+zbytek. Dlaždice otevřené police se proto píše ve dvou kusech: tlačítko se
 jménem a cenou, tedy to, co dítě čte a na co klepá, a kresba, kterou doplní
 `IntersectionObserver`, až se dlaždice přiblíží k zornému poli. Prvních osm
 dlaždice police se kreslí rovnou (`SHELF_EAGER`), aby police neotevřela řadu
@@ -1805,18 +1905,25 @@ dlaždici jako `data-draw`, takže obrazovka se pořád kreslí z profilu a `dra
 kreslí přesně to, co by nakreslila buňka. Prohlížeč bez `IntersectionObserver`
 dostane všechny kresby při připojení obrazovky, tedy přesně chování před R11.
 
-Čísla: sbalená garáž 962 až 1009 uzlů podle toho, jak je kačenka oblečená,
-s největší otevřenou policí nejvýš 1489, s padesáti vlajkami 1537. Hlídá to
-`flow.test.js` stropem **1800 uzlů**, měřeným na skutečném DOM se zaslepeným
-pozorovatelem; spadne, až garáž povyroste zhruba o dalších sedmdesát dlaždic,
-nebo až někdo skládání či líné kreslení vypne.
+Čísla: dlaždic je po vlajkách 167, tedy o polovinu víc než před R11, a přesto
+má sbalená garáž 992 až 1104 uzlů podle toho, kolik toho dítě má a jak je
+kačenka oblečená, a s největší otevřenou policí nejvýš 1519. Největší police
+není nejdelší, ale nejhustší, tedy kreslené vzory: dlaždic má deset, ale
+šachovnice i mapa světa jsou samy o sobě dvacet tvarů. Hlídá to `flow.test.js`
+stropem **1800 uzlů**, měřeným na skutečném DOM se zaslepeným pozorovatelem;
+bez skládání a líného kreslení by dnešní garáž dělala 6875 uzlů a spadla by
+šestkrát. Strop spadne, až garáž povyroste o další takový kus, a je to výzva
+podívat se na ni znovu, ne důvod strop zvednout.
 
 **Žádný díl nemá jiný atribut než kresbu a cenu.** Vzhled nemá na jízdu vliv,
 soupeřem zůstává vlastní nejlepší jízda a celý katalog i s cenami je vidět od
 první chvíle: nic se nelosuje, nic se nedá ztratit ani zdražit. Zdarma je jedině
-klasické žluté tělo, zbylých 64 dílů stojí 6 až 30 součástek; nejlevnější je
-levnější než polovina jedné zakázky, takže dítě, které dokončí jednu jedinou
-zakázku, si má vždycky co koupit.
+klasické žluté tělo, zbylých 111 dílů stojí 6 až 30 součástek a vlajky z nich
+všechny stejných osm; nejlevnější je levnější než polovina jedné zakázky, takže
+dítě, které dokončí jednu jedinou zakázku, si má vždycky co koupit, a svou
+vlajku si koupí po první zakázce. Celý katalog stojí 1302 součástek, z toho
+vlajky 384, takže posbírat je všechny je dlouhá cesta: zhruba pětadvacet
+zakázek jen na ně.
 
 ---
 
@@ -1887,7 +1994,8 @@ definici proti sobě samé a nechytila nic; jede pro měřítko 1 i 1,25, pro de
 všechny čtyři tvary karty, a porovnává i to, že `TX_BY_GRADE` v `app.js` říká
 totéž co `--tx` v CSS.
 
-**Krok H přidal šest okruhů a všechny čtou hotovou kresbu zpátky**, protože
+**Krok H přidal šest okruhů a vlajky sedmý, a všechny čtou hotovou kresbu
+zpátky**, protože
 samotnou kresbu žádný test neuvidí a prohlédnout ji musí člověk. Okruh 3a jde
 přes osmadvacet zvířat: id, tvar, obě barvy, cenu a české jméno má zamrazené
 v tabulce, protože na id visí zkušenosti a vlastnictví a na ceně to, na co dítě
@@ -1900,7 +2008,7 @@ na klobouk. Okruh 3c je deset těl, tedy že se každá barva opravdu vykreslí,
 si těla nejsou navzájem barevně blízko ani nesplývají s bílou dlaždicí garáže
 (zase v Lab, práh 25 ΔE), a že obléknutí jiné barvy nesahá na seznam koupených
 dílů.
-Okruhy 3d a 3e jsou zbylé čtyři vrstvy, tedy všech 55 vzorů, klobouků, očních
+Okruhy 3d a 3e jsou zbylé čtyři vrstvy, tedy všech 102 vzorů, klobouků, očních
 dílů a kusů výbavy vykreslených na kačenku a přečtených zpátky: žádný díl
 nesmí vyjet z rámu, žádný klobouk sedět na oku (měřeném jako kolečko) ani na
 zobáku (měřeném jako klín ze tří obdélníků, protože obdélník, do kterého se
@@ -1912,7 +2020,18 @@ z vrstvy Oči musí sedět na oku a zůstat pod `brim`, nic z výbavy nesmí nad
 takže zadní půlka výbavy musí stát před tělem a přední za vším ostatním.
 K tomu kontrola, kterou žádná jiná nenahradí: `DUCK.HEAD` se v testu posune
 a všech dvacet klobouků se musí pohnout s ní. Okruh 3f je kontrast dílu proti
-tělu přes všech 550 dvojic, viz oddíl 7f.
+tělu přes všech 1020 dvojic, viz oddíl 7f.
+
+**Okruh 3g jsou vlajky a je jediný, který kresbu nečte, ale maluje.** Katalog
+osmačtyřiceti vlajek, pět polic, stejná cena u všech a jméno ve třech jazycích;
+to, že tři pásy neskončily, ale odpovídají svým nástupcem, a že se při tom do
+profilu nesahá; a hlavně **poznatelnost, měřená a ne odhadovaná**: každá vlajka
+se vykreslí na mřížku 2627 vzorků na těle a bradě kačenky, bez křídla a bez
+obličeje a s přimíchaným bříškem, a každá z 1128 dvojic musí být vidět jinak
+aspoň na dvanácti procentech té plochy při 25 ΔE. Proto smí vlajka kreslit jen
+tvary, které si vzorkovač umí přečíst; křivka by ten okruh oslepila a test to
+hlídá zvlášť. Nejtěsnější dvojice test vypíše, takže se pozná, která z nich se
+po zásahu do kresby zhoršila.
 
 `flow.test.js` projede celou hru včetně volby učebnice a závodu s hodinami
 a na konci ověří, že rodičovská sekce má blok pro každou rodinu, kterou má
@@ -1949,11 +2068,11 @@ jako pozorovatele, který si dlaždice zapamatuje a nikdy nic neohlásí, tedy
 prohlížeč, ve kterém se ještě nikam neposunulo; zbytek souboru běží bez něj,
 což je záložní cesta pro starý telefon. A **strop 1800 uzlů** na celé
 obrazovce, sbalené i s největší otevřenou policí, měřený na skutečném DOM.
-Před R11 měla garáž 2368 uzlů, dneska 962 až 1489 podle stavu, a s padesáti
-chystanými vlajkami vyjde na 1537.
+Před R11 měla garáž 2368 uzlů při 115 dlaždicích; dneska jich má 167 a 992 až
+1519 uzlů podle stavu. Bez skládání a líného kreslení by to bylo 6875.
 
-`flow.test.js` má dnes **329 kontrol**, `migration.test.js` 269 a `style.test.js`
-29; `i18n.test.js` projde 523 klíčů ve třech jazycích a celý závod v každém
+`flow.test.js` má dnes **337 kontrol**, `migration.test.js` 290 a `style.test.js`
+29; `i18n.test.js` projde 576 klíčů ve třech jazycích a celý závod v každém
 z nich. Jak počet kontrol ve `flow.test.js` rostl: po kroku A 153, po B0 170,
 po B0b 175, po C 184, po D1 186, po D2 188, po D3 191, po D4 196, po celém
 kroku H 231, po E1 250 (z toho 246 po samotných dvou políčkách a čtyři až
@@ -3032,10 +3151,35 @@ k celému modelu jsou v oddílu 7f.
     ukáže špatně.
 11. **Do garáže se nesahá.** Police si velikost, ceny i větu o sobě počítá
     sama ze seznamu vrstvy, takže nový díl nikde jinde zapsaný být nemusí;
-    stačí, že stojí v `DUCK_*`. Jediné, co nový díl posune, je **strop uzlů**
+    stačí, že stojí v `DUCK_*`. Vrstva Vzor je jediná, kde police není totéž
+    co vrstva: visí na šesti a nová police je jeden řádek v `DUCK_LAYERS`. Jediné, co nový díl posune, je **strop uzlů**
     ve `flow.test.js`: dokud se do jedné vrstvy nepřidá víc než zhruba
     sedmdesát dlaždic, drží, a když spadne, je to výzva podívat se na garáž
     znovu, ne důvod strop zvednout. Viz oddíl 7f.
+
+### Kontrolní seznam pro novou vlajku
+
+Kratší, protože vlajka se nekreslí od nuly, ale jako řádek do jedné z pěti
+skupin v `DUCK_FLAG_SHELVES`. Podrobnosti jsou v oddílu 7f.
+
+1. **Rozsah.** Přidat zemi do dětské hry je věc uživatele, ne implementace.
+   Dnešní rozsah je střední, západní a severní Evropa a celá Amerika, tak jak
+   ho uživatel vyjmenoval.
+2. Řádek `["xx", F => ...]` do té skupiny, do které země patří; id vznikne jako
+   `dp_flag_xx` a cena je `FLAG_COST`, tedy stejná jako u všech ostatních.
+3. Jméno země pod tím id ve všech třech jazycích v `src/i18n.js`. Pořadí na
+   polici se nikam nepíše, počítá se ze jména.
+4. **Jen tvary, které se dají změřit:** obdélník, kruh, elipsa, mnohoúhelník
+   a cesta ze samých úseček, vždycky s výplní. Křivka oslepí okruh 3g.
+5. **Pásy v pravém pořadí a směru, značka na volné pole u hlavy.** Střed
+   plováku zakrývá křídlo. Vlajka se svislými pásy se nepřeklápí nikdy.
+6. **Žádný znak.** Když se vlajka bez znaku nedá odlišit od jiné, nakreslí se
+   místo znaku jedna jednoduchá značka, ne zmenšený znak.
+7. **Změřit.** `node tests/items.test.js` vypíše nejtěsnější dvojice; pod
+   dvanácti procenty okruh 3g spadne. Když spadne, je to výzva překreslit
+   značku nebo sáhnout na odstín, ne snížit práh.
+8. **Render a prohlédnutí** na klasické žluté v dlaždicové velikosti a pak
+   v mřížce se všemi ostatními, přes `cairosvg` podle oddílu 2.
 
 ### Kontrolní seznam pro nové zvíře
 

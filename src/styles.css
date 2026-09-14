@@ -597,7 +597,14 @@ html[data-w="tablet"][data-o="tall"] .keypad{width:100%;max-width:480px;margin:0
 .item.sel{border-color:var(--grape);background:var(--grape-soft);box-shadow:0 0 0 3px rgba(91,75,214,.16)}
 .item .pic{width:100%;aspect-ratio:1;display:grid;place-items:center}
 .item .pic svg{width:88%;height:88%}
-.item .nm{font-size:calc(12.5px * var(--tx));font-weight:800;text-align:center;line-height:1.15;color:var(--ink-soft)}
+/* a tile is about a hundred pixels wide and the longest label on one is
+   now a country: Lichtenštejnsko is one word and wider than that, so a
+   label breaks inside a word rather than hanging over the edge */
+.item .nm{font-size:calc(12.5px * var(--tx));font-weight:800;text-align:center;line-height:1.15;color:var(--ink-soft);
+  overflow-wrap:anywhere;hyphens:auto}
+/* the price under a name, on the one shelf where the tile has to carry
+   both: every flag costs the same, so the price alone says nothing */
+.item .nm .cost{display:block;font-weight:700;opacity:.72}
 .item.locked{background:var(--shell-2);border-style:dashed}
 .item.locked .pic{filter:grayscale(1) brightness(1.6) contrast(.35);opacity:.65}
 .item .lvl{position:absolute;top:5px;right:6px;font-size:calc(12.5px * var(--tx));font-weight:900;color:var(--sun-dark);background:#fff5df;border-radius:99px;padding:2px 5px}

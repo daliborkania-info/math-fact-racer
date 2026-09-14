@@ -2661,6 +2661,190 @@
      }
     ]
    }
+  },
+  {
+   "id": "v15-pred-vlajkami",
+   "note": "zari 2026, tretak z verze tesne pred vlajkami: kacenku uz zna, ma koupene tri kacenci dily a jeden z kazde vrstvy na sobe, a mezi nimi dp_pasy, tedy tri pasy, ktere pri prichodu vlajek prestaly byt vlastnim dilem a staly se nizozemskou vlajkou. Pravidlo z oddilu 3 rika, ze koupeny dil se nesmi ztratit, takze se id nemaze ani neprepisuje: profil si dal nese dp_pasy a nova verze na nej odpovi nastupcem. Po nacteni musi mit porad presne to, co mel, kacenka musi kreslit nizozemskou vlajku a police vlajek musi tu vlajku povazovat za zaplacenou",
+   "expectOpen": [
+    "a3",
+    "a5",
+    "a7",
+    "a10",
+    "a15",
+    "a20",
+    "bridge",
+    "t1",
+    "clock",
+    "a100"
+   ],
+   "expectClosed": [
+    "a1000",
+    "round",
+    "chain",
+    "ops",
+    "tens",
+    "units",
+    "beyond",
+    "d1"
+   ],
+   "expectChapter": null,
+   "expectWorld": "circuit",
+   "expectGrade": 3,
+   "expectStars": [
+    "m2x3",
+    "a4p6"
+   ],
+   "expectNoStars": [
+    "o1"
+   ],
+   "db": {
+    "current": "stareVl",
+    "sound": true,
+    "lang": "cs",
+    "pin": "h7f2x91",
+    "profiles": [
+     {
+      "id": "stareVl",
+      "name": "Nela",
+      "lang": "cs",
+      "facts": {
+       "m1x1": {
+        "lv": 5,
+        "reps": 14,
+        "ok": 14,
+        "bad": 0,
+        "best": 1050,
+        "seen": 1757600000000
+       },
+       "m2x3": {
+        "lv": 4,
+        "reps": 9,
+        "ok": 8,
+        "bad": 1,
+        "best": 1600,
+        "seen": 1757600000000
+       },
+       "a4p6": {
+        "lv": 5,
+        "reps": 11,
+        "ok": 11,
+        "bad": 0,
+        "best": 1200,
+        "seen": 1757600000000
+       },
+       "o1": {
+        "lv": 2,
+        "reps": 6,
+        "ok": 4,
+        "bad": 2,
+        "best": 4100,
+        "seen": 1757600000000
+       }
+      },
+      "stars": {
+       "m1x1": true,
+       "a4p6": true
+      },
+      "best": {
+       "t1": {
+        "dist": 109.5,
+        "hist": [
+         7.1,
+         13.9
+        ],
+        "n0": 20
+       },
+       "a100": {
+        "dist": 96,
+        "hist": [],
+        "n0": 20
+       }
+      },
+      "done": {
+       "t1": 3,
+       "a100": 2,
+       "clock": 1
+      },
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha",
+       "ri_ufo"
+      ],
+      "runner": "ri_ufo",
+      "xp": {
+       "pet_kiki": 310,
+       "pet_mecha": 65
+      },
+      "coins": 118,
+      "parts": 47,
+      "paints": [
+       "pa_neon",
+       "pa_lava"
+      ],
+      "paint": {
+       "ri_ufo": "pa_lava"
+      },
+      "jobRuns": {
+       "money": 5,
+       "count": 3
+      },
+      "trackRuns": {
+       "t1": 11,
+       "clock": 2,
+       "a100": 7
+      },
+      "opened": {
+       "a3": true,
+       "a5": true,
+       "a7": true,
+       "a10": true,
+       "a15": true,
+       "a20": true,
+       "bridge": true,
+       "t1": true,
+       "clock": true,
+       "a100": true
+      },
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "normal",
+      "curriculum": null,
+      "chapter": null,
+      "chapterMode": "soft",
+      "world": "circuit",
+      "grade": 3,
+      "streak": 2,
+      "lastDay": null,
+      "bestStreak": 9,
+      "runs": 20,
+      "totalOk": 331,
+      "totalAns": 402,
+      "msSum": 967000,
+      "msN": 388,
+      "created": 1757600000000,
+      "duckParts": [
+       "db_mint",
+       "dp_pasy",
+       "dh_ksilt"
+      ],
+      "duck": {
+       "body": "db_mint",
+       "pat": "dp_pasy",
+       "head": "dh_ksilt"
+      }
+     }
+    ]
+   },
+   "expectHeir": {
+    "old": "dp_pasy",
+    "heir": "dp_flag_nl",
+    "layer": "pat"
+   }
   }
  ]
 }

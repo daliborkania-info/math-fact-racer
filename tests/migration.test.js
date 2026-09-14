@@ -218,6 +218,31 @@ for(const c of FX.cases){
        pr.parts+' soucastek, natery '+(pr.paints||[]).join(','));
   }
 
+  /* dil, ktery odesel z katalogu a prevzal ho jiny: koupeny dil se
+     nesmi ztratit, a nesmi se ani prepsat. Stare id zustava v profilu
+     presne tak, jak tam bylo, a nova verze na nej odpovi nastupcem:
+     dite ho ma zaplaceny, nosi ho a cte pod nim jeho nove jmeno. */
+  if(c.expectHeir){
+    const pr=after.profiles[0], H=c.expectHeir;
+    ok('stare id zustalo v profilu nedotcene',
+       (pr.duckParts||[]).includes(H.old) && (pr.duck||{})[H.layer]===H.old,
+       JSON.stringify(pr.duckParts)+' / '+JSON.stringify(pr.duck));
+    ok('profil se nedozvedel o nastupci tim, ze by mu ho nekdo dopsal',
+       !(pr.duckParts||[]).includes(H.heir));
+    ok('dil je presto porad koupeny, jen uz se jmenuje jinak',
+       w.eval('ownsDuckPart(P(), duckPartById("'+H.heir+'"))')===true
+       && w.eval('duckPartById("'+H.old+'").id')===H.heir);
+    ok('kacenka ho ma porad na sobe a kresli ho',
+       w.eval('duckSVG(itemById("du_kacka"), P().duck)===duckSVG(itemById("du_kacka"), '
+         +'Object.assign({}, P().duck, {'+H.layer+':"'+H.heir+'"}))')===true
+       && w.eval('duckSVG(itemById("du_kacka"), P().duck)!==duckSVG(itemById("du_kacka"), '
+         +'Object.assign({}, P().duck, {'+H.layer+':""}))')===true);
+    ok('a v garazi se cte jeho jmeno, ne prazdno',
+       w.eval('duckPartName("'+H.old+'")')===w.eval('t("'+H.heir+'")')
+       && w.eval('duckPartName("'+H.old+'")').length>0,
+       w.eval('duckPartName("'+H.old+'")'));
+  }
+
   // svet: starsi profil patri do okruhu, protoze v nem uz hral, a zadny
   // svet mu nesmi vzit koupeneho zavodnika z nabidky
   if(c.expectWorld){

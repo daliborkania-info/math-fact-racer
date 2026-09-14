@@ -1567,6 +1567,23 @@ má 115 dlaždic, z toho 70 celých kačenek, a past z H5 je tedy o čtvrtinu ho
 než jak ji plán odhadoval. **R11 padlo 14. září 2026**, sbalitelné police plus
 líné kreslení; podrobnosti a naměřená čísla jsou u něj v oddílu 9.
 
+**A po dokončení celého kroku přišly ze zadání uživatele vlajky**, 14. září
+2026, tedy až za tímhle plánem: dnešní díl vrstvy Vzor `dp_pasy` (tři pásy)
+skončil a nahradilo ho osmačtyřicet vlajek střední, západní a severní Evropy
+a celé Ameriky. Plán s nimi nepočítal a R11 je jediné místo, kde se o nich
+psalo dopředu; skutečnost dopadla jinak a lépe, protože vlajky nevisí na jedné
+polici, ale na pěti podle světadílu, takže nejdelší otevřená police má pořád
+jednadvacet dlaždic jako před nimi a garáž místo odhadovaných 1537 uzlů dělá
+nejvýš 1519 při 167 dlaždicích. Vrstva Vzor má od té chvíle 57 dílů za 482
+součástek a celý kačenčí katalog 112 dílů za 1302, kombinací je 2 070 600.
+Tři pásy se neztratily nikomu, kdo si je koupil: byly červené, bílé a modré,
+tedy nizozemská vlajka nakreslená, aniž by to někdo řekl, a tou zůstaly, takže
+staré id odpoví nástupcem a v profilu se nic nepřepisuje. Patnáct vlajek se od
+jiné v seznamu liší jen znakem uprostřed; znaky se nekreslí a nahrazuje je
+jedna jednoduchá značka, a jestli to stačí, se **měří** okruhem 3g
+v `items.test.js`. Celý model a naměřená čísla jsou v `PROJECT-STATE.md`
+oddíl 7f.
+
 **Na pořadí s krokem G nezávisí.** G je učivo a kurikula, H je jen to, co se
 dá vlastnit a na co se dá koukat; nesdílejí jediný soubor kromě `app.js`
 a `i18n.js`, a i tam sahají do jiných oddílů. Stojí za G jen proto, že se
@@ -2262,7 +2279,7 @@ přesně dnešní chování.
 
 Výsledek: garáž se otevírá na **37 dlaždicích a 962 až 1009 uzlech** podle toho,
 jak je kačenka oblečená, s největší otevřenou policí má **nejvýš 1489 uzlů**,
-a s padesáti vlajkami vyjde police vzorů na **1537 uzlů a 104 kB**, tedy pořád
+a s padesáti vlajkami by police vzorů vyšla na **1537 uzlů a 104 kB**, tedy pořád
 hluboko pod dneškem. Hlídá to kontrola ve `flow.test.js` se **stropem 1800
 uzlů**, měřená na skutečném DOM se zaslepeným pozorovatelem; spadne, až garáž
 povyroste zhruba o dalších sedmdesát dlaždic, nebo až někdo skládání či líné

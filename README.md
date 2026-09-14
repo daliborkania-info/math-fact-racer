@@ -63,7 +63,7 @@ A race is twenty questions and exactly one lap of the circuit. Answer on a big n
 
 **The rival is yesterday's self.** The ghost car in the neighbouring lane is the best run ever recorded on that track, positioned by the current points gap. There are no leaderboards and no other children to lose against.
 
-Coins from every race buy racers for the garage: eight machines, that is rockets, race cars, a robot and a buggy, and twenty eight animals that grow through three stages the more sums they solve with you. The rubber duck is free from the start and is never bought; what is bought is only what it wears, and that is paid for in workshop parts rather than coins. It has five layers, that is body, pattern, hat, eyes and gear, sixty five pieces in all.
+Coins from every race buy racers for the garage: eight machines, that is rockets, race cars, a robot and a buggy, and twenty eight animals that grow through three stages the more sums they solve with you. The rubber duck is free from the start and is never bought; what is bought is only what it wears, and that is paid for in workshop parts rather than coins. It has five layers, that is body, pattern, hat, eyes and gear, a hundred and twelve pieces in all, and forty eight of the patterns are the flags of Europe and the Americas.
 
 ---
 

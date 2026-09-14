@@ -358,6 +358,12 @@ cs: {
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Méďa", pet_kiki: "Kiki",
   pet_zub: "Zoubek", pet_duha: "Duháček", pet_puk: "Puk", pet_flek: "Flíček",
   pet_sova: "Sovík", pet_drak: "Dráček", pet_hvezd: "Hvězdík", pet_noc: "Noční",
+  pet_kocka: "Mourek", pet_berus: "Beruška", pet_zaba: "Skokánek",
+  pet_zelva: "Krunýřek", pet_jezek: "Bodlinka", pet_liska: "Ryška",
+  pet_tucnak: "Tučňáček", pet_kapy: "Kapík", pet_panda: "Bambusák",
+  pet_lenochod: "Lenoušek", pet_slon: "Dupálek", pet_lev: "Hřívák",
+  pet_zralok: "Ploutvík", pet_papous: "Pestrouš", pet_chobot: "Osminožka",
+  pet_trex: "Dinouš",
   du_kacka: "Kačenka"
 },
 
@@ -703,6 +709,12 @@ en: {
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bear", pet_kiki: "Kiki",
   pet_zub: "Toothy", pet_duha: "Rainbow", pet_puk: "Puck", pet_flek: "Patch",
   pet_sova: "Owlet", pet_drak: "Dragon", pet_hvezd: "Starry", pet_noc: "Nightling",
+  pet_kocka: "Whiskers", pet_berus: "Dotty", pet_zaba: "Hopper",
+  pet_zelva: "Shelly", pet_jezek: "Prickles", pet_liska: "Rusty",
+  pet_tucnak: "Waddles", pet_kapy: "Capy", pet_panda: "Bamboo",
+  pet_lenochod: "Snoozy", pet_slon: "Stomper", pet_lev: "Bigmane",
+  pet_zralok: "Finny", pet_papous: "Squawky", pet_chobot: "Squiggly",
+  pet_trex: "Chompy",
   du_kacka: "Duckie"
 },
 
@@ -1048,6 +1060,12 @@ de: {
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bär", pet_kiki: "Kiki",
   pet_zub: "Zahni", pet_duha: "Regenbogi", pet_puk: "Puck", pet_flek: "Fleck",
   pet_sova: "Eulchen", pet_drak: "Drachi", pet_hvezd: "Sternchen", pet_noc: "Nachtling",
+  pet_kocka: "Schnurrli", pet_berus: "Käferli", pet_zaba: "Hüpfi",
+  pet_zelva: "Schildi", pet_jezek: "Stachli", pet_liska: "Fuchsi",
+  pet_tucnak: "Watschel", pet_kapy: "Kapi", pet_panda: "Bambusi",
+  pet_lenochod: "Schlafi", pet_slon: "Rüsseli", pet_lev: "Mähni",
+  pet_zralok: "Flossi", pet_papous: "Lori", pet_chobot: "Kraki",
+  pet_trex: "Dinoli",
   du_kacka: "Entchen"
 }
 

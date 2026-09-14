@@ -165,13 +165,17 @@ A.DUCKS.forEach(x=>{const v=A.duckSVG(x); if(/NaN|undefined/.test(v)){svgBad++;c
 Object.keys(A.ENVS).forEach(e=>{const v=A.sceneSVG('circuit',e,"t1"); if(/NaN|undefined/.test(v)){svgBad++;console.log('  !!  ENV problem',e);}});
 console.log('vadnych SVG:',svgBad);
 
-// 3a. dvanact zvirat
+// 3a. osmadvacet zvirat
 //
 // Krok H6 nahradil jeden parametricky tvar dvanacti vlastnimi kresbami
 // a slibil u toho jednu vec: kresba je jedine, co se smi zmenit. Na id
 // visi zkusenosti a vlastnictvi, na cene to, na co dite setri, a jmeno
 // i barva jsou duvod, proc si dite zvire vybralo. Proto je tabulka niz
 // zamrazena: kdyz se v ni cokoli hne, nekomu se zmenilo neco, co uz ma.
+// Krok H7 pridal sestnact dalsich a zaradil je do katalogu podle ceny,
+// takze se poradi radku zmenilo; id, cena, barvy, tvar ani jmeno se
+// u puvodnich dvanacti nezmenily o pismeno, a poradi v mrizce garaze
+// neni nic, co uz dite ma.
 //
 // Samotnou kresbu test neuvidi, tu je nutne vyrenderovat a prohlednout.
 // Spocitat se da zbytek: ze zadne zvire nevyjede z ramu v zadnem ze tri
@@ -183,15 +187,31 @@ const ZVTAB=[
   ['pet_bimbo','dolphin', '#7ad3ff','#3ea8e0', 25,'Bimbo'],
   ['pet_lupi', 'critter', '#ffd166','#e3a521', 30,'Lupi'],
   ['pet_mecha','bear',    '#c79b73','#9c7350', 30,'Méďa'],
+  ['pet_kocka','cat',     '#ffb35c','#d9832a', 35,'Mourek'],
   ['pet_kiki', 'rabbit',  '#ff9ec4','#e56d9d', 40,'Kiki'],
   ['pet_zub',  'croc',    '#a4e768','#6fbb34', 40,'Zoubek'],
+  ['pet_berus','ladybug', '#ff5b5b','#2b2b33', 45,'Beruška'],
+  ['pet_zaba', 'frog',    '#8ee83f','#4a9e1f', 55,'Skokánek'],
   ['pet_duha', 'unicorn', '#d3a4ff','#9a6ae0', 60,'Duháček'],
   ['pet_puk',  'axolotl', '#8ee6d5','#4bb8a4', 60,'Puk'],
+  ['pet_zelva','turtle',  '#cfe08a','#a4713a', 65,'Krunýřek'],
   ['pet_flek', 'dog',     '#ffb3a1','#e0705a', 70,'Flíček'],
+  ['pet_jezek','hedgehog','#f0d3a8','#8a6a4a', 75,'Bodlinka'],
   ['pet_sova', 'owl',     '#b9a4ff','#7d63d8', 80,'Sovík'],
+  ['pet_liska','fox',     '#ff7a3c','#d9521c', 85,'Ryška'],
+  ['pet_tucnak','penguin','#4a5a78','#2b3852', 95,'Tučňáček'],
   ['pet_drak', 'dragon',  '#6fe0a8','#2ba36c',100,'Dráček'],
+  ['pet_kapy', 'capybara','#b5764a','#8a5230',105,'Kapík'],
+  ['pet_panda','panda',   '#f2efe6','#3a3a44',115,'Bambusák'],
   ['pet_hvezd','hornling','#ffe17a','#e0ab1f',120,'Hvězdík'],
-  ['pet_noc',  'bat',     '#6d7cff','#3a44b8',150,'Noční']
+  ['pet_lenochod','sloth','#c9b89a','#8c7a5e',125,'Lenoušek'],
+  ['pet_slon', 'elephant','#b3bccd','#7d879b',135,'Dupálek'],
+  ['pet_noc',  'bat',     '#6d7cff','#3a44b8',150,'Noční'],
+  ['pet_lev',  'lion',    '#ffd07a','#d9902a',150,'Hřívák'],
+  ['pet_zralok','shark',  '#9fb3c8','#5b7490',165,'Ploutvík'],
+  ['pet_papous','parrot', '#4aa8ff','#ffc43f',180,'Pestrouš'],
+  ['pet_chobot','octopus','#ff7a6b','#d9443a',190,'Osminožka'],
+  ['pet_trex', 'trex',    '#f2a54a','#c26f22',200,'Dinouš']
 ];
 if(A.PETS.length!==ZVTAB.length) zvsay('zvirat uz neni '+ZVTAB.length+', ale '+A.PETS.length);
 ZVTAB.forEach((z,i)=>{
@@ -203,6 +223,18 @@ ZVTAB.forEach((z,i)=>{
   if(A.I18N.cs[id]!==cz) zvsay(id+' se cesky uz nejmenuje '+cz);
   ['cs','en','de'].forEach(j=>{ if(!A.I18N[j][id]) zvsay(id+' nema jmeno v jazyce '+j); });
 });
+// katalog je videt cely od prvni chvile a je razeny od nejlevnejsiho,
+// takze dite vidi, na co setri, a hned vedle to, co si koupi dneska
+for(let i=1;i<A.PETS.length;i++)
+  if(A.PETS[i].cost<A.PETS[i-1].cost)
+    zvsay('katalog uz neni razeny od nejlevnejsiho: '+A.PETS[i-1].id+' > '+A.PETS[i].id);
+// a nova rada nesmi byt zed na konci: nejlevnejsi z H7 musi byt levnejsi
+// nez nejdrazsi z puvodnich dvanacti
+const stareZ=['pet_bimbo','pet_lupi','pet_mecha','pet_kiki','pet_zub','pet_duha',
+              'pet_puk','pet_flek','pet_sova','pet_drak','pet_hvezd','pet_noc'];
+const ceny=k=>A.PETS.filter(p=>k(p.id)).map(p=>p.cost);
+if(Math.min(...ceny(id=>!stareZ.includes(id)))>=Math.max(...ceny(id=>stareZ.includes(id))))
+  zvsay('nova zvirata zacinaji az za nejdrazsim starym, cela rada vypada jako zed');
 // kazde zvire ma vlastni kresbu; nahradnik `plain` je jen pojistka pro
 // tvar, o kterem tahle verze nikdy neslysela, a nesmi kreslit nikoho
 const tvaryZ=A.PETS.map(p=>p.shape);

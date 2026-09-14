@@ -1557,7 +1557,24 @@ Patří to k rozhodnutí R10.
 ověří, že SVG jde naparsovat a nevyjede z rámu, nic víc. A druhá: je to jediné
 místo celého kroku H, kde nová verze sáhne na něco, co dítě už má.
 
-### H7. Šestnáct nových zvířat
+### H7. Šestnáct nových zvířat — HOTOVO 14. září 2026
+
+Proti plánu se upřesnilo tohle: nová zvířata se do `PETS` **vetkala podle ceny**,
+ne přidala za konec, takže je katalog jedna řada od 25 do 200 mincí a nejlevnější
+nové zvíře (kočka za 35) stojí míň než polovina nejdražšího dnešního; ceny sedí
+podle plánu, jen je celkem 1820 mincí místo odhadovaných 1700. Tři zvířata si
+řekla o `mouth:"own"`, protože jejich pusa **je** ta kresba (tučňákův klín zobáku,
+žraločí a tyranosauří čelist se zuby), a slon taky, protože jeho úsměv obchází
+chobot; papoušek a chobotnice si musely přestěhovat hvězdu třetího stupně, jednomu
+zabírají pravý dolní roh ocasní pera a druhému chapadla. Přibyly čtyři sdílené
+díly (`beads`, `whiskers`, `hexPlate` a vedle nich se znovu použily `ridge`,
+`toothRow`, `paws`, `earTri`, `earRound`), takže šestnáct zvířat stojí zhruba
+230 řádků. A po prvním renderu se předělávalo šest z šestnácti: kapybara dostala
+hranatou hlavu s tmavým čenichem, aby nebyla druhý medvěd, ježkovi se obličej
+posunul pod čepici z bodlin, protože uprostřed kruhu vypadal jako sluníčko,
+želvě se nohy přestěhovaly před krunýř, jinak je krunýř celé schoval, lenochod
+dostal tmavší masku a drápy přes větev, T-rexovi přibyly pořádné nohy a ručička
+dál od těla a papouškovi chocholka ze tří per místo kudrlin.
 
 Šestnáct položek v `PETS`, šestnáct tvarových funkcí v `PET_SHAPES`, 48 textů.
 Vybíráno podle dvou kritérií zároveň: zvíře, které má malé dítě rádo,

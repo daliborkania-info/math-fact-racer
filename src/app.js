@@ -1898,26 +1898,50 @@ function record(p, item, correct, ms){
    Every sprite is drawn from parameters, so the whole set costs a few
    hundred bytes instead of a folder full of images.
    ================================================================= */
-/* Twelve animals, and every one of them names the animal it is. `shape`
-   points at its drawing in PET_SHAPES; the id, the price and the name
-   never change, because a child's experience and savings hang off them,
-   and neither do the two colours, because the animal was picked to match
-   them. Two of the twelve are deliberately not a species: Lupi and
+/* Twenty-eight animals, and every one of them names the animal it is.
+   `shape` points at its drawing in PET_SHAPES; the id, the price and the
+   name never change, because a child's experience and savings hang off
+   them, and neither do the two colours, because the animal was picked to
+   match them. Two of them are deliberately not a species: Lupi and
    Hvězdík stay the creatures they already were, so nobody's friend turns
-   into somebody else overnight. */
+   into somebody else overnight.
+   The list is in price order, cheapest first, and the sixteen added in
+   step H7 are threaded into it rather than stacked behind it: the
+   cheapest new animal costs less than half of what the dearest old one
+   does, so the new row is a ramp a child can start climbing today
+   instead of a wall at the end of the garage. Nothing here is drawn at
+   random, every price is on show from the first minute, and no animal
+   has any attribute but its drawing, so the rival is still your own
+   best lap. */
 const PETS = [
   {id:"pet_bimbo", shape:"dolphin",   c1:"#7ad3ff", c2:"#3ea8e0", cost:25},
   {id:"pet_lupi",  shape:"critter",   c1:"#ffd166", c2:"#e3a521", cost:30},
   {id:"pet_mecha", shape:"bear",      c1:"#c79b73", c2:"#9c7350", cost:30},
+  {id:"pet_kocka", shape:"cat",       c1:"#ffb35c", c2:"#d9832a", cost:35},
   {id:"pet_kiki",  shape:"rabbit",    c1:"#ff9ec4", c2:"#e56d9d", cost:40},
   {id:"pet_zub",   shape:"croc",      c1:"#a4e768", c2:"#6fbb34", cost:40},
+  {id:"pet_berus", shape:"ladybug",   c1:"#ff5b5b", c2:"#2b2b33", cost:45},
+  {id:"pet_zaba",  shape:"frog",      c1:"#8ee83f", c2:"#4a9e1f", cost:55},
   {id:"pet_duha",  shape:"unicorn",   c1:"#d3a4ff", c2:"#9a6ae0", cost:60},
   {id:"pet_puk",   shape:"axolotl",   c1:"#8ee6d5", c2:"#4bb8a4", cost:60},
+  {id:"pet_zelva", shape:"turtle",    c1:"#cfe08a", c2:"#a4713a", cost:65},
   {id:"pet_flek",  shape:"dog",       c1:"#ffb3a1", c2:"#e0705a", cost:70},
+  {id:"pet_jezek", shape:"hedgehog",  c1:"#f0d3a8", c2:"#8a6a4a", cost:75},
   {id:"pet_sova",  shape:"owl",       c1:"#b9a4ff", c2:"#7d63d8", cost:80},
+  {id:"pet_liska", shape:"fox",       c1:"#ff7a3c", c2:"#d9521c", cost:85},
+  {id:"pet_tucnak",shape:"penguin",   c1:"#4a5a78", c2:"#2b3852", cost:95},
   {id:"pet_drak",  shape:"dragon",    c1:"#6fe0a8", c2:"#2ba36c", cost:100},
+  {id:"pet_kapy",  shape:"capybara",  c1:"#b5764a", c2:"#8a5230", cost:105},
+  {id:"pet_panda", shape:"panda",     c1:"#f2efe6", c2:"#3a3a44", cost:115},
   {id:"pet_hvezd", shape:"hornling",  c1:"#ffe17a", c2:"#e0ab1f", cost:120},
-  {id:"pet_noc",   shape:"bat",       c1:"#6d7cff", c2:"#3a44b8", cost:150}
+  {id:"pet_lenochod", shape:"sloth",  c1:"#c9b89a", c2:"#8c7a5e", cost:125},
+  {id:"pet_slon",  shape:"elephant",  c1:"#b3bccd", c2:"#7d879b", cost:135},
+  {id:"pet_noc",   shape:"bat",       c1:"#6d7cff", c2:"#3a44b8", cost:150},
+  {id:"pet_lev",   shape:"lion",      c1:"#ffd07a", c2:"#d9902a", cost:150},
+  {id:"pet_zralok",shape:"shark",     c1:"#9fb3c8", c2:"#5b7490", cost:165},
+  {id:"pet_papous",shape:"parrot",    c1:"#4aa8ff", c2:"#ffc43f", cost:180},
+  {id:"pet_chobot",shape:"octopus",   c1:"#ff7a6b", c2:"#d9443a", cost:190},
+  {id:"pet_trex",  shape:"trex",      c1:"#f2a54a", c2:"#c26f22", cost:200}
 ];
 const RIDES = [
   {id:"ri_raketa",   kind:"rocket", c1:"#ff6b6b", c2:"#ffd166", cost:50},
@@ -2782,6 +2806,37 @@ function toothRow(x0, x1, y, h, count, up, fill){
   }
   return out;
 }
+/* Circles set along an arc. A lion's mane is a ring of them, and the
+   same call with a smaller radius gives the second ring it grows. */
+function beads(cx, cy, r, a0, a1, count, rr, fill){
+  let out = "";
+  for(let i = 0; i < count; i++){
+    const a = (a0 + (a1 - a0) * i / (count - 1)) * Math.PI / 180;
+    out += `<circle cx="${svgn(cx + r * Math.cos(a))}" cy="${svgn(cy + r * Math.sin(a))}"`
+         + ` r="${svgn(rr)}" fill="${fill}"/>`;
+  }
+  return out;
+}
+// three whiskers on one side of a face; `dir` is which side
+function whiskers(x, y, dir, len, c){
+  let out = "";
+  for(const k of [-1, 0, 1]){
+    out += `<path d="M${svgn(x)} ${svgn(y)} Q ${svgn(x + dir * len * .6)} ${svgn(y + k * 3)}`
+         + ` ${svgn(x + dir * len)} ${svgn(y + k * 6.5)}" stroke="${c}" stroke-width="1.5"`
+         + ` fill="none" stroke-linecap="round"/>`;
+  }
+  return out;
+}
+// a six-sided plate, for the shell of a turtle
+function hexPlate(cx, cy, r, fill, stroke){
+  const pts = [];
+  for(let i = 0; i < 6; i++){
+    const a = (-90 + i * 60) * Math.PI / 180;
+    pts.push(svgn(cx + r * Math.cos(a)) + " " + svgn(cy + r * Math.sin(a)));
+  }
+  return `<path d="M${pts.join(" L")} Z" fill="${fill}" stroke="${stroke}"`
+       + ` stroke-width="1.6" stroke-linejoin="round"/>`;
+}
 // one feathery gill: a stalk with three lobes on the end of it
 function gill(x, y, tx, ty, c){
   const back = tx < x ? 4.2 : -4.2;
@@ -3034,6 +3089,348 @@ const PET_SHAPES = {
       + `<path d="M46.6 77 L49 77 L47.8 81.5 Z" fill="#fff"/>`
       + `<path d="M51 77 L53.4 77 L52.2 81.5 Z" fill="#fff"/>`;
     return {g, eye: {xs: [43, 57], y: 61, r: 5.5}, mouth: {x: 50, y: 76, w: 9, d: 3.4}, star: [50, 26]};
+  },
+
+  /* --- the sixteen the catalogue added ---
+     Same two rules: nothing rotates, every path is absolute, and every
+     one of them has to be nameable as an animal and nameable as
+     nothing else. */
+
+  /* A cat is whiskers, upright pointed ears and a long tail held up
+     with rings on it. The tabby stripes on the forehead and the small
+     pink nose keep it from reading as the dog. */
+  cat(it){
+    const inner = "#ffc2d4", dark = shade(it.c2, .35), stripe = shade(it.c2, .2);
+    const g = `<path d="M68 88 C 85 88, 89 72, 82 58" stroke="${it.c2}" stroke-width="8" fill="none" stroke-linecap="round"/>`
+      + `<path d="M80 84 L86 80" stroke="${stripe}" stroke-width="3" stroke-linecap="round"/>`
+      + `<path d="M84 74 L89 72" stroke="${stripe}" stroke-width="3" stroke-linecap="round"/>`
+      + earTri(33, 33, 45, 27, 30, 13, it.c1, inner)
+      + earTri(67, 33, 55, 27, 70, 13, it.c1, inner)
+      + `<ellipse cx="50" cy="80" rx="21" ry="18" fill="${it.c1}"/>`
+      + paws(50, 95, 12, 9, 6, it.c1)
+      + `<ellipse cx="50" cy="84" rx="12" ry="11" fill="${tint(it.c1, .55)}"/>`
+      + `<path d="M32 74 L40 72" stroke="${stripe}" stroke-width="3" stroke-linecap="round"/>`
+      + `<path d="M31 82 L39 81" stroke="${stripe}" stroke-width="3" stroke-linecap="round"/>`
+      + `<circle cx="50" cy="45" r="20" fill="${it.c1}"/>`
+      + `<path d="M44 30 L46 35" stroke="${stripe}" stroke-width="2.6" stroke-linecap="round"/>`
+      + `<path d="M50 28 L50 34" stroke="${stripe}" stroke-width="2.6" stroke-linecap="round"/>`
+      + `<path d="M56 30 L54 35" stroke="${stripe}" stroke-width="2.6" stroke-linecap="round"/>`
+      + `<ellipse cx="44" cy="56" rx="7" ry="5.5" fill="${tint(it.c1, .55)}"/>`
+      + `<ellipse cx="56" cy="56" rx="7" ry="5.5" fill="${tint(it.c1, .55)}"/>`
+      + whiskers(37, 55, -1, 18, dark) + whiskers(63, 55, 1, 18, dark)
+      + `<path d="M50 53 L45.6 49 L54.4 49 Z" fill="${dark}"/>`;
+    return {g, eye: {xs: [42, 58], y: 42, r: 6}, mouth: {x: 50, y: 57, w: 9, d: 3.2}};
+  },
+
+  /* A penguin stands upright, has no neck, and is drawn by three things:
+     the white front from chin to feet, flippers flat against the sides
+     and orange feet sticking out at the bottom. The wedge of a beak is
+     the mouth. */
+  penguin(it){
+    const belly = "#fdf6e8", foot = "#ffb020";
+    const g = `<path d="M25 60 C 14 66, 16 86, 27 92 C 28 80, 28 68, 31 60 Z" fill="${it.c2}"/>`
+      + `<path d="M75 60 C 86 66, 84 86, 73 92 C 72 80, 72 68, 69 60 Z" fill="${it.c2}"/>`
+      + `<path d="M34 92 C 26 94, 24 102, 33 102 L45 102 C 47 95, 42 92, 38 92 Z" fill="${foot}"/>`
+      + `<path d="M66 92 C 74 94, 76 102, 67 102 L55 102 C 53 95, 58 92, 62 92 Z" fill="${foot}"/>`
+      + `<ellipse cx="50" cy="62" rx="26" ry="34" fill="${it.c1}"/>`
+      + `<path d="M50 32 C 33 34, 30 52, 34 68 C 38 86, 62 86, 66 68 C 70 52, 67 34, 50 32 Z" fill="${belly}"/>`
+      + `<path d="M42 53 L58 53 L50 63 Z" fill="${foot}"/>`
+      + `<path d="M44 58 L56 58 L50 63 Z" fill="${shade(foot, .22)}"/>`;
+    return {g, eye: {xs: [42, 58], y: 46, r: 5.4}, mouth: "own"};
+  },
+
+  /* A fox: a face that narrows to a point, white cheeks and chest, dark
+     socks, and above all the tail, as thick as the body and tipped with
+     white. The ears are taller and wider than the cat's. */
+  fox(it){
+    const white = "#fff6ea", sock = shade(it.c2, .5);
+    const g = `<path d="M33 90 C 17 88, 15 62, 26 52" stroke="${it.c1}" stroke-width="15" fill="none" stroke-linecap="round"/>`
+      + `<circle cx="26" cy="52" r="8.5" fill="${white}"/>`
+      + earTri(34, 36, 48, 26, 28, 12, it.c1, shade(it.c2, .3))
+      + earTri(66, 36, 52, 26, 72, 12, it.c1, shade(it.c2, .3))
+      + `<ellipse cx="50" cy="84" rx="20" ry="15" fill="${it.c1}"/>`
+      + paws(50, 97, 12, 8.5, 5.5, sock)
+      + `<ellipse cx="50" cy="88" rx="12" ry="9" fill="${white}"/>`
+      + `<path d="M31 33 C 29 52, 38 66, 50 70 C 62 66, 71 52, 69 33 Z" fill="${it.c1}"/>`
+      + `<path d="M38 47 C 35 60, 42 68, 50 70 C 58 68, 65 60, 62 47 Z" fill="${white}"/>`
+      + `<path d="M50 59 L45.4 54.4 L54.6 54.4 Z" fill="${sock}"/>`;
+    return {g, eye: {xs: [41, 59], y: 45, r: 5.4}, mouth: {x: 50, y: 62, w: 8, d: 3}};
+  },
+
+  /* A hedgehog is a cap of spines pulled down over a small pale face
+     with a pointed snout. The second row of spines is the growth it
+     gets: the same animal, more of it. */
+  hedgehog(it, s){
+    const dark = shade(it.c2, .22);
+    const g = `<ellipse cx="50" cy="62" rx="30" ry="25" fill="${it.c2}"/>`
+      + ridge(50, 64, 30, 176, 364, 11, 9, dark)
+      + (s >= 2 ? ridge(50, 66, 23, 186, 354, 9, 8, it.c2) : "")
+      + paws(50, 92, 17, 8, 5.5, tint(it.c1, .15))
+      + `<ellipse cx="50" cy="74" rx="20" ry="16" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="83" rx="8.5" ry="6.5" fill="${tint(it.c1, .4)}"/>`
+      + `<ellipse cx="50" cy="79" rx="4" ry="3.2" fill="#3b2a1e"/>`
+      + whiskers(42, 83, -1, 14, shade(it.c2, .1))
+      + whiskers(58, 83, 1, 14, shade(it.c2, .1));
+    return {g, eye: {xs: [42, 58], y: 70, r: 5}, mouth: {x: 50, y: 85, w: 8, d: 2.6}};
+  },
+
+  /* A turtle is the shell and nothing else would do: a dome with plates
+     drawn on it, a rim along the bottom, a small round head looking out
+     over the top and four stubby legs at the corners. */
+  turtle(it){
+    const shell = it.c2, plate = tint(it.c2, .22), rim = shade(it.c2, .2);
+    const g = `<path d="M41 50 L59 50 L59 64 L41 64 Z" fill="${it.c1}"/>`
+      + `<path d="M14 88 C 14 50, 86 50, 86 88 Z" fill="${shell}"/>`
+      + hexPlate(50, 70, 12, plate, rim)
+      + hexPlate(28, 80, 9, plate, rim)
+      + hexPlate(72, 80, 9, plate, rim)
+      + hexPlate(50, 88, 9, plate, rim)
+      + `<path d="M14 88 C 14 96, 86 96, 86 88 Z" fill="${tint(it.c2, .45)}"/>`
+      + `<path d="M24 86 C 10 88, 8 100, 20 100 C 29 100, 32 92, 32 87 Z" fill="${it.c1}"/>`
+      + `<path d="M76 86 C 90 88, 92 100, 80 100 C 71 100, 68 92, 68 87 Z" fill="${it.c1}"/>`
+      + paws(50, 96, 15, 9, 6, it.c1)
+      + `<ellipse cx="50" cy="43" rx="16" ry="15" fill="${it.c1}"/>`
+      + `<ellipse cx="44" cy="49" rx="2.4" ry="1.8" fill="${shade(it.c1, .35)}"/>`
+      + `<ellipse cx="56" cy="49" rx="2.4" ry="1.8" fill="${shade(it.c1, .35)}"/>`;
+    return {g, eye: {xs: [44, 56], y: 40, r: 5.2}, mouth: {x: 50, y: 52, w: 9, d: 3.2}};
+  },
+
+  /* A frog: eyes up on two bumps that stand clear of the head, a mouth
+     from one side of the face to the other, hind legs folded up beside
+     the body and toes spread out in front. */
+  frog(it){
+    const pale = tint(it.c1, .55), dark = shade(it.c2, .12);
+    const toes = (x, y, r) => `<circle cx="${svgn(x - r * 1.5)}" cy="${svgn(y)}" r="${r}" fill="${dark}"/>`
+      + `<circle cx="${svgn(x)}" cy="${svgn(y + 1.5)}" r="${r}" fill="${dark}"/>`
+      + `<circle cx="${svgn(x + r * 1.5)}" cy="${svgn(y)}" r="${r}" fill="${dark}"/>`;
+    const g = `<ellipse cx="23" cy="78" rx="12" ry="16" fill="${it.c2}"/>`
+      + `<ellipse cx="77" cy="78" rx="12" ry="16" fill="${it.c2}"/>`
+      + toes(21, 97, 4.4) + toes(79, 97, 4.4)
+      + `<ellipse cx="50" cy="76" rx="26" ry="21" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="82" rx="16" ry="13" fill="${pale}"/>`
+      + toes(39, 92, 5) + toes(61, 92, 5)
+      + `<ellipse cx="50" cy="52" rx="28" ry="19" fill="${it.c1}"/>`
+      + `<circle cx="34" cy="38" r="11" fill="${it.c1}"/>`
+      + `<circle cx="66" cy="38" r="11" fill="${it.c1}"/>`;
+    return {g, eye: {xs: [34, 66], y: 38, r: 7.5}, mouth: {x: 50, y: 57, w: 32, d: 7}};
+  },
+
+  /* An elephant is the trunk, and after that the ears: two fans wider
+     than the head. Small tusks and a smile that the trunk hangs down
+     the middle of, which is why the mouth is drawn here. */
+  elephant(it){
+    const earIn = shade(it.c2, .12), tusk = "#fff6e0";
+    const g = `<circle cx="26" cy="50" r="18" fill="${it.c2}"/>`
+      + `<circle cx="27" cy="52" r="11" fill="${earIn}"/>`
+      + `<circle cx="74" cy="50" r="18" fill="${it.c2}"/>`
+      + `<circle cx="73" cy="52" r="11" fill="${earIn}"/>`
+      + `<ellipse cx="50" cy="84" rx="24" ry="16" fill="${it.c1}"/>`
+      + paws(50, 97, 14, 10, 6.5, it.c2)
+      + `<circle cx="50" cy="48" r="23" fill="${it.c1}"/>`
+      + `<path d="M36 57 Q 50 71 64 57" stroke="#22314f" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+      + `<path d="M43 64 C 41 71, 42 76, 45 78" stroke="${tusk}" stroke-width="4" fill="none" stroke-linecap="round"/>`
+      + `<path d="M57 64 C 59 71, 58 76, 55 78" stroke="${tusk}" stroke-width="4" fill="none" stroke-linecap="round"/>`
+      + `<path d="M44 56 C 41 74, 43 88, 51 93 C 57 96, 61 89, 57 86 C 52 83, 50 74, 56 57 Z" fill="${it.c1}"/>`
+      + `<path d="M45 66 L55 66" stroke="${shade(it.c2, .1)}" stroke-width="1.6" stroke-linecap="round"/>`
+      + `<path d="M44 73 L54 73" stroke="${shade(it.c2, .1)}" stroke-width="1.6" stroke-linecap="round"/>`
+      + `<path d="M45 80 L54 80" stroke="${shade(it.c2, .1)}" stroke-width="1.6" stroke-linecap="round"/>`;
+    return {g, eye: {xs: [41, 59], y: 46, r: 5.2}, mouth: "own"};
+  },
+
+  /* A lion is the mane and only the mane: a ring of it all the way
+     round a small face, with the ears poking out of the top and a tuft
+     on the end of the tail. It grows a second, fuller ring. */
+  lion(it, s){
+    const mane = it.c2, deep = shade(it.c2, .18);
+    const R = s >= 2 ? 26 : 23, n = s >= 2 ? 13 : 11, rr = s >= 2 ? 10 : 9;
+    const g = `<path d="M69 88 C 84 86, 87 72, 81 64" stroke="${it.c1}" stroke-width="5" fill="none" stroke-linecap="round"/>`
+      + `<circle cx="81" cy="62" r="6.5" fill="${mane}"/>`
+      + `<ellipse cx="50" cy="84" rx="19" ry="14" fill="${it.c1}"/>`
+      + paws(50, 96, 12, 9, 6, it.c1)
+      + beads(50, 48, R - 7, 0, 327, 9, rr - 1, deep)
+      + beads(50, 48, R, 0, 360 * (n - 1) / n, n, rr, mane)
+      + earRound(33, 36, 7, it.c1, tint(it.c1, .5))
+      + earRound(67, 36, 7, it.c1, tint(it.c1, .5))
+      + `<circle cx="50" cy="48" r="20" fill="${it.c1}"/>`
+      + `<ellipse cx="44" cy="58" rx="7" ry="5.5" fill="${tint(it.c1, .5)}"/>`
+      + `<ellipse cx="56" cy="58" rx="7" ry="5.5" fill="${tint(it.c1, .5)}"/>`
+      + `<path d="M50 56 L45.6 51.5 L54.4 51.5 Z" fill="${shade(it.c2, .35)}"/>`;
+    return {g, eye: {xs: [43, 57], y: 45, r: 5.5}, mouth: {x: 50, y: 59, w: 10, d: 4}};
+  },
+
+  /* A panda is a bear with the pattern the pattern is for: black ears,
+     black patches round the eyes, black arms and legs, everything else
+     white. Nothing else here is black and white at all. */
+  panda(it){
+    const dark = it.c2, deep = shade(it.c2, .25);
+    const g = earRound(30, 28, 10, dark, deep)
+      + earRound(70, 28, 10, dark, deep)
+      + `<path d="M28 72 C 20 78, 20 90, 27 94 C 33 90, 34 80, 36 74 Z" fill="${dark}"/>`
+      + `<path d="M72 72 C 80 78, 80 90, 73 94 C 67 90, 66 80, 64 74 Z" fill="${dark}"/>`
+      + `<ellipse cx="50" cy="80" rx="24" ry="19" fill="${it.c1}"/>`
+      + paws(50, 96, 15, 10, 6.5, dark)
+      + `<circle cx="50" cy="45" r="22" fill="${it.c1}"/>`
+      + `<ellipse cx="40" cy="43" rx="8.5" ry="9.5" fill="${dark}"/>`
+      + `<ellipse cx="60" cy="43" rx="8.5" ry="9.5" fill="${dark}"/>`
+      + `<ellipse cx="50" cy="55" rx="11" ry="8" fill="${tint(it.c1, .35)}"/>`
+      + `<ellipse cx="50" cy="52" rx="4.6" ry="3.4" fill="${deep}"/>`;
+    return {g, eye: {xs: [40, 60], y: 43, r: 5.4}, mouth: {x: 50, y: 58, w: 10, d: 4}};
+  },
+
+  /* A capybara is a brick with a nose: a head as square as a head gets,
+     flat on top, tiny ears right at the corners, eyes high and far
+     apart and an enormous blunt muzzle underneath. */
+  capybara(it){
+    const muzzle = shade(it.c1, .22), dark = shade(it.c2, .35);
+    const g = `<ellipse cx="50" cy="86" rx="29" ry="15" fill="${it.c1}"/>`
+      + paws(50, 97, 18, 9, 5.5, it.c2)
+      + earRound(32, 34, 5.5, it.c2, dark)
+      + earRound(68, 34, 5.5, it.c2, dark)
+      + `<path d="M28 40 C 28 33, 72 33, 72 40 L72 60 C 72 72, 28 72, 28 60 Z" fill="${it.c1}"/>`
+      + `<path d="M30 54 C 30 76, 70 76, 70 54 Z" fill="${muzzle}"/>`
+      + `<ellipse cx="45" cy="60" rx="3" ry="2.2" fill="${dark}"/>`
+      + `<ellipse cx="55" cy="60" rx="3" ry="2.2" fill="${dark}"/>`
+      + whiskers(34, 64, -1, 18, shade(it.c2, .2))
+      + whiskers(66, 64, 1, 18, shade(it.c2, .2));
+    return {g, eye: {xs: [38, 62], y: 46, r: 4.2}, mouth: {x: 50, y: 68, w: 11, d: 2.6}};
+  },
+
+  /* A sloth hangs, and that is the whole drawing: a branch across the
+     top, two long arms hooked over it by their claws, and everything
+     else dangling. The dark mask round the eyes says which animal is
+     doing the hanging. */
+  sloth(it){
+    const bark = "#8a6a4a", face = tint(it.c1, .55), mask = shade(it.c2, .45);
+    const claw = (x) => `<path d="M${svgn(x - 6)} 24 C ${svgn(x - 7)} 14, ${svgn(x + 7)} 14, ${svgn(x + 6)} 24"`
+      + ` stroke="${it.c2}" stroke-width="6" fill="none" stroke-linecap="round"/>`
+      + `<path d="M${svgn(x - 8)} 20 C ${svgn(x - 10)} 13, ${svgn(x - 4)} 11, ${svgn(x - 2)} 15"`
+      + ` stroke="${mask}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+      + `<path d="M${svgn(x - 3)} 17 C ${svgn(x - 3)} 11, ${svgn(x + 3)} 11, ${svgn(x + 3)} 16"`
+      + ` stroke="${mask}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+    const g = `<path d="M10 20 L90 20" stroke="${bark}" stroke-width="8" stroke-linecap="round"/>`
+      + `<path d="M38 64 C 24 56, 22 34, 30 24" stroke="${it.c2}" stroke-width="10" fill="none" stroke-linecap="round"/>`
+      + `<path d="M62 64 C 76 56, 78 34, 70 24" stroke="${it.c2}" stroke-width="10" fill="none" stroke-linecap="round"/>`
+      + claw(30) + claw(70)
+      + `<path d="M40 86 C 34 96, 36 104, 44 104" stroke="${it.c2}" stroke-width="9" fill="none" stroke-linecap="round"/>`
+      + `<path d="M60 86 C 66 96, 64 104, 56 104" stroke="${it.c2}" stroke-width="9" fill="none" stroke-linecap="round"/>`
+      + `<ellipse cx="50" cy="74" rx="20" ry="22" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="78" rx="12" ry="14" fill="${tint(it.c1, .3)}"/>`
+      + `<circle cx="50" cy="54" r="18" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="56" rx="15" ry="14" fill="${face}"/>`
+      + `<ellipse cx="42" cy="52" rx="6.5" ry="7.5" fill="${mask}"/>`
+      + `<ellipse cx="58" cy="52" rx="6.5" ry="7.5" fill="${mask}"/>`
+      + `<ellipse cx="50" cy="60" rx="4" ry="3" fill="${mask}"/>`;
+    return {g, eye: {xs: [42, 58], y: 52, r: 4.6}, mouth: {x: 50, y: 64, w: 13, d: 4}};
+  },
+
+  /* A shark, side on like the dolphin, and told apart from it by every
+     line: a snout that comes to a point, a dorsal fin with straight
+     edges, a tail standing upright, gill slits, and a jaw full of
+     triangles, which is the mouth. */
+  shark(it){
+    const belly = tint(it.c1, .62), dark = shade(it.c2, .2);
+    const g = `<path d="M24 62 L10 38 L17 62 L10 88 Z" fill="${it.c2}"/>`
+      + `<path d="M44 42 L54 16 L62 46 Z" fill="${it.c2}"/>`
+      + `<path d="M42 72 L34 92 L50 80 Z" fill="${it.c2}"/>`
+      + `<path d="M20 62 C 22 42, 46 36, 64 43 C 76 48, 86 55, 92 59 C 86 68, 74 78, 58 80 C 38 82, 20 76, 20 62 Z" fill="${it.c1}"/>`
+      + `<path d="M26 74 C 40 82, 58 78, 72 66 C 66 76, 44 84, 26 74 Z" fill="${belly}"/>`
+      + `<path d="M38 54 C 36 58, 36 62, 38 66" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
+      + `<path d="M44 53 C 42 57, 42 62, 44 66" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
+      + `<path d="M50 52 C 48 57, 48 62, 50 66" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
+      + `<path d="M58 66 C 70 68, 82 64, 90 58" stroke="${dark}" stroke-width="2" fill="none" stroke-linecap="round"/>`
+      + toothRow(60, 86, 66, 5, 6, false, "#fff");
+    return {g, eye: {xs: [72], y: 53, r: 4.2}, mouth: "own"};
+  },
+
+  /* An octopus counts: eight arms, and a child will count them. A dome
+     of a head sitting straight on top of them, suckers down every arm,
+     and the star has to move out of the bottom corner because the arms
+     are already there. */
+  octopus(it){
+    const sucker = tint(it.c1, .55);
+    const arm = (x, tipX, tipY) => {
+      const midX = (x + tipX) / 2;
+      return `<path d="M${svgn(x - 5)} 60 C ${svgn(midX - 5)} ${svgn(tipY - 16)}, ${svgn(tipX - 5)} ${svgn(tipY - 8)}, ${svgn(tipX)} ${svgn(tipY)}`
+        + ` C ${svgn(tipX + 5)} ${svgn(tipY - 8)}, ${svgn(midX + 5)} ${svgn(tipY - 16)}, ${svgn(x + 5)} 60 Z" fill="${it.c1}"/>`
+        + `<circle cx="${svgn((x + midX) / 2)}" cy="${svgn(tipY - 20)}" r="2.4" fill="${sucker}"/>`
+        + `<circle cx="${svgn(midX)}" cy="${svgn(tipY - 11)}" r="2.2" fill="${sucker}"/>`;
+    };
+    const g = arm(24, 12, 88) + arm(33, 26, 96) + arm(42, 40, 100) + arm(50, 52, 96)
+      + arm(58, 62, 100) + arm(67, 74, 96) + arm(76, 88, 88)
+      + `<ellipse cx="50" cy="42" rx="25" ry="27" fill="${it.c1}"/>`
+      + `<ellipse cx="50" cy="64" rx="25" ry="10" fill="${it.c2}" opacity=".35"/>`
+      + `<circle cx="38" cy="26" r="5" fill="${sucker}"/>`
+      + `<circle cx="56" cy="21" r="3.6" fill="${sucker}"/>`
+      + `<circle cx="64" cy="30" r="4.4" fill="${sucker}"/>`
+      + `<ellipse cx="40" cy="44" rx="10" ry="9" fill="${tint(it.c1, .3)}"/>`
+      + `<ellipse cx="60" cy="44" rx="10" ry="9" fill="${tint(it.c1, .3)}"/>`;
+    return {g, eye: {xs: [40, 60], y: 44, r: 7}, mouth: {x: 50, y: 57, w: 11, d: 4},
+            star: [20, 24]};
+  },
+
+  /* A T-rex is the joke about the arms: a head far too big, a jaw full
+     of teeth, a tail to balance it, legs like tree trunks and two arms
+     the size of a child's hand. Side on, because the arms have to show. */
+  trex(it){
+    const dark = shade(it.c2, .18), belly = tint(it.c1, .5);
+    const g = `<path d="M40 78 C 28 72, 16 74, 8 82 C 18 88, 30 90, 42 88 Z" fill="${it.c1}"/>`
+      + ridge(52, 66, 24, -156, -104, 4, 6, dark)
+      + `<ellipse cx="48" cy="72" rx="22" ry="22" fill="${it.c1}"/>`
+      + `<ellipse cx="44" cy="86" rx="14" ry="15" fill="${it.c2}"/>`
+      + `<path d="M38 94 L52 94 L52 102 L38 102 Z" fill="${it.c2}"/>`
+      + `<path d="M36 98 L60 98 C 66 100, 66 105, 58 105 L38 105 C 34 105, 34 98, 36 98 Z" fill="${it.c2}"/>`
+      + `<path d="M48 105 L48 100 M56 105 L56 100" stroke="${dark}" stroke-width="1.6" stroke-linecap="round"/>`
+      + `<ellipse cx="48" cy="78" rx="13" ry="14" fill="${belly}"/>`
+      + `<path d="M62 62 C 71 62, 74 68, 72 74" stroke="${it.c2}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`
+      + `<path d="M72 74 L77 78 M72 74 L76 71" stroke="${it.c2}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+      + `<path d="M46 44 C 46 30, 62 24, 74 28 C 84 32, 90 40, 90 46 L62 52 C 50 52, 46 50, 46 44 Z" fill="${it.c1}"/>`
+      + `<path d="M56 50 L90 46 C 94 50, 90 56, 84 57 L60 58 Z" fill="${shade(it.c1, .1)}"/>`
+      + toothRow(62, 88, 50, 5, 6, false, "#fff")
+      + `<path d="M62 58 L86 56" stroke="${dark}" stroke-width="1.6" stroke-linecap="round"/>`
+      + `<ellipse cx="86" cy="41" rx="2.4" ry="1.8" fill="${dark}"/>`;
+    return {g, eye: {xs: [74], y: 38, r: 5}, mouth: "own"};
+  },
+
+  /* A ladybird is a red dome split down the middle with black dots on
+     it, a black head and two antennae with knobs on the end. Six little
+     legs, because that is how many it has. */
+  ladybug(it){
+    const dark = it.c2, spot = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${dark}"/>`;
+    const leg = (x1, y1, x2, y2) => `<path d="M${x1} ${y1} L${x2} ${y2}"`
+      + ` stroke="${dark}" stroke-width="3" stroke-linecap="round"/>`;
+    const g = leg(30, 62, 16, 58) + leg(28, 72, 13, 74) + leg(30, 82, 16, 90)
+      + leg(70, 62, 84, 58) + leg(72, 72, 87, 74) + leg(70, 82, 84, 90)
+      + `<path d="M34 40 C 28 30, 24 22, 26 18" stroke="${dark}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+      + `<circle cx="26" cy="17" r="4" fill="${dark}"/>`
+      + `<path d="M66 40 C 72 30, 76 22, 74 18" stroke="${dark}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+      + `<circle cx="74" cy="17" r="4" fill="${dark}"/>`
+      + `<circle cx="50" cy="68" r="28" fill="${it.c1}"/>`
+      + `<path d="M50 40 L50 96" stroke="${dark}" stroke-width="3.4" stroke-linecap="round"/>`
+      + spot(36, 56, 6) + spot(64, 56, 6) + spot(32, 74, 7)
+      + spot(68, 74, 7) + spot(44, 88, 5.5) + spot(56, 88, 5.5)
+      + `<path d="M32 46 C 32 28, 68 28, 68 46 Z" fill="${dark}"/>`;
+    return {g, eye: {xs: [42, 58], y: 38, r: 5.4}, mouth: {x: 50, y: 44, w: 9, d: 2.6}};
+  },
+
+  /* A parrot: the hooked beak first, then the crest of three feathers
+     on the crown, a folded wing and two long tail feathers below. The
+     beak is the mouth, the way the owl's is. */
+  parrot(it){
+    const beak = "#4a4a55", cheek = "#fff6ea";
+    const g = `<path d="M56 84 L80 104 L68 106 L48 88 Z" fill="${it.c2}"/>`
+      + `<path d="M50 86 L64 108 L52 108 L42 90 Z" fill="${shade(it.c2, .2)}"/>`
+      + `<path d="M48 28 L34 16 L52 24 Z" fill="${it.c2}"/>`
+      + `<path d="M52 26 L45 13 L58 23 Z" fill="${it.c2}"/>`
+      + `<path d="M56 27 L56 14 L62 25 Z" fill="${it.c2}"/>`
+      + `<ellipse cx="47" cy="66" rx="23" ry="26" fill="${it.c1}"/>`
+      + `<ellipse cx="47" cy="74" rx="14" ry="16" fill="${it.c2}"/>`
+      + `<path d="M32 92 C 26 96, 28 102, 36 100 M44 94 C 42 100, 46 104, 52 100" stroke="#ffb020" stroke-width="4" fill="none" stroke-linecap="round"/>`
+      + `<path d="M60 54 C 70 60, 72 74, 64 84 C 60 74, 56 62, 56 56 Z" fill="${shade(it.c1, .16)}"/>`
+      + `<circle cx="48" cy="40" r="20" fill="${it.c1}"/>`
+      + `<ellipse cx="54" cy="40" rx="12" ry="11" fill="${cheek}"/>`
+      + `<path d="M62 30 C 76 32, 78 44, 68 52 C 62 56, 58 50, 60 44 Z" fill="${beak}"/>`
+      + `<path d="M62 46 C 68 48, 70 50, 68 52 C 64 54, 61 51, 61 48 Z" fill="${shade(beak, .3)}"/>`;
+    return {g, eye: {xs: [52], y: 38, r: 5.6}, mouth: "own", star: [18, 32]};
   },
 
   /* A stand-in, so an animal whose shape this version has never heard of

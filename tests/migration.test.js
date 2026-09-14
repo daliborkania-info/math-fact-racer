@@ -121,6 +121,15 @@ for(const c of FX.cases){
   ok('nic z profilu nezmizelo ani neklesla', hard.length===0, hard.join(' | ')||'vse na miste');
   if(diffs.length!==hard.length) console.log('       povolena migrace: '+diffs.filter(allowed).join(' | '));
 
+  // katalog zvirat roste (H7 ho zvedl na osmadvacet), ale `owned` roste
+  // jen nakupem: starsimu profilu se nove zvire nesmi objevit jako uz
+  // koupene, jinak by prisel o to, na co setri. Pribyt smi jen startovni
+  // sestava, kterou uz starsi verze nemely.
+  const start=JSON.parse(w.eval('JSON.stringify(STARTERS)'));
+  const pribylo=(after.profiles[0].owned||[]).filter(id=>!(before.profiles[0].owned||[]).includes(id));
+  ok('nove zvire se neobjevilo jako koupene', pribylo.every(id=>start.includes(id)),
+     pribylo.length?'pribylo '+pribylo.join(','):'nepribylo nic');
+
   const opened=JSON.parse(w.eval('JSON.stringify(TRACKS.filter(t=>unlockState(P(),t).open).map(t=>t.id))'));
   const chybi=(c.expectOpen||[]).filter(id=>!opened.includes(id));
   ok('trati, ktere uz byly otevrene, zustaly otevrene', chybi.length===0,

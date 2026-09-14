@@ -38,7 +38,10 @@ to eight with it. Step H3 moved two more: the garage sells 39 duck parts rather
 than 9, now that patterns and hats stand under the ten colours, and three tiles
 are free to tap rather than one, the classic yellow plus the two empty tiles
 that take a pattern or a hat off again. Step H4 moved the same two again, to 64
-parts for sale and five free tiles, when the eye and gear layers arrived.
+parts for sale and five free tiles, when the eye and gear layers arrived. Step H7
+moved the racer count a third time, from eight to nine: the garage now holds
+twenty-eight animals instead of twelve, and the flow test buys one of the new
+ones with coins to prove that a new animal is paid for rather than given away.
 
 **Layout is checked in pictures, not in jsdom.** jsdom has no layout at all, so
 nothing here can tell whether the keypad fits under the question. What the tests

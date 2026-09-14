@@ -38,7 +38,7 @@ Sloupec **témata** odkazuje na `id` z [TEMATA.md](TEMATA.md). Téma uvedené ja
 | 3 | Opakování, násobilka 5, 6, 7, 8, 9 | 8, 9 | `mult_table`, `div_table`, `missing_operand`, `times_more_less` |
 | 4 | Hodiny a určování času | 10, 11 | `clock_read`, `time_elapsed` |
 | 5 | Zkouška správnosti | 12, 13 | `inverse_check`, `missing_operand` |
-| 6 | Jednociferná, dvojciferná a trojciferná čísla, sudá a lichá | 14, 15 | `digit_count`, `parity`, `number_line` |
+| 6 | Jednociferná, dvojciferná a trojciferná čísla, sudá a lichá | 14, 15 | `digit_count` ✓, `parity` ✓, `number_line` |
 | 7 | Zaokrouhlování na desítky | 16 | `rounding_10` |
 | 8 | Sčítání a odčítání dvojciferných bez přechodu | 16 až 19 | `add_sub_100`, `number_line`, `unit_convert` |
 | 9 | Sčítání do celých desítek a odčítání k celým desítkám | 20 až 23 | `add_sub_100` |
@@ -121,6 +121,17 @@ sčítat; z téhož důvodu se otevírá od stovky, ne od tisícovky. Kapitola 2
 opakování celého oboru, si rozklad bere taky. Tím je třetí ročník na
 sedmadvaceti kapitolách z třiatřiceti.
 
+**Kapitolu 6 otevřela 14. září 2026 dvojice `parity` a `digit_count`** a je to
+jediná kapitola v celém adresáři, která **žádnou trať nedostala a nedostane**.
+Odpovídá se v ní výběrem ze dvou nebo tří velkých tlačítek, tedy poznáváním
+místo vybavování, a u dvou tlačítek je hádající dítě úspěšné v půlce případů;
+vlastní trať by tím platila za hádání. Existuje proto jen jako doplněk uvnitř
+trati podle vybrané kapitoly, tedy přesně tehdy, když třída na téhle dvoustraně
+zrovna je, a do šampionátu ani do trati "co ti nejde" se nedostane. Kbelíky jsou
+tři: sudá a lichá do sta, sudá a lichá trojciferná, a kolik má číslo číslic přes
+všechny tři velikosti. Tím je třetí ročník na osmadvaceti kapitolách
+z třiatřiceti; podrobně v `PROJECT-STATE.md`, oddíl 12e.
+
 Násobí a dělí se v `ops` jen v oboru malé násobilky a dělení vždycky vyjde
 beze zbytku; `tens` dělí sice i za ní, ale jen kulatými čísly, a `div_remainder`
 dělí sice se zbytkem, ale jen v oboru do desetinásobku dělitele. Čtvrtý kbelík
@@ -128,11 +139,10 @@ dělí sice se zbytkem, ale jen v oboru do desetinásobku dělitele. Čtvrtý kb
 `500 - (40 + 30)`, ne `(300 + 60) : 4`; celé je to popsané
 v `PROJECT-STATE.md`, oddíl 4.
 
-Zamčené zůstávají kapitoly 6, 15, 17, 19, 22 a 32. Kapitola 17
+Zamčené zůstávají kapitoly 15, 17, 19, 22 a 32. Kapitola 17
 jednotky jen pojmenovává a porovnává, nepřevádí je, takže na ni `unit_convert`
-nestačí a čeká na `unit_pick` a `compare_units`. Zbytek čeká na další vstupní
-prvky, tedy `pick` a `cmp`; pořadí je
-v `PROJECT-STATE.md`, oddíl 12b.
+nestačí a čeká na `compare_units`. Zbytek čeká na poslední vstupní prvek `cmp`
+a na dílnu; pořadí je v `PROJECT-STATE.md`, oddíl 12b.
 
 ## Pilot, hotovo
 

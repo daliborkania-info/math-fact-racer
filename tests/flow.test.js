@@ -253,8 +253,12 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===6, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===5, zamcene().length+' zamcenych z 33');
 ok('scitani a odcitani vice cisel se da vybrat', !zamcene().includes(11));
+// vyber z nabidky umime od kroku E3, tedy kapitola 6; je to jedina
+// kapitola, ktera se odpovida tlacitky, a jinam nez do skolni trati se
+// z ni nic nedostane
+ok('jednociferna az trojciferna a sude a liche se daji vybrat', !zamcene().includes(6));
 // deleni se zbytkem umime od kroku E1, tedy kapitola 27; zlomky porad ne
 ok('deleni se zbytkem se da vybrat a zlomky zustaly zamcene',
    !zamcene().includes(27) && zamcene().includes(32));
@@ -981,6 +985,52 @@ key('ok');
 await wait(400);
 ok('napsane cislice misto radu dostanou vlastni hlasku', /doopravdy/.test(txt()), txt().slice(0,160));
 await wait(1700);
+click(q('[data-act="quit"]')); click(q('[data-yes]'));
+
+console.log('--- vyber z nabidky ---');
+// Odpoved, ktera se vybira z tlacitek. Zkousi se prave to, co strojovy
+// test nad retezci nevidi: ze stisk tlacitka odpoved rovnou odesle, ze
+// se v policku objevi slovo a ne cislo tlacitka, ze se plocha vymeni i
+// mezi dvema otazkami s vyberem, kdyz se lisi nabidka, a ze se plocha
+// vejde na obrazovku stejne jako ciselna klavesnice.
+ev('startRun(P(),"t1")');
+ev("RUN.items[RUN.idx]=itemFromKey('jp1');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+const nab=()=>qa('#keypad [data-k]');
+ok('otazka s vyberem kresli dve velka tlacitka',
+   nab().length===2 && q('#keypad').dataset.input==='pick' && q('#keypad').dataset.opts==='2',
+   nab().map(b=>b.textContent).join(' / '));
+ok('na plose vyberu neni guma, sipka ani fajfka',
+   !q('#keypad [data-k="ok"]') && !q('#keypad [data-k="del"]') && !q('#keypad [data-k="next"]'));
+ok('na radku stoji cislo, slovo a prazdne policko',
+   /^\d+$/.test(qtext()) && bx(0) && bx(0).textContent==='?' && /je/.test(q('#qbox').textContent),
+   q('#qbox').textContent);
+ok('nad tlacitky stoji slovy, na co se ptame', /sudé, nebo liché/.test(txt()));
+// stisk je cela odpoved: nic se nepotvrzuje a odesle se hned
+const vybDist=ev('RUN.dist');
+const spravne=ev('RUN.items[RUN.idx].answer');
+click(nab()[spravne]);
+ok('stisk tlacitka rovnou odeslal odpoved', ev('RUN.state')==='feedback', 'stav '+ev('RUN.state'));
+ok('v policku je slovo, ne cislo tlacitka',
+   ['sudé','liché'].indexOf(bx(0).textContent)>=0, bx(0).textContent);
+ok('spravny vyber posunul zavodnika', ev('RUN.dist')>vybDist, vybDist+' -> '+ev('RUN.dist'));
+await wait(900);
+// druha otazka s vyberem, ale s jinou nabidkou: plocha se musi vymenit,
+// jinak by pod prstem zustala slova predchozi otazky
+ev("RUN.items[RUN.idx]=itemFromKey('jd1');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+ok('jina nabidka vymenila plochu, i kdyz je prvek tyz',
+   nab().length===3 && nab().every(b=>/číslice/.test(b.textContent)),
+   nab().map(b=>b.textContent).join(' / '));
+// spatny vyber u sudych a lichych dostane pravidlo, ne obecnou hlasku
+ev("RUN.items[RUN.idx]=itemFromKey('jp2');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+click(nab()[1-ev('RUN.items[RUN.idx].answer')]);
+await wait(400);
+ok('spatne sude nebo liche rekne pravidlo o posledni cislici',
+   /poslední číslice/.test(txt()), txt().slice(0,170));
+await wait(1700);
+// a zpatky na ciselnou klavesnici, aniz by se cokoli zaseklo
+ev("RUN.items[RUN.idx]=itemFromKey('m6x7');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+ok('po vyberu se ciselna klavesnice vratila cela', nab().length===12 && !!q('#keypad [data-k="ok"]'),
+   nab().length+' klaves');
 click(q('[data-act="quit"]')); click(q('[data-yes]'));
 
 console.log('--- sirsi okno ---');

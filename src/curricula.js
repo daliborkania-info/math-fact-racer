@@ -42,6 +42,15 @@
  *                                 places the number has: two digits,
  *                                 then a three digit number ending in a
  *                                 whole ten, then all three at once
+ *   pick  [bucket ids]            p1, p2, d1: the questions whose answer
+ *                                 is chosen from what is offered rather
+ *                                 than written, p being even or odd and
+ *                                 d how many figures a number has. One
+ *                                 field like the units, because the
+ *                                 double page teaches both at once. A
+ *                                 chapter that asks for this is the only
+ *                                 way such a question ever reaches a
+ *                                 race; see J_BUCKETS in app.js
  *   units [bucket ids]            1..4, converting units by the kind of
  *                                 measure: length, weight, volume, time.
  *                                 One field, unlike past the tables: a
@@ -78,6 +87,7 @@ const ALL_Z = ["1","2","3","4"];
 const ALL_G = ["1","2"];
 const ALL_R = ["1","2","3","4","5"];
 const ALL_V = ["1","2","3"];
+const ALL_J = ["p1","p2","d1"];
 
 const CURRICULA = [
   {
@@ -177,7 +187,10 @@ const CURRICULA = [
       // the material of the four before it and hides the first number
       {n:5,  name:"Zkouška správnosti",                   src:"7. díl, s. 12–13",
              pool:{variant:"missing", as100:ALL_H, mult:ALL_TABLES}},
-      {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:null},
+      // the one double page whose questions are answered by choosing
+      // rather than by writing; it is a supplement inside this track and
+      // has no track of its own, see J_BUCKETS in app.js
+      {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:{pick:ALL_J}},
       // the seventh part is still under a hundred, so only two digit numbers
       {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:{round:["o1"]}},
       {n:8,  name:"Dvojciferná bez přechodu",             src:"7. díl, s. 16–19", pool:{as100:["h1","h4"]}},

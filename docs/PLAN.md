@@ -1184,11 +1184,88 @@ Klávesnice `.keypad-pad3` sdílí rozvržení s `.keypad-pad2`, tedy čtyři sl
 - Chyba rodiny má vlastní hlášku: napsat číslici místo toho, kolik doopravdy
   platí, jmenuje obojí (`splitDigits`).
 
-### E3. `pick`, `parity` a `digit_count`, kapitola 6
+### E3. `pick`, `parity` a `digit_count`, kapitola 6 — HOTOVO 14. září 2026
 
 Dvě až čtyři velká tlačítka. Porušuje první princip (poznávání místo
 vybavování), proto jen jako doplněk uvnitř školní trati, nikdy vlastní trať;
 totéž platí pro E4.
+
+**Hranice se držela a je zadrátovaná na čtyřech místech.** Rodina nemá záznam
+v `TRACKS`, takže na mapě není a `mix` ji z tratí nenasbírá; `mix` ji navíc
+výslovně odfiltruje, protože sbírá i školní trať a ta má pool kapitoly;
+`weak` ji odfiltruje z krabičky stejně jako zakázky dílny (`isPickKey` vedle
+`isJobKey`); a na konci `buildRun()` stojí hlasitá hlídka, která spadne, když
+se otázka s výběrem octne v čemkoli jiném než ve školní trati. Test 7x
+v `items.test.js` projede všechny tratě včetně šampionátu a trati "co ti
+nejde" s krabičkou plnou výběru a ověří, že žádná ho nedostane, a naopak že
+kapitola 6 ho dostat musí.
+
+**Co se proti plánu upřesnilo.**
+
+- **Kolik tlačítek a jak se losují.** Sudé a liché má dvě, protože otázka má
+  dvě odpovědi; kolik číslic má tři, protože kapitola jmenuje tři druhy čísel.
+  Žádná nabídka neobsahuje volbu, která by nebyla skutečnou odpovědí.
+  **Správné tlačítko se losuje první a rovnoměrně a číslo se k němu teprve
+  staví**, tlačítka přitom stojí pořád ve stejném pořadí na stejném místě.
+  Poloha tím nenese nic (každé tlačítko je správně přesně jednou ze dvou, resp.
+  ze tří) a nic se pod prstem nehýbe. Míchání tlačítek by odpověď schovalo
+  taky, ale posouvalo by cíl mezi dvěma otázkami téhož závodu a vypadalo by
+  jako los. Žádná náhodná odměna nevzniká: body se počítají ze správnosti
+  a z času jako všude jinde, na tom, které tlačítko to bylo, nezávisí nic.
+  Hlídá to okruh 7w v `items.test.js`, včetně rovnoměrnosti na třech tisících
+  otázkách na kbelík.
+- **Klíče jsou `jp1`, `jp2` a `jd1`**, hlavička `j`, prefixová konvence jako
+  u stovky. Jedna hlavička nese oba druhy otázky, stejně jako `k`, `x` a `g`
+  nesou obě znaménka; abecedy zbývá málo. Sudé a liché má dva kbelíky (do sta
+  a trojciferná), kolik číslic jeden, a to **musí mít jeden**: kbelík, který by
+  nikdy nevyrobil trojciferné číslo, by udělal ze třetího tlačítka tlačítko,
+  které se dá vždycky přeskočit.
+- **Stisk tlačítka je celá odpověď a rovnou ji odešle.** Fajfka na ploše není,
+  protože se výběr neskládá po znacích, takže není co potvrzovat; guma a šipka
+  z téhož důvodu taky ne. Tlačítka jdou přes `data-k` (`opt0`, `opt1`, …)
+  a mají vlastní větev v `tap()`, tedy past z oddílu 12c se neporušila.
+- **Plocha má přesně výšku číselné klávesnice.** Čtyři řady kláves a tři mezery
+  jsou `4K + 24 px`; n tlačítek a n-1 mezer musí dát totéž, z čehož plynou tři
+  řádky v CSS (`2K+8`, `(4K+8)/3`, `K`). Výška klávesy se proto píše jednou
+  jako `--keyh` a čte se z obou stran. Na šířku se nepočítá nic: plocha se
+  roztáhne do téhož pole mřížky jako klávesnice.
+- **Tlačítka jdou pod sebe přes celou šířku, ne do třísloupcového gridu.**
+  Tři velká tlačítka vedle sebe by měla 110 px a nevešlo by se do nich nic
+  čitelného; je to přesně ta náhoda, před kterou oddíl 12c varuje. Naměřeno
+  na telefonu 375 px: tlačítko je široké 347 px, nejširší slovo `jedna číslice`
+  má 118 px ve třetím ročníku a 176 px v písmu prvního, tedy poloviny volného
+  místa. Řádek otázky s vyplněným políčkem je nejširší `697 hat zwei Ziffern`
+  s 326 px z 339 ve třetím ročníku (česky 320, anglicky 325); ve druhém se
+  nejširší varianta zalomí o pár pixelů a v prvním zalomí, stejně jako se tam
+  zalomí rozklad čísla, a je to v pořádku, trať patří třetímu ročníku.
+- **Políčko odpovědi zůstalo**, jen s vlastní třídou řádku `.q-pick`: plní se
+  slovem, ne číslem, takže se sází v písmu jednotky za odpovědí (22 px), ne
+  v písmu čísla. Díky tomu nepřibyla ani jedna nová cesta zpětné vazby,
+  `paintBoxes()` a `submit()` obarví políčko zeleně nebo červeně jako vždycky.
+- **Odpovídací plocha se pozná podle nabídky, ne podle jména prvku.**
+  `surfaceOf(item)` a `data-surface`: dvě otázky s výběrem mají obě
+  `input:"pick"`, ale jinou nabídku, a `submit()` by pod prstem nechal slova
+  předchozí otázky. Tohle byla jediná skutečná past kroku.
+- **Rodina nemá sbírku, a proto ani nerozsvěcuje místa.** Velikost sbírky se
+  bere z trati, tahle žádnou nemá, a místo, které se rozsvítí tam, kam se nedá
+  podívat, by slibovalo víc, než Poklady ukážou. Hlídá to `lightStar()`, jediná
+  brána, která místo rozsvěcuje; `seedStars()` teď jde přes ni taky.
+- **V heatmapě vidět je, a to je záměr.** Nemá trať, takže se neptá na
+  odemčení: ukáže se, když ji vybraná kapitola chce nebo když už dítě něco
+  z ní odpovídalo. Rodič má vidět, co dítě v krabičce má, ne které cesty
+  existují; a strip tří šedých dlaždic pro dítě, které se ke kapitole 6 nikdy
+  nedostane, by neříkal nic.
+- **Násobitel prahů je 1,4**: přečíst číslo a použít pravidlo je víc než
+  vybavit si spoj, a mnohem míň než cokoli psaného, protože odpověď je jeden
+  stisk a nic se neťuká.
+- **Texty obcházejí "cifru" i "řád".** Mluví se o číslicích, což je slovo
+  z první třídy: `jedna číslice`, `dvě číslice`, `tři číslice`, a otázka zní
+  "Kolik číslic má to číslo?". Chybná odpověď u sudých a lichých dostane
+  pravidlo, které je celým obsahem kapitoly: rozhoduje poslední číslice.
+- **Míchání vstupních prvků v jedné jízdě posouzeno, viz `PROJECT-STATE.md`,
+  oddíl 12c.** Závěr: únosné je to, protože se mění jen spodní část obrazovky
+  a výška zůstává, a v měkkém režimu je výběr menšinou otázek; podmínku
+  v `buildRun()` a `reachedKeys()` proto nepotřebujeme.
 
 ### E4. `cmp`, `compare_numbers` a `compare_units`, kapitoly 22 a 17
 

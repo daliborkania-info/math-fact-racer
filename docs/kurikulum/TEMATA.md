@@ -27,7 +27,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `pad2` | dvě políčka vedle sebe, podíl a zbytek | hotovo |
 | `pad3` | tři políčka, stovky a desítky a jednotky | hotovo |
 | `cmp` | tři velká tlačítka `<` `=` `>` | k dodělání |
-| `pick` | dvě až čtyři velká tlačítka s volbami | k dodělání |
+| `pick` | dvě až čtyři velká tlačítka s volbami, pod sebou přes celou šířku | hotovo, **jen uvnitř školní trati** |
 | `clock` | ciferník k přečtení, odpověď na `pad` | hotovo |
 | `frac` | čitatel a jmenovatel, dvě políčka | k dodělání |
 | `line` | číselná osa, klepnutí na pozici | k dodělání |
@@ -60,8 +60,8 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `time_elapsed` | kolik minut nebo hodin uplynulo | `pad` | do 24 h | nové |
 | `time_convert` | převody jednotek času | `pad` | sekundy až roky, do 1000 | hotovo |
 | `unit_convert` | převody jednotek délky, hmotnosti a objemu | `pad` | celá čísla do 1000 | hotovo |
-| `parity` | sudé nebo liché | `pick` | 0 až 1000 | nové |
-| `digit_count` | jednociferné, dvojciferné, trojciferné | `pick` | 0 až 1000 | nové |
+| `parity` | sudé nebo liché, dva kbelíky: do sta a trojciferná | `pick` | 1 až 999 | hotovo, bez vlastní trati |
+| `digit_count` | jednociferné, dvojciferné, trojciferné | `pick` | 1 až 999 | hotovo, bez vlastní trati |
 | `number_pattern` | doplnění dalšího členu číselné řady, aritmetické i geometrické | `pad` | 0 až 1000 | nové |
 | `compare_numbers` | porovnávání čísel | `cmp` | 0 až 1000 | nové |
 | `compare_units` | porovnávání veličin s jednotkami | `cmp` | podle jednotky | nové |
@@ -152,6 +152,38 @@ políčky by po dítěti chtěl nulu, kterou nikdo nepíše.
 
 Typická chyba je napsat číslici místo toho, kolik doopravdy platí, a má vlastní
 hlášku, která jmenuje obojí.
+
+**`parity` a `digit_count`, hotovo 14. září 2026, a je to jediné téma
+v katalogu s podmínkou.** Otázka je číslo a odpověď je slovo: jestli je sudé
+nebo liché, a kolik má číslic. Jinak než výběrem z nabídky se položit nedá,
+takže je to poznávání, ne vybavování, a jde to proti prvnímu nedotknutelnému
+principu hry. Existuje proto **jen jako doplněk uvnitř trati podle vybrané
+kapitoly učebnice, nikdy jako vlastní trať**: u dvou tlačítek je hádající dítě
+úspěšné v půlce případů, takže vlastní trať by platila za hádání a ukazatel na
+mapě by lhal. Držené je to tím, že rodina nemá záznam v tratích, že ji
+šampionát i trať "co ti nejde" výslovně odfiltrují, a hlasitou hlídkou
+v sestavování závodu; podrobně v `PROJECT-STATE.md`, oddíl 12e.
+
+**Kolik tlačítek a jak se losují je rozhodnutí, ne výchozí nastavení.** Sudé
+a liché má dvě, protože otázka má dvě odpovědi; kolik číslic má tři, protože
+kapitola jmenuje tři druhy čísel. Žádná nabídka neobsahuje návnadu, tedy volbu,
+která by nebyla skutečnou odpovědí. Správné tlačítko se losuje první
+a rovnoměrně a číslo se k němu teprve staví, přičemž tlačítka stojí pořád ve
+stejném pořadí na stejném místě: poloha tím nenese nic a nic se pod prstem
+nehýbe. Míchání tlačítek by odpověď schovalo taky, ale posouvalo by cíl mezi
+otázkami téhož závodu a vypadalo by jako los.
+
+**Kolik číslic musí mít jediný kbelík přes všechny tři velikosti.** Kbelík,
+který by nikdy nevyrobil trojciferné číslo, by udělal ze třetího tlačítka
+tlačítko, které se dá vždycky přeskočit. Sudé a liché naopak dva kbelíky má,
+do sta a trojciferná, protože přehlédnout ostatní číslice a číst jen poslední
+je vlastní malý krok.
+
+**Texty obcházejí "cifru" i "řád".** Mluví se o číslicích, což je slovo z první
+třídy: `jedna číslice`, `dvě číslice`, `tři číslice`, otázka zní "Kolik číslic
+má to číslo?" a řádek se čte jako věta, `347 má tři číslice`. Chybná odpověď
+u sudých a lichých dostane pravidlo, které je celým obsahem kapitoly:
+rozhoduje poslední číslice.
 
 **`add_sub_20`, obor do dvaceti bez přechodu, hotovo.** Klíč `a{a}p{b}` měl
 původně oba sčítance do deseti, takže 12 + 3 se nedalo zapsat vůbec, a celý

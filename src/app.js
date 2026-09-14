@@ -127,7 +127,7 @@ function seedShop(p){
    knew, so the best it can be given is what it knows right now. */
 function seedStars(p){
   p.stars = p.stars || {};
-  for(const k of Object.keys(p.facts || {})) if(p.facts[k].lv >= STAR_LV) p.stars[k] = true;
+  for(const k of Object.keys(p.facts || {})) if(p.facts[k].lv >= STAR_LV) lightStar(p, k);
 }
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
@@ -435,6 +435,53 @@ const V_BUCKETS = [
 ];
 const splitKeys = ids => ids.map(id => "v" + id);
 
+/* Choosing from what is offered, which is the one thing in the whole
+   game that is recognising rather than recalling.
+
+   THE BOUNDARY, and it is the point of this family rather than a note
+   on the side. The first of the untouchable principles says the answer
+   is written on the number pad and never picked from a list, because
+   recall builds a memory trace and recognition does not. Two chapters
+   of the book cannot be asked any other way: whether a number is even
+   or odd, and how many figures it is written with, are questions whose
+   answer is a word. So this family exists, and it exists *only* as a
+   supplement inside the track that follows the chapter the class is on.
+   It has no track of its own, it is kept out of the championship and
+   out of the trouble spots, and `buildRun()` says so out loud if a new
+   branch ever hands it to anything else. What that costs is written
+   down too: a child guessing between two buttons is right half the
+   time, which is exactly why a race may never be built out of this and
+   only a chapter's own race may contain it.
+
+   No collection, either, and for the same reason: places in the
+   Treasures are sized from a track, this family has none, and a place
+   that lights up where nothing can be looked at is worse than no place.
+   `lightStar()` is the one gate that says so.
+
+   The buckets. Even and odd come in two, under a hundred and then three
+   figures, because ignoring the other figures and reading only the last
+   one is a small step of its own. How many figures comes in one bucket
+   spanning all three kinds, and it has to: a bucket that never produced
+   a three figure number would make the third button one that is never
+   right, and a button that is never right is a button a child learns to
+   skip.
+
+   Keys are prefixed like the hundred, `"j" + bucket`, and the kind of
+   question stands inside the bucket id rather than taking a second
+   letter of the alphabet: `jp1`, `jp2` for even and odd, `jd1` for how
+   many figures. Ten letters were left and about ten generators are
+   planned, so one head carries both kinds the way `k`, `x` and `g`
+   carry their two directions. */
+const J_BUCKETS = [
+  {id:"p1", kind:"parity", lo:1,   hi:99},   // even or odd under a hundred
+  {id:"p2", kind:"parity", lo:100, hi:999},  // and then of a three figure number
+  {id:"d1", kind:"digits", upto:3}           // one, two or three figures
+];
+const pickKeys = ids => ids.map(id => "j" + id);
+/* The one family that may never be raced outside the chapter it belongs
+   to, asked in the places that have to keep it out. */
+const isPickKey = k => !!k && k[0] === "j";
+
 /* Converting units, one bucket per kind of measure. The seventh part
    introduces length, weight and volume (chapter 17) and then the clock
    and the calendar (chapter 18), and the eighth part converts them
@@ -675,6 +722,10 @@ function poolKeys(spec){
   // one field as well: a chapter that splits a number apart has no
   // second direction, and the bucket is which places the number has
   if(spec.split) out.push(...splitKeys(spec.split));
+  // one field like the units, and for the same reason: the double page
+  // that names one, two and three figure numbers is the double page
+  // that sorts them into even and odd, so a chapter on it is on both
+  if(spec.pick) out.push(...pickKeys(spec.pick));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.ops) out.push(...opsKeys(spec.ops));
@@ -718,7 +769,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxoqzgurv";
+const FAMILY_HEADS = "pnckxoqzgurvj";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -1070,6 +1121,7 @@ function rawItem(key){
   if(head === "g") return tensItem(key);
   if(head === "r") return divremItem(key);
   if(head === "v") return splitItem(key);
+  if(head === "j") return pickItem(key);
   if(head === "u") return unitItem(key);
   if(head === "o") return roundItem(key);
   if(head === "q") return chainItem(key);
@@ -1286,6 +1338,67 @@ function splitItem(key){
     // the hundreds, two for the tens, one for the ones
     maxLen: b.places.map(pl => String(V_PLACE[pl]).length),
     sep: "+", ask: "splitAsk" + b.id
+  };
+}
+
+/* Choosing from what is offered: even or odd, and how many figures a
+   number is written with. Why this family is a supplement inside the
+   school track and nothing else is written above `J_BUCKETS`.
+
+   HOW MANY BUTTONS, and it is a decision rather than a default. Even or
+   odd gets two because the question has exactly two answers; a third
+   would be a decoy, and a decoy teaches a child to shop around rather
+   than to look at the number. How many figures gets three because the
+   chapter names exactly three kinds of number. Nothing here ever offers
+   a choice that is not a real answer to the question asked.
+
+   HOW THE RIGHT ONE IS DRAWN. Which button is the right one is drawn
+   first, evenly, and the number is then built to match it; the buttons
+   themselves stand in the same order in the same place every time. So
+   the position of the answer carries nothing: each button is the right
+   one exactly one time in two, or one time in three, and no run of
+   questions rewards a child who presses the same place twice. Shuffling
+   the buttons instead would hide the answer just as well and would be
+   worse twice over: the target would move under the thumb between two
+   questions of the same race, and a surface that rearranges itself is a
+   surface that looks like a draw. Nothing here is a draw. The points an
+   answer is worth come from being right and from how long it took, the
+   same as everywhere else in the game, so there is no prize attached to
+   which button was pressed.
+
+   Built by construction like every family since the thousand. For even
+   and odd the first number of the wanted parity inside the bucket is
+   stepped to, and the draw then goes in twos, so the parity is true
+   because nothing else could come out. For how many figures the band of
+   the drawn answer is what is drawn from. Nothing is worked out and
+   then corrected, and an unknown bucket falls over out loud. */
+function pickItem(key){
+  const b = J_BUCKETS.find(x => x.id === key.slice(1));
+  if(!b) noBucket("pickItem", key);
+  if(b.kind === "parity"){
+    const a = ri(0, 1);                                  // 0 even, 1 odd, drawn first
+    const first = b.lo + ((b.lo % 2) === a ? 0 : 1);     // the first number in the bucket that is it
+    return {
+      key, kind:"parity", input:"pick",
+      text: String(first + 2 * ri(0, Math.floor((b.hi - first) / 2))),
+      answer: a,
+      // the words on the buttons, finished text on the item like every
+      // other word a question carries: the language does not change in
+      // the middle of a race
+      opts: [t("pickEven"), t("pickOdd")],
+      // the line reads "47 je ▢", so what stands between the number and
+      // the answer is a word rather than an equals sign
+      rel: "pickIs", ask: "parityAsk"
+    };
+  }
+  const a = ri(0, b.upto - 1);                           // how many figures, drawn first
+  const lo = a ? Math.pow(10, a) : 1, hi = Math.pow(10, a + 1) - 1;
+  return {
+    key, kind:"digits", input:"pick",
+    text: String(ri(lo, hi)),
+    answer: a,
+    opts: [t("pickFig1"), t("pickFig2"), t("pickFig3")].slice(0, b.upto),
+    rel: "pickHas", ask: "digitsAsk"
   };
 }
 
@@ -1658,6 +1771,10 @@ function buildRun(p, tr){
     // The chapter sets the focus. In the soft mode the rest of the race
     // still comes from earlier chapters, because dropping spaced review
     // would break the strongest part of the design.
+    // This is also the one branch a question answered by choosing may
+    // ever arrive in, whether as the focus of the chapter it belongs to
+    // or as review of it from a later chapter; see `J_BUCKETS` and the
+    // line at the end of this function.
     const focus = schoolPool(p);
     const cur = curriculumById(p.curriculum);
     const ch = chapterOf(p);
@@ -1747,15 +1864,30 @@ function buildRun(p, tr){
       // either, the same way a staged track holds back its later steps
       if(inGrade(p, other) && unlockState(p, other).open) all.push(...reachedKeys(p, other));
     }
-    keys = sampleKeys(p, [...new Set(all)], n, 3);
+    // the school track is one of the tracks gathered above and its pool
+    // is the chapter's, so this is where a question answered by
+    // choosing would walk into the championship; it does not
+    keys = sampleKeys(p, [...new Set(all)].filter(k => !isPickKey(k)), n, 3);
   } else { // weak
-    // workshop tasks live in the same box but are not race questions
-    const seen = Object.keys(p.facts).filter(k => p.facts[k].reps > 0 && !isJobKey(k));
+    // workshop tasks live in the same box but are not race questions,
+    // and neither is anything answered by choosing: it has no track, so
+    // the box it leaves behind must not be the back door it returns by
+    const seen = Object.keys(p.facts).filter(k => p.facts[k].reps > 0 && !isJobKey(k) && !isPickKey(k));
     seen.sort((x,y) => (p.facts[x].lv - p.facts[y].lv) || (p.facts[y].bad - p.facts[x].bad));
     const worst = seen.slice(0, Math.max(8, Math.round(seen.length * .35)));
     keys = sampleKeys(p, worst.length ? worst : seen, n, 0);
   }
   if(!keys || !keys.length) keys = sampleKeys(p, multFactsFor([1,2,5,10]).map(f => mk(f.a,f.b)), n, 5);
+  /* The boundary of the one family that is recognising rather than
+     recalling, held here rather than trusted to the branches above. It
+     is kept out where it could get in, the championship gathering the
+     school track's pool and the trouble spots gathering the box, and
+     this line says so out loud if a new track or a new branch ever
+     forgets. Nothing can reach it today, which is the point: a quiet
+     filter here would hide the day something does. */
+  if(tr.op !== "school" && keys.some(isPickKey)){
+    throw new Error("buildRun: " + tr.id + " reached a question answered by choosing");
+  }
   // shuffle, but never leave the same fact twice in a row
   for(let i = keys.length-1; i > 0; i--){ const j = ri(0,i); [keys[i],keys[j]] = [keys[j],keys[i]]; }
   // A neighbour swap is not enough once a pool is tiny: the first range
@@ -2031,7 +2163,17 @@ function revealSVG(inner, done, total){
    of its own and not something computed from `facts`. */
 const STAR_LV = 4;
 const starred = (p, key) => !!(p.stars || {})[key];
-function lightStar(p, key){ (p.stars || (p.stars = {}))[key] = true; }
+/* One place per fact, and a fact gets one only when there is a
+   collection it belongs to. Every collection is sized from a track;
+   choosing from what is offered has no track on purpose, so it has no
+   collection either, and a place that lit up where nothing can be
+   looked at would leave the count on the result screen promising more
+   than the Treasures ever show. This is the one gate that lights a
+   place, so it is also the one that can withhold one. */
+function lightStar(p, key){
+  if(isPickKey(key)) return;
+  (p.stars || (p.stars = {}))[key] = true;
+}
 function starCount(p, keys){
   let n = 0;
   for(const k of keys) if(starred(p, k)) n++;
@@ -2069,9 +2211,14 @@ function thresholds(p, item){
   // like putting a nought back, but it is written into up to three boxes
   // with a hop between each pair, so the keying is what the allowance is
   // mostly for
+  // reading a number and saying what kind it is takes longer than
+  // recalling a fact, because the number has to be read before the rule
+  // is applied, and far less than anything written down: the answer is
+  // one press and there is nothing to key in at all
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
                : item.kind === "divrem" ? 2.4
                : item.kind === "split" ? 2.2
+               : (item.kind === "parity" || item.kind === "digits") ? 1.4
                : item.kind === "unit" ? 2.2
                : item.kind === "multten" || item.kind === "divten" ? 1.8
                : item.kind === "ops" ? 2.4
@@ -5460,7 +5607,17 @@ const TARGET = 100;
    was one more line here rather than a third way through the screen:
    everything below counts the boxes, none of it asks whether there are
    two. */
-const SLOTS = {pad: 1, pad2: 2, pad3: 3};
+const SLOTS = {pad: 1, pad2: 2, pad3: 3, pick: 1};
+/* Which answering surface a question wants, for the one question of
+   whether the one on screen has to be rebuilt. It is not simply
+   `input`, because two questions answered by choosing are answered on
+   two different surfaces whenever the choices differ: even or odd
+   offers two words, how many figures offers three, and swapping only on
+   the name would leave the wrong words under the child's thumb. */
+function surfaceOf(item){
+  const kind = (item && item.input) || "pad";
+  return item && item.opts ? kind + "|" + item.opts.join("|") : kind;
+}
 function slotsOf(item){ return SLOTS[(item && item.input) || "pad"] || 1; }
 /* The first box keeps the id it has always had, because the screen
    around it knows it by that name; the others are numbered from two. */
@@ -5566,7 +5723,13 @@ function questionHTML(item, slot){
     return `<div class="question q-boxes q-boxes${n}${questionSize(item)}" id="qbox">${inner}`
       + `${mid}${words(item.tail)}${unit}</div>`;
   }
-  return `<div class="question${questionSize(item)}" id="qbox">${inner}${box(0)}${unit}</div>`;
+  /* A question answered by choosing wears a row class of its own,
+     because the box on it fills with a word rather than a number: "347
+     má ▢" turns into "347 má tři číslice", and a word set in the size a
+     number is set in would run off the side. Everything else about the
+     row is the ordinary one box shape. */
+  const chosen = item && item.opts ? " q-pick" : "";
+  return `<div class="question${chosen}${questionSize(item)}" id="qbox">${inner}${box(0)}${unit}</div>`;
 }
 /* The answering surface belongs to the question, not to the screen, so
    a race may mix families that are answered differently. A new input
@@ -5587,16 +5750,40 @@ function keypadHTML(item){
      surfaces does not change height under the child's thumb.
      Two boxes and three get the same pad: the arrow steps round them
      all, so what changes between them is the row above, not the keys. */
+  const surf = ` data-surface="${esc(surfaceOf(item))}"`;
+  /* A question answered by choosing puts the choices themselves on the
+     answering surface, one under the other and across its whole width.
+     They are words, not digits: three of them side by side would be a
+     hundred and ten pixels each and nothing a child reads at a glance
+     fits in that. Three big buttons dropping into the three columns of
+     the number pad is the trap this avoids; they would fit, and only by
+     accident.
+     The surface keeps the height of the number pad, four rows of keys
+     and the three gaps between them, and the stylesheet shares those
+     rows out between however many choices there are, so a race that
+     mixes the two does not move the screen under the child's thumb.
+     There is no tick: a choice is not gathered up press by press the
+     way a number is, so the button that is pressed is the whole answer
+     and sending it is the same move. Every button goes through
+     `data-k`, because the delegated listener reads that attribute
+     before any other and a `data-act` of its own would never be
+     reached. */
+  if(kind === "pick"){
+    const opts = (item && item.opts) || [];
+    return `<div class="keypad keypad-pick" id="keypad" data-input="pick" data-opts="${opts.length}"${surf}>
+      ${opts.map((o, i) => `<button class="key opt" data-k="opt${i}">${esc(o)}</button>`).join("")}
+    </div>`;
+  }
   if(SLOTS[kind] > 1){
     const next = `<button class="key nx" data-k="next" aria-label="${t("nextBox")}">&#8594;</button>`;
-    return `<div class="keypad keypad-${kind}" id="keypad" data-input="${kind}">
+    return `<div class="keypad keypad-${kind}" id="keypad" data-input="${kind}"${surf}>
       ${dig(1)}${dig(2)}${dig(3)}${del}
       ${dig(4)}${dig(5)}${dig(6)}${next}
       ${dig(7)}${dig(8)}${dig(9)}${ok}
       <button class="key zero" data-k="0">0</button>
     </div>`;
   }
-  return `<div class="keypad keypad-pad" id="keypad" data-input="pad">
+  return `<div class="keypad keypad-pad" id="keypad" data-input="pad"${surf}>
     ${[1,2,3,4,5,6,7,8,9].map(n => dig(n)).join("")}
     ${del}${dig(0)}${ok}
   </div>`;
@@ -5610,6 +5797,10 @@ function askText(item){ return item && item.ask ? t.apply(null, [item.ask].conca
    of its own shows exactly what was typed into it. */
 function typedText(item, typed, slot){
   if(typed === "") return "?";
+  /* A question answered by choosing keeps which button was pressed, so
+     the box shows the choice that was made rather than the number of
+     the button: "347 má tři číslice", not "347 má 2". */
+  if(item && item.opts) return item.opts[+typed] === undefined ? typed : item.opts[+typed];
   if(!slot && item && item.kind === "clock" && typed.length >= 3){
     return typed.slice(0, -2) + ":" + typed.slice(-2);
   }
@@ -5807,6 +5998,19 @@ function pickSlot(i){
 function tap(k){
   if(!RUN || RUN.state !== "ask") return;
   const item = RUN.items[RUN.idx], n = slotsOf(item);
+  /* A question answered by choosing has nothing to gather: the button
+     that was pressed is the whole answer, so it is written into the box
+     and sent in one move. A number key can still arrive from a real
+     keyboard, where 1 is the first choice; on the surface itself there
+     are no number keys at all. */
+  if(item && item.opts){
+    const i = k.slice(0, 3) === "opt" ? +k.slice(3) : (k >= "1" && k <= "9" ? +k - 1 : -1);
+    if(!(i >= 0) || i >= item.opts.length) return;
+    RUN.typed = String(i);
+    paintBoxes(item);
+    submit();
+    return;
+  }
   if(k === "next"){ if(n > 1) pickSlot((RUN.slot + 1) % n); return; }
   if(k === "ok"){ if(typedFull()) submit(); return; }
   if(k === "del"){
@@ -5853,6 +6057,10 @@ function showCombo(n){
 function rightAnswerText(item){
   if(item.kind === "clock") return t("clockIs", item.disp);
   if(item.layout === "lead") return item.answer + " " + item.text;
+  /* A question answered by choosing reads back as the sentence it is,
+     "347 má tři číslice", because the choice is a word and the number
+     of the button it stood on would say nothing. */
+  if(item.opts) return item.text + " " + relOf(item) + " " + item.opts[item.answer];
   /* An answer that was written into several boxes reads back as the
      whole line, with the words that stood between the boxes standing
      between the numbers: "36 : 5 = 7 (zb. 1)". */
@@ -5884,6 +6092,12 @@ function missHint(item, typed){
     if(!isNaN(r) && r >= item.divisor) return t("divremTooBig", item.divisor);
     if(!isNaN(q) && r === item.answer[1] && q !== item.answer[0]) return t("divremQuotient", item.divisor);
   }
+  /* Even and odd has one rule behind it and the whole chapter is that
+     rule, so a wrong answer gets told the rule rather than the answer:
+     only the last figure decides. How many figures gets no message of
+     its own, because the line read back above it already says what the
+     number is, which is the only thing there was to miscount. */
+  if(item.kind === "parity") return t("parityMiss");
   /* The one mistake splitting a number apart is about: writing the
      digit down instead of what it is worth, a 4 where forty belongs.
      Every part of the answer is a digit times what its place is worth,
@@ -5994,8 +6208,11 @@ function submit(){
     // a race may mix families answered on different things; swap the
     // answering surface only when it actually changes, so the keys do
     // not flicker on every question
+    // it asks the surface, not the name of the input element: two
+    // questions answered by choosing share a name and not the words on
+    // the buttons
     const kp = document.getElementById("keypad");
-    if(kp && kp.dataset.input !== (next.input || "pad")) kp.outerHTML = keypadHTML(next);
+    if(kp && kp.dataset.surface !== surfaceOf(next)) kp.outerHTML = keypadHTML(next);
     const pipbox = document.querySelector(".pips");
     if(pipbox && pipbox.children.length !== RUN.items.length){
       pipbox.innerHTML = RUN.items.map(() => `<span class="pip"></span>`).join("");
@@ -6660,9 +6877,14 @@ const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
    on the map, so it always gets a block. */
 function heatSpecs(p){
   const out = [];
-  const push = (trackId, spec) => {
+  /* `reach` is for a family that has no track to be asked about: it
+     says in its own words whether the child can get at the material.
+     Without it the choice is between always showing a block and never
+     showing one, and neither is the truth for material that arrives
+     only through one chapter of one book. */
+  const push = (trackId, spec, reach) => {
     const tr = trackId && trackById(trackId);
-    const reachable = !tr || (inGrade(p, tr) && unlockState(p, tr).open);
+    const reachable = reach !== undefined ? reach : (!tr || (inGrade(p, tr) && unlockState(p, tr).open));
     if(reachable || spec.tiles.some(x => x.keys && heatCell(p, x.keys).has)) out.push(spec);
   };
   push("t1", heatGrid(t("heatMult"), HEAT_10,
@@ -6702,6 +6924,24 @@ function heatSpecs(p){
   // the two lines of several numbers stand together
   push("ops", heatStrip(t("trk_ops"), 4, Z_BUCKETS.map(b =>
     ({label: Z_EX[b.id], keys:["z" + b.id], tip: Z_EX[b.id]}))));
+  /* What kind of number it is stands just before what its places are
+     worth, because both are reading a number rather than counting with
+     one, and the book takes them in that order. It has no track, so
+     there is nothing to ask whether it is reachable: it is shown when
+     the chapter the class is on asks for it, or when the child has
+     already answered some of it. A parent whose child is nowhere near
+     that chapter would otherwise read three grey squares of material
+     the game will never hand out. The heat map is the one place this
+     family is visible at all, and it belongs here: it says what the
+     child has in the box, not which paths exist. */
+  const pickTiles = J_BUCKETS.map(b => {
+    // the label is a word rather than an example sum, because there is
+    // no sum to show; it is looked up by the key, the way the workshop
+    // names its own tiles
+    const k = "j" + b.id;
+    return {label: t("heat_" + k), keys:[k], tip: t("heat_" + k)};
+  });
+  push(null, heatStrip(t("heatPick"), 3, pickTiles), schoolPool(p).some(isPickKey));
   // what each place of a number is worth is the ground the thousand is
   // built on, so the parent reads the two one under the other, which is
   // also how they stand on the map

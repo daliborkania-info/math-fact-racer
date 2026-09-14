@@ -403,6 +403,19 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
    twice. */
 .question.q-boxes3{gap:4px}
 .question.q-boxes3 .answerbox{padding:0 5px}
+/* A row whose answer is chosen rather than counted. The box fills with
+   a word, "347 má tři číslice", and a word set at the size of the
+   number would be half the width of the phone on its own; it is set at
+   the size of the unit behind an answer instead, and for the same
+   reason, because what is being judged is the number and the word only
+   names what kind it is. Measured on a 375 px phone in the third year,
+   where this material lives: the widest line of either family is
+   "347 má tři číslice" at 288 px of the 339 there are, and the widest
+   in German, "347 hat drei Ziffern", at 300. */
+.question.q-pick .answerbox{
+  min-width:calc(74px * var(--tx));height:52px;padding:0 12px;
+  font-size:calc(22px * var(--tx));letter-spacing:0;
+}
 /* the words between and after the boxes, "(zb." and ")", read at the
    size of the rest of the line; only the wide letter spacing of the
    numbers would look wrong around a bracket */
@@ -421,8 +434,8 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 .hintline{min-height:38px;text-align:center;font-size:calc(15px * var(--tx));color:var(--ink-soft);line-height:1.35;font-weight:700}
 .hintline b{font-family:var(--font-display);font-size:calc(20px * var(--tx));color:var(--ink)}
 
-/* The answering surface. One kind exists so far, the number pad; each
-   further one brings its own modifier class, so the layout lives with
+/* The answering surface. Two kinds exist, the number pad and the row of
+   choices; each brings its own modifier class, so the layout lives with
    the input element rather than in the screen around it.
    Do not call this pad3: in docs/kurikulum/TEMATA.md that name belongs
    to the input element with three boxes for hundreds, tens and ones,
@@ -451,11 +464,38 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 .keypad-pad2 .key.zero,.keypad-pad3 .key.zero{grid-column:span 3}
 .key.nx{background:var(--shell-2);box-shadow:0 4px 0 #c3cde5}
 .key.nx:active{box-shadow:0 1px 0 #c3cde5}
+/* The surface of a question answered by choosing: the choices stand one
+   under the other and take the whole width, because they are words and
+   not digits. Three of them dropped into the three columns of the
+   number pad would be 110 px each and would fit only by accident, which
+   is exactly the accident the comment in docs was written about.
+   The heights below are the whole of how this surface keeps the height
+   of the number pad. Four rows of keys and the three gaps between them
+   come to 4K + 24 px; n buttons and their n-1 gaps have to come to the
+   same, which is where each of the three lines comes from, and it is
+   why the key height is written once as --keyh and read from here. On
+   its side there is nothing to work out: the surface is stretched into
+   the grid area it shares with the number pad, so the rows simply
+   divide whatever height that is. */
+.keypad-pick{grid-template-columns:1fr}
+html:not([data-o="wide"]) .keypad-pick[data-opts="2"] .key{height:calc(2 * var(--keyh) + 8px)}
+html:not([data-o="wide"]) .keypad-pick[data-opts="3"] .key{height:calc((4 * var(--keyh) + 8px) / 3)}
+html:not([data-o="wide"]) .keypad-pick[data-opts="4"] .key{height:var(--keyh)}
+/* A word on a key, read at the size a digit on a key is read: the
+   longest of them, "jedna číslice", is 176 px of the 347 the button has
+   even in the first year's type, so there is no reason to set it
+   smaller. It is kept on one line, because a choice that wraps looks
+   like two choices. */
+.key.opt{font-size:calc(26px * var(--tx));padding:0 10px;white-space:nowrap}
 /* The key grows with the letters on it: a larger digit in a key of the
    old height would sit in a box it no longer fits, so the floor of the
-   height carries the same scale as the type. */
+   height carries the same scale as the type. It is written here once,
+   as a custom property, because the surface of a question answered by
+   choosing has to come to exactly the same height out of a different
+   number of buttons. */
+html{--keyh:max(clamp(50px,8.6vh,64px), calc(50px * var(--tx)))}
 .key{
-  height:clamp(50px,8.6vh,64px);min-height:calc(50px * var(--tx));
+  height:var(--keyh);
   border-radius:var(--r-m);background:var(--paper);
   font-family:var(--font-display);font-size:calc(26px * var(--tx));box-shadow:0 4px 0 var(--line);
   display:grid;place-items:center;font-variant-numeric:tabular-nums;
@@ -493,6 +533,9 @@ html[data-o="wide"] .keypad{grid-area:keypad;min-height:0;align-self:stretch}
 html[data-o="wide"] .keypad-pad{grid-template-rows:repeat(4,minmax(calc(38px * var(--tx)),1fr))}
 html[data-o="wide"] .keypad-pad2,
 html[data-o="wide"] .keypad-pad3{grid-template-rows:repeat(4,minmax(calc(38px * var(--tx)),1fr))}
+/* the choices share the same box the number pad is stretched into, so
+   however many of them there are, the surface is the same height */
+html[data-o="wide"] .keypad-pick{grid-auto-rows:minmax(calc(38px * var(--tx)),1fr)}
 /* The floor of a key grows with the digit on it here too, which is what
    step C4 asks for and what the flat 40 px of step C1 took away again.
    It starts lower than the 50 px of a screen held upright, because on its

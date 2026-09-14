@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -52,32 +52,46 @@ A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
+// odpoved je vetsinou jedno cislo, ale vstupni prvek se dvema policky
+// odpovida dvema hodnotami naraz (podil a zbytek), takze se vsude nize
+// pracuje se seznamem hodnot a s tim, co se do policek napsalo
+const vals=it=>Array.isArray(it.answer)?it.answer:[it.answer];
+const wrote=(it,v)=>Array.isArray(it.answer)?v.map(String):String(v[0]);
+const mlen=(it,i)=>Array.isArray(it.maxLen)?it.maxLen[i]:it.maxLen;
 for(const k of keys) for(let i=0;i<40;i++){
   const it=A.itemFromKey(k); checked++;
   const r=RANGE[k[0]];
   if(!r){say(k,'rodina nema v testu uvedeny rozsah odpovedi');break;}
-  if(!Number.isInteger(it.answer)||it.answer<r[0]||it.answer>r[1]){
-    say(k,'odpoved mimo rozsah rodiny: '+it.answer+' neni v '+r.join(' az '));continue;
+  const odp=vals(it);
+  if(odp.some(a=>!Number.isInteger(a)||a<r[0]||a>r[1])){
+    say(k,'odpoved mimo rozsah rodiny: '+odp.join(' ')+' neni v '+r.join(' az '));continue;
   }
   // zadani, ktere je aritmeticky radek, se overi spoctenim; obrazkova
   // otazka zadny takovy radek nema a overuje se jen pres check
   // otazka s jednotkou neni aritmeticky radek, i kdyby v jednotce nejaky
   // ten znak stal: "3 m" se nepocita, cely vypocet je v prevodu samotnem
-  if(/[+\-×:]/.test(it.text) && !it.unit){
+  // deleni se zbytkem taky neni: "36 : 5" je 7,2 a odpoved je 7 a 1,
+  // tedy dve hodnoty, ktere se z radku spoctou az dohromady
+  if(/[+\-×:]/.test(it.text) && !it.unit && odp.length===1){
     const val=eval(it.text.replace(/×/g,'*').replace(/:/g,'/'));
     if(val!==it.answer){say(k,'zadani nesedi s odpovedi: '+it.text+' je '+val+', ma byt '+it.answer);continue;}
-  } else if(!it.svg && !it.ask){
+  } else if(!it.svg && !it.ask && odp.length===1){
     // otazka musi byt sama o sobe srozumitelna: bud je to vypocet, nebo
     // obrazek, nebo je slovy receno, co se ma udelat. Holy pocet bez
     // zadani by dite jen koukalo na cislo a hadalo.
     say(k,'otazka neni ani vypocet, ani obrazek, ani otazka slovy');continue;
   }
-  // kazda otazka musi uznat svou odpoved a neuznat sousedni
-  if(!it.check(String(it.answer))){say(k,'otazka neuznala vlastni odpoved '+it.answer);continue;}
-  if(it.check(String(it.answer+1))){say(k,'otazka uznala i spatnou odpoved '+(it.answer+1));continue;}
+  // kazda otazka musi uznat svou odpoved a neuznat sousedni; u dvou
+  // policek se check vola polem a kazda hodnota se posuzuje zvlast,
+  // takze se zkousi zkazit vzdycky jen jedna z nich
+  if(!it.check(wrote(it,odp))){say(k,'otazka neuznala vlastni odpoved '+odp.join(' '));continue;}
+  const vedle=odp.some((a,j)=>it.check(wrote(it,odp.map((b,l)=>l===j?b+1:b))));
+  if(vedle){say(k,'otazka uznala i spatnou odpoved vedle '+odp.join(' '));continue;}
   // a musi jit zadat na tom, co nabizi
-  if(it.input!=='pad'){say(k,'nezname vstupni zarizeni '+it.input);continue;}
-  if(String(it.answer).length>it.maxLen){say(k,'odpoved '+it.answer+' se nevejde do '+it.maxLen+' znaku');}
+  if(it.input!=='pad'&&it.input!=='pad2'){say(k,'nezname vstupni zarizeni '+it.input);continue;}
+  if(it.input==='pad2'&&odp.length!==2){say(k,'dve policka, ale '+odp.length+' hodnot v odpovedi');continue;}
+  const siroka=odp.some((a,j)=>String(a).length>mlen(it,j));
+  if(siroka){say(k,'odpoved '+odp.join(' ')+' se nevejde do policka o '+it.maxLen+' znacich');}
 }
 console.log('zkontrolovano prikladu:',checked,'| chyb:',bad);
 
@@ -1784,6 +1798,66 @@ for(const k of ['o1','q1','z1','u1','gm1','c1']){
   if(it.ask!==plain.ask){mvBad++;console.log('  !!  varianta prepsala zadani cizi rodiny',k);}
 }
 console.log('zkontrolovano chybejicich clenu:',mvN,'| nejdelsi radek:',mvDelsi,'('+mvDelka+' znaku) | chyb:',mvBad);
+
+// 7r. vstupni prvek se dvema polickami
+//
+// Deleni se zbytkem jeste neexistuje, takze se prvek zkousi na polozce
+// slozene tady: dve hodnoty v odpovedi a slova, ktera mezi polickami
+// a za nimi stoji. Az generator prijde, tenhle okruh se nemeni, jen
+// prestane byt jediny, kdo pad2 vyrabi. Psani, preskok a mazani pres
+// hranici jsou interakce nad zivym DOMem a hlida je flow.test.js.
+let p2Bad=0;
+const p2say=m=>{p2Bad++;console.log('  !!  '+m);};
+const dvoj=Object.assign({key:'r36x5', text:'36 : 5', answer:[7,1], input:'pad2',
+  maxLen:[2,1], sep:'(zb.', tail:')', kind:'divrem'});
+dvoj.check=A.defaultCheck(dvoj.answer);
+const jedno=A.itemFromKey('m6x7');
+
+if(A.slotsOf(dvoj)!==2) p2say('pad2 nema dve policka, ale '+A.slotsOf(dvoj));
+if(A.slotsOf(jedno)!==1) p2say('obycejna otazka dostala vic nez jedno policko');
+// radek: zadani, prvni policko, slova mezi, druhe policko, slova za nim
+const hd=A.questionHTML(dvoj);
+const iA=hd.indexOf('id="abox"'), iB=hd.indexOf('id="abox2"'), iS=hd.indexOf('(zb.');
+if(iA<0||iB<0) p2say('radek nema obe policka: '+hd);
+if(iA>iB) p2say('policka nestoji v poradi podil, zbytek');
+if(!(iS>iA&&iS<iB)) p2say('slova mezi polickami nestoji mezi nimi');
+if(hd.indexOf('<span class="qsep">)</span>')<iB) p2say('zavorka se nezavrela za druhym polickem');
+if(!/data-slot="0"/.test(hd)||!/data-slot="1"/.test(hd)) p2say('policko nerekne, ktere je, takze do nej nejde klepnout');
+if(!/class="answerbox active" id="abox"/.test(hd)) p2say('neni videt, do ktereho policka se pise');
+const hd1=A.questionHTML(dvoj,1);
+if(!/class="answerbox active" id="abox2"/.test(hd1)) p2say('prepnute policko se neoznacilo');
+if(/class="answerbox active" id="abox"/.test(hd1)) p2say('aktivni jsou dve policka naraz');
+// nejsirsi radek, ktery hra kresli, takze nejmensi pismo a vlastni trida
+if(!/q-boxes/.test(hd)) p2say('radek se dvema polickami nema vlastni tridu');
+if(!/q-xlong/.test(hd)) p2say('radek se dvema polickami si nerekl o nejmensi pismo: '+hd);
+// jedno policko zustalo presne takove, jake bylo
+const hd0=A.questionHTML(jedno);
+if(/data-slot|q-boxes|active/.test(hd0)) p2say('jedno policko dostalo vybavu dvou: '+hd0);
+if(!/<span class="answerbox" id="abox">/.test(hd0)) p2say('policko jedne odpovedi zmenilo tvar: '+hd0);
+// klavesnice: tri sloupce cislic plus ctvrty s gumou, sipkou a fajfkou
+const kp=A.keypadHTML(dvoj), kp0=A.keypadHTML(jedno);
+if(!/data-input="pad2"/.test(kp)) p2say('klavesnice se nepredstavila jako pad2');
+if(!/class="keypad keypad-pad2"/.test(kp)) p2say('klavesnice nema vlastni rozvrzeni');
+if((kp.match(/data-k="/g)||[]).length!==13) p2say('klavesnice pro dve policka nema trinact klaves');
+if(!/data-k="next"/.test(kp)) p2say('chybi klavesa na prepnuti policka');
+// prepinaci klavesa musi jit pres data-k, jinak ji delegovany posluchac
+// nikdy nedostane
+if(/data-act=/.test(kp)) p2say('klavesa si vzala data-act, ktere posluchac cte az nakonec');
+if(/data-k="next"/.test(kp0)) p2say('obycejna klavesnice dostala prepinaci klavesu');
+if((kp0.match(/data-k="/g)||[]).length!==12) p2say('obycejna klavesnice uz nema dvanact klaves');
+// kazda hodnota se porovnava zvlast, nikdy se neslepi do jednoho cisla
+if(!dvoj.check(['7','1'])) p2say('otazka neuznala vlastni odpoved');
+if(dvoj.check(['7','2'])) p2say('spatny zbytek prosel');
+if(dvoj.check(['8','1'])) p2say('spatny podil prosel');
+if(dvoj.check(['1','7'])) p2say('prohozene hodnoty prosly');
+if(dvoj.check('71')) p2say('podil a zbytek slepene do jednoho cisla prosly');
+if(dvoj.check(['7'])) p2say('chybejici zbytek prosel jako odpoved');
+if(dvoj.check(['7',''])) p2say('prazdne policko proslo jako nula');
+if(!A.defaultCheck(42)('42')||A.defaultCheck(42)('43')) p2say('jedna hodnota se prestala porovnavat');
+// a cela odpoved se precte zpatky jako radek, ne jako dve cisla za sebou
+const celyR=A.rightAnswerText(dvoj);
+if(celyR!=='36 : 5 = 7 (zb. 1)') p2say('cela odpoved se necte jako radek: '+celyR);
+console.log('chyb ve vstupnim prvku se dvema polickami:',p2Bad);
 
 // 7m. varianta jede pres skolni trat a pres kapitolu, nikam jinam
 let mvTrBad=0;

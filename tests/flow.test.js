@@ -851,6 +851,68 @@ ok('ctvrtak vidi celou mapu jako driv',
    qa('.place').length+' mist');
 ok('ctvrtak nema ani dvere dopredu, nic dalsiho neni', qa('.place.peekdoor').length===0);
 
+console.log('--- dve policka v odpovedi ---');
+// Deleni se zbytkem jeste neexistuje, takze se vstupni prvek zkousi na
+// polozce slozene tady: zavod se rozjede jako kterykoli jiny a otazka
+// se vymeni za dvoupolickovou. Zkousi se prave to, co strojovy test nad
+// retezci nevidi, tedy psani do obou policek, preskok po naplneni,
+// mazani pres hranici, prepinaci klavesa a klepnuti do policka.
+ev('startRun(P(),"t1")');
+ev(`(function(){
+  const it=Object.assign({},itemFromKey('m6x7'),{text:'36 : 5',answer:[7,1],
+    input:'pad2',maxLen:[2,1],sep:'(zb.',tail:')',kind:'divrem'});
+  it.check=defaultCheck(it.answer);
+  RUN.items[RUN.idx]=it; RUN.typed=blankTyped(it); RUN.slot=0; RUN.state='ask';
+  render();
+})()`);
+const bx=i=>d.getElementById(i?'abox2':'abox');
+const key=k=>click(qa('[data-k]').find(b=>b.dataset.k===k));
+ok('otazka o dvou hodnotach ma dve policka', !!bx(0)&&!!bx(1));
+ok('klavesnice ma navic klavesu na prepnuti policka',
+   qa('#keypad [data-k]').length===13 && q('#keypad [data-k="next"]')!==null,
+   qa('#keypad [data-k]').length+' klaves');
+ok('pise se do prvniho policka',
+   bx(0).classList.contains('active') && !bx(1).classList.contains('active'));
+key('1');
+ok('cislice jde do policka, do ktereho se pise', bx(0).textContent==='1' && bx(1).textContent==='?');
+key('2');
+ok('plne policko preda klavesy dalsimu',
+   bx(0).textContent==='12' && bx(1).classList.contains('active'), 'policko '+ev('RUN.slot'));
+key('3');
+ok('druhe policko se da napsat',
+   bx(1).textContent==='3' && ev('JSON.stringify(RUN.typed)')==='["12","3"]');
+key('del'); key('del');
+ok('mazani pres hranici se vrati do predchoziho policka',
+   bx(1).textContent==='?' && bx(0).textContent==='1' && bx(0).classList.contains('active'),
+   ev('JSON.stringify(RUN.typed)'));
+key('ok');
+ok('nedopsana odpoved se neodesle', ev('RUN.state')==='ask', 'stav '+ev('RUN.state'));
+key('next');
+ok('sipka prepne policko', bx(1).classList.contains('active') && !bx(0).classList.contains('active'));
+key('next');
+ok('sipka se po poslednim policku vrati na prvni', bx(0).classList.contains('active'));
+click(bx(1));
+ok('klepnuti do policka do nej prepne klavesy',
+   bx(1).classList.contains('active') && ev('RUN.slot')===1);
+ok('kazda hodnota se posuzuje zvlast',
+   ev('RUN.items[RUN.idx].check(["7","1"])')===true
+   && ev('RUN.items[RUN.idx].check(["7","2"])')===false
+   && ev('RUN.items[RUN.idx].check(["8","1"])')===false
+   && ev('RUN.items[RUN.idx].check("71")')===false);
+// a cela cesta az do zapisu: odpoved se slozi z obou policek a odesle
+ev('RUN.typed=["",""];RUN.slot=0;paintBoxes(RUN.items[RUN.idx])');
+key('7'); key('next'); key('1');
+ok('odpoved se slozila z obou policek', ev('JSON.stringify(RUN.typed)')==='["7","1"]');
+const dvojDist=ev('RUN.dist');
+key('ok');
+await wait(900);
+ok('spravna odpoved ve dvou polickach posunula zavodnika', ev('RUN.dist')>dvojDist,
+   dvojDist+' -> '+ev('RUN.dist'));
+ok('dalsi otazka si vzala zpatky klavesnici s jednim polickem',
+   qa('#keypad [data-k]').length===12 && bx(1)===null,
+   qa('#keypad [data-k]').length+' klaves');
+click(q('[data-act="quit"]')); click(q('[data-yes]'));
+
 console.log('--- sirsi okno ---');
 // Az sem se hralo na telefonu 375 x 812. Tady se okno vedome prepne na
 // 1024 x 768, tedy tablet na sirku, a mapa se musi prestehovat do ctyr

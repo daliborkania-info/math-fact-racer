@@ -179,7 +179,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 443 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 444 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -887,17 +887,60 @@ zaokrouhlení, převod s jednotkou a řetězec tří čísel projdou nedotčené
 potřeba, protože závod podle kapitoly pouští variantu i na opakování
 z dřívějších kapitol. Násobitel prahů 1,6 **násobí** násobitel rodiny.
 
-**Řádek otázky má dva tvary, ne jeden.** Vedle běžného `zadání = [políčko]`
+**Řádek otázky má tři tvary, ne jeden.** Vedle běžného `zadání = [políčko]`
 existuje `layout:"lead"`, kde políčko stojí vlevo a zbytek řádku za ním,
-`[políčko] × 7 = 42`. Je to druhé rozvržení po obrázku a kreslí ho totéž
-`questionHTML()`. Příplatek na délku **nedostalo a nemá ho dostat**: obě
-rozvržení kreslí právě jedno políčko, takže se políčko vykrátí, a vedoucí řádek
-si navíc nese znaménko i výsledek uvnitř měřeného textu, kdežto běžný je kreslí
-mimo něj. Prostý počet znaků tedy sedí na znak přesně. `rightAnswerText()`
+`[políčko] × 7 = 42`, a od kroku E1 řádek se dvěma políčky, viz níž. Kreslí je
+všechny totéž
+`questionHTML()`. Vedoucí řádek příplatek na délku **nedostal a nemá ho dostat**:
+obě ta rozvržení kreslí právě jedno políčko, takže se políčko vykrátí, a vedoucí
+řádek si navíc nese znaménko i výsledek uvnitř měřeného textu, kdežto běžný je
+kreslí mimo něj. Prostý počet znaků tedy sedí na znak přesně. `rightAnswerText()`
 takový řádek přečte s doplněným políčkem, tedy `6 × 7 = 42`. Žádný znak pro
 prázdné políčko se nekreslí; políčko **je** `#abox`, skutečný prvek
 s přerušovaným rámečkem a otazníkem, takže na řádku není nic, co by záviselo na
 jazyku nebo na tom, jestli písmo telefonu zná `▢`.
+
+**Odpověď smí mít víc než jedno políčko.** Dělení se zbytkem má podíl a zbytek,
+a to jsou dvě čísla, ne jedno divně zapsané; finta „hodina krát sto plus minuty“
+by u nich nerozlišila špatný zápis od špatného výpočtu. Kolik políček otázka má,
+si říká sama přes `input`, a tabulka `SLOTS` k tomu jménu přiřadí počet: `pad` je
+jedno, `pad2` dvě. Kód kolem toho je záměrně obecný v počtu, aby `pad3` (kapitola
+21, tři řády) nebyl třetí cesta, ale další řádek v `SLOTS`.
+
+- `RUN.typed` je řetězec, dokud je políčko jedno, a pole řetězců, jakmile jich je
+  víc; `RUN.slot` říká, do kterého se píše. Sahá se na to jen přes `typedAt()`,
+  `setTypedAt()`, `blankTyped()` a `typedFull()`, takže zbytek kódu o tom, který
+  z obou tvarů zrovna platí, vědět nemusí.
+- Políčka mají `id` `abox`, `abox2`, …; **první si jméno nechalo**, protože ho zná
+  celá obrazovka. Dává je `boxId()`, hledá `boxAt()` a překresluje `paintBoxes()`.
+- `maxLen` smí být číslo pro všechna políčka, nebo pole po políčkách; dělení se
+  zbytkem chce dvouciferný podíl a jednociferný zbytek, tedy `[2,1]`.
+- Plné políčko předá klávesy dalšímu samo, mazání za začátkem políčka se vrátí do
+  předchozího a přepnout se dá dvěma způsoby: klávesou se šipkou (`data-k="next"`)
+  a klepnutím do políčka (`data-slot`). Klávesa musí jít přes `data-k`, protože
+  delegovaný posluchač bere `data-k` dřív; `data-slot` je z téhož důvodu vlastní
+  větev hned za ním, ne `data-act`.
+- `check` dostane **pole** a porovná každou hodnotu zvlášť; výchozí porovnání
+  vyrábí `defaultCheck(answer)` z toho, jestli je odpověď pole. Prázdné políčko
+  není nula, `typedFull()` nepustí OK dřív, než je v každém políčku něco.
+- Slova mezi políčky a za nimi jsou na položce jako hotový text (`sep`, `tail`),
+  ze stejného důvodu jako jednotka: jazyk se uprostřed závodu nemění.
+  `questionSize()` je počítá do délky řádku a druhé políčko k nim přidá tři znaky
+  za sebe, protože se nevykrátí. `rightAnswerText()` přečte celý řádek zpátky,
+  tedy `36 : 5 = 7 (zb. 1)`.
+- CSS: `.question.q-boxes` je řádek s víc políčky (užší políčko a menší mezery,
+  jinak se dvě políčka na 375 px nevejdou), `.keypad-pad2` je klávesnice se
+  čtvrtým sloupcem na gumu, šipku a fajfku. Řádek se na telefonu na výšku vejde
+  na jednu řádku pro třetí a čtvrtý ročník; ve větším písmu prvních dvou ročníků
+  a v závodě na šířku se zalomí, stejně jako se dnes zalomí nejdelší převod nebo
+  závorka, a nic se neuřízne.
+
+**Známé zjednodušení: `record()` bere správnost jako ano nebo ne**, takže „podíl
+dobře, zbytek špatně“ spadne do krabičky jako celá chyba a celý příklad se vrátí
+jako otázka navíc. Rozlišit to by znamenalo sáhnout na datový model, tedy na
+pravidlo z oddílu 3 i na migrační test, a v kroku E1 se to vědomě nedělá. Pro
+učení to není špatně (dítě si příklad zopakuje celý), ale rodičovská heatmapa
+kvůli tomu neukáže, že zlobí jenom zbytek.
 
 **Pozor na čtyři pasti.** `t` je překladová funkce. Nikdy nepojmenovávej lokální
 proměnnou `t`, zvlášť ne pro objekt trati. Používá se `tr`. Tohle už jednou
@@ -906,7 +949,9 @@ nové `<select>` musí mít obsluhu v tom druhém posluchači. A otázka není v
 řádek textu: `questionHTML()` vrací **celý prvek `#qbox`** včetně rovnítka nebo
 ciferníku, odpovídacího políčka a třídy podle délky zadání, a mezi otázkami se
 ten prvek vyměňuje přes `outerHTML`, takže `#abox` se po každé otázce musí najít
-znovu. Nikdy nesahej na `#qtext` přes `textContent`, pokud může nést obrázek.
+znovu; od kroku E1 to platí dvojnásob, protože políček může být víc a hledají se
+přes `boxAt(i)`, nikdy si je nedrž v proměnné přes hranici otázky. Nikdy nesahej
+na `#qtext` přes `textContent`, pokud může nést obrázek.
 **Dlouhé zadání si samo řekne o menší písmo.** `questionSize()` měří řádek tak,
 jak se kreslí, tedy **včetně mezer a včetně jednotky za odpovědí**, a dá `#qbox`
 třídu `q-long` od devíti znaků a `q-xlong` od třinácti; `47 + 5 - 3 = ?` se v plné velikosti na 375 px
@@ -1973,15 +2018,19 @@ odpovědi. Bez toho test skončí hláškou, že rodina nemá uvedený rozsah. J
 schválně jediné místo, kde se test musí rozšířit ručně spolu s kódem.
 
 **B. Nové vstupní prvky, tedy `pad2`, `pad3`, `cmp`, `pick`.**
+**`pad2` hotovo, 14. září 2026.** Dvě políčka umí `tap()`, `typedText()`,
+`questionHTML()`, `keypadHTML()` i `submit()`, `check` dostane pole dvou hodnot
+a porovná je zvlášť, celé je to popsané v oddílu 7 pod „Odpověď smí mít víc než
+jedno políčko“. Generátor dělení se zbytkem tím ale hotový není, takže `pad2`
+zatím žádná rodina nepoužívá. Zbytek dole platí dál.
 
-Porovnání odpovědi už přes `item.check()` prochází, ale zadávání pořád počítá
-s jedním polem: `RUN.typed` je jeden řetězec, `#abox` je jeden prvek a
-`typedText()` vrací jeden řetězec. Dvě políčka potřebují pojem aktivního
-políčka, přeskok po naplnění, mazání přes hranici a druhý `id`. To je zbylá
-práce na `pad2`, ale je to už jen `tap()`, `typedText()` a `questionHTML()`,
-ne celá dráha. U hodin šla použít finta hodina krát sto plus minuty, u dělení
-se zbytkem je křehká, protože nerozliší špatný zápis od špatného výsledku, takže
-`check` tam má dostat opravdové dvě hodnoty.
+Zadávání dřív počítalo s jedním polem: `RUN.typed` byl jeden řetězec, `#abox`
+jeden prvek a `typedText()` vracel jeden řetězec. Dvě políčka potřebují pojem
+aktivního políčka, přeskok po naplnění, mazání přes hranici a druhý `id`. Kód je
+napsaný obecně v počtu políček, takže `pad3` je další řádek v `SLOTS` a vlastní
+tvar řádku, ne nová dráha. U hodin šla použít finta hodina krát sto plus minuty,
+u dělení se zbytkem je křehká, protože nerozliší špatný zápis od špatného
+výsledku, takže `check` tam dostává opravdové dvě hodnoty.
 
 Klávesnice se skládá v `keypadHTML(item)` a `submit()` ji vymění, když má další
 otázka jiný `input`. Nový vstupní prvek přidá větev tam, pravidlo
@@ -1998,11 +2047,15 @@ v `buildRun()` a v `reachedKeys()`.
 `record()` bere správnost jako ano nebo ne. U dvou políček to znamená, že
 "podíl dobře, zbytek špatně" spadne do krabičky jako celá chyba. Změna by sáhla
 na datový model, takže rovnou na pravidlo z oddílu 3 a na migrační test.
+**Vědomě se to v E1 nezměnilo**, viz známé zjednodušení na konci oddílu 7.
 
 V CSS je políčko odpovědi široké nejmíň 104 pixelů a klávesnice má pevně tři
 sloupce. Dvě nebo tři políčka vedle sebe se do řádku nevejdou a tři velká
 tlačítka do třísloupcového gridu jen náhodou. Rozměry jsou navíc zopakované
-podruhé v media query pro nízké displeje.
+podruhé v media query pro nízké displeje. **Pro dvě políčka se to vyřešilo
+vlastní třídou řádku** `.question.q-boxes`, která políčko zúží na 52 px a mezery
+na 5 px, a klávesnicí `.keypad-pad2` o čtyřech sloupcích místo tří; tři velká
+tlačítka `pick` a `cmp` tenhle problém pořád mají.
 
 **C. Viditelnost pro rodiče. Hotovo, září 2026.** Heatmapa byla doslova tabulka
 jedenáct krát jedenáct pro malou násobilku a souhrn nahoře počítal taky jen
@@ -2180,7 +2233,10 @@ v `questionHTML()`. Viz oddíl 7.
    (ty jsou otevřené vždycky), nebo visí na zvládnutí předchozí
 9. násobitel v `thresholds()`, jinak bude mít dítě samé pomalé odpovědi
 10. `maxLen` na položce, pokud odpověď přeleze tři číslice, a `unit`, pokud
-    odpověď nese jednotku; obojí je údaj na položce, ne výjimka v obrazovce
+    odpověď nese jednotku; obojí je údaj na položce, ne výjimka v obrazovce.
+    Odpovídá-li se do dvou políček, patří sem `input:"pad2"`, odpověď jako pole
+    dvou čísel, `maxLen` jako pole a slova mezi políčky a za nimi (`sep`,
+    `tail`) jako hotový text ve všech třech jazycích; viz oddíl 7
 11. blok v `heatSpecs()`, jinak ji rodič v heatmapě neuvidí
 
 **Dál:** kapitoly v `src/curricula.js` a dvojice textů `trk_*` a `trk_*s` ve všech

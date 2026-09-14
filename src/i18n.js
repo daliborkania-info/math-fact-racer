@@ -120,6 +120,7 @@ cs: {
   quitText: "Body z rozjeté jízdy se nezapočítají, ale to, co jsi spočítal, ti zůstane.",
   quitYes: "Ukončit",
   clear: "Smazat",
+  nextBox: "Další políčko",
 
   /* result */
   res0: "Kolo dojeto",        res0s: "Celé kolo je za tebou. Příště pojedeš rychleji.",
@@ -477,6 +478,7 @@ en: {
   quitText: "Points from this lap will not count, but everything you worked out still counts towards your progress.",
   quitYes: "Quit",
   clear: "Clear",
+  nextBox: "Next box",
 
   res0: "Lap completed",     res0s: "The whole lap is behind you. Next time you will be quicker.",
   res1: "Bronze medal",      res1s: "Nice lap. A few less mistakes and silver is yours.",
@@ -828,6 +830,7 @@ de: {
   quitText: "Die Punkte aus dieser Runde zählen nicht, aber alles, was du gerechnet hast, bleibt dir.",
   quitYes: "Beenden",
   clear: "Löschen",
+  nextBox: "Nächstes Feld",
 
   res0: "Runde geschafft",   res0s: "Die ganze Runde liegt hinter dir. Nächstes Mal wird es schneller.",
   res1: "Bronzemedaille",    res1s: "Schöne Runde. Ein paar Fehler weniger und Silber ist drin.",

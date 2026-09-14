@@ -1051,6 +1051,31 @@ Po D4 je třetí ročník na 25 hratelných kapitolách z 33 a vlna A je hotová
 
 Pořadí práce: nejdřív dvě políčka, pak generátor.
 
+**Vstupní prvek `pad2` — HOTOVO 14. září 2026. Generátor dělení se zbytkem
+zbývá.** Dvě políčka fungují a jsou otestovaná, ale zatím je žádná rodina
+nepoužívá: `pad2` neumí vyrobit žádný klíč, takže se do závodu nedostane.
+Hotové je všechno kolem zadávání, tedy `SLOTS`, `RUN.typed` jako pole,
+`RUN.slot`, `boxId`/`boxAt`/`paintBoxes`, `maxLen` po políčkách, přeskok po
+naplnění, mazání přes hranici, klávesa `data-k="next"`, klepnutí do políčka
+přes `data-slot`, třetí tvar řádku v `questionHTML()` se slovy `sep` a `tail`,
+klávesnice `.keypad-pad2` o čtyřech sloupcích, `defaultCheck()` porovnávající
+pole hodnotu po hodnotě, `rightAnswerText()` nad celým řádkem a `submit()`
+označující obě políčka. Otestované je to v `items.test.js` (okruh 7r, tvar
+řádku, klávesnice, porovnání) a v `flow.test.js` (oddíl „dve policka
+v odpovedi“, psaní, přeskok, mazání přes hranici, šipka, klepnutí, odeslání),
+v obou případech nad položkou složenou v testu, protože generátor neexistuje.
+Proti plánu se upřesnilo trojí: řádek si o příplatek na délku **říct musí**
+(druhé políčko se nevykrátí, na rozdíl od `layout:"lead"`), takže `questionSize()`
+k němu přidá tři znaky plus délku slov mezi políčky; políčko a mezery se pro
+takový řádek zúžily vlastní třídou `.question.q-boxes`, jinak se dvě políčka na
+375 px nevejdou; a `missHint()` pro `kind:"divrem"` zůstal na potom, protože
+hlášky `divremTooBig` a `divremQuotient` potřebují dělitele, tedy generátor.
+**Zbývá tedy: rozhodnutí R2, klíč a kbelíky, generátor, `poolKeys()`, kapitola 27
+v `curricula.js`, texty ve třech jazycích včetně slov `sep` a `tail`, `divrem`
+hlášky v `missHint()`, řádek v `RANGE` v `items.test.js` a zbytek kontrolního
+seznamu pro novou rodinu.** `record()` se nezměnil, „podíl dobře, zbytek špatně“
+je celá chyba a je to zapsané v `PROJECT-STATE.md` jako známé zjednodušení.
+
 **Dvě políčka.** `RUN.typed` zůstává řetězec pro `pad`, pro `pad2` je to pole
 dvou řetězců a `RUN.slot` říká, které je aktivní. `questionHTML()` pro
 `input:"pad2"` vykreslí `36 : 5 = [abox0] (zb. [abox1])` s třídou `active`

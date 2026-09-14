@@ -891,8 +891,21 @@ function itemFromKey(key, opts){
   if(opts && opts.variant === "missing") it = missingItem(it);
   if(!it.input)  it.input  = "pad";
   if(!it.maxLen) it.maxLen = 3;
-  if(!it.check)  it.check  = typed => parseInt(typed, 10) === it.answer;
+  if(!it.check)  it.check  = defaultCheck(it.answer);
   return it;
+}
+/* Whether what was typed is the answer, for a family that has not said
+   so itself. An answer written into more than one box is more than one
+   value, so it arrives as an array and every value is compared on its
+   own. Squashing the two into a single number, the way a time is keyed
+   as hours times a hundred plus minutes, would not do here: a quotient
+   of 7 with a remainder of 1 and a quotient of 71 would come out the
+   same, and a badly written answer would count as a badly worked out
+   one. */
+function defaultCheck(answer){
+  if(!Array.isArray(answer)) return typed => parseInt(typed, 10) === answer;
+  return typed => Array.isArray(typed) && typed.length === answer.length
+    && answer.every((a, i) => parseInt(typed[i], 10) === a);
 }
 /* The missing operand, which is also how a sum is checked in an exercise
    book. "Work out 45 - 18, then check 27 + 18" and "▢ - 18 = 27" are the
@@ -5164,9 +5177,10 @@ let RUN = null;
 function startRun(p, trackId){
   const tr = trackById(trackId);
   const n = p.qCount || 20;
+  const items = buildRun(p, tr);
   RUN = {
-    t: tr, items: buildRun(p, tr), n0: n, idx: 0, answered: 0, prog: 0, dist: 0, hist: [],
-    typed: "", state: "ask", t0: 0, wrongKeys: [],
+    t: tr, items, n0: n, idx: 0, answered: 0, prog: 0, dist: 0, hist: [],
+    typed: blankTyped(items[0]), slot: 0, state: "ask", t0: 0, wrongKeys: [],
     okCount: 0, marks: [], coins: 0, retries: 0, newStars: 0,
     // the score is normalised to a 100 point scale whatever the race length
     mult: 20 / n
@@ -5174,6 +5188,38 @@ function startRun(p, trackId){
   go("game");
 }
 const TARGET = 100;
+
+/* ---------- the answer is not always one number ----------
+   Division with a remainder is answered with a quotient and a
+   remainder, and those are two numbers, not one number written oddly.
+   How many boxes a question has is another thing the question says
+   about itself: `input` names the element and the table below says how
+   wide that element is.
+
+   `RUN.typed` stays a plain string while there is one box and becomes
+   an array of strings once there are several; `RUN.slot` says which of
+   them the keys are writing into. Everything that touches what has been
+   typed goes through the helpers here, so nothing else has to know
+   which of the two shapes is in play. */
+const SLOTS = {pad: 1, pad2: 2};
+function slotsOf(item){ return SLOTS[(item && item.input) || "pad"] || 1; }
+/* The first box keeps the id it has always had, because the screen
+   around it knows it by that name; the others are numbered from two. */
+function boxId(i){ return i ? "abox" + (i + 1) : "abox"; }
+function boxAt(i){ return document.getElementById(boxId(i)); }
+/* How many characters fit in one box. A single number says the same for
+   every box, an array says it box by box, so a two digit quotient and a
+   one digit remainder can each be exactly as wide as they need to be. */
+function maxLenAt(item, i){
+  const m = item && item.maxLen;
+  return (Array.isArray(m) ? m[i] : m) || 3;
+}
+function blankTyped(item){ const n = slotsOf(item); return n > 1 ? new Array(n).fill("") : ""; }
+function typedAt(i){ return Array.isArray(RUN.typed) ? (RUN.typed[i] || "") : RUN.typed; }
+function setTypedAt(i, v){ if(Array.isArray(RUN.typed)) RUN.typed[i] = v; else RUN.typed = v; }
+/* Nothing is sent off until every box has something in it: an empty
+   remainder is not an answer of zero, it is an answer not given yet. */
+function typedFull(){ return Array.isArray(RUN.typed) ? RUN.typed.every(s => s !== "") : RUN.typed !== ""; }
 
 /* A question is either a line of arithmetic or a picture to read. The
    equals sign belongs only to the first kind, so the whole question row
@@ -5209,11 +5255,29 @@ function relOf(item){ return item && item.rel ? t(item.rel) : "="; }
    line, one character either way. */
 function questionSize(item){
   if(!item || item.svg || !item.text) return "";
-  const n = String(item.text).length + (item.unit ? String(item.unit).length + 1 : 0);
+  let n = String(item.text).length + (item.unit ? String(item.unit).length + 1 : 0);
+  /* A second answer box does need an allowance of its own, unlike the
+     lead layout above, and for the opposite reason: the one box every
+     question draws cancels out, a second one does not. It is the
+     widest thing the game puts on a row. Narrowed for this row it is
+     58 px, about three characters of the display face, and the words
+     that stand between and after the boxes are counted as they are
+     written, plus the space in front of each of them. */
+  for(let i = 1; i < slotsOf(item); i++) n += 3;
+  if(slotsOf(item) > 1){
+    n += (item.sep ? String(item.sep).length + 1 : 0) + (item.tail ? String(item.tail).length : 0);
+  }
   return n >= 13 ? " q-xlong" : n >= 9 ? " q-long" : "";
 }
-function questionHTML(item){
-  const box = `<span class="answerbox" id="abox">?</span>`;
+function questionHTML(item, slot){
+  const n = slotsOf(item), act = slot || 0;
+  /* A box says whether the keys are writing into it, and carries the
+     index it stands for, so that tapping it moves them there. One box
+     needs neither, and gets neither, so the row of every family drawn
+     so far comes out exactly as it did. */
+  const box = i => `<span class="answerbox${n > 1 && i === act ? " active" : ""}" id="${boxId(i)}"`
+    + (n > 1 ? ` data-slot="${i}"` : "") + `>?</span>`;
+  const words = s => s ? `<span class="qsep">${s}</span>` : "";
   // the unit of the answer stands behind the box, where the child would
   // write it in an exercise book
   const unit = item && item.unit ? `<span class="unit">${item.unit}</span>` : "";
@@ -5221,34 +5285,62 @@ function questionHTML(item){
   // and the rest of the line follows it, so the child reads "▢ × 7 = 42"
   // in the order it is written in the book
   if(item && item.layout === "lead"){
-    return `<div class="question${questionSize(item)}" id="qbox">${box}<span id="qtext">${item.text}</span>${unit}</div>`;
+    return `<div class="question${questionSize(item)}" id="qbox">${box(0)}<span id="qtext">${item.text}</span>${unit}</div>`;
   }
   const inner = !item ? `<span id="qtext"></span>`
     : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
     : `<span id="qtext">${item.text}</span><span>${relOf(item)}</span>`;
-  return `<div class="question${questionSize(item)}" id="qbox">${inner}${box}${unit}</div>`;
+  /* The third shape of the row: two boxes with the words that belong
+     between and after them, "36 : 5 = ▢ (zb. ▢)". The words are on the
+     item as finished text, like the unit and for the same reason: the
+     language does not change in the middle of a race. */
+  if(n > 1){
+    return `<div class="question q-boxes${questionSize(item)}" id="qbox">${inner}`
+      + `${box(0)}${words(item.sep)}${box(1)}${words(item.tail)}${unit}</div>`;
+  }
+  return `<div class="question${questionSize(item)}" id="qbox">${inner}${box(0)}${unit}</div>`;
 }
 /* The answering surface belongs to the question, not to the screen, so
-   a race may mix families that are answered differently. Only the
-   number pad exists so far; a new input element adds a branch here, a
-   `.keypad-<name>` rule in the stylesheet and a branch in `tap()`. */
+   a race may mix families that are answered differently. A new input
+   element adds a branch here, a `.keypad-<name>` rule in the stylesheet
+   and a branch in `tap()`. Every key goes through `data-k`, because the
+   delegated listener reads that attribute before any other. */
 function keypadHTML(item){
   const kind = (item && item.input) || "pad";
-  return `<div class="keypad keypad-${kind}" id="keypad" data-input="${kind}">
-    ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="key" data-k="${n}">${n}</button>`).join("")}
-    <button class="key del" data-k="del" aria-label="${t("clear")}">&#9003;</button>
-    <button class="key" data-k="0">0</button>
-    <button class="key act" data-k="ok">OK</button>
+  const dig = n => `<button class="key" data-k="${n}">${n}</button>`;
+  const del = `<button class="key del" data-k="del" aria-label="${t("clear")}">&#9003;</button>`;
+  const ok = `<button class="key act" data-k="ok">OK</button>`;
+  /* Two boxes get a key that moves between them. A box that fills up
+     hands the keys on by itself, but a one digit quotient in a box that
+     holds two does not, and a child is not going to work out that the
+     box itself can be tapped. The digits keep their three columns and
+     the rubber, the arrow and the tick move into a fourth, so the pad
+     is still four rows tall and a race that mixes the two surfaces does
+     not change height under the child's thumb. */
+  if(kind === "pad2"){
+    const next = `<button class="key nx" data-k="next" aria-label="${t("nextBox")}">&#8594;</button>`;
+    return `<div class="keypad keypad-pad2" id="keypad" data-input="pad2">
+      ${dig(1)}${dig(2)}${dig(3)}${del}
+      ${dig(4)}${dig(5)}${dig(6)}${next}
+      ${dig(7)}${dig(8)}${dig(9)}${ok}
+      <button class="key zero" data-k="0">0</button>
+    </div>`;
+  }
+  return `<div class="keypad keypad-pad" id="keypad" data-input="pad">
+    ${[1,2,3,4,5,6,7,8,9].map(n => dig(n)).join("")}
+    ${del}${dig(0)}${ok}
   </div>`;
 }
 /* Some questions need a word of framing before the child answers, for
    instance whether the dial means morning or evening. */
 function askText(item){ return item && item.ask ? t.apply(null, [item.ask].concat(item.askArgs || [])) : ""; }
-/* What the child sees in the answer box while typing. A time is keyed as
-   plain digits and gets its colon as soon as the reading is unambiguous. */
-function typedText(item, typed){
+/* What the child sees in one answer box while typing. A time is keyed as
+   plain digits and gets its colon as soon as the reading is unambiguous;
+   that belongs to the single box of a dial, so a box that has an index
+   of its own shows exactly what was typed into it. */
+function typedText(item, typed, slot){
   if(typed === "") return "?";
-  if(item && item.kind === "clock" && typed.length >= 3){
+  if(!slot && item && item.kind === "clock" && typed.length >= 3){
     return typed.slice(0, -2) + ":" + typed.slice(-2);
   }
   return typed;
@@ -5286,7 +5378,7 @@ function viewGame(p){
       <span class="gap" id="gap">${hasGhost ? t("gapEven") : t("gapFirst")}</span>
     </div>
     <div class="qzone">
-      ${questionHTML(RUN.items[RUN.idx])}
+      ${questionHTML(RUN.items[RUN.idx], RUN.slot)}
       <div class="hintline" id="hint">${askText(RUN.items[RUN.idx])}</div>
     </div>
     ${keypadHTML(RUN.items[RUN.idx])}
@@ -5414,18 +5506,51 @@ function mountGame(){
     if(e.key >= "0" && e.key <= "9") tap(e.key);
     else if(e.key === "Backspace") tap("del");
     else if(e.key === "Enter") tap("ok");
+    // the arrow key of a keyboard does what the arrow key of the pad does
+    else if(e.key === "ArrowRight") tap("next");
   };
 }
 function drawRail(){ driveTo(myU(), ghostU()); }
 
+/* The whole question row is rebuilt between questions, so the boxes are
+   looked up again every time rather than held on to. */
+function paintBoxes(item){
+  const n = slotsOf(item);
+  for(let i = 0; i < n; i++){
+    const box = boxAt(i);
+    if(!box) continue;
+    const v = typedAt(i);
+    box.textContent = typedText(item, v, i);
+    box.className = "answerbox" + (v ? " filled" : "") + (n > 1 && i === RUN.slot ? " active" : "");
+  }
+}
+/* Which box the keys write into. Two ways lead here, the arrow key and
+   a tap on the box itself, and both are the same move. */
+function pickSlot(i){
+  if(!RUN || RUN.state !== "ask") return;
+  const item = RUN.items[RUN.idx];
+  if(!(i >= 0) || i >= slotsOf(item)) return;
+  RUN.slot = i;
+  paintBoxes(item);
+}
+
 function tap(k){
   if(!RUN || RUN.state !== "ask") return;
-  const item = RUN.items[RUN.idx], box = document.getElementById("abox");
-  if(k === "del"){ RUN.typed = RUN.typed.slice(0, -1); }
-  else if(k === "ok"){ if(RUN.typed !== "") submit(); return; }
-  else if(RUN.typed.length < ((item && item.maxLen) || 3)){ RUN.typed += k; }
-  box.textContent = typedText(item, RUN.typed);
-  box.className = "answerbox" + (RUN.typed ? " filled" : "");
+  const item = RUN.items[RUN.idx], n = slotsOf(item);
+  if(k === "next"){ if(n > 1) pickSlot((RUN.slot + 1) % n); return; }
+  if(k === "ok"){ if(typedFull()) submit(); return; }
+  if(k === "del"){
+    /* Rubbing out past the start of a box steps back into the one
+       before it, so a wrong quotient is reached by pressing the same
+       key again rather than by first finding the right box. */
+    if(typedAt(RUN.slot) === "" && RUN.slot > 0) RUN.slot--;
+    setTypedAt(RUN.slot, typedAt(RUN.slot).slice(0, -1));
+  } else if(typedAt(RUN.slot).length < maxLenAt(item, RUN.slot)){
+    setTypedAt(RUN.slot, typedAt(RUN.slot) + k);
+    // a box that has filled up hands the keys on by itself
+    if(typedAt(RUN.slot).length >= maxLenAt(item, RUN.slot) && RUN.slot < n - 1) RUN.slot++;
+  }
+  paintBoxes(item);
 }
 
 function floaty(text, bad){
@@ -5458,6 +5583,13 @@ function showCombo(n){
 function rightAnswerText(item){
   if(item.kind === "clock") return t("clockIs", item.disp);
   if(item.layout === "lead") return item.answer + " " + item.text;
+  /* An answer that was written into several boxes reads back as the
+     whole line, with the words that stood between the boxes standing
+     between the numbers: "36 : 5 = 7 (zb. 1)". */
+  if(Array.isArray(item.answer)){
+    const mid = item.sep ? " " + item.sep + " " : " ";
+    return item.text + " " + relOf(item) + " " + item.answer.join(mid) + (item.tail || "");
+  }
   return item.text + " " + relOf(item) + " " + item.answer + (item.unit ? " " + item.unit : "");
 }
 /* The two mistakes a child actually makes on a dial are reading the hour
@@ -5478,7 +5610,9 @@ function submit(){
   const p = P(), item = RUN.items[RUN.idx];
   const ms = Date.now() - RUN.t0;
   const correct = item.check(RUN.typed);
-  const box = document.getElementById("abox"), hint = document.getElementById("hint");
+  const hint = document.getElementById("hint");
+  // every box of the answer is marked, not just the first one
+  const markBoxes = cls => { for(let i = 0; i < slotsOf(item); i++){ const b = boxAt(i); if(b) b.className = cls; } };
   const car = document.getElementById("mycar");
   const flash = cls => {
     if(!car) return;
@@ -5510,7 +5644,7 @@ function submit(){
     RUN.combo = (RUN.combo || 0) + 1;
     if(RUN.combo >= 3) gain += Math.min(0.6, (RUN.combo - 2) * 0.2);
     RUN.marks[RUN.idx] = isRetry ? 2 : 1;
-    box.className = "answerbox ok";
+    markBoxes("answerbox ok");
     flash("boost");
     showCombo(RUN.combo);
     if(gain >= 6.5){ sfx.great(); hint.innerHTML = RUN.combo >= 3 ? t("lightningTurbo") : t("lightning"); }
@@ -5521,7 +5655,7 @@ function submit(){
     RUN.combo = 0;
     showCombo(0);
     RUN.marks[RUN.idx] = 0;
-    box.className = "answerbox bad";
+    markBoxes("answerbox bad");
     flash("brake");
     sfx.bad(); buzz([18, 60, 18]);
     hint.innerHTML = `<b>${rightAnswerText(item)}</b><br>${missHint(item, RUN.typed)}`;
@@ -5554,8 +5688,10 @@ function submit(){
       setTimeout(() => { if(RUN && view.name === "game") finishRun(); }, 1300);
       return;
     }
-    RUN.typed = ""; RUN.state = "ask"; RUN.t0 = Date.now();
     const next = RUN.items[RUN.idx];
+    // the next question may be answered in a different number of boxes,
+    // so what has been typed starts again in the shape that one wants
+    RUN.typed = blankTyped(next); RUN.slot = 0; RUN.state = "ask"; RUN.t0 = Date.now();
     const qb = document.getElementById("qbox");
     if(!qb) return;
     // the whole row is rebuilt because the next question may be a
@@ -6449,6 +6585,11 @@ function ask(title, text, okLabel, cb){
 document.addEventListener("click", e => {
   const kb = e.target.closest("[data-k]");
   if(kb){ tap(kb.dataset.k); return; }
+  // an answer written into several boxes: tapping a box moves the keys
+  // into it. Its own attribute rather than data-act, because this
+  // listener reads data-k first and data-act last.
+  const sb = e.target.closest("[data-slot]");
+  if(sb){ pickSlot(+sb.dataset.slot); return; }
   // the workshop answers by handling coins, so it has its own two
   // attributes rather than borrowing the keypad's
   const cn = e.target.closest("[data-coin]");

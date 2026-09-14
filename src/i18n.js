@@ -445,6 +445,13 @@ cs: {
   resetText: "Smaže se přehled zvládnutých příkladů, mince i sbírka. Jméno hráče zůstane.",
   resetYes: "Vymazat",
 
+  /* voluntary support, parent section only; the three things this
+     wording always has to say are in docs/PROJECT-STATE.md, part 13 */
+  supportTitle: "Hra je zdarma a zůstane zdarma",
+  supportWhat: "Kdo chce, může dobrovolně přispět na další učivo, tedy na ročníky, které v ní zatím nejsou.",
+  supportFine: "Nepřispět je naprosto v pořádku a ve hře se to nijak nepozná.",
+  supportMore: "Jak přispět",
+
   /* racer names */
   ri_auto: "Závoďák", ri_raketa: "Raketa", ri_motor: "Motorka", ri_letad: "Letadlo",
   ri_ponor: "Ponorka", ri_ufo: "Létající talíř", ri_mech: "Robot", ri_bugina: "Bugina",
@@ -866,6 +873,13 @@ en: {
   resetText: "The mastery grid, the coins and the collection will all go. The player name stays.",
   resetYes: "Erase",
 
+  /* voluntary support, parent section only; the three things this
+     wording always has to say are in docs/PROJECT-STATE.md, part 13 */
+  supportTitle: "The game is free and will stay free",
+  supportWhat: "You can chip in towards the material still to come, that is the later school years.",
+  supportFine: "Not contributing is completely fine and the game cannot tell the difference.",
+  supportMore: "How to contribute",
+
   ri_auto: "Racer", ri_raketa: "Rocket", ri_motor: "Motorbike", ri_letad: "Plane",
   ri_ponor: "Submarine", ri_ufo: "Flying saucer", ri_mech: "Robot", ri_bugina: "Buggy",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bear", pet_kiki: "Kiki",
@@ -1286,6 +1300,13 @@ de: {
   resetTitle: "Fortschritt löschen?",
   resetText: "Das Raster, die Münzen und die Sammlung sind dann weg. Der Name bleibt.",
   resetYes: "Löschen",
+
+  /* voluntary support, parent section only; the three things this
+     wording always has to say are in docs/PROJECT-STATE.md, part 13 */
+  supportTitle: "Das Spiel ist und bleibt kostenlos",
+  supportWhat: "Wer möchte, kann freiwillig den weiteren Lernstoff unterstützen, also die höheren Klassenstufen.",
+  supportFine: "Nichts zu geben ist völlig in Ordnung, im Spiel macht es keinen Unterschied.",
+  supportMore: "Wie Sie beitragen können",
 
   ri_auto: "Rennwagen", ri_raketa: "Rakete", ri_motor: "Motorrad", ri_letad: "Flugzeug",
   ri_ponor: "U-Boot", ri_ufo: "Fliegende Untertasse", ri_mech: "Roboter", ri_bugina: "Buggy",

@@ -672,6 +672,30 @@ html[data-w="tablet"][data-o="tall"] .keypad{width:100%;max-width:480px;margin:0
 .seg button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--line);padding:10px;font-size:12px;font-family:ui-monospace,monospace;font-weight:500;-webkit-user-select:text;user-select:text}
 
+/* The note about backing the project. It is one more card of the parent
+   section, wearing the same paper and the same border as the others and
+   carrying no heading of its own, because it is meant to be seen once
+   and then stepped past: no colour but a warm mark, no counter, nothing
+   to dismiss. It is never drawn on a child screen, so --tx is 1 here
+   whatever happens; the sizes multiply it anyway, because that is the
+   rule every size in this file keeps. */
+.support{display:flex;flex-direction:column;gap:7px}
+/* The mark keeps to the first line of the heading rather than to the
+   middle of it: the German title runs to two lines on a phone, and a
+   badge floating between them reads as a stray. */
+.support .head{display:flex;align-items:flex-start;gap:9px}
+.support .mark{
+  flex:none;width:26px;height:26px;border-radius:99px;margin-top:-1px;
+  background:#fff5df;border:2px solid #ffdc9a;color:var(--sun-dark);
+  display:grid;place-items:center;font-size:calc(13px * var(--tx));line-height:1;
+}
+.support .head b{font-family:var(--font-display);font-size:calc(15.5px * var(--tx));font-weight:700;line-height:1.35}
+.support .more{
+  align-self:flex-start;color:var(--grape);font-weight:800;
+  font-size:calc(13.5px * var(--tx));text-decoration:none;
+  border-bottom:2px solid var(--grape-soft);padding:2px 0 3px;
+}
+
 /* ---------- bottom sheet ---------- */
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(16,24,45,.5);animation:fade .18s}
 @keyframes fade{from{opacity:0}}
@@ -1332,6 +1356,13 @@ cs: {
   resetText: "Smaže se přehled zvládnutých příkladů, mince i sbírka. Jméno hráče zůstane.",
   resetYes: "Vymazat",
 
+  /* voluntary support, parent section only; the three things this
+     wording always has to say are in docs/PROJECT-STATE.md, part 13 */
+  supportTitle: "Hra je zdarma a zůstane zdarma",
+  supportWhat: "Kdo chce, může dobrovolně přispět na další učivo, tedy na ročníky, které v ní zatím nejsou.",
+  supportFine: "Nepřispět je naprosto v pořádku a ve hře se to nijak nepozná.",
+  supportMore: "Jak přispět",
+
   /* racer names */
   ri_auto: "Závoďák", ri_raketa: "Raketa", ri_motor: "Motorka", ri_letad: "Letadlo",
   ri_ponor: "Ponorka", ri_ufo: "Létající talíř", ri_mech: "Robot", ri_bugina: "Bugina",
@@ -1753,6 +1784,13 @@ en: {
   resetText: "The mastery grid, the coins and the collection will all go. The player name stays.",
   resetYes: "Erase",
 
+  /* voluntary support, parent section only; the three things this
+     wording always has to say are in docs/PROJECT-STATE.md, part 13 */
+  supportTitle: "The game is free and will stay free",
+  supportWhat: "You can chip in towards the material still to come, that is the later school years.",
+  supportFine: "Not contributing is completely fine and the game cannot tell the difference.",
+  supportMore: "How to contribute",
+
   ri_auto: "Racer", ri_raketa: "Rocket", ri_motor: "Motorbike", ri_letad: "Plane",
   ri_ponor: "Submarine", ri_ufo: "Flying saucer", ri_mech: "Robot", ri_bugina: "Buggy",
   pet_bimbo: "Bimbo", pet_lupi: "Lupi", pet_mecha: "Bear", pet_kiki: "Kiki",
@@ -2173,6 +2211,13 @@ de: {
   resetTitle: "Fortschritt löschen?",
   resetText: "Das Raster, die Münzen und die Sammlung sind dann weg. Der Name bleibt.",
   resetYes: "Löschen",
+
+  /* voluntary support, parent section only; the three things this
+     wording always has to say are in docs/PROJECT-STATE.md, part 13 */
+  supportTitle: "Das Spiel ist und bleibt kostenlos",
+  supportWhat: "Wer möchte, kann freiwillig den weiteren Lernstoff unterstützen, also die höheren Klassenstufen.",
+  supportFine: "Nichts zu geben ist völlig in Ordnung, im Spiel macht es keinen Unterschied.",
+  supportMore: "Wie Sie beitragen können",
 
   ri_auto: "Rennwagen", ri_raketa: "Rakete", ri_motor: "Motorrad", ri_letad: "Flugzeug",
   ri_ponor: "U-Boot", ri_ufo: "Fliegende Untertasse", ri_mech: "Roboter", ri_bugina: "Buggy",
@@ -9854,6 +9899,35 @@ function overallMastery(p){
   return w ? s / w : 0;
 }
 
+/* Where the note about backing the project sends the parent. It is the
+   section of the README on GitHub, reached by the anchor GitHub builds
+   out of the heading; both anchors were read off the rendered page
+   rather than guessed, because a heading with Czech diacritics keeps
+   them in the anchor and a guess would have been wrong as often as
+   right. There is no German README, so German reads the English one.
+   Nothing here is fetched: it is a plain link, so a game running with
+   no connection is exactly as it was. */
+const SUPPORT_README = "https://github.com/daliborkania-info/math-fact-racer/blob/main/";
+const SUPPORT_URL = {
+  cs: SUPPORT_README + "README.cs.md#podpora-projektu",
+  en: SUPPORT_README + "README.md#supporting-the-project",
+  de: SUPPORT_README + "README.md#supporting-the-project"
+};
+/* The parent section speaks the parent's language, never the child's,
+   so this reads DB.lang and not the profile. */
+function supportUrl(){ return SUPPORT_URL[DB.lang] || SUPPORT_URL[FALLBACK_LANG]; }
+/* Three sentences and a link, drawn as one more card of the parent
+   section rather than as a banner over it. It is asked for here and
+   nowhere else: no child screen may ever call this, which is what the
+   sweep in tests/flow.test.js watches. */
+function supportCard(){
+  return `<div class="card support" style="margin-top:14px">
+    <div class="head"><span class="mark">&#9829;</span><b>${t("supportTitle")}</b></div>
+    <div class="muted">${t("supportWhat")} ${t("supportFine")}</div>
+    <a class="more" href="${supportUrl()}" target="_blank" rel="noopener noreferrer">${t("supportMore")} &#8594;</a>
+  </div>`;
+}
+
 function viewParent(p){
   const heat = heatSpecs(p).map(spec => heatBlock(p, spec)).join("");
   const avg = p.msN ? (p.msSum / p.msN / 1000) : 0;
@@ -9881,6 +9955,8 @@ function viewParent(p){
         <div class="stat"><div class="v">${accAll}&#8202;%</div><div class="l">${t("statAccuracy")}</div></div>
         <div class="stat"><div class="v">${avg ? num(avg, 1) : "0"}&#8202;s</div><div class="l">${t("statAvg")}</div></div>
       </div>
+
+      ${supportCard()}
 
       <div class="h2">${t("secMastery")}</div>
       <div class="card">

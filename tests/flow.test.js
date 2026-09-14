@@ -31,6 +31,16 @@ const ok=(n,c,x)=>console.log((c?'  OK  ':'  !!  ')+n+(x!==undefined?'   ['+x+']
 const ev=s=>dom.window.eval(s);
 
 (async()=>{
+/* Hlidac na cely beh. Kazda obrazovka prochazi render(), takze jedina
+   kontrola, kterou nejde obejit, visi tam: po kazdem vykresleni
+   obrazovky, ktera neni za rodicovskym kodem, tam nesmi byt poznamka
+   o dobrovolnem prispevku. Prohlidka par obrazovek, na ktere test
+   nahodou prijde, by minula tu, ktera pribude priste. */
+ev('window.__seen=0;window.__leak=[];const __r=render;'
+  +'render=function(){__r.apply(null,arguments);'
+  +'if(PARENT_VIEWS.indexOf(view.name)<0){window.__seen++;'
+  +'if(document.querySelector("#app .support")) window.__leak.push(view.name);}};');
+
 console.log('--- prvni spusteni ---');
 ok('kod je jen jedno pole', qa('#pin1,#pin2').length===1);
 ok('prepinac jazyka na uvodni obrazovce', qa('[data-act="parentlang"]').length===3);
@@ -239,6 +249,39 @@ ok('souhrn uz neni jen nasobilka, ale vazeny prumer pres otevrene trate',
 click(qa('[data-act="qcount"]').find(b=>b.dataset.n==='10'));
 click(qa('[data-act="speed"]').find(b=>b.dataset.sp==='slow'));
 ok('nastaveni ulozeno', DBg().profiles[0].qCount===10 && DBg().profiles[0].speedMode==='slow');
+
+console.log('--- dobrovolna podpora ---');
+// Jeden blok, nahore, nad prvnim nadpisem sekce, a rekne vsechny tri
+// veci z oddilu 13: hra je zdarma, na co se prispiva, a ze nepřispet
+// nic nemeni. Text se bere ze slovniku, ne se opisuje sem, aby se
+// kontrola nedala projit prepsanim zdejsi vety.
+const SUP=JSON.parse(ev('JSON.stringify(I18N.cs)'));
+ok('podpora je v rodicovske sekci prave jednou', qa('.scr .support').length===1,
+   qa('.scr .support').length+' bloku');
+ok('podpora stoji nad prvnim nadpisem sekce',
+   !!(q('.support').compareDocumentPosition(q('.h2')) & 4));
+const supTxt=()=>q('.support').textContent.replace(/\s+/g,' ').trim();
+ok('rika, ze hra je a zustane zdarma', supTxt().indexOf(SUP.supportTitle)>=0);
+ok('rika, na co se prispiva', supTxt().indexOf(SUP.supportWhat)>=0);
+ok('rika, ze neprispet je v poradku a ve hre se to nepozna', supTxt().indexOf(SUP.supportFine)>=0);
+ok('nic se neodemyka ani nepocita', qa('.support [data-act],.support .sw,.support progress').length===0);
+const odkaz=()=>q('.support a.more');
+ok('odkaz vede na ceskou sekci README a otevre se v nove zalozce',
+   odkaz().getAttribute('href')==='https://github.com/daliborkania-info/math-fact-racer/blob/main/README.cs.md#podpora-projektu'
+   && odkaz().getAttribute('target')==='_blank' && /noopener/.test(odkaz().getAttribute('rel')),
+   odkaz().getAttribute('href'));
+// jazyk rodicovske sekce rozhoduje o tom, na kterou verzi README se miri;
+// nemecke README neexistuje, takze nemcina cte anglicke
+click(qa('[data-act="parentlang"]').find(b=>b.dataset.lang==='de'));
+ok('nemcina mluvi nemecky, ale ctenim miri na anglicke README',
+   supTxt().indexOf(JSON.parse(ev('JSON.stringify(I18N.de)')).supportTitle)>=0
+   && odkaz().getAttribute('href').indexOf('README.md#supporting-the-project')>0,
+   odkaz().getAttribute('href'));
+click(qa('[data-act="parentlang"]').find(b=>b.dataset.lang==='en'));
+ok('anglictina miri na anglicke README',
+   odkaz().getAttribute('href').indexOf('README.md#supporting-the-project')>0);
+click(qa('[data-act="parentlang"]').find(b=>b.dataset.lang==='cs'));
+ok('zpatky v cestine', DBg().lang==='cs' && odkaz().getAttribute('href').indexOf('README.cs.md')>0);
 
 console.log('--- volba ucebnice ---');
 const sel=s=>{const el=q(s); return el;};
@@ -1144,6 +1187,29 @@ const sirka=ev('placeBox(4).w');       // 22 procent, tedy 100/4 - 3
 ok('siroka mapa nevyjede ven',
    qa('.world .place').every(el=>parseFloat(el.style.left)+sirka<=100),
    qa('.world .place').length+' mist siroke po '+sirka+' %');
+
+console.log('--- co dite nikdy neuvidi ---');
+// Vysledek hlidace z uvodu souboru: za cely beh se vykreslila mapa,
+// zavod, vysledek, garaz, poklady, obchod i dilna, a ani na jedne z nich
+// nesmela poznamka o prispevku byt. Pocet prohlednutych obrazovek se
+// tiskne schvalne: hlidac, ktery nic nevidel, nic nehlida.
+const videl=ev('window.__seen'), unik=JSON.parse(ev('JSON.stringify(window.__leak)'));
+ok('hlidac opravdu bezel pres detske obrazovky', videl>20, videl+' vykresleni');
+ok('podpora se na zadne detske obrazovce neukazala', unik.length===0,
+   unik.length?[...new Set(unik)].join(', '):'zadna z '+videl);
+// druhy zamek, ve zdroji: slova o prispevku se skladaji na jednom miste
+// a to misto je rodicovska obrazovka. Kdyby je nekdo zavolal odjinud,
+// hlidac vyse by to chytil az ve chvili, kdy tudy test projde.
+const appsrc=fs.readFileSync(path.join(ROOT, 'src', 'app.js'),'utf8');
+const odKud=[...appsrc.matchAll(/\$\{supportCard\(\)\}/g)].map(m=>m.index);
+const zacatek=appsrc.indexOf('function viewParent('), konec=appsrc.indexOf('\nfunction ', zacatek+1);
+const mimo=odKud.filter(i=>i<zacatek || i>konec);
+ok('podporu vykresluje jedine viewParent', odKud.length===1 && mimo.length===0,
+   odKud.length+' volani, mimo viewParent '+mimo.length);
+const slova=[...appsrc.matchAll(/t\("(support[A-Za-z]*)"\)/g)].map(m=>m.index);
+const defStart=appsrc.indexOf('function supportCard('), defEnd=appsrc.indexOf('\nfunction ', defStart+1);
+ok('slova o podpore stoji jen v tom jednom bloku',
+   slova.length===4 && slova.every(i=>i>defStart && i<defEnd), slova.length+' klicu');
 
 console.log('\nchyby za behu:', errs.length?errs.join('\n'):'zadne');
 process.exit(0);

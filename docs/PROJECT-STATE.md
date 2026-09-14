@@ -2653,6 +2653,39 @@ co konkrétně se za příspěvky bude vyvíjet dál, tedy učivo třetí tříd
 ročníky; a explicitně říct, že nepřispět je naprosto v pořádku a že se to ve
 hře nijak nepozná. Žádné odemykání, žádné počítadlo cíle, žádný tlak.
 
+**Od září 2026 je na to místo i v aplikaci a platí pro ně tatáž tři pravidla.**
+Je to jedna karta v rodičovské sekci, hned pod třemi čísly nahoře a nad prvním
+nadpisem, kreslí ji `supportCard()` a volá ji jediné místo, `viewParent()`.
+Vypadá jako ostatní karty té obrazovky, tedy stejný papír i rám, jen nemá nad
+sebou nadpis, protože to není nastavení; nese značku, nadpis, tři věty a odkaz,
+a nic jiného. Dál platí:
+
+- **V dětské části se nesmí objevit vůbec nic.** Ani na mapě, ani ve výsledku,
+  ani v garáži, ve sbírce nálezů, v obchodě nebo v dílně. Hlídá to
+  `flow.test.js` dvěma zámky: hlídač pověšený na `render()` na celý běh testu,
+  který po každém vykreslení obrazovky mimo `PARENT_VIEWS` hledá `.support`,
+  a čtení zdroje, že `supportCard()` se volá jen uvnitř `viewParent()`
+  a klíče `support*` se skládají jen uvnitř něj. Prohlídka několika obrazovek,
+  na které test náhodou přijde, by minula tu, která přibude příště.
+- **Mluví jazykem rodiče, tedy `DB.lang`, nikdy `profil.lang`.** Rodičovská
+  sekce je v `PARENT_VIEWS`, takže `applyLang()` to zařídí samo; `supportUrl()`
+  si ale `DB.lang` bere výslovně, aby se to nedalo pokazit voláním odjinud.
+- **Odkaz míří na sekci v README na GitHubu**, tedy čeština na
+  `README.cs.md#podpora-projektu` a angličtina i němčina na
+  `README.md#supporting-the-project`, protože německé README neexistuje. Kotvy
+  si GitHub vyrábí z nadpisů a **obě byly přečtené z vykreslené stránky, ne
+  odhadnuté**; u nadpisu s diakritikou si GitHub diakritiku v kotvě nechává
+  (`#počtářský-závod`), takže odhad by vyšel jen někdy. Proto nevznikla žádná
+  samostatná stránka s možnostmi přispění: kotva funguje a druhá stránka by
+  byla druhé místo, kde musí stát tytéž tři věty.
+- **Nic se nestahuje a nic se nevolá po síti.** Je to prostý `<a>` s
+  `target="_blank"` a `rel="noopener noreferrer"`, takže hra bez připojení běží
+  přesně jako dřív; nefunguje jen ten odkaz, což je v pořádku.
+- **Velikost písma násobí `--tx`** jako všechno ostatní v `styles.css`, i když
+  je v rodičovské sekci `--tx` vždycky jedna. Značka se drží prvního řádku
+  nadpisu, ne jeho středu, protože nadpis se na telefonu smí zalomit a značka
+  plovoucí mezi dvěma řádky vypadá jako omylem.
+
 **Zvolený kanál.** QR platba podle českého standardu SPAYD, obrázek přímo
 v repozitáři. Nulové poplatky, žádná registrace pro dárce, rodič to zvládne
 na tři klepnutí v bankovní aplikaci. QR se generuje skriptem `tools/make-qr.py`

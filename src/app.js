@@ -7396,6 +7396,35 @@ function overallMastery(p){
   return w ? s / w : 0;
 }
 
+/* Where the note about backing the project sends the parent. It is the
+   section of the README on GitHub, reached by the anchor GitHub builds
+   out of the heading; both anchors were read off the rendered page
+   rather than guessed, because a heading with Czech diacritics keeps
+   them in the anchor and a guess would have been wrong as often as
+   right. There is no German README, so German reads the English one.
+   Nothing here is fetched: it is a plain link, so a game running with
+   no connection is exactly as it was. */
+const SUPPORT_README = "https://github.com/daliborkania-info/math-fact-racer/blob/main/";
+const SUPPORT_URL = {
+  cs: SUPPORT_README + "README.cs.md#podpora-projektu",
+  en: SUPPORT_README + "README.md#supporting-the-project",
+  de: SUPPORT_README + "README.md#supporting-the-project"
+};
+/* The parent section speaks the parent's language, never the child's,
+   so this reads DB.lang and not the profile. */
+function supportUrl(){ return SUPPORT_URL[DB.lang] || SUPPORT_URL[FALLBACK_LANG]; }
+/* Three sentences and a link, drawn as one more card of the parent
+   section rather than as a banner over it. It is asked for here and
+   nowhere else: no child screen may ever call this, which is what the
+   sweep in tests/flow.test.js watches. */
+function supportCard(){
+  return `<div class="card support" style="margin-top:14px">
+    <div class="head"><span class="mark">&#9829;</span><b>${t("supportTitle")}</b></div>
+    <div class="muted">${t("supportWhat")} ${t("supportFine")}</div>
+    <a class="more" href="${supportUrl()}" target="_blank" rel="noopener noreferrer">${t("supportMore")} &#8594;</a>
+  </div>`;
+}
+
 function viewParent(p){
   const heat = heatSpecs(p).map(spec => heatBlock(p, spec)).join("");
   const avg = p.msN ? (p.msSum / p.msN / 1000) : 0;
@@ -7423,6 +7452,8 @@ function viewParent(p){
         <div class="stat"><div class="v">${accAll}&#8202;%</div><div class="l">${t("statAccuracy")}</div></div>
         <div class="stat"><div class="v">${avg ? num(avg, 1) : "0"}&#8202;s</div><div class="l">${t("statAvg")}</div></div>
       </div>
+
+      ${supportCard()}
 
       <div class="h2">${t("secMastery")}</div>
       <div class="card">

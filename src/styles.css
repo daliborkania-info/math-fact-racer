@@ -653,6 +653,30 @@ html[data-w="tablet"][data-o="tall"] .keypad{width:100%;max-width:480px;margin:0
 .seg button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--line);padding:10px;font-size:12px;font-family:ui-monospace,monospace;font-weight:500;-webkit-user-select:text;user-select:text}
 
+/* The note about backing the project. It is one more card of the parent
+   section, wearing the same paper and the same border as the others and
+   carrying no heading of its own, because it is meant to be seen once
+   and then stepped past: no colour but a warm mark, no counter, nothing
+   to dismiss. It is never drawn on a child screen, so --tx is 1 here
+   whatever happens; the sizes multiply it anyway, because that is the
+   rule every size in this file keeps. */
+.support{display:flex;flex-direction:column;gap:7px}
+/* The mark keeps to the first line of the heading rather than to the
+   middle of it: the German title runs to two lines on a phone, and a
+   badge floating between them reads as a stray. */
+.support .head{display:flex;align-items:flex-start;gap:9px}
+.support .mark{
+  flex:none;width:26px;height:26px;border-radius:99px;margin-top:-1px;
+  background:#fff5df;border:2px solid #ffdc9a;color:var(--sun-dark);
+  display:grid;place-items:center;font-size:calc(13px * var(--tx));line-height:1;
+}
+.support .head b{font-family:var(--font-display);font-size:calc(15.5px * var(--tx));font-weight:700;line-height:1.35}
+.support .more{
+  align-self:flex-start;color:var(--grape);font-weight:800;
+  font-size:calc(13.5px * var(--tx));text-decoration:none;
+  border-bottom:2px solid var(--grape-soft);padding:2px 0 3px;
+}
+
 /* ---------- bottom sheet ---------- */
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(16,24,45,.5);animation:fade .18s}
 @keyframes fade{from{opacity:0}}

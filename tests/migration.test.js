@@ -40,6 +40,17 @@ function fillFacts(tag){
     for(const h of ['xm','xd']) for(const i of ['1','2','3','4'])
       out[h+i]={lv:1,reps:3,ok:2,bad:1,best:4200,seen:1757000000000};
   }
+  if(tag==='nasobilka-umi-deleni-nacate'){
+    // cela mala nasobilka na urovni 4, takze deleni si dite zaslouzene
+    // odemklo, ale samo deleni je jen nacate: vsechny spoje na urovni 1
+    // delaji zvladnuti 1/3, tedy pod branou 0,6, kterou se otevira trat
+    // Co zbyde (a s ni i trat Za nasobilkou). Nova verze ji tedy nesmi
+    // otevrit sama.
+    for(let a=1;a<=10;a++) for(let b=a;b<=10;b++){
+      out['m'+a+'x'+b]={lv:4,reps:8,ok:8,bad:0,best:1900,seen:1757000000000};
+      if(a>1) out['d'+a+'x'+b]={lv:1,reps:3,ok:2,bad:1,best:4300,seen:1757000000000};
+    }
+  }
   if(tag==='tisicovka-jen-nacata'){
     // cela stovka na urovni 4, tedy zaslouzene otevrena tisicovka, ale
     // sama tisicovka je jen nacata: dvanact klicu na urovni 1 dela

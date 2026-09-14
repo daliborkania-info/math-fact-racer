@@ -1042,18 +1042,50 @@ hledání chybějícího členu je obrácená operace. Test: `items.test.js` ov�
 že `record()` píše pod původní klíč.
 
 Po D4 je třetí ročník na 25 hratelných kapitolách z 33 a vlna A je hotová.
+Po E1 je na 26 z 33.
 
 ---
 
 ## Krok E. Vlna B, nové vstupní prvky
 
-### E1. `pad2` a dělení se zbytkem, kapitola 27
+### E1. `pad2` a dělení se zbytkem, kapitola 27 — HOTOVO 14. září 2026
 
-Pořadí práce: nejdřív dvě políčka, pak generátor.
+Pořadí práce: nejdřív dvě políčka, pak generátor. Obojí je hotové, ve dvou
+commitech.
 
-**Vstupní prvek `pad2` — HOTOVO 14. září 2026. Generátor dělení se zbytkem
-zbývá.** Dvě políčka fungují a jsou otestovaná, ale zatím je žádná rodina
-nepoužívá: `pad2` neumí vyrobit žádný klíč, takže se do závodu nedostane.
+**Co se proti plánu upřesnilo, druhá polovina (generátor).** Rozhodnutí **R2
+padlo podle doporučení**: rodina po dělitelích, klíče `r2` až `r10`, hlavička
+`r`, kbelíky `R_BUCKETS` po dvojicích podle sešitu (`2 a 3`, `4 a 5`, `6 a 7`,
+`8 a 9`, `10`), dělenec se losuje. K tomu pět věcí, které plán neřešil:
+
+- **Jak často vyjde dělení beze zbytku, je rozhodnutí, ne náhoda.** Losovat
+  zbytek rovnoměrně od nuly by znamenalo, že u dvojky vyjde beze zbytku každý
+  druhý příklad a u desítky každý desátý, takže by každý kbelík učil něco
+  jiného. Je to proto pevná pětina ve všech kbelících, `DIVREM_EVEN = .2`:
+  dost na to, aby "nezbylo nic" zůstalo odpovědí, kterou musí dítě poznat
+  a napsat do druhého políčka nulu, a málo na to, aby zbytek zůstal tím, o čem
+  kapitola je. Sešit učí obojí, takže se nesmí vynechat ani jedno.
+- **Staví se konstrukcí, a to pozpátku proti tomu, jak se řádek čte.** Nejdřív
+  podíl (1 až 10, tedy po desetinásobek dělitele, jak sešit značí násobky na
+  ose), pak zbytek z rozsahu, který na dělitele nedosáhne, a teprve z nich
+  dělenec. Zbytek je tím pádem menší než dělitel proto, že jinde být nemůže,
+  ne proto, že se něco ořízlo. Neznámý dělitel padá přes `noBucket()`.
+- **Trať `divrem` stojí na mapě hned za `tens`**, tedy na konci násobící
+  a dělící řady třetího ročníku, a otevírá se od `d1` na 0,6, stejně jako
+  `beyond`. Kapitola 27 leží v knize hned vedle kapitoly 28, takže pořadí
+  knihy to neporušuje, a na dělení se zbytkem není na čem stavět, dokud dítě
+  nezná násobky dělitele.
+- **Násobitel prahů je 2,4**, tedy jako u pořadí operací: spoj z násobilky,
+  odečtení a k tomu dvě čísla do dvou políček s přeskokem mezi nimi.
+- **Nejdelší řádek rodiny je `109 : 10 = ▢ (zb. ▢)`** a na 375 px se vejde na
+  jednu řádku od druhého ročníku výš (česky 294 px z 339, anglicky 312,
+  německy 313); prvňákovi se zalomí, stejně jako se mu zalomí nejdelší převod,
+  který je s 332 px dál pořád nejširší řádek hry.
+
+**Vstupní prvek `pad2` — HOTOVO 14. září 2026.** Dvě políčka fungují a jsou
+otestovaná. Do generátoru je žádná rodina
+pouštěla jen ručně složená položka v testu; od druhé poloviny kroku je vyrábí
+rodina dělení se zbytkem.
 Hotové je všechno kolem zadávání, tedy `SLOTS`, `RUN.typed` jako pole,
 `RUN.slot`, `boxId`/`boxAt`/`paintBoxes`, `maxLen` po políčkách, přeskok po
 naplnění, mazání přes hranici, klávesa `data-k="next"`, klepnutí do políčka
@@ -1070,10 +1102,7 @@ k němu přidá tři znaky plus délku slov mezi políčky; políčko a mezery s
 takový řádek zúžily vlastní třídou `.question.q-boxes`, jinak se dvě políčka na
 375 px nevejdou; a `missHint()` pro `kind:"divrem"` zůstal na potom, protože
 hlášky `divremTooBig` a `divremQuotient` potřebují dělitele, tedy generátor.
-**Zbývá tedy: rozhodnutí R2, klíč a kbelíky, generátor, `poolKeys()`, kapitola 27
-v `curricula.js`, texty ve třech jazycích včetně slov `sep` a `tail`, `divrem`
-hlášky v `missHint()`, řádek v `RANGE` v `items.test.js` a zbytek kontrolního
-seznamu pro novou rodinu.** `record()` se nezměnil, „podíl dobře, zbytek špatně“
+`record()` se nezměnil, „podíl dobře, zbytek špatně“
 je celá chyba a je to zapsané v `PROJECT-STATE.md` jako známé zjednodušení.
 
 **Dvě políčka.** `RUN.typed` zůstává řetězec pro `pad`, pro `pad2` je to pole
@@ -1090,14 +1119,14 @@ dostane vlastní hlášku `divremTooBig`, zbytek správný a podíl špatný
 `divremQuotient`. `items.test.js` na řádku `if(it.input!=='pad')` musí `pad2`
 znát a `check` volat s polem.
 
-**Klíč.** `TEMATA.md` navrhuje `r{dělenec}x{dělitel}`, tedy vyčíslitelná
-fakta. Pro dělitele 2 až 10 a dělence do desetinásobku je to přes pět set
-klíčů, sbírka s pěti sty místy a krabička, která se nikdy nenaplní. Návrh
-tohoto plánu: **rodina po dělitelích**, `r2` až `r10`, `r` do `FAMILY_HEADS`,
-dělenec se generuje, kbelíky stupňované ve dvojicích podle sešitu, `2 a 3`,
-`4 a 5`, `6 a 7`, `8 a 9`, `10`. Krabička si pak pamatuje, jak dítěti jde
-dělení sedmi se zbytkem, což je přesně ta dovednost. Rozhodnutí v oddílu 9,
-R2; dokud nepadne, generátor se nepíše.
+**Klíč. Rozhodnuto 14. září 2026 podle doporučení.** `TEMATA.md` navrhoval
+`r{dělenec}x{dělitel}`, tedy vyčíslitelná fakta. Pro dělitele 2 až 10
+a dělence do desetinásobku je to přes pět set klíčů, sbírka s pěti sty místy
+a krabička, která se nikdy nenaplní. Udělaná je proto **rodina po dělitelích**,
+`r2` až `r10`, `r` v `FAMILY_HEADS`, dělenec se generuje, kbelíky stupňované
+ve dvojicích podle sešitu, `2 a 3`, `4 a 5`, `6 a 7`, `8 a 9`, `10`. Krabička
+si pamatuje, jak dítěti jde dělení sedmi se zbytkem, což je přesně ta
+dovednost, a sbírka trati má devět míst místo pěti set.
 
 `record()` bere správnost jako ano nebo ne; "podíl dobře, zbytek špatně" je
 celá chyba. Změna by sáhla na datový model a na migrační test, takže se
@@ -1745,7 +1774,8 @@ i hodiny, takže mapa, na kterou přijde, má na co klepnout. Zůstává jen to
 křivé místo, že `a100` stojí v jeho letošním bloku zamčená za mostem, který je
 za dveřmi; R1 by to spravila, ale nic na ní nestojí.
 
-**R2. Klíč dělení se zbytkem.** Rodina po dělitelích `r2` až `r10` (návrh
+**R2. Rozhodnuto 14. září 2026 podle doporučení, hotovo v E1.**
+**Klíč dělení se zbytkem.** Rodina po dělitelích `r2` až `r10` (návrh
 plánu) proti vyčíslitelným `r{dělenec}x{dělitel}` (`TEMATA.md`). Doporučení:
 rodina po dělitelích, důvody v E1.
 

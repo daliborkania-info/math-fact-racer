@@ -104,26 +104,35 @@ a čas, a převádí se v každém z nich oběma směry. Na mapě stojí hned za
 protože kilometr je tisíc metrů a kilo tisíc gramů; bez oboru do tisíce není
 z čeho převádět. Celkem je to čtyřiadvacet kapitol z třiatřiceti.
 
+Kapitolu 5, zkoušku správnosti, otevřela varianta `missing_operand`: je to
+látka čtyř kapitol před ní položená pozpátku, takže vlastní trať nemá.
+**Kapitolu 27, dělení se zbytkem, otevřel 14. září 2026 generátor
+`div_remainder`** a jezdí se na trati `divrem`, která má pět kbelíků po
+dvojicích dělitelů a na mapě stojí hned za `tens`, tedy na konci násobící
+a dělící řady; je to první rodina, která se odpovídá do dvou políček. Tím je
+třetí ročník na šestadvaceti kapitolách z třiatřiceti.
+
 Násobí a dělí se v `ops` jen v oboru malé násobilky a dělení vždycky vyjde
 beze zbytku; `tens` dělí sice i za ní, ale jen kulatými čísly, a `div_remainder`
-zatím není. Čtvrtý kbelík `ops` proto roste do tisíce na straně sčítání, tedy
+dělí sice se zbytkem, ale jen v oboru do desetinásobku dělitele. Čtvrtý kbelík
+`ops` proto roste do tisíce na straně sčítání, tedy
 `500 - (40 + 30)`, ne `(300 + 60) : 4`; celé je to popsané
 v `PROJECT-STATE.md`, oddíl 4.
 
-Zamčené zůstávají kapitoly 5, 6, 15, 17, 19, 21, 22, 27 a 32. Kapitola 17
+Zamčené zůstávají kapitoly 6, 15, 17, 19, 21, 22 a 32. Kapitola 17
 jednotky jen pojmenovává a porovnává, nepřevádí je, takže na ni `unit_convert`
-nestačí a čeká na `unit_pick` a `compare_units`. Tři z těch devíti nepotřebují
-na vstupu nic nového, stačí další generátory na číselnou klávesnici; pořadí je
+nestačí a čeká na `unit_pick` a `compare_units`. Zbytek čeká na další vstupní
+prvky, tedy `pad3`, `pick` a `cmp`; pořadí je
 v `PROJECT-STATE.md`, oddíl 12b.
 
-## Pilot
+## Pilot, hotovo
 
 Kapitola 27, dělení se zbytkem. Je to jádrová látka třetí třídy, sešit jí věnuje
-tři dvoustrany, tedy nejvíc ze všech témat obou dílů. Vyžaduje přesně jeden
-nový vstupní prvek, tedy druhé políčko na zbytek, a celá se odehraje uvnitř
+tři dvoustrany, tedy nejvíc ze všech témat obou dílů. Vyžadovala přesně jeden
+nový vstupní prvek, tedy druhé políčko na zbytek, a celá se odehrává uvnitř
 existujícího závodu bez zásahu do mechaniky.
 
-Sešit ji staví takto, a stojí za to to zachovat:
+Sešit ji staví takto:
 
 1. Vyznačení násobků daného dělitele na číselné ose, tedy příprava.
 2. Výpočet, podíl a zbytek do dvou políček.
@@ -131,7 +140,11 @@ Sešit ji staví takto, a stojí za to to zachovat:
 4. Slovní úloha, kde je zbytek smyslem zadání, například kolik zbyde.
 
 Dělitele bere po dvojicích v pořadí 2 a 3, 4 a 5, 6 a 7, 8 a 9, pak 10 a nakonec
-smíšené opakování. To je hotová osnova pro pět podkapitol nebo pro pět tratí.
+smíšené opakování. To je hotová osnova pro pět kbelíků a přesně tak je trať
+udělaná; podíl se losuje po desetinásobek dělitele, tedy po tu část osy, kterou
+sešit značí. Bod 2 je hotový. Bod 3 je varianta nad týmiž klíči, ne rodina, bod
+4 patří podle `PROJECT-STATE.md`, oddíl 4b, do dílny, a bod 1 je příprava, ne
+procvičování.
 
 ## Co se v tomhle ročníku neobjeví
 

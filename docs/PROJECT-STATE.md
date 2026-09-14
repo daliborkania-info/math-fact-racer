@@ -1,8 +1,8 @@
 # Stav projektu a předávací dokument
 
 Poslední aktualizace: 14. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
-celém kroku D a **celém kroku H** nového plánu, opravě řazení mapy (C3b) a opravě
-nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
+celém kroku D, **celém kroku H** a **kroku E1** nového plánu, opravě řazení mapy (C3b)
+a opravě nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
 
 **Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
 nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
@@ -12,11 +12,11 @@ světy a mapa jako krajina). K tomu dvě věci, které v plánu nebyly a přišl
 zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalšího roku,
 a rozdělení prvního ročníku na šest číselných oborů.
 
-**Stav v číslech.** Pětadvacet tratí ve čtyřech světech, 100 palet prostředí,
-dvě zakázky v dílně, 86 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 25/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
+**Stav v číslech.** Šestadvacet tratí ve čtyřech světech, 104 palety prostředí,
+dvě zakázky v dílně, 87 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
+třetí 26/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
 osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934 součástek v pěti
-vrstvách, 443 klíčů rozhraní ve třech jazycích, šest testových souborů.
+vrstvách, 451 klíčů rozhraní ve třech jazycích, šest testových souborů.
 
 **Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
 okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
@@ -140,8 +140,21 @@ jedna na zvíře, ne jeden tvar s přepínači. Celý kačenčí model je v nov�
 oddílu 7f, včetně pravidla o autorských právech, které musí znát každý, kdo
 sáhne na kresbu.
 
-**Na řadě je krok E**, tedy nové vstupní prvky, počínaje `pad2` a dělením se
-zbytkem, a dál podle `docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
+**Krok E1 je hotový** (14. září), ve dvou commitech. První dal hře **vstupní
+prvek `pad2`**, tedy odpověď do dvou políček: `RUN.typed` jako pole, `RUN.slot`,
+přeskok po naplnění, mazání přes hranici, klávesa se šipkou, klepnutí do
+políčka, třetí tvar řádku v `questionHTML()` se slovy `sep` a `tail`
+a `check`, který porovnává hodnoty zvlášť. Druhý postavil rodinu, která ho
+používá: **dělení se zbytkem**, kapitola 27 třetího ročníku, jako trať
+`divrem` s hlavičkou klíče `r`. Klíč je **dělitel**, `r2` až `r10`, dělenec se
+losuje; kbelíky jdou po dvojicích dělitelů podle sešitu. Na mapě stojí hned za
+`tens`, tedy na konci násobící a dělící řady, a otevírá se od dělení. Proti
+plánu se upřesnilo, jak často má dělení vyjít beze zbytku a proč, viz oddíl 4
+a `docs/PLAN.md`.
+
+**Na řadě je zbytek kroku E**, tedy `pad3` a rozklad trojciferného čísla (E2),
+pak `pick` (E3) a `cmp` (E4), a dál podle `docs/PLAN.md`. Hotový prompt je na
+konci, v oddílu 14.
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -179,7 +192,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 444 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 451 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -476,6 +489,41 @@ V prvním kbelíku se dělí **jen deseti nebo stem**: `230 : 23` by bylo dělen
 dvojciferným číslem, které hra nikde neučí. Kulatý činitel smí stát vpředu
 i vzadu, protože tak to píše i učebnice.
 
+**Dělení se zbytkem.** `divrem`, kapitola 27 třetího ročníku, nejdelší
+kapitola obou dílů, sešit jí věnuje tři dvoustrany. Je to první rodina, která
+se **odpovídá do dvou políček**, tedy `input:"pad2"`, protože podíl a zbytek
+jsou dvě čísla, ne jedno divně zapsané. Řádek zní `36 : 5 = ▢ (zb. ▢)`
+a slova mezi políčky a za nimi si nese položka jako hotový text (`sep`,
+`tail`), stejně jako jednotku; nad klávesnicí navíc stojí slovy, co ta dvě
+políčka znamenají, takže se zkratka nemusí hádat.
+
+**Klíč je dělitel, ne dvojice čísel.** `r2` až `r10`, dělenec se losuje. Zápis
+po faktech, `r{dělenec}x{dělitel}`, by dal přes pět set klíčů, sbírku s pěti
+sty místy a krabičku, která se nikdy nenaplní; krabička má místo toho pamatovat,
+jak dítěti jde dělení sedmi se zbytkem, což je přesně ta dovednost, a sbírka
+trati má devět míst. Kbelíky jsou dvojice dělitelů, jak je bere sešit: `2 a 3`,
+`4 a 5`, `6 a 7`, `8 a 9`, `10`, tedy jeden kbelík je jedna dvoustrana, a oba
+dělitele dvojice stoupají zároveň. Aktuální kbelík hledá `divremStage()`.
+
+Staví se konstrukcí a pozpátku proti tomu, jak se řádek čte: nejdřív podíl
+(1 až 10, tedy po desetinásobek dělitele, jak sešit značí násobky na ose), pak
+zbytek z rozsahu, který na dělitele nedosáhne, a teprve z obojího dělenec.
+**Zbytek je tedy menší než dělitel proto, že jinde být nemůže**, ne proto, že
+se něco ořízlo, a neznámý dělitel padá hlasitě. **Beze zbytku vyjde pevná
+pětina příkladů** ve všech kbelících, `DIVREM_EVEN`. Je to rozhodnutí, ne
+náhoda: kdyby se zbytek losoval rovnoměrně od nuly, vyšel by u dvojky beze
+zbytku každý druhý příklad a u desítky každý desátý, takže by každý kbelík
+učil něco jiného. Pětina je dost na to, aby "nezbylo nic" zůstalo odpovědí,
+kterou musí dítě poznat a napsat do druhého políčka nulu, a málo na to, aby
+zbytek zůstal tím, o čem kapitola je; sešit učí obojí, takže se nesmí vynechat
+ani jedno.
+
+Na mapě stojí hned za `tens`, tedy na konci násobící a dělící řady třetího
+ročníku, a otevírá se od `d1` na 0,6, stejně jako `beyond`: dělení se zbytkem
+je dělení plus odečtení a bez násobků dělitele nemá na čem stát. Kapitola 27
+leží v knize hned vedle kapitoly 28, takže pořadí knihy to neporušuje.
+Chybná odpověď má dvě vlastní hlášky, viz oddíl 7.
+
 **Převody jednotek.** `units`, kapitoly 18 a 29 třetího ročníku. Čtyři kbelíky
 podle druhu veličiny: `u1` délka (`m`, `cm`, `km`, `dm`, `mm`), `u2` hmotnost
 (`kg`, `g`, `t`), `u3` objem (`l`, `dl`, `ml`, `hl`), `u4` čas (`h`, `min`, `s`,
@@ -499,7 +547,9 @@ plurál, protože "Převeď na dní" není česky.
 je zhruba polovina toho. U počítání do sta se prahy násobí 1,9, u počítání do
 tisíce 2,2, u zaokrouhlování 2,0, u řetězce taky 2,0, protože jsou to dvě
 operace místo jedné, u pořadí operací 2,4, protože k těm dvěma operacím
-přibývá rozhodnutí, která z nich jde první, u kulatých čísel 1,8, protože je to
+přibývá rozhodnutí, která z nich jde první, u dělení se zbytkem taky 2,4,
+protože je to spoj z násobilky, odečtení a k tomu dvě čísla do dvou políček
+s přeskokem mezi nimi, u kulatých čísel 1,8, protože je to
 spíš pravidlo než počítání, u převodů 2,2, protože se musí nejdřív rozhodnout,
 kterým směrem jednotka jde, a teprve pak počítat, u hodin taky 2,4, protože přečíst ciferník a
 naťukat čtyři číslice trvá déle než vybavit si spoj, a za násobilkou 2,6,
@@ -631,7 +681,7 @@ se do průměrné doby odpovědi.
 
 ## 5. Trati
 
-Pětadvacet tratí, každá má vlastní generovanou cestu a vlastní prostředí
+Šestadvacet tratí, každá má vlastní generovanou cestu a vlastní prostředí
 v každém ze čtyř světů; tvar cesty je na trati, ne na světě, mění se s ním
 krajina kolem ní a to, čím cesta končí.
 
@@ -647,6 +697,7 @@ krajina kolem ní a to, čím cesta končí.
 | ops | 3 | 3 | co se počítá dřív, čtyři kbelíky: bez závorek a se závorkami, do sta a do tisíce |
 | beyond | 3 | 3 | násobení a dělení mimo malou násobilku, čtyři kbelíky podle toho, co se rozkládá |
 | tens | 3 | 3 | násobení a dělení deseti, stem a kulatou desítkou, dva kbelíky v obou směrech |
+| divrem | 3 | 3 | dělení se zbytkem, klíč je dělitel `r2` až `r10`, pět kbelíků po dvojicích dělitelů |
 | round | 3 | 3 | zaokrouhlování, tři kbelíky: desítky do sta, desítky do tisíce, stovky |
 | a3, a5, a7, a10, a15, a20 | 1 | 2 | šest oborů prvního ročníku, sčítání a odčítání bez přechodu přes desítku, viz oddíl 4 |
 | bridge | 2 | 2 | sčítání a odčítání s přechodem přes desítku, čtyři mosty |
@@ -680,14 +731,14 @@ Klíče příkladů: `m{a}x{b}` násobení, `d{a}x{b}` dělení, `a{a}p{b}` sč�
 a `kn{bucket}` do tisíce, `xm{bucket}` a `xd{bucket}` za násobilkou,
 `o1` až `o3` zaokrouhlování, `q{bucket}` řetězec tří čísel, `z{bucket}` pořadí
 operací, `gm{bucket}` a `gd{bucket}` kulatá čísla, `u1` až `u4` převody
-jednotek, `c1` až `c6`
+jednotek, `r2` až `r10` dělení se zbytkem, `c1` až `c6`
 hodiny. Kanonicky vždy `a <= b`,
 komutativita se sbaluje. U dvacítky smí být
 druhé číslo i náctka, takže 13 + 4 je `a4p13`; díky tomu generátor ani odčítání
 nepotřebují na obor do dvaceti bez přechodu jedinou výjimku.
 
 Klíč začínající písmenem z `FAMILY_HEADS`, dnes `p`, `n`, `c`, `k`, `x`, `o`,
-`q`, `z`, `g` a `u`,
+`q`, `z`, `g`, `u` a `r`,
 není jeden příklad, ale celá rodina, kterou generátor rozbaluje až v `itemFromKey`.
 Proto se v `poolSize` počítá za čtyři a proto `buildRun` na konci přegeneruje
 otázku, která by vyšla stejně jako ta předchozí. Každý další kbelíkový generátor
@@ -905,7 +956,8 @@ a to jsou dvě čísla, ne jedno divně zapsané; finta „hodina krát sto plus
 by u nich nerozlišila špatný zápis od špatného výpočtu. Kolik políček otázka má,
 si říká sama přes `input`, a tabulka `SLOTS` k tomu jménu přiřadí počet: `pad` je
 jedno, `pad2` dvě. Kód kolem toho je záměrně obecný v počtu, aby `pad3` (kapitola
-21, tři řády) nebyl třetí cesta, ale další řádek v `SLOTS`.
+21, tři řády) nebyl třetí cesta, ale další řádek v `SLOTS`. Jediná rodina, která
+`pad2` dnes vyrábí, je dělení se zbytkem, `divremItem()`; viz oddíl 4.
 
 - `RUN.typed` je řetězec, dokud je políčko jedno, a pole řetězců, jakmile jich je
   víc; `RUN.slot` říká, do kterého se píše. Sahá se na to jen přes `typedAt()`,
@@ -934,6 +986,13 @@ jedno, `pad2` dvě. Kód kolem toho je záměrně obecný v počtu, aby `pad3` (
   na jednu řádku pro třetí a čtvrtý ročník; ve větším písmu prvních dvou ročníků
   a v závodě na šířku se zalomí, stejně jako se dnes zalomí nejdelší převod nebo
   závorka, a nic se neuřízne.
+
+**Chyba s dvěma políčky má vlastní hlášky.** `missHint()` u `kind:"divrem"`
+pojmenuje dvě chyby, které dítě opravdu dělá: zbytek větší nebo rovný děliteli
+znamená, že se tam vejde ještě jedna celá (`divremTooBig`), a správný zbytek
+s chybným podílem znamená, že se špatně spočítalo, kolikrát se to tam vejde
+(`divremQuotient`). Obě jmenují dělitele, takže obě potřebovaly generátor; než
+byl, nešly napsat. Cokoli jiného padá na obecnou hlášku, stejně jako u hodin.
 
 **Známé zjednodušení: `record()` bere správnost jako ano nebo ne**, takže „podíl
 dobře, zbytek špatně“ spadne do krabičky jako celá chyba a celý příklad se vrátí
@@ -1864,12 +1923,12 @@ krabičky, tvrdý bere jen aktuální kapitolu. Měkký je výchozí, protože j
 rozpadne rozložené opakování.
 
 **Data jsou v `src/curricula.js`.** Tři kurikula pro první až třetí ročník,
-95 kapitol, z toho 86 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
+95 kapitol, z toho 87 hratelných. Čtvrtý a pátý ročník v aplikaci nejsou,
 protože by v nich bylo skoro všechno zamčené; mapy k nim existují v `docs/`.
 
 **Pool je deklarativní.** Kapitola popisuje učivo jako `mult`, `div`, `as20`,
 `as100`, `as1000`, `multBeyond`, `divBeyond`, `round`, `clock`, `chain`, `ops`,
-`multTens`, `divTens` a `units`,
+`multTens`, `divTens`, `units` a `divrem`,
 a `poolKeys()` to překládá na klíče příkladů. Vedle toho smí kapitola říct
 `variant`, což není pool, ale **tvar otázky**: tytéž klíče položené jinak, dnes
 `"missing"`, viz oddíl 7. Do `poolKeys()` nevstupuje. Násobení a dělení za násobilkou jsou dvě pole,
@@ -1905,11 +1964,12 @@ generátor jich vyrobí neomezeně a umí je stupňovat.
 
 Tabulka vznikla tak, že se přes reálnou logiku `poolKeys` a `poolSize` spočítalo,
 kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne podle
-dojmu. Stav po doplnění chybějícího členu je 86 hratelných
-kapitol z 95, po ročnících 18/18, 43/44 a 25/33; první ročník je tím celý
-a **vlna A, tedy všechno, co jde na `pad`, je hotová celá**. Zbylých osm
-zamčených kapitol třetí třídy čeká na nový vstupní prvek nebo na dílnu, tedy
-na krok E a F plánu.
+dojmu. Stav po dělení se zbytkem je 87 hratelných
+kapitol z 95, po ročnících 18/18, 43/44 a 26/33; první ročník je tím celý,
+**vlna A, tedy všechno, co jde na `pad`, je hotová celá** a z vlny B je hotový
+první vstupní prvek, `pad2`. Zbylých sedm
+zamčených kapitol třetí třídy čeká na další vstupní prvek nebo na dílnu, tedy
+na zbytek kroku E a na krok F plánu.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
@@ -1935,7 +1995,9 @@ oddíl 7.
 která nepotřebovala na vstupu nic nového, byla kapitola 5, a třetí třída je
 s ní na 25/33, aniž by se sáhlo na klávesnici. Kapitola 17 mezi zbylých osm
 patří: jednotky jen pojmenovává a porovnává, takže na ni `unit_convert`
-nestačí.
+nestačí. Devátou odemklo až dělení se zbytkem, tedy první nový vstupní prvek,
+a třetí třída je od 14. září 2026 na 26/33; zamčených zůstává sedm, kapitoly
+6, 15, 17, 19, 21, 22 a 32.
 
 **`written_add_sub` neodemkne ani jednu kapitolu**, i když ho mapa druhé třídy
 posunula v prioritě nahoru. Kapitoly, ve kterých se objevuje, jsou hratelné už
@@ -1966,7 +2028,8 @@ modifikátory existujících, a byl to jiný typ zásahu: ne nová trať a nové
 klíče, ale druhý parametr `itemFromKey()` a druhý tvar řádku otázky.
 
 **Další na řadě jsou nové vstupní prvky**, tedy krok E plánu: `pad2`
-a `div_remainder`, `pad3` a `place_value`, `pick` a dvojice `parity`
+a `div_remainder` (**hotovo 14. září 2026**, viz oddíl 12d), `pad3`
+a `place_value`, `pick` a dvojice `parity`
 s `digit_count`, úplně nakonec `cmp` a porovnávání. Od téhle chvíle každá
 další kapitola čeká buď na ně, nebo na dílnu, což je jiný druh práce než
 celá vlna A: sahá se na klávesnici a na `tap()`, ne jen na generátor.
@@ -2004,8 +2067,10 @@ okruhy v `items.test.js`. Nic z bodů A až D se neukázalo jako skrytý blokát
 **A. Rodiny na `pad`, tedy nejlevnější vlna.**
 
 `thresholds()` je ruční výraz, kde má každá rodina svůj násobitel prahů,
-zatím 2,6 za násobilkou, 2,4 pro hodiny, 2,2 pro počítání do tisíce, 2,0 pro
-zaokrouhlování i pro řetězec a 1,9 pro počítání do sta. Kdo na to zapomene, dostane
+zatím 2,6 za násobilkou, 2,4 pro hodiny, pro pořadí operací i pro dělení se
+zbytkem, 2,2 pro počítání do tisíce a pro převody, 2,0 pro
+zaokrouhlování i pro řetězec, 1,9 pro počítání do sta a 1,8 pro kulatá čísla.
+Kdo na to zapomene, dostane
 prahy pro jednociferné vybavování a děti budou mít samé pomalé odpovědi.
 Tohle je jediná věc, na kterou se v téhle vlně dá zapomenout tiše.
 
@@ -2018,11 +2083,11 @@ odpovědi. Bez toho test skončí hláškou, že rodina nemá uvedený rozsah. J
 schválně jediné místo, kde se test musí rozšířit ručně spolu s kódem.
 
 **B. Nové vstupní prvky, tedy `pad2`, `pad3`, `cmp`, `pick`.**
-**`pad2` hotovo, 14. září 2026.** Dvě políčka umí `tap()`, `typedText()`,
-`questionHTML()`, `keypadHTML()` i `submit()`, `check` dostane pole dvou hodnot
-a porovná je zvlášť, celé je to popsané v oddílu 7 pod „Odpověď smí mít víc než
-jedno políčko“. Generátor dělení se zbytkem tím ale hotový není, takže `pad2`
-zatím žádná rodina nepoužívá. Zbytek dole platí dál.
+**`pad2` hotovo i s rodinou, 14. září 2026.** Dvě políčka umí `tap()`,
+`typedText()`, `questionHTML()`, `keypadHTML()` i `submit()`, `check` dostane
+pole dvou hodnot a porovná je zvlášť, celé je to popsané v oddílu 7 pod
+„Odpověď smí mít víc než jedno políčko“. Používá je rodina dělení se zbytkem,
+`divrem`. Zbytek dole platí dál.
 
 Zadávání dřív počítalo s jedním polem: `RUN.typed` byl jeden řetězec, `#abox`
 jeden prvek a `typedText()` vracel jeden řetězec. Dvě políčka potřebují pojem
@@ -2072,12 +2137,12 @@ B a D1 až D3 byl čtyři kroky pozadu. Obsazené je `m` násobení, `d` dělen�
 `a` sčítání do 20, `s` odčítání do 20, `p` a `n` kbelíky do sta, `k` celý obor
 do tisíce včetně znaménka, `x` násobení a dělení za násobilkou včetně znaménka,
 `o` zaokrouhlování, `q` řetězec tří čísel, `z` pořadí operací, `g` kulatá čísla
-včetně znaménka, `u` převody jednotek, `c` hodiny a `w` zakázky dílny, které
+včetně znaménka, `u` převody jednotek, `r` dělení se zbytkem, `c` hodiny
+a `w` zakázky dílny, které
 leží v téže krabičce, i když je žádný pool závodu nevyrobí (`isJobKey`).
-Rezervované je `r` pro dělení se zbytkem.
 
 Kbelíkové rodiny z toho jsou `FAMILY_HEADS` v `src/app.js`, dnes řetězec
-`pnckxoqzgu`, tedy tenhle seznam bez jednotlivých spojů (`m`, `d`, `a`, `s`)
+`pnckxoqzgur`, tedy tenhle seznam bez jednotlivých spojů (`m`, `d`, `a`, `s`)
 a bez dílny (`w`); obojí musí sedět, `poolSize` a `buildRun` se ptají právě
 `FAMILY_HEADS`. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká
 slepením `"p" + "h1"`; jako hlavička rodiny by se to pralo. Stejně tak `b` je
@@ -2088,13 +2153,19 @@ znaménkem ho má nést uvnitř klíče jako tisícovka, ne brát si dvě písme
 stovka.
 
 Kbelíky mají dvě různé konvence: `c1` je rovnou celý klíč, `h1` a `b1` se
-prefixují. Nová kbelíková rodina si musí vědomě vybrat jednu.
+prefixují. Nová kbelíková rodina si musí vědomě vybrat jednu. **Dělení se
+zbytkem přidalo třetí:** klíč je `"r" + dělitel`, tedy `r7`, a kbelík je
+dvojice dělitelů nad ním, takže jeden kbelík drží dva klíče a `divremKeys()`
+je rozbaluje. Je to schválně: dovednost, kterou si má krabička pamatovat, je
+dělení sedmi, ne "druhá dvoustrana", a dvojice v sešitu je jen pořadí, ve
+kterém se dělitele zavádějí.
 
 Tiché nouzové cesty schovávají chyby. Neznámý klíč vrátí z `itemFromKey()`
 příklad 1 + 1, prázdný pool spadne v `buildRun()` na malou násobilku a chybějící
 prostředí na louku. Při vývoji nové rodiny to vypadá, že to skoro funguje.
 Uvnitř rodiny se to od 13. září 2026 nedělá: neznámý kbelík je hlasitý pád,
-`noBucket(kde, klíč)` v `opsItem()` a `tensItem()`, vedle hlasitých pádů
+`noBucket(kde, klíč)` v `opsItem()`, `tensItem()` a `divremItem()`, vedle
+hlasitých pádů
 u prázdného rozsahu převodu a u nedokončitelného řetězce. Zbývají dvě tichá
 místa téhož druhu, `unitItem()` bere u neznámého kbelíku `U_BUCKETS[0]`
 a `chainTriple()` spadne na poslední větev; dnes to nikdo nevyrobí, protože
@@ -2107,28 +2178,33 @@ první a cache je jen záloha pro offline, takže aktualizace se k dětem dostan
 jsou nad klíčem skutečně obecné a nepotřebují sáhnout vůbec.
 
 **Co z toho je teď na řadě.** Rodiny na klávesnici jdou psát rovnou, cesta je
-volná. Před prvním `pad2` zbývá dodělat víc políček v `tap()`, `typedText()`
-a `questionHTML()`, což je odhadem půl dne. Heatmapa v rodičovské sekci je
-samostatný kus práce, který nikoho neblokuje, ale s každou další rodinou je
-ta obrazovka nepravdivější.
+volná, a od kroku E1 to platí i pro rodinu na `pad2`. Heatmapa v rodičovské
+sekci je hotová, viz oddíl 7b.
 
-## 12d. Pilot pro `pad2`
+## 12d. Pilot pro `pad2` — hotovo 14. září 2026
 
 **Dělení se zbytkem.** Kapitola 27 mapy třetího ročníku, strany 30 až 35
 osmého dílu. Je to jádrová látka třetí třídy, sešit jí věnuje tři dvoustrany,
 nejvíc ze všech témat obou dílů, a celá se odehraje uvnitř existujícího závodu.
-Potřebuje jediný nový vstupní prvek, druhé políčko na zbytek.
+Potřebovala jediný nový vstupní prvek, druhé políčko na zbytek.
 
 Sešit ji staví v pořadí, které stojí za to zachovat: vyznačení násobků dělitele
 na číselné ose, výpočet podílu a zbytku, obrácená úloha na doplnění dělence,
 slovní úloha, kde je zbytek smyslem zadání. Dělitele bere po dvojicích 2 a 3,
 4 a 5, 6 a 7, 8 a 9, pak 10 a nakonec smíšené opakování, což je hotová osnova
-pro pět podkapitol nebo pět tratí.
+pro pět kbelíků, a přesně tak jsou udělané: `R_BUCKETS`.
 
-Co je k tomu potřeba: klíč příkladu `r{dělenec}x{dělitel}`, vstupní prvek `pad2`
-se dvěma políčky, rozšíření `poolKeys()` o `divrem`, doplnění kapitoly 27 v
-`src/curricula.js` a texty ve třech jazycích. Typická chyba je zbytek větší nebo
-rovný děliteli, na to má chybová hláška reagovat konkrétně.
+**Hotovo je:** trať `divrem` s hlavičkou klíče `r`, klíč po dělitelích `r2` až
+`r10` místo vyčíslitelných faktů (přes pět set klíčů), `divrem` v `poolKeys()`,
+kapitola 27 v `src/curricula.js`, texty ve třech jazycích včetně slov mezi
+políčky, a dvě vlastní chybové hlášky: zbytek větší nebo rovný děliteli dostane
+`divremTooBig`, zbytek správný a podíl špatný `divremQuotient`. Podrobnosti
+v oddílu 4.
+
+**Zbylé dvě úlohy kapitoly se nedělaly a je to schválně.** Doplnění dělence ze
+zadaného podílu a zbytku (`div_remainder_inv`) je obrácená úloha nad týmiž
+klíči, tedy varianta jako doplňování chybějícího členu, ne rodina; slovní úloha
+se zbytkem patří podle oddílu 4b do dílny, ne do závodu.
 
 **Porovnávání zůstává poslední úmyslně.** `cmp` a `pick` vypadají jako levný
 způsob, jak odemknout hodně naráz, ale změřeno to nesedí, jsou to tři kapitoly
@@ -2245,21 +2321,26 @@ třech jazycích v `src/i18n.js`.
 **Délku otázky řešit nemusíš**, `questionSize()` ji měří sama a dlouhý řádek
 dostane menší písmo; od řetězce tří čísel to platí pro každou rodinu. Co stojí
 za kontrolu na obrázku, je jen to, jestli se nejdelší zadání té rodiny opravdu
-vejde na 360 px.
+vejde na 360 px. Rodina se dvěma políčky si musí říct o příplatek, viz oddíl 7;
+nejširší řádek, který dnes hra kreslí, je pořád nejdelší převod
+(`240 měsíců = ▢ let`, 332 px z 339 na telefonu na výšku ve třetím ročníku),
+dělení se zbytkem je s 294 px česky a 313 px německy pod ním.
 
 **V `tests/items.test.js`:** export nových symbolů v `module.exports` na konci
 skládaného zdroje, řádek do tabulky `RANGE`, klíče do seznamu `keys` i do množiny
 `VALID` a vlastní okruh, který ověří, že každý kbelík dělá to, co slibuje.
 
 **V `tests/flow.test.js` sedí natvrdo tahle čísla** a každá nová trať je posune.
-Od kroku B0 se měří zvlášť složená a rozbalená mapa, viz oddíl 7d, a od D3
-platí tahle: třeťák má složeno 17 různých cest a 19 míst (1 dveře, 17 tratí
-letoška, dílna) a rozbaleno 24 cest a 26 míst, za dveřmi má 7 tratí; druhák má
+Od kroku B0 se měří zvlášť složená a rozbalená mapa, viz oddíl 7d, a od E1
+platí tahle: třeťák má složeno 18 různých cest a 20 míst (1 dveře, 18 tratí
+letoška, dílna) a rozbaleno 25 cest a 27 míst, za dveřmi má 7 tratí; druhák má
 18 míst bez dveří a bez milníku a k tomu dveře dopředu; prvňák má 8 a dveře
-zpátky nemá; čtvrťák vidí celou mapu, tedy 25 míst a žádné dveře ani milník.
+zpátky nemá; čtvrťák vidí celou mapu, tedy 26 míst a žádné dveře ani milník.
 Dál sedí počet tratí v ukázce druhého ročníku (10) a počet zamčených kapitol
-třetí třídy (8 z 33). Krok D4 mapu neposunul, protože varianta vlastní trať
-nemá; posunul jen ten poslední počet, z devíti na osm.
+třetí třídy (7 z 33). Krok D4 mapu neposunul, protože varianta vlastní trať
+nemá; posunul jen ten poslední počet, z devíti na osm. Krok E1 posunul obojí:
+`divrem` je třetiročníková trať, takže se mapa druháka ani prvňáka nehnula,
+a kapitola 27 dostala generátor, takže zamčených je sedm.
 
 **Krok H mapu taky neposunul a posunul zato garáž.** Startovních závodníků je
 sedm místo šesti (přibyla kačenka) a dvě místa, která počítají závodníky profilu
@@ -2343,17 +2424,26 @@ a šestým testovým souborem) a **celý krok D**: D1 (pořadí operací, trať 
 D2 (kulatá čísla, trať `tens`), D3 (převody jednotek, trať `units`) a D4
 (chybějící člen, varianta bez vlastní trati). **Hotový je i celý krok H**, tedy
 gumová kačenka s pěti vrstvami výstroje a osmadvacet zvířat, v osmi commitech;
-učiva se netýká a na mapu nesáhl. Nejbližší je krok E, tedy nové
-vstupní prvky, počínaje `pad2` a dělením se zbytkem. Z rozhodnutí
+učiva se netýká a na mapu nesáhl. **Hotový je i krok E1**, tedy vstupní prvek
+`pad2` a rodina dělení se zbytkem, ve dvou commitech. Nejbližší je zbytek
+kroku E: E2 (`pad3` a rozklad trojciferného čísla), E3 (`pick`) a E4 (`cmp`).
+Z rozhodnutí
 v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
 nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px), R5 (měřítka
-písma 1,25 / 1,12 / 1,04 / 1,0), R3 (chybějící člen pod původním klíčem)
-a R10 (překreslit dnešních dvanáct zvířat, ale bez změny identity Lupi
-a Hvězdíka), všechna podle doporučení. R1 (žebřík minulých
+písma 1,25 / 1,12 / 1,04 / 1,0), R3 (chybějící člen pod původním klíčem),
+R10 (překreslit dnešních dvanáct zvířat, ale bez změny identity Lupi
+a Hvězdíka) a R2 (dělení se zbytkem jako rodina po dělitelích `r2` až `r10`),
+všechna podle doporučení. R1 (žebřík minulých
 let) je odložené a po B0b už není naléhavé, viz hlavička. Nová je **R11**,
 tedy počet dlaždic v garáži, viz oddíl 9 plánu.
 
-**Co je čerstvě hotové a nesmí se rozbít.** Chybějící člen je varianta, ne
+**Co je čerstvě hotové a nesmí se rozbít.** Odpověď smí mít víc než jedno
+políčko: `RUN.typed` je pole, jakmile jich je víc, sahá se na něj jen přes
+`typedAt()` a spol., a `check` porovnává hodnoty zvlášť, nikdy je neslepuje do
+jednoho čísla (E1). Dělení se zbytkem má klíč po dělitelích, staví se
+konstrukcí pozpátku (podíl, zbytek, teprve dělenec), zbytek je menší než
+dělitel proto, že jinde být nemůže, a beze zbytku vyjde pevná pětina příkladů
+ve všech kbelících (E1, oddíl 4). Chybějící člen je varianta, ne
 rodina: klíč se nemění, variantu si vyžádá kapitola a předává ji jediné místo,
 větev `school` v `buildRun()`, takže se nikdy nedostane do šampionátu ani do
 trati "co ti nejde", a obalit se dá jen prostý početní řádek, takže ciferník
@@ -2389,12 +2479,12 @@ ročníku (4b).
 > subagentovi, než půjdeš dál. Když subagent hlásí rozpor s plánem, rozhodni
 > autonomně podle plánu.
 >
-> Dneska chci krok E, tedy nové vstupní prvky, počínaje `pad2` a dělením se
-> zbytkem; E1 rozděl na dva subagenty, jak říká oddíl 10 plánu, nejdřív dvě
-> políčka `pad2` a pak generátor. Každý subagent má vlastní commit.
+> Dneska chci zbytek kroku E, tedy E2 (`pad3` a rozklad trojciferného čísla,
+> kapitola 21), E3 (`pick`, sudá a lichá, kapitola 6) a E4 (`cmp`,
+> porovnávání, kapitoly 22 a 17); E1, tedy `pad2` a dělení se zbytkem, je
+> hotové. Každý subagent má vlastní commit.
 > Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentovi
-> v zadání, u E1 hlavně R2 (rodina po dělitelích `r2` až `r10`); R1 (žebřík
-> minulých let) zatím nedělej.
+> v zadání; R1 (žebřík minulých let) zatím nedělej.
 >
 > Každá nová rodina si vyrenderuje své čtyři palety a prohlédne je na obrázku
 > podle oddílu 2; `convert` nekreslí přechody, takže se pozadí skládá zvlášť.
@@ -2412,8 +2502,8 @@ ročníku (4b).
 > Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
 > které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
 > hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
-> úkolem byl zbytek kroku E, a ověř, že subagenti označili hotové kroky
-> v `docs/PLAN.md`.
+> úkolem byl krok F (slovní úlohy v dílně), a ověř, že subagenti označili
+> hotové kroky v `docs/PLAN.md`.
 
 ### Prompt pro autonomní dokončení celého plánu
 

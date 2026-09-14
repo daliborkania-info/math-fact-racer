@@ -32,6 +32,11 @@
  *   divTens  [bucket ids]         and by a round ten, and the same
  *                                 products read backwards. Two fields
  *                                 for the same reason as past the tables
+ *   divrem [bucket ids]           1..5, dividing with something left
+ *                                 over, the divisors in the pairs the
+ *                                 books take them in. One field like the
+ *                                 units: a chapter that divides with a
+ *                                 remainder has no second direction
  *   units [bucket ids]            1..4, converting units by the kind of
  *                                 measure: length, weight, volume, time.
  *                                 One field, unlike past the tables: a
@@ -66,6 +71,7 @@ const ALL_X = ["1","2","3","4"];
 const ALL_O = ["o1","o2","o3"];
 const ALL_Z = ["1","2","3","4"];
 const ALL_G = ["1","2"];
+const ALL_R = ["1","2","3","4","5"];
 
 const CURRICULA = [
   {
@@ -195,7 +201,10 @@ const CURRICULA = [
       {n:24, name:"Přičítání a odčítání do tisíce",       src:"8. díl, s. 8–27",  pool:{as1000:ALL_K}},
       {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29", pool:{as1000:ALL_K, as100:ALL_H}},
       {n:26, name:"Zaokrouhlování na desítky a stovky",   src:"8. díl, s. 30",    pool:{round:ALL_O}},
-      {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35", pool:null},
+      // three double pages, the longest chapter of either part, and it
+      // walks the divisors in pairs, which is exactly the five buckets
+      {n:27, name:"Dělení se zbytkem",                    src:"8. díl, s. 30–35",
+             pool:{divrem:ALL_R}},
       // the chapter teaches both directions on the same four pages, so
       // unlike chapters 14 and 16 it asks for both fields at once
       {n:28, name:"Násobení a dělení 10 a 100",           src:"8. díl, s. 36–39",

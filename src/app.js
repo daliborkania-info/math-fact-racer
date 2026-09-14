@@ -376,6 +376,29 @@ const G_BUCKETS = [
 ];
 const tensKeys = ids => ids.map(b => "gm" + b).concat(ids.map(b => "gd" + b));
 
+/* Dividing with something left over, chapter 27 of the eighth part. It
+   is the longest chapter of the two parts, three double pages, and the
+   workbook builds it by marking the multiples of one divisor on a number
+   line and then asking how far past the last one the number sits.
+   The key is the divisor, `r2` to `r10`, and the dividend is drawn.
+   Writing every fact out instead, `r{dividend}x{divisor}`, would be over
+   five hundred keys: a collection with five hundred places and a Leitner
+   box that never fills up. What the box is worth remembering is how the
+   child gets on with dividing by seven, and that is one key, not fifty.
+   The buckets are the pairs of divisors the workbook takes them in, two
+   and three first and ten last, so one bucket is one double page. */
+const R_BUCKETS = [
+  {id:"1", div:[2,3]},
+  {id:"2", div:[4,5]},
+  {id:"3", div:[6,7]},
+  {id:"4", div:[8,9]},
+  {id:"5", div:[10]}
+];
+const divremKeys = ids => ids.reduce((out, id) => {
+  const b = R_BUCKETS.find(x => x.id === id);
+  return b ? out.concat(b.div.map(d => "r" + d)) : out;
+}, []);
+
 /* Converting units, one bucket per kind of measure. The seventh part
    introduces length, weight and volume (chapter 17) and then the clock
    and the calendar (chapter 18), and the eighth part converts them
@@ -493,6 +516,12 @@ const TRACKS = [
   // same skill as multiplying past the tables read one step further, so
   // the road keeps the two of them side by side
   {id:"tens", op:"tens",                                  env:"mulberry", grade:3},
+  // dividing with something left over is chapter 27, one page before the
+  // round tens of chapter 28, and it is the last step of the dividing
+  // the child has been doing since d1, so the road keeps the whole
+  // multiplying and dividing run of the third year together rather than
+  // dropping it between the rounding and the thousand
+  {id:"divrem",op:"divrem",                               env:"flaxfield",grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
   // the units are chapters 18 and 29, but the conversions themselves
@@ -597,6 +626,10 @@ function poolKeys(spec){
   // one field, not two: a chapter that converts converts both ways, and
   // the bucket is the kind of measure rather than the direction
   if(spec.units) out.push(...unitKeys(spec.units));
+  // one field like the units, and for the same reason: a chapter that
+  // divides with a remainder divides by whatever its divisors are, and
+  // the bucket is the pair of divisors rather than a direction
+  if(spec.divrem) out.push(...divremKeys(spec.divrem));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.ops) out.push(...opsKeys(spec.ops));
@@ -640,7 +673,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxoqzgu";
+const FAMILY_HEADS = "pnckxoqzgur";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -689,6 +722,7 @@ function trackKeys(p, tr){
   if(tr.op === "beyond")return beyondKeys(X_BUCKETS.map(b => b.id));
   if(tr.op === "tens")  return tensKeys(G_BUCKETS.map(b => b.id));
   if(tr.op === "units") return unitKeys(U_BUCKETS.map(b => b.id));
+  if(tr.op === "divrem")return divremKeys(R_BUCKETS.map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.map(b => b.id));
   if(tr.op === "ops")   return opsKeys(Z_BUCKETS.map(b => b.id));
@@ -721,6 +755,10 @@ function tensStage(p){ return stageIndex(p, i => tensKeys([G_BUCKETS[i].id]), G_
 // which kind of measure is being converted: length, then weight, then
 // volume, then time, which is the order the books take them in
 function unitsStage(p){ return stageIndex(p, i => unitKeys([U_BUCKETS[i].id]), U_BUCKETS.length); }
+// which pair of divisors is being shared out with something left over;
+// both divisors of a pair rise and fall together, because the workbook
+// puts them on one double page and they are one step
+function divremStage(p){ return stageIndex(p, i => divremKeys([R_BUCKETS[i].id]), R_BUCKETS.length); }
 // how far the rounding has got: tens under a hundred, then tens of a
 // three digit number, then hundreds
 function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
@@ -744,6 +782,7 @@ function reachedKeys(p, tr){
   if(tr.op === "beyond") return beyondKeys(X_BUCKETS.slice(0, beyondStage(p) + 1).map(b => b.id));
   if(tr.op === "tens") return tensKeys(G_BUCKETS.slice(0, tensStage(p) + 1).map(b => b.id));
   if(tr.op === "units") return unitKeys(U_BUCKETS.slice(0, unitsStage(p) + 1).map(b => b.id));
+  if(tr.op === "divrem") return divremKeys(R_BUCKETS.slice(0, divremStage(p) + 1).map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.slice(0, chainStage(p) + 1).map(b => b.id));
   if(tr.op === "ops") return opsKeys(Z_BUCKETS.slice(0, opsStage(p) + 1).map(b => b.id));
@@ -843,6 +882,11 @@ function unlockState(p, tr){
     // splitting 12 × 3 into 30 + 6 only works once the table underneath
     // is there, and the track teaches dividing as well as multiplying
     case "beyond": return (m("d1") >= .6 || many("d1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_d1"))};
+    // sharing out with something left over is dividing plus a take-away,
+    // and the take-away only makes sense once the child knows where the
+    // multiples of the divisor are; that is the dividing track, so this
+    // one hangs on the same gate as splitting a number apart does
+    case "divrem": return (m("d1") >= .6 || many("d1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_d1"))};
     // putting a nought back on 3 × 4 is the step straight after splitting
     // 12 × 3 apart, so this one waits on the track that teaches the
     // splitting rather than on the table underneath it
@@ -968,6 +1012,7 @@ function rawItem(key){
   if(head === "k") return thousandItem(key);
   if(head === "x") return beyondItem(key);
   if(head === "g") return tensItem(key);
+  if(head === "r") return divremItem(key);
   if(head === "u") return unitItem(key);
   if(head === "o") return roundItem(key);
   if(head === "q") return chainItem(key);
@@ -1104,6 +1149,53 @@ function tensItem(key){
   const byRound = b === "1" || Math.random() < .5;
   return {key, kind:"divten", maxLen:4,
           text:(x * r) + " : " + (byRound ? r : x), answer: byRound ? x : r};
+}
+
+/* Dividing with something left over, the first question answered in two
+   boxes. The quotient and the remainder are two numbers and are kept as
+   two: squashed into one they could not tell a badly written answer from
+   a badly worked out one, which is the whole reason `pad2` exists.
+   Built by construction like every family since the thousand, and the
+   other way round from how the question reads. The quotient is drawn
+   first and what is left over second, out of a range that cannot reach
+   the divisor, and the dividend is then worked out from the two. The
+   remainder is therefore smaller than the divisor because there is
+   nowhere else for it to be, rather than because an overflow was trimmed
+   back afterwards, and a bucket or a divisor the family does not have
+   says so out loud instead of handing back a made up example.
+   The quotient goes up to ten, which is as far as the workbook marks the
+   multiples of the divisor on its number line, so the dividend stays
+   inside what the child can already count.
+
+   How often it comes out even is a decision, not an accident, and the
+   workbook teaches both, so neither can be left out. Drawing the
+   remainder evenly from nought upwards would make one division in two
+   come out even when dividing by two and one in ten when dividing by
+   ten, so every bucket would teach a different lesson. It is a fixed one
+   in five instead, the same in all of them: often enough that "nothing
+   is left over" stays a real answer the child has to notice and write a
+   nought for, rare enough that what is left over is still what the
+   chapter is about. */
+const DIVREM_EVEN = .2;
+function divremItem(key){
+  const d = Number(key.slice(1));
+  if(!R_BUCKETS.some(b => b.div.includes(d))) noBucket("divremItem", key);
+  const q = ri(1, 10);
+  const r = Math.random() < DIVREM_EVEN ? 0 : ri(1, d - 1);
+  return {
+    key, kind:"divrem", divisor: d,
+    text:(q * d + r) + " : " + d,
+    answer:[q, r],
+    input:"pad2",
+    // the quotient reaches ten, what is left over never reaches ten
+    maxLen:[2, 1],
+    /* The words between and after the boxes, finished text on the item
+       for the same reason the unit is: the language does not change in
+       the middle of a race. What the two boxes are for is said in words
+       above the keypad, so the short form in the row never has to be
+       guessed at. */
+    sep: t("divremSep"), tail: t("divremTail"), ask:"divremAsk"
+  };
 }
 
 /* Converting units, the first question whose answer wears a unit. The
@@ -1533,6 +1625,10 @@ function buildRun(p, tr){
     const ui = unitsStage(p);
     const review = unitKeys(U_BUCKETS.slice(0, ui).map(b => b.id));
     keys = focusAndReview(p, unitKeys([U_BUCKETS[ui].id]), review, n, 2);
+  } else if(tr.op === "divrem"){
+    const ri2 = divremStage(p);
+    const review = divremKeys(R_BUCKETS.slice(0, ri2).map(b => b.id));
+    keys = focusAndReview(p, divremKeys([R_BUCKETS[ri2].id]), review, n, 2);
   } else if(tr.op === "round"){
     const oi = roundStage(p);
     const review = roundKeys(O_BUCKETS.slice(0, oi).map(b => b.id));
@@ -1870,7 +1966,12 @@ function thresholds(p, item){
   // a conversion is read, decided and only then counted: the child has
   // to work out which way round the unit goes before a single number is
   // multiplied, which is longer than any one step of arithmetic here
+  // sharing out with something left over is a table fact, then a take
+  // away, and then two numbers keyed into two boxes with a hop between
+  // them, so it needs as much room as deciding which half of a line goes
+  // first: two steps of thinking and more keying than anything else here
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
+               : item.kind === "divrem" ? 2.4
                : item.kind === "unit" ? 2.2
                : item.kind === "multten" || item.kind === "divten" ? 1.8
                : item.kind === "ops" ? 2.4
@@ -3972,6 +4073,12 @@ const ENVS = Object.assign({
   // magenta is the one place in the wheel that is still free, and next
   // to either of those two it cannot be taken for the same place.
   mulberry: pal(318, 330, 50, "flower", {sat:40}),
+  // A field of flax in flower for the circuit. The violets that are
+  // already there are a dusky amethyst plateau and a strong magenta
+  // moor; this one is a clean blue violet, lighter than either, and the
+  // nearest of them is forty eight away. Nothing else on the circuit is
+  // a blue that is not water or sky.
+  flaxfield: pal(240, 252, 60, "flower", {sat:50}),
   dunes:  pal( 46,  90, 72, "shell"),
   shore:  pal( 38, 190, 76, "shell"),
   palms:  pal(105, 150, 58, "leaf"),
@@ -4016,6 +4123,14 @@ const ENVS = Object.assign({
   // floor stays green underneath, the same trick as the heath and the
   // bluebells, except this one is pale where all of those are strong
   tr_frost:  pal(198, 130, 84, "crystal", {h2:120, l2:52, sat:28}),
+  // a field of poppies: the flowers make the top of the slope and the
+  // ground stays green underneath, the same trick as the heath, the
+  // bluebells and the orchard. Those three are purple, blue and pink;
+  // this is the red one, and it is a true red rather than the warm
+  // orange the first draft had, because that one read as one more autumn
+  // slope beside the quarry and the orchard. Fifty four from the
+  // orchard, which is the nearest of the four
+  tr_poppies:pal(  0, 118, 56, "flower", {h2:115, l2:44, sat:62}),
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
@@ -4058,6 +4173,12 @@ const ENVS = Object.assign({
   // a horizon of snow. The fog has the same two ends of the wheel but
   // all the colour washed out of it, so the two cannot be confused
   sk_snow:   pal(210, 200, 46, "crystal", {h2:195, l2:92, sat:60}),
+  // a copper horizon under a deep blue: the sky world's four warm
+  // horizons (the sunset, the dawn, the dust and the ember) are all
+  // pale gold and all sit high up the lightness scale, so the one thing
+  // still free on that side of the wheel is a dark one. This is it,
+  // fifty five from the dust, which is the nearest of the four
+  sk_copper: pal(204,  18, 44, "stone",   {h2: 12, l2:46, sat:54}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
   dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
@@ -4099,7 +4220,15 @@ const ENVS = Object.assign({
   // under the ice: the water is the darkest of all of them and the floor
   // the palest, which is the widest gap between the two ends anywhere in
   // the deep and is what makes it read as light coming through ice
-  dp_ice:    pal(204, 206, 34, "crystal", {h2:200, l2:84, sat:40})
+  dp_ice:    pal(204, 206, 34, "crystal", {h2:200, l2:84, sat:40}),
+  // a bank of orange sponges: dark water over a warm floor that is
+  // lighter than the water above it, which only the ice does otherwise,
+  // and the ice is blue where this is amber. The deep's other warm
+  // floors are the coral, the reef and the vent, all of them darker and
+  // redder; the first draft sat close enough to the coral to read as the
+  // same place, so the water went deeper and the floor warmer. The
+  // nearest is now the ice, forty six away
+  dp_sponges:pal(214,  26, 34, "shell",   {h2: 28, l2:70, sat:60})
 });
 
 /* --- worlds ---
@@ -4120,7 +4249,7 @@ const WORLDS = [
         a20:"tr_brook", bridge:"tr_log",
         t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
         d1:"tr_burrow", chain:"tr_reeds", ops:"tr_hollow", beyond:"tr_field",
-        tens:"tr_bells", round:"tr_quarry", units:"tr_frost",
+        tens:"tr_bells", divrem:"tr_poppies", round:"tr_quarry", units:"tr_frost",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
@@ -4128,7 +4257,7 @@ const WORLDS = [
         a20:"sk_breeze", bridge:"sk_arch",
         t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
         d1:"sk_void", chain:"sk_haze", ops:"sk_gate", beyond:"sk_dust",
-        tens:"sk_afterglow", round:"sk_storm", units:"sk_snow",
+        tens:"sk_afterglow", divrem:"sk_copper", round:"sk_storm", units:"sk_snow",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
@@ -4136,7 +4265,7 @@ const WORLDS = [
         a20:"dp_lagoon", bridge:"dp_arch",
         t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
         d1:"dp_abyss", chain:"dp_shoal", ops:"dp_weed", beyond:"dp_sand",
-        tens:"dp_urchins", round:"dp_cavern", units:"dp_ice",
+        tens:"dp_urchins", divrem:"dp_sponges", round:"dp_cavern", units:"dp_ice",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -5603,6 +5732,17 @@ function missHint(item, typed){
     if(gm === m && (gh - h === 1 || h - gh === 1)) return t("clockMissHour");
     if(gh === m && gm === h) return t("clockMissSwap");
   }
+  /* The two mistakes worth naming when something is left over. Leaving
+     as much as the divisor or more means one more of it still fits in,
+     which is the mistake the whole chapter is about; getting what is
+     left over right but the quotient wrong is miscounting how many times
+     it goes in, and saying so beats repeating the answer. Both need the
+     divisor, which is why they had to wait for the generator. */
+  if(item.kind === "divrem" && Array.isArray(typed)){
+    const q = parseInt(typed[0], 10), r = parseInt(typed[1], 10);
+    if(!isNaN(r) && r >= item.divisor) return t("divremTooBig", item.divisor);
+    if(!isNaN(q) && r === item.answer[1] && q !== item.answer[0]) return t("divremQuotient", item.divisor);
+  }
   return t("wrongHint");
 }
 
@@ -6348,6 +6488,11 @@ const O_EX = {"1":"47→50", "2":"347→350", "3":"347→300"};
 const U_EX = {"1":"3 m→cm", "2":"1 kg→g", "3":"4 l→dl", "4":"2 h→min"};
 const Q_EX = {"1":"7+5-3", "2":"30+40-20", "3":"47+5-3"};
 const Z_EX = {"1":"4+3×5", "2":"(4+3)×5", "3":"300+7×8", "4":"500-(40+30)"};
+// one tile per divisor rather than per bucket, because the divisor is
+// what the key remembers and a parent wants to see that it is the
+// sevens that are sticking
+const R_EX = {"2":"9:2", "3":"14:3", "4":"23:4", "5":"36:5", "6":"40:6",
+              "7":"52:7", "8":"60:8", "9":"75:9", "10":"87:10"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
 const divEx = ex => { const [a,b] = ex.split("×").map(Number); return (a*b) + ":" + b; };
 const bucketTiles = (ex, plusKey, minusKey) => Object.keys(ex)
@@ -6382,6 +6527,11 @@ function heatSpecs(p){
     ({label: G_EX["m" + b.id], keys:["gm" + b.id], tip: G_EX["m" + b.id]}))
     .concat(G_BUCKETS.map(b =>
     ({label: G_EX["d" + b.id], keys:["gd" + b.id], tip: G_EX["d" + b.id]})))));
+  // sharing out with something left over is the last of the dividing, so
+  // it closes the multiplying and dividing run, exactly where it closes
+  // it on the map
+  push("divrem", heatStrip(t("trk_divrem"), 3, Object.keys(R_EX).map(d =>
+    ({label: R_EX[d], keys:["r" + d], tip: R_EX[d]}))));
   // the first year is one block of six ranges rather than six blocks of
   // one, because a parent reads it as one ladder
   push("a3", heatStrip(t("heatBands"), 6, BANDS.map(b =>

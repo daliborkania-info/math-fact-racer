@@ -24,7 +24,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | --- | --- | --- |
 | `pad` | číselná klávesnice, jedna odpověď | hotovo |
 | `coins` | mince se skládají na pult, odpověď je hrst mincí | hotovo, jen v dílně |
-| `pad2` | dvě políčka vedle sebe, podíl a zbytek | k dodělání |
+| `pad2` | dvě políčka vedle sebe, podíl a zbytek | hotovo |
 | `pad3` | tři políčka, stovky a desítky a jednotky | k dodělání |
 | `cmp` | tři velká tlačítka `<` `=` `>` | k dodělání |
 | `pick` | dvě až čtyři velká tlačítka s volbami | k dodělání |
@@ -51,7 +51,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `order_of_ops` | pořadí operací bez závorek a se závorkami, čtyři kbelíky: bez závorek a se závorkami, do sta a do tisíce | `pad` | 0 až 1000 | hotovo |
 | `mult_beyond` | násobení mimo rozsah malé násobilky, 12 × 3, čtyři kbelíky podle toho, co se rozkládá | `pad` | do 1000 | hotovo |
 | `div_beyond` | dělení mimo rozsah malé násobilky, 56 : 4, totéž sezení pozpátku | `pad` | do 1000 | hotovo |
-| `div_remainder` | dělení se zbytkem | `pad2` | dělitel 2 až 10 | **pilot** |
+| `div_remainder` | dělení se zbytkem, pět kbelíků po dvojicích dělitelů | `pad2` | dělitel 2 až 10 | hotovo |
 | `div_remainder_inv` | doplnění dělence ze zadaného podílu a zbytku | `pad` | dělitel 2 až 10 | nové |
 | `mult_div_10_100` | násobení a dělení deseti a stem | `pad` | do 1000 | hotovo |
 | `mult_round` | násobení číslem končícím nulami a dělení takového čísla | `pad` | do 1000 | hotovo |
@@ -108,11 +108,25 @@ kterékoli z nich napíše generátor, je potřeba se podívat na pár stran.
 
 ## Poznámky ke generátorům
 
-**`div_remainder`.** Klíč příkladu `r{dělenec}x{dělitel}`, odpověď je dvojice
-podíl a zbytek. Dělitel 2 až 10, dělenec do desetinásobku dělitele. Vynechávat
-případy se zbytkem nula není potřeba, naopak patří dovnitř, protože rozlišit
-"beze zbytku" je součást dovednosti. Typická chyba je zbytek větší nebo rovný
-děliteli, na to má chybová hláška reagovat konkrétně.
+**`div_remainder`, hotovo 14. září 2026.** Odpověď je dvojice podíl a zbytek,
+dělitel 2 až 10, dělenec do desetinásobku dělitele.
+
+**Klíč je dělitel, `r2` až `r10`, ne vyčíslitelný fakt.** Původní návrh
+`r{dělenec}x{dělitel}` by dal přes pět set klíčů, sbírku s pěti sty místy
+a Leitnerovu krabičku, která se nikdy nenaplní. Dovednost, kterou má krabička
+pamatovat, je "jak mu jde dělení sedmi se zbytkem", a to je jeden klíč; dělenec
+se proto losuje. Kbelíky jsou dvojice dělitelů, jak je bere sešit (2 a 3, 4 a 5,
+6 a 7, 8 a 9, 10), tedy jeden kbelík je jedna dvoustrana.
+
+Vynechávat případy se zbytkem nula není potřeba, naopak patří dovnitř, protože
+rozlišit "beze zbytku" je součást dovednosti. **Jak často vyjdou, je ale
+rozhodnutí, ne náhoda:** rovnoměrně losovaný zbytek by u dvojky vyšel nulový
+v polovině případů a u desítky v desetině, takže by každý kbelík učil něco
+jiného. Je to proto pevná pětina ve všech kbelících.
+
+Typická chyba je zbytek větší nebo rovný děliteli a má vlastní hlášku, která
+říká, že se tam vejde ještě jedna celá; druhou má správný zbytek s chybným
+podílem.
 
 **`add_sub_20`, obor do dvaceti bez přechodu, hotovo.** Klíč `a{a}p{b}` měl
 původně oba sčítance do deseti, takže 12 + 3 se nedalo zapsat vůbec, a celý

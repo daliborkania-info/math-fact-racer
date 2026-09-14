@@ -11,7 +11,7 @@ zjištění je odkaz. Kde přímý důkaz není, je to napsané.
 
 ## 1. Stav
 
-Pětadvacet tratí ve čtyřech světech, 86 hratelných kapitol z 95, dvě zakázky
+Šestadvacet tratí ve čtyřech světech, 87 hratelných kapitol z 95, dvě zakázky
 v dílně, tři jazyky. K tomu sedmatřicet závodníků a 65 dílů kačenčí výstroje.
 První ročník je pokrytý celý, druhý skoro celý.
 

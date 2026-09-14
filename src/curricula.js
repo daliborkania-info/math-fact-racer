@@ -37,6 +37,11 @@
  *                                 books take them in. One field like the
  *                                 units: a chapter that divides with a
  *                                 remainder has no second direction
+ *   split [bucket ids]            1..3, splitting a number into what
+ *                                 each of its places is worth, by which
+ *                                 places the number has: two digits,
+ *                                 then a three digit number ending in a
+ *                                 whole ten, then all three at once
  *   units [bucket ids]            1..4, converting units by the kind of
  *                                 measure: length, weight, volume, time.
  *                                 One field, unlike past the tables: a
@@ -72,6 +77,7 @@ const ALL_O = ["o1","o2","o3"];
 const ALL_Z = ["1","2","3","4"];
 const ALL_G = ["1","2"];
 const ALL_R = ["1","2","3","4","5"];
+const ALL_V = ["1","2","3"];
 
 const CURRICULA = [
   {
@@ -194,12 +200,16 @@ const CURRICULA = [
       {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45", pool:{units:["4"]}},
       {n:19, name:"Zlomky, úvodní seznámení",             src:"7. díl, s. 46–47", pool:null},
       {n:20, name:"Opakování celého pololetí",            src:"7. díl, s. 48–49", pool:{mult:ALL_TABLES, div:ALL_TABLES, as100:ALL_H}},
-      {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:null},
+      // the book derives the thousand here, from the hundred the class
+      // already has, and the pages walk the places of a number before a
+      // single sum is done in the new range
+      {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:{split:ALL_V}},
       {n:22, name:"Porovnávání čísel do tisíce",          src:"8. díl, s. 4–5",   pool:null},
       {n:23, name:"Sčítání a odčítání po stovkách",       src:"8. díl, s. 6–7",   pool:{as1000:["b1"]}},
       // the book walks these twenty pages through all six steps in order
       {n:24, name:"Přičítání a odčítání do tisíce",       src:"8. díl, s. 8–27",  pool:{as1000:ALL_K}},
-      {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29", pool:{as1000:ALL_K, as100:ALL_H}},
+      {n:25, name:"Opakování oboru do tisíce",            src:"8. díl, s. 28–29",
+             pool:{as1000:ALL_K, as100:ALL_H, split:ALL_V}},
       {n:26, name:"Zaokrouhlování na desítky a stovky",   src:"8. díl, s. 30",    pool:{round:ALL_O}},
       // three double pages, the longest chapter of either part, and it
       // walks the divisors in pairs, which is exactly the five buckets

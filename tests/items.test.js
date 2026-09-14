@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,R_BUCKETS,divremKeys,divremStage,V_BUCKETS,splitKeys,splitStage,V_PLACE,questionHTML,keypadHTML,defaultCheck,slotsOf,rightAnswerText,missHint,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -37,6 +37,7 @@ const RANGE={
   g:[1,1000],      // kulata cisla, soucin nikdy pres tisic
   u:[1,1000],      // prevody jednotek, odpoved vzdycky cele cislo do tisice
   r:[0,10],        // deleni se zbytkem: podil 1 az 10, zbytek 0 az 9
+  v:[1,900],       // rozklad cisla: jednotky 1 az 9 az po stovky 100 az 900
   c:[100,2359]     // hodiny, hodina krat sto plus minuty
 };
 let bad=0,checked=0;
@@ -52,6 +53,7 @@ A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.divremKeys(A.R_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
+A.splitKeys(A.V_BUCKETS.map(b=>b.id)).forEach(k=>keys.push(k));
 A.clockKeys().forEach(k=>keys.push(k));
 const say=(k,m)=>{bad++; if(bad<8) console.log('  !!  '+m+'   ['+k+']');};
 // odpoved je vetsinou jedno cislo, ale vstupni prvek se dvema policky
@@ -77,7 +79,7 @@ for(const k of keys) for(let i=0;i<40;i++){
   if(/[+\-×:]/.test(it.text) && !it.unit && odp.length===1){
     const val=eval(it.text.replace(/×/g,'*').replace(/:/g,'/'));
     if(val!==it.answer){say(k,'zadani nesedi s odpovedi: '+it.text+' je '+val+', ma byt '+it.answer);continue;}
-  } else if(!it.svg && !it.ask && odp.length===1){
+  } else if(!it.svg && !it.ask){
     // otazka musi byt sama o sobe srozumitelna: bud je to vypocet, nebo
     // obrazek, nebo je slovy receno, co se ma udelat. Holy pocet bez
     // zadani by dite jen koukalo na cislo a hadalo.
@@ -90,8 +92,8 @@ for(const k of keys) for(let i=0;i<40;i++){
   const vedle=odp.some((a,j)=>it.check(wrote(it,odp.map((b,l)=>l===j?b+1:b))));
   if(vedle){say(k,'otazka uznala i spatnou odpoved vedle '+odp.join(' '));continue;}
   // a musi jit zadat na tom, co nabizi
-  if(it.input!=='pad'&&it.input!=='pad2'){say(k,'nezname vstupni zarizeni '+it.input);continue;}
-  if(it.input==='pad2'&&odp.length!==2){say(k,'dve policka, ale '+odp.length+' hodnot v odpovedi');continue;}
+  if(['pad','pad2','pad3'].indexOf(it.input)<0){say(k,'nezname vstupni zarizeni '+it.input);continue;}
+  if(A.slotsOf(it)!==odp.length){say(k,A.slotsOf(it)+' policek, ale '+odp.length+' hodnot v odpovedi');continue;}
   const siroka=odp.some((a,j)=>String(a).length>mlen(it,j));
   if(siroka){say(k,'odpoved '+odp.join(' ')+' se nevejde do policka o '+it.maxLen+' znacich');}
 }
@@ -976,6 +978,7 @@ A.opsKeys(A.Z_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.tensKeys(A.G_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.unitKeys(A.U_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.divremKeys(A.R_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
+A.splitKeys(A.V_BUCKETS.map(b=>b.id)).forEach(k=>VALID.add(k));
 A.clockKeys().forEach(k=>VALID.add(k));
 
 let curBad=0, chapters=0, playable=0, tiny=0;
@@ -1784,6 +1787,107 @@ if(A.poolKeys(zbKap27.pool).join()!=='r2,r3,r4,r5,r6,r7,r8,r9,r10'){
 if(A.poolSize(['r7'])!==4){zbStBad++;console.log('  !!  klic deleni se zbytkem se nepocita jako rodina');}
 console.log('chyb ve stupnich deleni se zbytkem:',zbStBad);
 
+// 7u. rozklad cisla: kazdy kbelik rozepisuje prave ty rady, ktere slibuje,
+// a kazda cast je cislice krat to, co dane misto v cisle plati
+//
+// Overuje se ze zadani, ne z toho, co si generator mysli: z radku se
+// precte cislo, z odpovedi jeho casti, a musi platit, ze se casti
+// sectou na to cislo a ze kazda z nich je jedna cislice nasobena stem,
+// deseti nebo jednickou. Nula v zadnem rade byt nesmi, protoze pro ni
+// neni policko: kniha pise 407 jako 400 + 7, tedy o jednu cast min.
+let rzBad=0, rzN=0;
+const rzsay=m=>{rzBad++; if(rzBad<8) console.log('  !!  '+m);};
+const RAD={h:100,t:10,o:1};
+for(const b of A.V_BUCKETS) for(const key of A.splitKeys([b.id])){
+  const videno=b.places.map(()=>new Set());
+  for(let i=0;i<600;i++){
+    const it=A.itemFromKey(key); rzN++;
+    const casti=it.answer;
+    if(!Array.isArray(casti)||casti.length!==b.places.length){
+      rzsay('kbelik '+b.id+' nerozepsal '+b.places.length+' casti: '+JSON.stringify(casti));break;}
+    // kolik policek radek ma, rika material, ne rodina
+    if(A.slotsOf(it)!==casti.length){rzsay('policek je '+A.slotsOf(it)+', casti '+casti.length);break;}
+    if(it.input!=='pad'+casti.length){rzsay('vstupni prvek nesedi s poctem casti: '+it.input);break;}
+    if(!/^\d+$/.test(it.text)){rzsay('zadani neni cislo: '+it.text);break;}
+    if(+it.text!==casti.reduce((a,x)=>a+x,0)){
+      rzsay('casti se nesectou na cislo v zadani: '+it.text+' != '+casti.join(' + '));break;}
+    let chyba=false;
+    b.places.forEach((pl,j)=>{
+      const cifra=casti[j]/RAD[pl];
+      if(!Number.isInteger(cifra)||cifra<1||cifra>9){
+        rzsay('cast '+casti[j]+' neni jednociferny nasobek '+RAD[pl]);chyba=true;}
+      if(String(casti[j]).length!==(Array.isArray(it.maxLen)?it.maxLen[j]:it.maxLen)){
+        rzsay('policko '+j+' nema misto presne na '+casti[j]);chyba=true;}
+      videno[j].add(cifra);
+    });
+    if(chyba)break;
+    if(it.sep!=='+'){rzsay('mezi policky nestoji plus: '+it.sep);break;}
+    if(it.tail){rzsay('za poslednim polickem nema nic stat');break;}
+    if(!it.ask){rzsay('nerika se slovy, co se ma udelat');break;}
+    // kazda hodnota zvlast: zkazit jednu staci na to, aby odpoved neprosla
+    const psane=casti.map(String);
+    if(!it.check(psane)){rzsay('otazka neuznala vlastni odpoved: '+it.text);break;}
+    let prosla=false;
+    casti.forEach((c,j)=>{ if(it.check(psane.map((x,l)=>l===j?String(c+1):x))) prosla=true; });
+    if(prosla){rzsay('spatna cast prosla: '+it.text);break;}
+    if(it.check(it.text)){rzsay('slepene cislo proslo misto casti: '+it.text);break;}
+    // cely radek se precte zpatky i s plusy mezi polickami
+    const cely=A.rightAnswerText(it);
+    if(cely!==it.text+' = '+casti.join(' + ')){rzsay('cela odpoved se necte jako radek: '+cely);break;}
+  }
+  videno.forEach((v,j)=>{ if(v.size!==9) rzsay('klic '+key+' pouzil v '+j+'. policku jen '+v.size+' cislic z devíti'); });
+}
+// napsat cislici misto toho, kolik doopravdy plati, ma vlastni hlasku
+const rzIt=A.itemFromKey('v3');
+const rzCifry=rzIt.answer.map(c=>String(c)[0]);
+const rzH1=A.missHint(rzIt,rzCifry);
+const rzH0=A.missHint(A.itemFromKey('m6x7'),'41');
+if(rzH1===rzH0) rzsay('napsane cislice misto radu nedostaly vlastni hlasku');
+if(rzH1.indexOf(String(rzIt.answer[0]))<0) rzsay('hlaska nerekne, co do policka patri: '+rzH1);
+// a spravna odpoved zadnou hlasku o cislicich nedostane
+if(A.missHint(rzIt,rzIt.answer.map(String))!==rzH0) rzsay('spravne napsane rady dostaly hlasku o cislicich');
+// neznamy kbelik pada nahlas, nevyrobi nahradni priklad
+let rzPadl=false; try{A.itemFromKey('v9');}catch(e){rzPadl=true;}
+if(!rzPadl) rzsay('neznamy kbelik rozkladu nespadl');
+console.log('zkontrolovano rozkladu cisla:',rzN,'| chyb:',rzBad);
+
+// 7v. rozklad se stupnuje po radech a stoji na stovce, ne na tisicovce
+let rzStBad=0;
+const rzg=A.newProfile('V1'); A.DB.profiles=[rzg]; A.DB.current=rzg.id;
+if(A.splitStage(rzg)!==0){rzStBad++;console.log('  !!  zacatecnik nezacina dvojcifernym cislem');}
+const rzRun0=A.buildRun(rzg,A.trackById('split'));
+if(rzRun0.length!==20){rzStBad++;console.log('  !!  spatna delka zavodu s rozkladem',rzRun0.length);}
+for(const it of rzRun0) if(it.key!=='v1'){rzStBad++;console.log('  !!  zacatecnik dostal vetsi cisla',it.text);break;}
+A.splitKeys(['1']).forEach(k=>rzg.facts[k]={lv:5,reps:9,ok:9,bad:0,best:2000,seen:Date.now()});
+if(A.splitStage(rzg)!==1){rzStBad++;console.log('  !!  po zvladnuti dvojciferneho se neposunul');}
+const rzRun1=A.buildRun(rzg,A.trackById('split'));
+const rzFocus=rzRun1.filter(it=>it.key==='v2').length;
+if(rzFocus<rzRun1.length*0.5){rzStBad++;console.log('  !!  druhy kbelik nenese zavod',rzFocus+'/'+rzRun1.length);}
+if(rzFocus===rzRun1.length){rzStBad++;console.log('  !!  chybi opakovani prvniho kbeliku');}
+// posledni kbelik je jediny, ktery se odpovida do tri policek
+const rzTri=A.itemFromKey('v3'), rzDve=A.itemFromKey('v2');
+if(A.slotsOf(rzTri)!==3){rzStBad++;console.log('  !!  treti kbelik nema tri policka');}
+if(A.slotsOf(rzDve)!==2){rzStBad++;console.log('  !!  druhy kbelik nema dve policka');}
+// stoji to na stovce, ne na tisicovce: je to zeme, na ktere tisicovka
+// teprve stoji, takze na ni nikdy nesmi cekat
+const rzu=A.newProfile('V2'); A.DB.profiles=[rzu]; A.DB.current=rzu.id;
+if(A.unlockState(rzu,A.trackById('split')).open){rzStBad++;console.log('  !!  rozklad je otevreny hned od zacatku');}
+A.trackKeys(rzu,A.trackById('a100')).forEach(k=>rzu.facts[k]={lv:2,reps:6,ok:5,bad:1,best:3000,seen:Date.now()});
+if(!A.unlockState(rzu,A.trackById('split')).open){rzStBad++;console.log('  !!  rozjeta stovka neotevrela rozklad');}
+// na mape stoji tesne pred tisicovkou, tedy v poradi knihy
+const rzPor=A.TRACKS.map(x=>x.id);
+if(rzPor.indexOf('split')!==rzPor.indexOf('a1000')-1){
+  rzStBad++;console.log('  !!  rozklad nestoji na mape tesne pred tisicovkou');}
+// kapitola 21 uz generator ma, kapitola 25 rozklad opakuje
+const rzCur3=A.CURRICULA.find(c=>c.id==='nns-matysek-3');
+if(!A.isPlayable(rzCur3.chapters.find(x=>x.n===21))){rzStBad++;console.log('  !!  kapitola 21 porad nejde vybrat');}
+if(A.poolKeys(rzCur3.chapters.find(x=>x.n===21).pool).join()!=='v1,v2,v3'){
+  rzStBad++;console.log('  !!  kapitola 21 nema vsechny rady');}
+if(A.poolKeys(rzCur3.chapters.find(x=>x.n===25).pool).indexOf('v3')<0){
+  rzStBad++;console.log('  !!  opakovani oboru do tisice zapomnelo na rozklad');}
+if(A.poolSize(['v3'])!==4){rzStBad++;console.log('  !!  klic rozkladu se nepocita jako rodina');}
+console.log('chyb ve stupnich rozkladu:',rzStBad);
+
 // 7k. dlouhe zadani si rekne o mensi pismo, kratke ne
 let qhBad=0;
 const qh=k=>A.questionHTML(A.itemFromKey(k));
@@ -1980,7 +2084,32 @@ if(!A.defaultCheck(42)('42')||A.defaultCheck(42)('43')) p2say('jedna hodnota se 
 // a cela odpoved se precte zpatky jako radek, ne jako dve cisla za sebou
 const celyR=A.rightAnswerText(dvoj);
 if(celyR!=='36 : 5 = 7 (zb. 1)') p2say('cela odpoved se necte jako radek: '+celyR);
-console.log('chyb ve vstupnim prvku se dvema polickami:',p2Bad);
+/* Tri policka nejsou treti cesta, jen dalsi radek v tabulce SLOTS,
+   takze se tady overuje totez, co u dvou: radek, klavesnice a porovnani.
+   Polozka je skutecna, z rodiny rozkladu cisla. */
+const troje=A.itemFromKey('v3');
+if(A.slotsOf(troje)!==3) p2say('pad3 nema tri policka, ale '+A.slotsOf(troje));
+const h3=A.questionHTML(troje);
+const i3=['id="abox"','id="abox2"','id="abox3"'].map(x=>h3.indexOf(x));
+if(i3.some(x=>x<0)) p2say('radek nema vsechna tri policka: '+h3);
+if(!(i3[0]<i3[1]&&i3[1]<i3[2])) p2say('policka nestoji v poradi stovky, desitky, jednotky');
+// slovo mezi policky stoji v kazde mezere, tedy dvakrat
+if((h3.match(/<span class="qsep">\+<\/span>/g)||[]).length!==2) p2say('plus nestoji v obou mezerach: '+h3);
+if(!/data-slot="2"/.test(h3)) p2say('treti policko nerekne, ktere je');
+if(!/class="answerbox active" id="abox"/.test(h3)) p2say('neni videt, do ktereho ze tri policek se pise');
+if(!/class="answerbox active" id="abox3"/.test(A.questionHTML(troje,2))) p2say('prepnuti na treti policko se neoznacilo');
+if(!/q-boxes q-boxes3/.test(h3)) p2say('radek se tremi polickami nerekne, kolik jich ma: '+h3);
+if(!/q-xlong/.test(h3)) p2say('nejsirsi radek hry si nerekl o nejmensi pismo: '+h3);
+const kp3=A.keypadHTML(troje);
+if(!/data-input="pad3"/.test(kp3)) p2say('klavesnice se nepredstavila jako pad3');
+if(!/class="keypad keypad-pad3"/.test(kp3)) p2say('klavesnice pro tri policka nema vlastni rozvrzeni');
+if((kp3.match(/data-k="/g)||[]).length!==13) p2say('klavesnice pro tri policka nema trinact klaves');
+if(!/data-k="next"/.test(kp3)) p2say('chybi klavesa na prepnuti policka');
+const c3=A.defaultCheck([300,40,7]);
+if(!c3(['300','40','7'])) p2say('tri hodnoty se neuznaly');
+if(c3(['300','40','8'])||c3(['30','40','7'])) p2say('spatna z tri hodnot prosla');
+if(c3(['300','40'])||c3('300407')) p2say('slepene nebo chybejici hodnoty prosly');
+console.log('chyb ve vstupnim prvku s vic policky:',p2Bad);
 
 // 7m. varianta jede pres skolni trat a pres kapitolu, nikam jinam
 let mvTrBad=0;

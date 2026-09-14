@@ -1132,12 +1132,57 @@ dovednost, a sbírka trati má devět míst místo pěti set.
 celá chyba. Změna by sáhla na datový model a na migrační test, takže se
 v E1 nedělá; zapsat do `PROJECT-STATE.md` jako známé zjednodušení.
 
-### E2. `pad3` a `place_value`, kapitola 21
+### E2. `pad3` a `place_value`, kapitola 21 — HOTOVO 14. září 2026
 
 Tři políčka stovky, desítky, jednotky; `pad3` je rozšíření `pad2` na `n`
 políček, takže `RUN.typed` jako pole a `RUN.slot` z E1 se použijí beze změny.
 Pozor na jméno třídy: `.keypad-pad3` je vstupní prvek, `.keypad-pad` je
 číselná klávesnice, viz past v `PROJECT-STATE.md`, oddíl 7.
+
+**`pad3` opravdu byl jen další řádek v `SLOTS`**, ne třetí cesta. E1 nechal
+počet políček na otázce, takže se doplnilo `pad3: 3` a zobecnilo se to, co
+ještě počítalo do dvou: `questionHTML()` kreslí políčka ve smyčce a slovo
+`sep` staví do **každé** mezery mezi nimi, `keypadHTML()` se ptá `SLOTS[kind] > 1`
+místo na jméno `pad2` a třídu si skládá z toho jména, a `questionSize()` počítá
+`sep` tolikrát, kolikrát se kreslí. Přeskok, mazání přes hranici, šipka dokola,
+klepnutí do políčka, `defaultCheck()` i `rightAnswerText()` se nezměnily vůbec.
+Klávesnice `.keypad-pad3` sdílí rozvržení s `.keypad-pad2`, tedy čtyři sloupce;
+`.keypad-pad` zůstává jméno rozvržení číselné klávesnice, past z oddílu 7
+`PROJECT-STATE.md` se neporušila.
+
+**Co se proti plánu upřesnilo.**
+
+- **Směr otázky je rozklad, ne skládání**, a je to hlavní rozhodnutí kroku.
+  `300 + 40 + 7 = ▢` jde odpovědět přečtením číslic v pořadí, v jakém stojí,
+  bez jediné myšlenky na to, kolik která platí, a na klávesnici je to navíc
+  sčítání do tisíce, které učí `a1000`. `347 = ▢ + ▢ + ▢` to neumožňuje.
+  Třetí možnost, tedy "kolik má stovek, desítek a jednotek" s odpovědí 3, 4, 7,
+  je to čtení bez počítání a taky se nedělá. Sešit píše řádek stejným směrem.
+- **Kbelíky jdou po řádech, ne po velikosti čísla**, jak sešit obor odvozuje:
+  `v1` dvojciferné (`47 = 40 + 7`), `v2` trojciferné zakončené celou desítkou
+  (`350 = 300 + 50`), `v3` všechny tři řády (`347 = 300 + 40 + 7`). Kolik
+  políček řádek má, tedy plyne z učiva: první dva kbelíky se odpovídají do dvou
+  políček, poslední do tří. Klíče `v1` až `v3`, hlavička `v`, trať `split`.
+- **Každé místo, které má políčko, se losuje od jedné do devíti**, takže v čísle
+  není nula tam, kde na ni čeká políčko. Omezení s důvodem, ne ořez: kniha píše
+  407 jako 400 + 7, tedy o jeden sčítanec míň, a tři políčka by chtěla nulu,
+  kterou nikdo nepíše.
+- **Na mapě stojí těsně před `a1000` a otevírá se od stovky na 0,5**, stejně
+  jako zaokrouhlování. Kapitola 21 je v knize před kapitolami 23 až 25 a v oboru,
+  který dítě nepotkalo, se nedá sčítat, takže tahle trať je zem, na které
+  tisícovka teprve stojí, a nikdy nesmí čekat na ni.
+- **Násobitel prahů je 2,2**: samotná úvaha je pravidlo jako u kulatých čísel,
+  ale píše se až do tří políček s přeskoky, takže je to spíš o ťukání.
+- **Nejširší řádek hry se tímhle krokem změnil.** `987 = 900 + 80 + 7` vyšel
+  s vyplněnými políčky na 340 px z 339 na telefonu 375 px ve třetím ročníku,
+  tedy o pixel mimo. Řeší to vlastní třída `.q-boxes3` (mezera 4 px místo 5,
+  odsazení v políčku 5 px místo 8), se kterou je to 322 px ve třetím ročníku
+  a 312 ve čtvrtém. Nic se neuřízlo ani předtím, řádek se zalomí, ale řádek,
+  který se zalomí bez důvodu, dítě čte dvakrát. Trať patří třetímu ročníku,
+  takže ji prvňák ani druhák nedostane; ve větším písmu druhé třídy, kam se dá
+  dostat jen přes školní trať s nastavenou kapitolou 21, se zalomí (342 px).
+- Chyba rodiny má vlastní hlášku: napsat číslici místo toho, kolik doopravdy
+  platí, jmenuje obojí (`splitDigits`).
 
 ### E3. `pick`, `parity` a `digit_count`, kapitola 6
 

@@ -25,7 +25,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `pad` | číselná klávesnice, jedna odpověď | hotovo |
 | `coins` | mince se skládají na pult, odpověď je hrst mincí | hotovo, jen v dílně |
 | `pad2` | dvě políčka vedle sebe, podíl a zbytek | hotovo |
-| `pad3` | tři políčka, stovky a desítky a jednotky | k dodělání |
+| `pad3` | tři políčka, stovky a desítky a jednotky | hotovo |
 | `cmp` | tři velká tlačítka `<` `=` `>` | k dodělání |
 | `pick` | dvě až čtyři velká tlačítka s volbami | k dodělání |
 | `clock` | ciferník k přečtení, odpověď na `pad` | hotovo |
@@ -55,7 +55,7 @@ do dílny, protože je to rozvaha, ne vybavení.
 | `div_remainder_inv` | doplnění dělence ze zadaného podílu a zbytku | `pad` | dělitel 2 až 10 | nové |
 | `mult_div_10_100` | násobení a dělení deseti a stem | `pad` | do 1000 | hotovo |
 | `mult_round` | násobení číslem končícím nulami a dělení takového čísla | `pad` | do 1000 | hotovo |
-| `place_value` | rozklad trojciferného čísla na stovky, desítky, jednotky | `pad3` | 100 až 999 | nové |
+| `place_value` | rozklad čísla na stovky, desítky a jednotky, tři kbelíky podle toho, které řády číslo má | `pad2` a `pad3` | 11 až 999 | hotovo |
 | `add_sub_1000` | sčítání a odčítání do tisíce, šest stupňů podle toho, co se přičítá a jestli se přechází přes stovku | `pad` | 0 až 1000 | hotovo |
 | `time_elapsed` | kolik minut nebo hodin uplynulo | `pad` | do 24 h | nové |
 | `time_convert` | převody jednotek času | `pad` | sekundy až roky, do 1000 | hotovo |
@@ -127,6 +127,31 @@ jiného. Je to proto pevná pětina ve všech kbelících.
 Typická chyba je zbytek větší nebo rovný děliteli a má vlastní hlášku, která
 říká, že se tam vejde ještě jedna celá; druhou má správný zbytek s chybným
 podílem.
+
+**`place_value`, hotovo 14. září 2026.** Otázka je číslo a odpověď je to, kolik
+platí jednotlivá jeho místa, tedy `347 = 300 + 40 + 7` do tří políček.
+
+**Směr je rozklad, ne skládání, a je to celé rozhodnutí téhle rodiny.**
+Obráceně, tedy `300 + 40 + 7 = ▢`, se dá odpovědět přečtením číslic v pořadí,
+v jakém stojí, aniž by dítě vědělo, kolik která platí, a na klávesnici je to
+navíc sčítání do tisíce, které už učí `add_sub_1000`. Při rozkladu to nejde:
+čtyřku uprostřed musí dítě vrátit jako čtyřicet, a přesně o tom kapitola je
+a přesně z toho se později žije při písemném sčítání. Ptát se místo toho
+"kolik má stovek, desítek a jednotek" s odpovědí 3, 4, 7 je zase jen to čtení
+bez počítání, takže to rodina nedělá. Sešit píše řádek stejným směrem.
+
+**Kbelíky jdou po řádech tak, jak sešit obor odvozuje**: nejdřív dvojciferné
+číslo, tedy stovka, na které dítě stojí, pak trojciferné zakončené celou
+desítkou, a nakonec všechny tři řády naráz. Kolik políček řádek má, tedy plyne
+z učiva, ne z rodiny: první dva kbelíky se odpovídají do dvou, poslední do tří.
+
+**Každé místo, které má políčko, se losuje od jedné do devíti**, takže v čísle
+nikdy není nula tam, kde na ni čeká políčko. Je to omezení s důvodem, ne ořez:
+kniha píše 407 jako 400 + 7, tedy o jeden sčítanec míň, a řádek se třemi
+políčky by po dítěti chtěl nulu, kterou nikdo nepíše.
+
+Typická chyba je napsat číslici místo toho, kolik doopravdy platí, a má vlastní
+hlášku, která jmenuje obojí.
 
 **`add_sub_20`, obor do dvaceti bez přechodu, hotovo.** Klíč `a{a}p{b}` měl
 původně oba sčítance do deseti, takže 12 + 3 se nedalo zapsat vůbec, a celý

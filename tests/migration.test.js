@@ -51,6 +51,15 @@ function fillFacts(tag){
       if(a>1) out['d'+a+'x'+b]={lv:1,reps:3,ok:2,bad:1,best:4300,seen:1757000000000};
     }
   }
+  if(tag==='stovka-jen-nacata'){
+    // cela stovka nacata a nic vic: deset klicu na urovni 1 dela
+    // zvladnuti 1/3, tedy pod branou 0,5, kterou se otevira trat
+    // Po částech, a s ni i retezec a zaokrouhlovani. Nova verze ji tedy
+    // nesmi otevrit sama. Stovku samotnou ma profil v `opened`, protoze
+    // si ji uz driv zaslouzene otevrel a zavodil na ni.
+    for(const b of ['h1','h2','h3','h4','h5']) for(const h of ['p','n'])
+      out[h+b]={lv:1,reps:3,ok:2,bad:1,best:4800,seen:1757000000000};
+  }
   if(tag==='tisicovka-jen-nacata'){
     // cela stovka na urovni 4, tedy zaslouzene otevrena tisicovka, ale
     // sama tisicovka je jen nacata: dvanact klicu na urovni 1 dela

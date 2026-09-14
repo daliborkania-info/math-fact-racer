@@ -58,15 +58,15 @@ ok('kacenka je mezi startovnimi zdarma', DBg().profiles[0].owned.includes('du_ka
 // mapa treťáka zacina tam, kde je letos trida, ale ucivo, ktere se letos
 // opakuje, zustava pred dvermi: treti rocnik zacina opakovanim nasobilky
 // (kapitoly 2 a 3 sedmeho dilu), stovky (kapitola 1) a hodin (kapitola 4).
-// V hlavnim bloku je tedy 18 trati: t1 az t5, d1, a100, clock, osm trati
+// V hlavnim bloku je tedy 19 trati: t1 az t5, d1, a100, clock, devet trati
 // tretiho rocniku a k tomu sampionat se slabymi misty. Plus dilna a dvere
-// zpatky je to 20 mist; cest je 18, dilna ani dvere nahled nemaji.
-// Osm trati tretiho rocniku je od kroku E1: retezec, poradi operaci,
-// za nasobilkou, kulata cisla, deleni se zbytkem, zaokrouhlovani,
-// tisicovka a prevody. Cislo se posunulo vedome, viz tests/README.md.
+// zpatky je to 21 mist; cest je 19, dilna ani dvere nahled nemaji.
+// Devet trati tretiho rocniku je od kroku E2: retezec, poradi operaci,
+// za nasobilkou, kulata cisla, deleni se zbytkem, zaokrouhlovani, rozklad
+// cisla, tisicovka a prevody. Cislo se posunulo vedome, viz tests/README.md.
 const cesty=()=>new Set(qa('.thumb svg path').map(p=>p.getAttribute('d'))).size;
-ok('slozena mapa treťáka ma 18 ruznych cest', cesty()===18, cesty()+' okruhu');
-ok('slozena mapa ma 20 mist', qa('.world .place').length===20, qa('.world .place').length+' mist');
+ok('slozena mapa treťáka ma 19 ruznych cest', cesty()===19, cesty()+' okruhu');
+ok('slozena mapa ma 21 mist', qa('.world .place').length===21, qa('.world .place').length+' mist');
 // tohle je ta regrese, kvuli ktere thru vzniklo: treťák si sedne k mape
 // a rovnou ma na co klepnout, nemusi hledat dvere do minulych let
 ok('mala nasobilka je treťákovi na mape a otevrena',
@@ -104,7 +104,7 @@ ok('trat hodin je v hlavnim bloku, uz ne za dvermi',
    /Hodiny/.test(txt()) && qa('[data-act="play"]').some(b=>b.dataset.id==='clock'));
 const predRozbalenim=JSON.stringify(DBg());
 click(q('[data-act="back"]'));
-ok('rozbaleni ukazalo minule roky', cesty()===25, cesty()+' okruhu');
+ok('rozbaleni ukazalo minule roky', cesty()===26, cesty()+' okruhu');
 ok('za dvermi je sest oboru prvniho rocniku a most', qa('.place.past').length===7 && qa('.place.peek').length===0,
    qa('.place.past').length+' trati z minulych let');
 ok('minule roky jsou plne, ne carkovane jako ukazka', /Do tří/.test(txt())
@@ -112,9 +112,9 @@ ok('minule roky jsou plne, ne carkovane jako ukazka', /Do tří/.test(txt())
 ok('o rozbaleni neni v ulozenych datech ani slovo', JSON.stringify(DBg())===predRozbalenim);
 ok('predel je videt i s rozbalenou mapou', qa('.milestone').length===1);
 // mapa uz neni svisly seznam: mista lezi podel cesty a zamcene je vidět taky
-// rozbaleno je to porad 27 mist, jen jich vic patri do hlavniho bloku:
-// 1 dvere + 7 minulych + 18 letosnich + dilna
-ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===27 && qa('.worldroad path').length>0,
+// rozbaleno je to porad 28 mist, jen jich vic patri do hlavniho bloku:
+// 1 dvere + 7 minulych + 19 letosnich + dilna
+ok('mista lezi podel cesty, ne pod sebou', qa('.world .place').length===28 && qa('.worldroad path').length>0,
    qa('.world .place').length+' mist');
 ok('kazde misto ma svou polohu v mape', qa('.place').every(el=>/left:/.test(el.getAttribute('style')||'')));
 ok('zamcena trat je videt, jen tmava', qa('.place.locked').length>0 && /Šestky a sedmičky/.test(txt()),
@@ -253,7 +253,7 @@ ok('nabidka kapitol ma 33 polozek', qa('[data-act="chaptersel"] option').length=
    qa('[data-act="chaptersel"] option').length+' kapitol');
 const opts=()=>qa('[data-act="chaptersel"] option');
 const zamcene=()=>opts().filter(o=>o.disabled).map(o=>+o.value);
-ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===7, zamcene().length+' zamcenych z 33');
+ok('kapitoly bez generatoru jsou nevybratelne', zamcene().length===6, zamcene().length+' zamcenych z 33');
 ok('scitani a odcitani vice cisel se da vybrat', !zamcene().includes(11));
 // deleni se zbytkem umime od kroku E1, tedy kapitola 27; zlomky porad ne
 ok('deleni se zbytkem se da vybrat a zlomky zustaly zamcene',
@@ -798,12 +798,12 @@ ok('predel treťáka nese jeho rocnik', /3\. třída/.test(q('.milestone').textC
 ok('dvere rikaji, ktere roky jsou za nimi', /1\. a 2\. třída/.test(q('.place.backdoor').textContent),
    q('.place.backdoor .sub').textContent.trim());
 click(q('[data-act="back"]'));
-ok('rozbalena mapa treťáka je delsi', qa('.place:not(.peekdoor)').length===27 && /Do tří/.test(txt()),
+ok('rozbalena mapa treťáka je delsi', qa('.place:not(.peekdoor)').length===28 && /Do tří/.test(txt()),
    qa('.place:not(.peekdoor)').length+' mist');
 // prepnuti hrace mapu zase slozi, stejne jako zavreni hry
 click(q('[data-act="players"]')); click(qa('[data-act="pick"]').find(b=>b.dataset.id===prvni().id));
 ok('prepnuti hrace mapu slozilo', qa('.place.past').length===0 && qa('.place.backdoor').length===1
-   && qa('.place:not(.peekdoor)').length===20);
+   && qa('.place:not(.peekdoor)').length===21);
 
 console.log('--- druhy hrac ---');
 // mapa zadne tlacitko "mapa" nema, uz na ni stojime; ten klik navic tady test
@@ -851,11 +851,11 @@ ok('ctvrtak cte pismo v zakladni velikosti', d.documentElement.dataset.grade==='
 ok('ctvrtak nema dvere zpatky ani predel',
    qa('.place.backdoor').length===0 && qa('.milestone').length===0);
 ok('ctvrtak vidi celou mapu jako driv',
-   qa('.place').length===26 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
+   qa('.place').length===27 && /Do tří/.test(txt()) && /Hodiny/.test(txt()) && /Do tisíce/.test(txt()),
    qa('.place').length+' mist');
 ok('ctvrtak nema ani dvere dopredu, nic dalsiho neni', qa('.place.peekdoor').length===0);
 
-console.log('--- dve policka v odpovedi ---');
+console.log('--- vic policek v odpovedi ---');
 // Deleni se zbytkem jeste neexistuje, takze se vstupni prvek zkousi na
 // polozce slozene tady: zavod se rozjede jako kterykoli jiny a otazka
 // se vymeni za dvoupolickovou. Zkousi se prave to, co strojovy test nad
@@ -937,6 +937,50 @@ key('ok');
 await wait(900);
 ok('prilis velky zbytek rekne, ze se tam vejde jeste jedna',
    /vejde se tam ještě jedna celá/.test(txt()), txt().slice(0,140));
+click(q('[data-act="quit"]')); click(q('[data-yes]'));
+
+// a tri policka, od kroku E2, na rodine rozkladu cisla. Kolik policek
+// radek ma, rika material: prvni dva kbeliky rozepisuji cislo na dva
+// rady a treti na tri, takze se tady vezme otazka z posledniho kbeliku.
+ev('startRun(P(),"split")');
+ev("RUN.items[RUN.idx]=itemFromKey('v3');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render()");
+const bx3=()=>d.getElementById('abox3');
+ok('zavod s rozkladem kresli tri policka', !!bx(0)&&!!bx(1)&&!!bx3()&&/^\d+$/.test(qtext()), qtext());
+ok('mezi polickami stoji plus, a to dvakrat',
+   (q('#qbox').innerHTML.match(/qsep/g)||[]).length===2, q('#qbox').textContent);
+ok('klavesnice pro tri policka ma taky trinact klaves',
+   qa('#keypad [data-k]').length===13 && q('#keypad [data-k="next"]')!==null,
+   qa('#keypad [data-k]').length+' klaves');
+ok('nad klavesnici stoji slovy, na co se cislo rozepisuje', /Rozepiš/.test(txt()));
+// policko je siroke presne na to, co do nej patri: tri cislice, dve, jedna
+key('9'); key('0'); key('0');
+ok('trojciferne policko preda klavesy az po treti cislici',
+   bx(0).textContent==='900' && ev('RUN.slot')===1, 'policko '+ev('RUN.slot'));
+key('8'); key('0');
+ok('druhe policko preda klavesy tretimu', ev('RUN.slot')===2, 'policko '+ev('RUN.slot'));
+key('7');
+ok('treti policko se napise a klavesy uz nikam nejdou',
+   bx3().textContent==='7' && ev('RUN.slot')===2 && ev('JSON.stringify(RUN.typed)')==='["900","80","7"]');
+key('del'); key('del');
+ok('mazani pres hranici se vrati i ze tretiho policka do druheho',
+   bx3().textContent==='?' && bx(1).textContent==='8' && bx(1).classList.contains('active'),
+   ev('JSON.stringify(RUN.typed)'));
+key('next'); key('next');
+ok('sipka objede vsechna tri policka dokola', bx(0).classList.contains('active'));
+// spravna odpoved z generatoru posune zavodnika
+ev("(function(){const it=RUN.items[RUN.idx];RUN.typed=it.answer.map(String);RUN.slot=2;paintBoxes(it);})()");
+const rozDist=ev('RUN.dist');
+key('ok');
+await wait(900);
+ok('spravny rozklad posunul zavodnika', ev('RUN.dist')>rozDist, rozDist+' -> '+ev('RUN.dist'));
+// napsat cislice misto toho, kolik doopravdy plati, ma vlastni hlasku
+ev("RUN.items[RUN.idx]=itemFromKey('v3');RUN.typed=blankTyped(RUN.items[RUN.idx]);RUN.slot=0;RUN.state='ask';render();"
+  +"RUN.typed=RUN.items[RUN.idx].answer.map(a=>String(a)[0]);paintBoxes(RUN.items[RUN.idx])");
+key('ok');
+// hlaska se cte drive, nez chybnou otazku po 1,9 s vystrida dalsi
+await wait(400);
+ok('napsane cislice misto radu dostanou vlastni hlasku', /doopravdy/.test(txt()), txt().slice(0,160));
+await wait(1700);
 click(q('[data-act="quit"]')); click(q('[data-yes]'));
 
 console.log('--- sirsi okno ---');

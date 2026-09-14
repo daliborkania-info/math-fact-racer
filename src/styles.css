@@ -391,6 +391,18 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
    for no reason is a question a child reads twice. */
 .question.q-boxes{gap:5px}
 .question.q-boxes .answerbox{min-width:calc(52px * var(--tx));padding:0 8px}
+/* Three boxes, which is what splitting a number into what its places
+   are worth needs, and which is now the widest row of all: one box more
+   than the rule above was written for and one word more between them,
+   and the first of the three holds three digits where a remainder holds
+   one. Measured on a 375 px phone in the third year, where this
+   material lives, "987 = 900 + 80 + 7" comes to 340 px of the 339 there
+   are; closing the gaps and the padding a little further brings it to
+   316 and leaves room to spare. It would wrap rather than be cut off
+   either way, but a row that wraps for no reason is a row a child reads
+   twice. */
+.question.q-boxes3{gap:4px}
+.question.q-boxes3 .answerbox{padding:0 5px}
 /* the words between and after the boxes, "(zb." and ")", read at the
    size of the rest of the line; only the wide letter spacing of the
    numbers would look wrong around a bracket */
@@ -412,27 +424,31 @@ html[data-o="wide"] .hud{flex-wrap:nowrap}
 /* The answering surface. One kind exists so far, the number pad; each
    further one brings its own modifier class, so the layout lives with
    the input element rather than in the screen around it.
-   Do not call this pad3: in docs/kurikulum/TEMATA.md that name is taken
-   by the input element with three boxes for hundreds, tens and units. */
+   Do not call this pad3: in docs/kurikulum/TEMATA.md that name belongs
+   to the input element with three boxes for hundreds, tens and ones,
+   which exists, is answered on the four column pad below, and has the
+   class `.keypad-pad3`. The layout of the number keys is `.keypad-pad`
+   whatever the question is answered into. */
 .keypad{
   flex:none;display:grid;gap:8px;
   padding:8px 14px calc(14px + var(--safe-b));background:var(--shell);
 }
 .keypad-pad{grid-template-columns:repeat(3,1fr)}
-/* The pad for an answer with two boxes. The digits keep their three
+/* The pad for an answer with more than one box, two of them or three.
+   The digits keep their three
    columns and the rubber, the arrow and the tick move into a fourth, so
    the surface is still four rows tall: a race that mixes the two pads
    must not change height under the child's thumb. The zero takes the
    whole bottom row of the digits, which is where a hand looks for it
    anyway. Placed in the flow, not by hand: the keys are written in
    reading order and the two spans below do the rest. */
-.keypad-pad2{grid-template-columns:repeat(4,1fr)}
+.keypad-pad2,.keypad-pad3{grid-template-columns:repeat(4,1fr)}
 /* the tick is two rows tall, so it fills the corner the zero leaves and
    is the easiest thing on the pad to hit; the height has to give way
    for that, because a key otherwise stands at a height of its own and
    would not stretch */
-.keypad-pad2 .key.act{grid-row:auto / span 2;height:auto}
-.keypad-pad2 .key.zero{grid-column:span 3}
+.keypad-pad2 .key.act,.keypad-pad3 .key.act{grid-row:auto / span 2;height:auto}
+.keypad-pad2 .key.zero,.keypad-pad3 .key.zero{grid-column:span 3}
 .key.nx{background:var(--shell-2);box-shadow:0 4px 0 #c3cde5}
 .key.nx:active{box-shadow:0 1px 0 #c3cde5}
 /* The key grows with the letters on it: a larger digit in a key of the
@@ -475,7 +491,8 @@ html[data-o="wide"] .keypad{grid-area:keypad;min-height:0;align-self:stretch}
    that may come later: .keypad is the surface, .keypad-pad is this one
    layout of it */
 html[data-o="wide"] .keypad-pad{grid-template-rows:repeat(4,minmax(calc(38px * var(--tx)),1fr))}
-html[data-o="wide"] .keypad-pad2{grid-template-rows:repeat(4,minmax(calc(38px * var(--tx)),1fr))}
+html[data-o="wide"] .keypad-pad2,
+html[data-o="wide"] .keypad-pad3{grid-template-rows:repeat(4,minmax(calc(38px * var(--tx)),1fr))}
 /* The floor of a key grows with the digit on it here too, which is what
    step C4 asks for and what the flat 40 px of step C1 took away again.
    It starts lower than the 50 px of a screen held upright, because on its

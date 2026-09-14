@@ -58,7 +58,7 @@ Sloupec **témata** odkazuje na `id` z [TEMATA.md](TEMATA.md). Téma uvedené ja
 
 | # | kapitola | strany | témata |
 | --- | --- | --- | --- |
-| 21 | Vyvození číselného oboru, orientace na číselné ose | 2 až 5 | `place_value`, `number_line` |
+| 21 | Vyvození číselného oboru, orientace na číselné ose | 2 až 5 | **`place_value`**, `number_line` |
 | 22 | Porovnávání čísel do 1000 | 4, 5 | `compare_numbers`, `compare_units` |
 | 23 | Sčítání a odčítání po stovkách | 6, 7 | `add_sub_1000`, `inverse_check` |
 | 24 | Přičítání a odčítání jedno- a dvojciferných čísel | 8 až 27 | `add_sub_1000`, `number_line`, `written_add_sub` |
@@ -109,8 +109,17 @@ látka čtyř kapitol před ní položená pozpátku, takže vlastní trať nem�
 **Kapitolu 27, dělení se zbytkem, otevřel 14. září 2026 generátor
 `div_remainder`** a jezdí se na trati `divrem`, která má pět kbelíků po
 dvojicích dělitelů a na mapě stojí hned za `tens`, tedy na konci násobící
-a dělící řady; je to první rodina, která se odpovídá do dvou políček. Tím je
-třetí ročník na šestadvaceti kapitolách z třiatřiceti.
+a dělící řady; je to první rodina, která se odpovídá do dvou políček.
+
+**Kapitolu 21, obor do tisíce, otevřel 14. září 2026 generátor `place_value`**
+a jezdí se na trati `Po částech`, která rozkládá číslo na to, kolik platí
+jednotlivá jeho místa, tedy `347 = 300 + 40 + 7`. Má tři kbelíky podle toho,
+které řády číslo má, a poslední z nich je první místo ve hře, kde se odpovídá
+do tří políček. Na mapě stojí těsně před tisícovkou, protože kapitola 21 je
+v knize dřív než kapitoly 23 až 25 a v oboru, který dítě nepotkalo, se nedá
+sčítat; z téhož důvodu se otevírá od stovky, ne od tisícovky. Kapitola 25,
+opakování celého oboru, si rozklad bere taky. Tím je třetí ročník na
+sedmadvaceti kapitolách z třiatřiceti.
 
 Násobí a dělí se v `ops` jen v oboru malé násobilky a dělení vždycky vyjde
 beze zbytku; `tens` dělí sice i za ní, ale jen kulatými čísly, a `div_remainder`
@@ -119,10 +128,10 @@ dělí sice se zbytkem, ale jen v oboru do desetinásobku dělitele. Čtvrtý kb
 `500 - (40 + 30)`, ne `(300 + 60) : 4`; celé je to popsané
 v `PROJECT-STATE.md`, oddíl 4.
 
-Zamčené zůstávají kapitoly 6, 15, 17, 19, 21, 22 a 32. Kapitola 17
+Zamčené zůstávají kapitoly 6, 15, 17, 19, 22 a 32. Kapitola 17
 jednotky jen pojmenovává a porovnává, nepřevádí je, takže na ni `unit_convert`
 nestačí a čeká na `unit_pick` a `compare_units`. Zbytek čeká na další vstupní
-prvky, tedy `pad3`, `pick` a `cmp`; pořadí je
+prvky, tedy `pick` a `cmp`; pořadí je
 v `PROJECT-STATE.md`, oddíl 12b.
 
 ## Pilot, hotovo

@@ -399,6 +399,42 @@ const divremKeys = ids => ids.reduce((out, id) => {
   return b ? out.concat(b.div.map(d => "r" + d)) : out;
 }, []);
 
+/* Splitting a number into what each of its places is worth, chapter 21
+   of the third year, where the thousand is derived from the hundred the
+   child already has.
+
+   Which way round to ask it was the whole decision here, and it went to
+   the splitting rather than to the putting together. "300 + 40 + 7 = ▢"
+   can be answered by reading the digits off the screen in the order
+   they stand in, without ever knowing what any of them is worth, and on
+   a keypad it is a sum inside a thousand, which `a1000` already
+   teaches. "347 = ▢ + ▢ + ▢" cannot: the four in the middle has to be
+   given back as forty, which is the whole of what the chapter is for
+   and what carries written adding later on. Asking instead how many
+   hundreds, tens and ones there are, answered 3, 4, 7, would be the
+   reading again with the arithmetic taken out, so it is not what is
+   asked either. The workbook writes the line the same way round.
+
+   The buckets walk the places the way the book derives the range: two
+   digits first, which is the hundred the child is standing on, then a
+   three digit number that ends in a whole ten, then all three places at
+   once. How many boxes the row has therefore comes out of the material
+   rather than being fixed: the first two buckets are answered in two,
+   the last in three.
+
+   Every place that gets a box is drawn from one to nine, so a number
+   never has a nought where a box is waiting. That is a restriction with
+   a reason rather than a trim: a book writes 407 as 400 + 7, two terms
+   and not three, so a fixed row of three boxes would be asking a child
+   for a nought that nobody writes down. */
+const V_PLACE = {h: 100, t: 10, o: 1};
+const V_BUCKETS = [
+  {id:"1", places:["t","o"]},      // 47 = 40 + 7
+  {id:"2", places:["h","t"]},      // 350 = 300 + 50
+  {id:"3", places:["h","t","o"]}   // 347 = 300 + 40 + 7
+];
+const splitKeys = ids => ids.map(id => "v" + id);
+
 /* Converting units, one bucket per kind of measure. The seventh part
    introduces length, weight and volume (chapter 17) and then the clock
    and the calendar (chapter 18), and the eighth part converts them
@@ -523,6 +559,12 @@ const TRACKS = [
   // dropping it between the rounding and the thousand
   {id:"divrem",op:"divrem",                               env:"flaxfield",grade:3},
   {id:"round", op:"round",                                env:"cave",     grade:3},
+  // splitting a number into what its places are worth is chapter 21,
+  // where the book derives the thousand from the hundred, and it comes
+  // before the adding of chapters 23 to 25: a child cannot add inside a
+  // range it has not met, so the road puts it immediately in front of
+  // the thousand rather than after it
+  {id:"split",op:"split",                                 env:"barley",   grade:3},
   {id:"a1000",op:"as1000",                                env:"volcano",  grade:3},
   // the units are chapters 18 and 29, but the conversions themselves
   // live in the thousand (1 km is 1000 m), so the road puts them where
@@ -630,6 +672,9 @@ function poolKeys(spec){
   // divides with a remainder divides by whatever its divisors are, and
   // the bucket is the pair of divisors rather than a direction
   if(spec.divrem) out.push(...divremKeys(spec.divrem));
+  // one field as well: a chapter that splits a number apart has no
+  // second direction, and the bucket is which places the number has
+  if(spec.split) out.push(...splitKeys(spec.split));
   if(spec.round) out.push(...spec.round);
   if(spec.chain) out.push(...chainKeys(spec.chain));
   if(spec.ops) out.push(...opsKeys(spec.ops));
@@ -673,7 +718,7 @@ function schoolPool(p){ const ch = chapterOf(p); return ch ? poolKeys(ch.pool) :
    Buckets are the normal shape for anything that is not an enumerable
    fact, so the family test lives in one place rather than growing a
    longer condition with every new topic. */
-const FAMILY_HEADS = "pnckxoqzgur";
+const FAMILY_HEADS = "pnckxoqzgurv";
 const isFamilyKey = k => FAMILY_HEADS.includes(k[0]);
 function poolSize(keys){
   let n = 0;
@@ -723,6 +768,7 @@ function trackKeys(p, tr){
   if(tr.op === "tens")  return tensKeys(G_BUCKETS.map(b => b.id));
   if(tr.op === "units") return unitKeys(U_BUCKETS.map(b => b.id));
   if(tr.op === "divrem")return divremKeys(R_BUCKETS.map(b => b.id));
+  if(tr.op === "split") return splitKeys(V_BUCKETS.map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.map(b => b.id));
   if(tr.op === "ops")   return opsKeys(Z_BUCKETS.map(b => b.id));
@@ -759,6 +805,9 @@ function unitsStage(p){ return stageIndex(p, i => unitKeys([U_BUCKETS[i].id]), U
 // both divisors of a pair rise and fall together, because the workbook
 // puts them on one double page and they are one step
 function divremStage(p){ return stageIndex(p, i => divremKeys([R_BUCKETS[i].id]), R_BUCKETS.length); }
+// how many places of a number are being split apart: two digits first,
+// then a three digit number ending in a whole ten, then all three
+function splitStage(p){ return stageIndex(p, i => splitKeys([V_BUCKETS[i].id]), V_BUCKETS.length); }
 // how far the rounding has got: tens under a hundred, then tens of a
 // three digit number, then hundreds
 function roundStage(p){ return stageIndex(p, i => roundKeys([O_BUCKETS[i].id]), O_BUCKETS.length); }
@@ -783,6 +832,7 @@ function reachedKeys(p, tr){
   if(tr.op === "tens") return tensKeys(G_BUCKETS.slice(0, tensStage(p) + 1).map(b => b.id));
   if(tr.op === "units") return unitKeys(U_BUCKETS.slice(0, unitsStage(p) + 1).map(b => b.id));
   if(tr.op === "divrem") return divremKeys(R_BUCKETS.slice(0, divremStage(p) + 1).map(b => b.id));
+  if(tr.op === "split") return splitKeys(V_BUCKETS.slice(0, splitStage(p) + 1).map(b => b.id));
   if(tr.op === "round") return roundKeys(O_BUCKETS.slice(0, roundStage(p) + 1).map(b => b.id));
   if(tr.op === "chain") return chainKeys(Q_BUCKETS.slice(0, chainStage(p) + 1).map(b => b.id));
   if(tr.op === "ops") return opsKeys(Z_BUCKETS.slice(0, opsStage(p) + 1).map(b => b.id));
@@ -885,7 +935,7 @@ function unlockState(p, tr){
     // sharing out with something left over is dividing plus a take-away,
     // and the take-away only makes sense once the child knows where the
     // multiples of the divisor are; that is the dividing track, so this
-    // one hangs on the same gate as splitting a number apart does
+    // one hangs on the same gate as multiplying past the tables does
     case "divrem": return (m("d1") >= .6 || many("d1")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_d1"))};
     // putting a nought back on 3 × 4 is the step straight after splitting
     // 12 × 3 apart, so this one waits on the track that teaches the
@@ -895,6 +945,12 @@ function unlockState(p, tr){
     // opens earlier than the thousand does, and its own first bucket
     // keeps the child on two digit numbers until they are solid
     case "round": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
+    // what each place of a number is worth is where the book derives the
+    // thousand from the hundred, so it stands on the hundred like the
+    // rounding next to it; it is the ground the thousand is built on
+    // rather than anything built on the thousand, so it must never wait
+    // for it
+    case "split": return (m("a100") >= .5 || many("a100")) ? {open:true} : {open:false, why: t("lockFinish", t("trk_a100"))};
     // adding and taking away in one breath is the chapter right after the
     // buckets within a hundred, so it stands on the hundred exactly as
     // rounding does
@@ -1013,6 +1069,7 @@ function rawItem(key){
   if(head === "x") return beyondItem(key);
   if(head === "g") return tensItem(key);
   if(head === "r") return divremItem(key);
+  if(head === "v") return splitItem(key);
   if(head === "u") return unitItem(key);
   if(head === "o") return roundItem(key);
   if(head === "q") return chainItem(key);
@@ -1195,6 +1252,40 @@ function divremItem(key){
        above the keypad, so the short form in the row never has to be
        guessed at. */
     sep: t("divremSep"), tail: t("divremTail"), ask:"divremAsk"
+  };
+}
+
+/* Splitting a number into what each of its places is worth, the row the
+   workbook writes: "347 = 300 + 40 + 7". Why this way round and not the
+   other, and why the digits are never noughts, is written above
+   `V_BUCKETS`.
+
+   Built by construction like every family since the thousand: each
+   place the bucket asks for is drawn from one to nine and multiplied by
+   what that place is worth, and the number in the question is what they
+   come to. Nothing is worked out from a number and then trimmed, so the
+   parts cannot fail to add up and a bucket the family does not have
+   says so out loud.
+
+   The plus sign between the boxes is the same character in all three
+   languages, so unlike the words around a remainder it is written here
+   rather than looked up; what the boxes mean is said in words above the
+   keypad, where the language does belong. */
+function splitItem(key){
+  const b = V_BUCKETS.find(x => x.id === key.slice(1));
+  if(!b) noBucket("splitItem", key);
+  const parts = b.places.map(pl => ri(1, 9) * V_PLACE[pl]);
+  return {
+    key, kind:"split",
+    text: String(parts.reduce((a, x) => a + x, 0)),
+    answer: parts,
+    // how many boxes the row has comes out of the material: two places
+    // are answered in two boxes, three in three
+    input: "pad" + parts.length,
+    // a box is exactly as wide as the digits that go into it: three for
+    // the hundreds, two for the tens, one for the ones
+    maxLen: b.places.map(pl => String(V_PLACE[pl]).length),
+    sep: "+", ask: "splitAsk" + b.id
   };
 }
 
@@ -1629,6 +1720,10 @@ function buildRun(p, tr){
     const ri2 = divremStage(p);
     const review = divremKeys(R_BUCKETS.slice(0, ri2).map(b => b.id));
     keys = focusAndReview(p, divremKeys([R_BUCKETS[ri2].id]), review, n, 2);
+  } else if(tr.op === "split"){
+    const vi = splitStage(p);
+    const review = splitKeys(V_BUCKETS.slice(0, vi).map(b => b.id));
+    keys = focusAndReview(p, splitKeys([V_BUCKETS[vi].id]), review, n, 2);
   } else if(tr.op === "round"){
     const oi = roundStage(p);
     const review = roundKeys(O_BUCKETS.slice(0, oi).map(b => b.id));
@@ -1970,8 +2065,13 @@ function thresholds(p, item){
   // away, and then two numbers keyed into two boxes with a hop between
   // them, so it needs as much room as deciding which half of a line goes
   // first: two steps of thinking and more keying than anything else here
+  // splitting a number apart is a rule rather than a piece of arithmetic,
+  // like putting a nought back, but it is written into up to three boxes
+  // with a hop between each pair, so the keying is what the allowance is
+  // mostly for
   const slower = item.kind === "multx" || item.kind === "divx" ? 2.6
                : item.kind === "divrem" ? 2.4
+               : item.kind === "split" ? 2.2
                : item.kind === "unit" ? 2.2
                : item.kind === "multten" || item.kind === "divten" ? 1.8
                : item.kind === "ops" ? 2.4
@@ -4079,6 +4179,13 @@ const ENVS = Object.assign({
   // nearest of them is forty eight away. Nothing else on the circuit is
   // a blue that is not water or sky.
   flaxfield: pal(240, 252, 60, "flower", {sat:50}),
+  // A field of barley ripening for the circuit. The yellows that are
+  // already there are the pale sand of the beach and the dunes and the
+  // dull olive gold of the savanna; this one is the vivid lemon green of
+  // a crop that is not dry yet, brighter and greener than any of them,
+  // and the savanna, its nearest neighbour, is thirty five away. The
+  // circuit's other greens are all darker and bluer than this.
+  barley:    pal( 63,  46, 64, "leaf",   {sat:60}),
   dunes:  pal( 46,  90, 72, "shell"),
   shore:  pal( 38, 190, 76, "shell"),
   palms:  pal(105, 150, 58, "leaf"),
@@ -4131,6 +4238,10 @@ const ENVS = Object.assign({
   // slope beside the quarry and the orchard. Fifty four from the
   // orchard, which is the nearest of the four
   tr_poppies:pal(  0, 118, 56, "flower", {h2:115, l2:44, sat:62}),
+  // a strip of barley beside the path, the crop bright over the green it
+  // stands in; the trail's other yellows are the dry golden field and
+  // the woodcutter's log, both of them duller and browner
+  tr_barley: pal( 52, 100, 66, "leaf",   {h2:104, l2:42, sat:70}),
   // The sky: the top of the gradient stays in the blues whatever the
   // track, because that is what makes it read as sky at all, and the
   // character of the place is carried by the horizon underneath it.
@@ -4179,6 +4290,11 @@ const ENVS = Object.assign({
   // still free on that side of the wheel is a dark one. This is it,
   // fifty five from the dust, which is the nearest of the four
   sk_copper: pal(204,  18, 44, "stone",   {h2: 12, l2:46, sat:54}),
+  // pollen drifting over the fields: a deep blue overhead and a horizon
+  // the colour of the crop it comes off. The sky's other bright horizons
+  // are the pale corn of the updraft and the grey gold of the dust, both
+  // of them washed out where this one is the full colour
+  sk_pollen: pal(198,  66, 32, "leaf",    {h2: 66, l2:62, sat:60}),
   // The deep: water at the top and the sea floor below it, so the light
   // falls the right way and no track ends up looking like a red sea.
   dp_pool:   pal(184, 160, 70, "shell",   {h2:178, l2:54}),
@@ -4228,7 +4344,12 @@ const ENVS = Object.assign({
   // redder; the first draft sat close enough to the coral to read as the
   // same place, so the water went deeper and the floor warmer. The
   // nearest is now the ice, forty six away
-  dp_sponges:pal(214,  26, 34, "shell",   {h2: 28, l2:70, sat:60})
+  dp_sponges:pal(214,  26, 34, "shell",   {h2: 28, l2:70, sat:60}),
+  // a bed of sea lemons: dark water over a floor of the one colour the
+  // deep has left, a clear yellow. The sand bank is the nearest thing to
+  // it and is a dull gold under bright water, so the two read as
+  // different places even at the size of a thumbnail
+  dp_lemon:  pal(196,  58, 36, "shell",   {h2: 60, l2:64, sat:70})
 });
 
 /* --- worlds ---
@@ -4249,7 +4370,8 @@ const WORLDS = [
         a20:"tr_brook", bridge:"tr_log",
         t1:"tr_glade", t2:"tr_pines", t3:"tr_heath", t4:"tr_rocks", t5:"tr_village",
         d1:"tr_burrow", chain:"tr_reeds", ops:"tr_hollow", beyond:"tr_field",
-        tens:"tr_bells", divrem:"tr_poppies", round:"tr_quarry", units:"tr_frost",
+        tens:"tr_bells", divrem:"tr_poppies", round:"tr_quarry", split:"tr_barley",
+        units:"tr_frost",
         a100:"tr_lake", a1000:"tr_falls", clock:"tr_orchard", mix:"tr_dusk",
         weak:"tr_mist", school:"tr_garden"}},
   {id:"sky", rides:["ri_raketa","ri_letad","ri_ufo","pet_drak","pet_sova"],
@@ -4257,7 +4379,8 @@ const WORLDS = [
         a20:"sk_breeze", bridge:"sk_arch",
         t1:"sk_dawn", t2:"sk_clouds", t3:"sk_sunset", t4:"sk_ridge", t5:"sk_rainbow",
         d1:"sk_void", chain:"sk_haze", ops:"sk_gate", beyond:"sk_dust",
-        tens:"sk_afterglow", divrem:"sk_copper", round:"sk_storm", units:"sk_snow",
+        tens:"sk_afterglow", divrem:"sk_copper", round:"sk_storm", split:"sk_pollen",
+        units:"sk_snow",
         a100:"sk_high", a1000:"sk_ember", clock:"sk_moon", mix:"sk_night",
         weak:"sk_fog", school:"sk_kite"}},
   {id:"deep", rides:["ri_ponor","ri_ufo","pet_zub","pet_puk","ri_mech"],
@@ -4265,7 +4388,8 @@ const WORLDS = [
         a20:"dp_lagoon", bridge:"dp_arch",
         t1:"dp_shallow", t2:"dp_kelp", t3:"dp_reef", t4:"dp_trench", t5:"dp_city",
         d1:"dp_abyss", chain:"dp_shoal", ops:"dp_weed", beyond:"dp_sand",
-        tens:"dp_urchins", divrem:"dp_sponges", round:"dp_cavern", units:"dp_ice",
+        tens:"dp_urchins", divrem:"dp_sponges", round:"dp_cavern", split:"dp_lemon",
+        units:"dp_ice",
         a100:"dp_current", a1000:"dp_vent", clock:"dp_pearl", mix:"dp_midnight",
         weak:"dp_murk", school:"dp_garden"}}
 ];
@@ -5329,8 +5453,14 @@ const TARGET = 100;
    an array of strings once there are several; `RUN.slot` says which of
    them the keys are writing into. Everything that touches what has been
    typed goes through the helpers here, so nothing else has to know
-   which of the two shapes is in play. */
-const SLOTS = {pad: 1, pad2: 2};
+   which of the two shapes is in play.
+
+   This table is the whole of what one more box costs. Splitting a number
+   into what each of its places is worth needs three of them, and that
+   was one more line here rather than a third way through the screen:
+   everything below counts the boxes, none of it asks whether there are
+   two. */
+const SLOTS = {pad: 1, pad2: 2, pad3: 3};
 function slotsOf(item){ return SLOTS[(item && item.input) || "pad"] || 1; }
 /* The first box keeps the id it has always had, because the screen
    around it knows it by that name; the others are numbered from two. */
@@ -5390,12 +5520,17 @@ function questionSize(item){
      question draws cancels out, a second one does not. It is the
      widest thing the game puts on a row. Narrowed for this row it is
      58 px, about three characters of the display face, and the words
-     that stand between and after the boxes are counted as they are
-     written, plus the space in front of each of them. */
-  for(let i = 1; i < slotsOf(item); i++) n += 3;
-  if(slotsOf(item) > 1){
-    n += (item.sep ? String(item.sep).length + 1 : 0) + (item.tail ? String(item.tail).length : 0);
-  }
+     that stand between the boxes are counted once for every gap they
+     stand in, plus the space in front of each of them, because a row of
+     three boxes carries that word twice.
+     The one box that cancels out is a box of one digit. Splitting a
+     number apart writes three hundred into the first of them, and three
+     digits in a box that is sized for one is half as wide again, so
+     what the boxes are allowed to hold is counted too; `maxLen` already
+     says it, box by box. */
+  const nb = slotsOf(item);
+  for(let i = 1; i < nb; i++) n += 3 + (item.sep ? String(item.sep).length + 1 : 0);
+  if(nb > 1) n += (maxLenAt(item, 0) - 1) + (item.tail ? String(item.tail).length : 0);
   return n >= 13 ? " q-xlong" : n >= 9 ? " q-long" : "";
 }
 function questionHTML(item, slot){
@@ -5419,13 +5554,17 @@ function questionHTML(item, slot){
   const inner = !item ? `<span id="qtext"></span>`
     : item.svg ? `<span id="qtext" class="qsvg">${item.svg}</span>`
     : `<span id="qtext">${item.text}</span><span>${relOf(item)}</span>`;
-  /* The third shape of the row: two boxes with the words that belong
-     between and after them, "36 : 5 = ▢ (zb. ▢)". The words are on the
-     item as finished text, like the unit and for the same reason: the
-     language does not change in the middle of a race. */
+  /* The third shape of the row: several boxes with the words that
+     belong between and after them, "36 : 5 = ▢ (zb. ▢)" and
+     "347 = ▢ + ▢ + ▢". The words are on the item as finished text, like
+     the unit and for the same reason: the language does not change in
+     the middle of a race. `sep` stands in every gap between two boxes,
+     so one word covers a row of two boxes and a row of three alike. */
   if(n > 1){
-    return `<div class="question q-boxes${questionSize(item)}" id="qbox">${inner}`
-      + `${box(0)}${words(item.sep)}${box(1)}${words(item.tail)}${unit}</div>`;
+    let mid = "";
+    for(let i = 0; i < n; i++) mid += (i ? words(item.sep) : "") + box(i);
+    return `<div class="question q-boxes q-boxes${n}${questionSize(item)}" id="qbox">${inner}`
+      + `${mid}${words(item.tail)}${unit}</div>`;
   }
   return `<div class="question${questionSize(item)}" id="qbox">${inner}${box(0)}${unit}</div>`;
 }
@@ -5439,16 +5578,18 @@ function keypadHTML(item){
   const dig = n => `<button class="key" data-k="${n}">${n}</button>`;
   const del = `<button class="key del" data-k="del" aria-label="${t("clear")}">&#9003;</button>`;
   const ok = `<button class="key act" data-k="ok">OK</button>`;
-  /* Two boxes get a key that moves between them. A box that fills up
-     hands the keys on by itself, but a one digit quotient in a box that
-     holds two does not, and a child is not going to work out that the
-     box itself can be tapped. The digits keep their three columns and
-     the rubber, the arrow and the tick move into a fourth, so the pad
-     is still four rows tall and a race that mixes the two surfaces does
-     not change height under the child's thumb. */
-  if(kind === "pad2"){
+  /* More than one box gets a key that moves between them. A box that
+     fills up hands the keys on by itself, but a one digit quotient in a
+     box that holds two does not, and a child is not going to work out
+     that the box itself can be tapped. The digits keep their three
+     columns and the rubber, the arrow and the tick move into a fourth,
+     so the pad is still four rows tall and a race that mixes the
+     surfaces does not change height under the child's thumb.
+     Two boxes and three get the same pad: the arrow steps round them
+     all, so what changes between them is the row above, not the keys. */
+  if(SLOTS[kind] > 1){
     const next = `<button class="key nx" data-k="next" aria-label="${t("nextBox")}">&#8594;</button>`;
-    return `<div class="keypad keypad-pad2" id="keypad" data-input="pad2">
+    return `<div class="keypad keypad-${kind}" id="keypad" data-input="${kind}">
       ${dig(1)}${dig(2)}${dig(3)}${del}
       ${dig(4)}${dig(5)}${dig(6)}${next}
       ${dig(7)}${dig(8)}${dig(9)}${ok}
@@ -5742,6 +5883,17 @@ function missHint(item, typed){
     const q = parseInt(typed[0], 10), r = parseInt(typed[1], 10);
     if(!isNaN(r) && r >= item.divisor) return t("divremTooBig", item.divisor);
     if(!isNaN(q) && r === item.answer[1] && q !== item.answer[0]) return t("divremQuotient", item.divisor);
+  }
+  /* The one mistake splitting a number apart is about: writing the
+     digit down instead of what it is worth, a 4 where forty belongs.
+     Every part of the answer is a digit times what its place is worth,
+     so the digit is the first character of it, and the message names
+     the first box where the bare digit was written. */
+  if(item.kind === "split" && Array.isArray(typed)){
+    for(let i = 0; i < item.answer.length; i++){
+      const worth = item.answer[i], digit = Number(String(worth)[0]);
+      if(worth > 9 && parseInt(typed[i], 10) === digit) return t("splitDigits", digit, worth);
+    }
   }
   return t("wrongHint");
 }
@@ -6491,6 +6643,8 @@ const Z_EX = {"1":"4+3×5", "2":"(4+3)×5", "3":"300+7×8", "4":"500-(40+30)"};
 // one tile per divisor rather than per bucket, because the divisor is
 // what the key remembers and a parent wants to see that it is the
 // sevens that are sticking
+// one example per bucket, the number and the line it splits into
+const V_EX = {"1":["47", "40 + 7"], "2":["350", "300 + 50"], "3":["347", "300 + 40 + 7"]};
 const R_EX = {"2":"9:2", "3":"14:3", "4":"23:4", "5":"36:5", "6":"40:6",
               "7":"52:7", "8":"60:8", "9":"75:9", "10":"87:10"};
 const minusEx = ex => { const [a,b] = ex.split("+").map(Number); return (a+b) + "-" + b; };
@@ -6548,6 +6702,11 @@ function heatSpecs(p){
   // the two lines of several numbers stand together
   push("ops", heatStrip(t("trk_ops"), 4, Z_BUCKETS.map(b =>
     ({label: Z_EX[b.id], keys:["z" + b.id], tip: Z_EX[b.id]}))));
+  // what each place of a number is worth is the ground the thousand is
+  // built on, so the parent reads the two one under the other, which is
+  // also how they stand on the map
+  push("split", heatStrip(t("trk_split"), 3, V_BUCKETS.map(b =>
+    ({label: V_EX[b.id][0], keys:["v" + b.id], tip: V_EX[b.id].join(" = ")}))));
   push("a1000", heatStrip(t("trk_a1000"), 6,
     bucketTiles(K_EX, id => "kp" + id, id => "kn" + id)));
   // converting units is the thousand wearing a unit, so it stands right

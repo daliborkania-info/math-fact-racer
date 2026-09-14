@@ -10,22 +10,36 @@ Procvičování malé násobilky pro děti zhruba od sedmi do deseti let, hrané
 
 ## Co se dá procvičovat
 
-| Trať | Obsah |
-| --- | --- |
-| Rozjezd | násobilka 1, 2, 5 a 10 |
-| Trojky a čtyřky | násobilka 3 a 4 |
-| Šestky a sedmičky | násobilka 6 a 7 |
-| Osmičky a devítky | nejtěžší roh tabulky |
-| Velký okruh | celá malá násobilka do 10 × 10 |
-| Dělení | stejné příklady čtené pozpátku |
-| Do dvaceti | sčítání a odčítání do 20 |
-| Do stovky | sčítání a odčítání do 100 |
-| Do tisíce | sčítání a odčítání do 1000, od celých stovek po přechod přes stovku |
-| Hodiny | přečtení ciferníku, od celých hodin po odpolední čas |
-| Šampionát | všechno odemčené dohromady |
-| Co ti nejde | jen příklady, které dítě opakovaně mine |
+Tratí je sedmadvacet a na mapě se objevují podle ročníku, který má dítě nastavený.
 
-Vedle tratí je na mapě **dílna**. Tam se nezávodí: neběží čas a za rychlost nejsou body, protože do dílny patří učivo, kde je hlavní prací rozvaha, ne vybavení z paměti. Zakázky jsou tři a přibývají s ročníkem: počítání dílků v bedýnce, peníze, tedy placení, drobné a vracení, kde se odpovídá skládáním mincí na pult, a slovní úlohy, kde se výsledek píše na klávesnici, ale bez stopek. Za hotovou práci jsou součástky, za které se v garáži kupují nátěry strojů. Součástky se nedají vyjezdit a na jízdu nemají žádný vliv.
+| Trať | Ročník | Obsah |
+| --- | --- | --- |
+| Do tří, Do pěti, Do sedmi, Do deseti, Do patnácti, Do dvaceti | 1. | šest číselných oborů, sčítání a odčítání bez přechodu přes desítku |
+| Přes desítku | 2. | sčítání a odčítání s přechodem přes desítku |
+| Rozjezd | 2. | násobilka 1, 2, 5 a 10 |
+| Trojky a čtyřky | 2. | násobilka 3 a 4 |
+| Šestky a sedmičky | 2. | násobilka 6 a 7 |
+| Osmičky a devítky | 2. | nejtěžší roh tabulky |
+| Velký okruh | 2. | celá malá násobilka do 10 × 10 |
+| Dělení | 2. | stejné příklady čtené pozpátku |
+| Do stovky | 2. | sčítání a odčítání do 100 |
+| Hodiny | 2. | přečtení ciferníku, od celých hodin po odpolední čas |
+| Řetězec | 3. | tři čísla a dvě znaménka, tedy 7 + 5 - 3 |
+| Co dřív | 3. | co se v příkladu počítá dřív, závorky včetně |
+| Za násobilkou | 3. | násobení a dělení mimo malou násobilku |
+| Kulatá čísla | 3. | násobení a dělení deseti, stem a kulatou desítkou |
+| Co zbyde | 3. | dělení se zbytkem, podíl a zbytek do dvou políček |
+| Zaokrouhlování | 3. | na desítky a na stovky |
+| Po částech | 3. | rozklad čísla na to, kolik platí jeho místa |
+| Do tisíce | 3. | sčítání a odčítání do 1000, od celých stovek po přechod přes stovku |
+| Převody | 3. | metry, kila, litry a čas, oběma směry |
+| Šampionát | - | všechno odemčené dohromady |
+| Co ti nejde | - | jen příklady, které dítě opakovaně mine |
+| Co máte ve škole | - | učivo právě nastavené kapitoly učebnice |
+
+Dvě věci vlastní trať schválně nemají, protože se odpovídají výběrem z nabídky, a ne psaním: sudé a liché s počtem číslic a porovnávání. Objeví se jen jako menšina otázek uvnitř trati **Co máte ve škole**, nikdy jako celý závod.
+
+Vedle tratí je na mapě **dílna**. Tam se nezávodí: neběží čas a za rychlost nejsou body, protože do dílny patří učivo, kde je hlavní prací rozvaha, ne vybavení z paměti. Zakázky jsou tři a přibývají s ročníkem: počítání dílků v bedýnce, peníze, tedy placení, drobné a vracení, kde se odpovídá skládáním mincí na pult, a slovní úlohy, kde se výsledek píše na klávesnici, ale bez stopek. Za hotovou práci jsou součástky, za které se v garáži kupují nátěry strojů a výstroj gumové kačenky. Součástky se nedají vyjezdit a na jízdu nemají žádný vliv.
 
 Trati se odemykají podle toho, jak dítě zvládá tu předchozí. Rodič může kterékoli odemknutí přebít ručně.
 
@@ -49,7 +63,7 @@ Závod je dvacet příkladů a přesně jedno kolo okruhu. Odpovídá se na velk
 
 **Soupeřem je vlastní včerejší jízda.** Auto ve vedlejším pruhu je nejlepší dosavadní jízda na téže trati, umístěná podle aktuálního rozdílu bodů. Žádné žebříčky, žádné cizí děti, proti kterým se dá prohrát.
 
-Mince z každého závodu kupují závodníky do garáže: rakety, závoďáky, robota, buginu a sadu zvířátek, která rostou přes tři stupně podle toho, kolik příkladů s nimi dítě spočítá.
+Mince z každého závodu kupují závodníky do garáže: osm strojů, tedy rakety, závoďáky, robota a buginu, a osmadvacet zvířat, která rostou přes tři stupně podle toho, kolik příkladů s nimi dítě spočítá. Gumová kačenka je zdarma od začátku a sama se nekupuje; kupuje se u ní jen to, co má na sobě, a platí se za to součástkami z dílny, ne mincemi. Vrstev je pět: tělo, vzor, klobouk, oči a výbava, dohromady 65 dílů.
 
 ---
 
@@ -136,7 +150,7 @@ Rodičovský kód je uložený jen jako hash. Udrží dítě mimo nastavení, al
 Hratelná stránka je jeden soběstačný soubor. Negeneruje se ručně, ale sestavuje.
 
 ```
-src/index.template.html   kostra dokumentu se třemi značkami
+src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
 src/i18n.js               všechny texty rozhraní, cs / en / de
 src/curricula.js          kapitoly učebnic pro volbu podle školy
@@ -167,7 +181,7 @@ MIT. Dělejte si s tím, co chcete, včetně rozdání všem rodičům ve tříd
 
 Hra je zdarma a zůstane zdarma. Žádné reklamy, žádné sledování, žádný účet, žádná placená verze, žádné odemykání za peníze. Nic z toho se nezmění, ať se stane cokoli.
 
-Jestli vám ale doma udělala radost a chcete, aby v ní přibývalo další učivo, tohle je způsob, jak to podpořit. Rozdělané mám dělení se zbytkem, počítání do tisíce, jednotky, čas a peníze, slovní úlohy a postupně i látku dalších ročníků. Píšu to po večerech vedle práce, takže každý příspěvek je hlavně signál, že to někdo používá a že má smysl v tom pokračovat.
+Jestli vám ale doma udělala radost a chcete, aby v ní přibývalo další učivo, tohle je způsob, jak to podpořit. Dělení se zbytkem, počítání do tisíce, jednotky, čas, peníze i slovní úlohy už ve hře jsou; na řadě je učivo čtvrté a páté třídy. Píšu to po večerech vedle práce, takže každý příspěvek je hlavně signál, že to někdo používá a že má smysl v tom pokračovat.
 
 Je to zcela dobrovolné. Nic se tím neodemyká, nic se tím nezrychluje a ve hře se nijak nepozná, kdo přispěl a kdo ne. Klidně tenhle odstavec přeskočte a hrajte dál, je to naprosto v pořádku a nic vám tím neuteče.
 

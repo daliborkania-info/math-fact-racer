@@ -10,22 +10,36 @@ Times tables practice for children of roughly seven to ten, played as a lap arou
 
 ## What it covers
 
-| Track | Content |
-| --- | --- |
-| Warm-up | times 1, 2, 5 and 10 |
-| Threes and fours | times 3 and 4 |
-| Sixes and sevens | times 6 and 7 |
-| Eights and nines | the hardest corner of the grid |
-| Grand circuit | the whole times table to 10 × 10 |
-| Division | the same facts read backwards |
-| Up to twenty | addition and subtraction within 20 |
-| Up to a hundred | addition and subtraction within 100 |
-| Up to a thousand | addition and subtraction within 1000, from whole hundreds to crossing one |
-| The clock | reading a dial, from whole hours to afternoon times |
-| Championship | everything unlocked, mixed |
-| Trouble spots | only the facts the child keeps missing |
+There are twenty seven tracks, and which of them appear on the map follows the school year the child is set to.
 
-Beside the tracks sits the **workshop**. Nothing is timed there and speed earns no points, because the workshop is for material where the work is reasoning rather than recall. There are three jobs and more of them open with the school year: counting parts in a tray, money, that is paying, change and coins, answered by putting coins on a counter, and word problems, where the answer is written on a keypad but nothing is timed. Finished work pays in parts, which buy paints for the machines in the garage. Parts cannot be earned by racing and change nothing about how a race runs.
+| Track | Year | Content |
+| --- | --- | --- |
+| Up to three, five, seven, ten, fifteen, twenty | 1 | six number ranges, adding and taking away, never past a ten |
+| Over the ten | 2 | adding and taking away across a ten |
+| Warm-up | 2 | times 1, 2, 5 and 10 |
+| Threes and fours | 2 | times 3 and 4 |
+| Sixes and sevens | 2 | times 6 and 7 |
+| Eights and nines | 2 | the hardest corner of the grid |
+| Grand circuit | 2 | the whole times table to 10 × 10 |
+| Division | 2 | the same facts read backwards |
+| Up to a hundred | 2 | addition and subtraction within 100 |
+| The clock | 2 | reading a dial, from whole hours to afternoon times |
+| Chains | 3 | three numbers and two signs, that is 7 + 5 - 3 |
+| What first | 3 | which part of a sum is worked out first, brackets included |
+| Past the tables | 3 | multiplying and dividing beyond the times table |
+| Tens and hundreds | 3 | multiplying and dividing by ten, a hundred and round tens |
+| What is left | 3 | dividing with a remainder, quotient and remainder in two boxes |
+| Rounding | 3 | to tens and to hundreds |
+| Piece by piece | 3 | splitting a number into what its places are worth |
+| Up to a thousand | 3 | addition and subtraction within 1000, from whole hundreds to crossing one |
+| Units | 3 | metres, kilos, litres and time, both ways |
+| Championship | - | everything unlocked, mixed |
+| Trouble spots | - | only the facts the child keeps missing |
+| What school is doing | - | the material of whichever textbook chapter is set |
+
+Two things deliberately have no track of their own, because they are answered by choosing from what is offered rather than by typing: odd and even with the count of figures, and comparing. They turn up only as a minority of the questions inside **What school is doing**, never as a whole race.
+
+Beside the tracks sits the **workshop**. Nothing is timed there and speed earns no points, because the workshop is for material where the work is reasoning rather than recall. There are three jobs and more of them open with the school year: counting parts in a tray, money, that is paying, change and coins, answered by putting coins on a counter, and word problems, where the answer is written on a keypad but nothing is timed. Finished work pays in parts, which buy paints for the machines in the garage and gear for the rubber duck. Parts cannot be earned by racing and change nothing about how a race runs.
 
 Tracks unlock as the previous one is learned. A parent can override any of that.
 
@@ -49,7 +63,7 @@ A race is twenty questions and exactly one lap of the circuit. Answer on a big n
 
 **The rival is yesterday's self.** The ghost car in the neighbouring lane is the best run ever recorded on that track, positioned by the current points gap. There are no leaderboards and no other children to lose against.
 
-Coins from every race buy racers for the garage: rockets, race cars, a robot, a buggy, and a set of creatures that grow through three stages the more sums they solve with you.
+Coins from every race buy racers for the garage: eight machines, that is rockets, race cars, a robot and a buggy, and twenty eight animals that grow through three stages the more sums they solve with you. The rubber duck is free from the start and is never bought; what is bought is only what it wears, and that is paid for in workshop parts rather than coins. It has five layers, that is body, pattern, hat, eyes and gear, sixty five pieces in all.
 
 ---
 
@@ -136,7 +150,7 @@ The parent code is stored only as a hash. It keeps a child out of the settings, 
 The playable page is a single self-contained file. It is generated, not edited by hand.
 
 ```
-src/index.template.html   document skeleton with three markers
+src/index.template.html   document skeleton with four markers
 src/styles.css            all styles
 src/i18n.js               every user facing string, cs / en / de
 src/curricula.js          textbook chapters for the follow-the-class mode
@@ -167,7 +181,7 @@ MIT. Do what you like with it, including handing it to every parent in the class
 
 The game is free and will stay free. No ads, no tracking, no account, no paid tier, nothing locked behind money. None of that is going to change.
 
-If it earned its keep at your house and you would like more material added, this is the way to back it. Next up are division with remainders, numbers to a thousand, units, time and money, word problems, and eventually the curriculum of later school years. It gets written in the evenings around a day job, so a contribution is mostly a signal that someone out there is using it.
+If it earned its keep at your house and you would like more material added, this is the way to back it. Division with remainders, numbers to a thousand, units, time, money and word problems are all in the game already; next up is the material of the fourth and fifth school years. It gets written in the evenings around a day job, so a contribution is mostly a signal that someone out there is using it.
 
 It is entirely voluntary. Nothing unlocks, nothing speeds up, and the game cannot tell who contributed and who did not. Skip this section and keep playing, that is completely fine and you miss nothing.
 

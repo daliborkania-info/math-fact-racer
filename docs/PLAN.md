@@ -22,10 +22,12 @@ anglicky jako jedna věta, která říká, co se pro dítě nebo rodiče změnil
 
 ## 0. Kde stojíme a co se v revizi zjistilo
 
-**Stav.** Dvaadvacet tratí ve čtyřech světech, 88 palet, dvě zakázky v dílně,
-80 hratelných kapitol z 95, pět testových souborů. Všech pět testů prochází,
-`flow.test.js` 172 kontrol, `migration.test.js` 84, `i18n` 322 klíčů ve třech
-jazycích bez děr. Jedna kontrola je nestabilní, viz A1.
+**Stav v den revize, tedy 13. září 2026 před krokem A.** Dvaadvacet tratí ve
+čtyřech světech, 88 palet, dvě zakázky v dílně, 80 hratelných kapitol z 95, pět
+testových souborů. Všech pět testů prochází, `flow.test.js` 172 kontrol,
+`migration.test.js` 84, `i18n` 322 klíčů ve třech jazycích bez děr. Jedna
+kontrola je nestabilní, viz A1. **Tahle čísla jsou záznam výchozího stavu a
+neaktualizují se**; dnešní stav je v `PROJECT-STATE.md` pod "Stav v číslech".
 
 **Revize kódu nenašla nic, co by rozbíjelo mechaniku.** Pohyb, body, krabička,
 odemykání, světy, ročníky i dílna dělají to, co dokumentace popisuje. Našla ale
@@ -58,16 +60,21 @@ uživatele a mění rozhodnutí z `PROJECT-STATE.md`, oddíl 7d.
 podle toho, co je slíbené (řetězec), co bolí nejvíc (responzivita) a co odemkne
 nejvíc kapitol za nejmíň práce (zbytek vlny A).
 
-| krok | co | velikost | mění datový model |
+| krok | co | stav | mění datový model |
 | --- | --- | --- | --- |
-| A | opravy z revize | hodina | ne |
-| B0 | předěl ročníků na mapě, minulé roky složené | půl session | ne |
-| B | `chain_3`, trať `chain` — hotovo | jedna session | ne |
-| C | responzivita a písmo podle ročníku | jedna až dvě session | ne |
-| D | zbytek vlny A, čtyři rodiny na `pad` | čtyři session | ne |
-| E | vlna B, nové vstupní prvky, začíná `pad2` | tři až čtyři session | `pad2` možná ano |
-| F | vlna C, slovní úlohy v dílně | jedna až dvě session | ne |
-| G | čtvrtý a pátý ročník | po ověření map | ano, `MAX_GRADE` |
+| A | opravy z revize | HOTOVO 13. 9. 2026 | ne |
+| B0 | předěl ročníků na mapě, minulé roky složené | HOTOVO 13. 9. 2026, s opravou B0b | ne |
+| B | `chain_3`, trať `chain` | HOTOVO 13. 9. 2026 | ne |
+| C | responzivita a písmo podle ročníku | HOTOVO 13. 9. 2026, s opravou C3b | ne |
+| D | zbytek vlny A, čtyři rodiny na `pad` | HOTOVO 13. 9. 2026 (D1 až D4) | ne |
+| E | vlna B, nové vstupní prvky | HOTOVO 14. 9. 2026 (E1 až E4) | ne |
+| F | vlna C, slovní úlohy v dílně | HOTOVO 14. 9. 2026 | ne |
+| G | čtvrtý a pátý ročník | **jediný nedodělaný**, viz níž | G1 ano, `MAX_GRADE` |
+| H | gumová kačenka a opravdová zvířata | HOTOVO 14. 9. 2026 (H1 až H8) | ano, `duck` a `duckParts` |
+
+**Nedodělaný je jediný krok, G.** G0 (mapa z modelového ŠVP) čeká na rozhodnutí
+R8 z oddílu 9, G1 (zapnutí ročníků) na ověření map čtvrtého a pátého ročníku ze
+skutečných stránek učebnice a znamená změnu datového modelu s novou fixturou.
 
 ---
 
@@ -1476,11 +1483,24 @@ kontroly, které nemohly spadnout.
 
 ---
 
-## Krok G. Čtvrtý a pátý ročník
+## Krok G. Čtvrtý a pátý ročník, jediný nedodělaný krok celého plánu
+
+**Stav k 14. září 2026: všechny ostatní kroky plánu jsou hotové a tenhle je
+jediný, který zbývá.** Nezačalo se na něm nic.
 
 Krok se po průzkumu státního kurikula (13. září 2026, záznam v
 `docs/kurikulum/ZDROJE-RVP.md`) rozpadá na dvě části, které na sobě nezávisí.
 G0 je nová mapa, kterou jde napsat hned, G1 je zapnutí ročníků v aplikaci.
+
+**Na čem každá z nich visí.** **G0 visí na rozhodnutí R8** z oddílu 9, tedy
+jestli se hrubší mapa ze státního zdroje má postavit dřív, než dorazí ověřený
+Matýsek; doporučení je ano a nic jiného už tomu nebrání, protože zdroj je
+veřejný a do enginu se nesahá. **G1 visí na dvou věcech naráz**: mapy
+`nns-matysek-4.md` a `-5.md` vznikly jen z obsahů a před zapnutím se musí ověřit
+ze skutečných stránek, což potřebuje přístup k učebnicím od uživatele, a samotné
+zapnutí je **změna datového modelu** (`MAX_GRADE`), takže znamená překlad staré
+čtyřky v `seedGrade()` a nový zamrazený profil ve
+`tests/fixtures/legacy-profiles.json`.
 
 ### G0. Mapa `npi-msvp-1st` z modelového ŠVP
 
@@ -2064,7 +2084,14 @@ v garáži; past z H5 se potvrdila a je o čtvrtinu horší, než plán čekal.
 Nic z tohohle není chyba a nic z toho se nedělá bez pokynu. Každé má
 doporučení a důvod.
 
-**R1. Žebřík dřívějšího ročníku pro starší dítě.** Profil třetího nebo
+**Stav k 14. září 2026.** Otevřená jsou čtyři: **R1** (učivo minulých let
+otevřené staršímu dítěti), **R8** (mapa z modelového ŠVP dřív než ověřený
+Matýsek, **na tomhle visí krok G0**), **R9** (učitelský žargon v názvech kapitol
+na dětské mapě) a **R11** (garáž má 115 dlaždic a je to past na výkon telefonu).
+Rozhodnutá jsou **R2 až R7 a R10**, všechna podle doporučení, a je to u nich
+napsané i s krokem, ve kterém se to udělalo.
+
+**R1. Žebřík dřívějšího ročníku pro starší dítě. OTEVŘENÉ.** Profil třetího nebo
 čtvrtého ročníku dnes vidí šest oborů prvního ročníku, z nichž pět je zamčených
 za "dokonči Do tří", a stovku zamčenou za mostem. Třeťák tedy musí odjezdit
 `1 + 2`, aby se dostal k `4 + 5`. Krok B0 to schová za dveře, ale po rozbalení
@@ -2096,7 +2123,8 @@ sdílí úroveň. Alternativa je vlastní hlavička a vlastní klíče, tedy dru
 krabička pro totéž učivo a druhá sbírka. Doporučení: původní klíč, jak stálo
 v předchozím plánu; `inverse_check` se do varianty skládá, viz D4.
 
-**R4. Poloha řetězce na mapě.** Před `beyond`, v pořadí knihy. Alternativa
+**R4. Rozhodnuto 13. září 2026 podle doporučení, hotovo v B.**
+**Poloha řetězce na mapě.** Před `beyond`, v pořadí knihy. Alternativa
 za `round`, aby se pořadí hotových tratí nehnulo. Doporučení: před `beyond`.
 
 **R5. Měřítka písma. Rozhodnuto 13. září 2026 podle doporučení, hotovo v C4.**
@@ -2113,11 +2141,13 @@ Alternativa: nechat dva sloupce a jen zvětšit karty. Doporučení: sloupce,
 protože dva sloupce na 1024 px dávají kartu 45 % široké a náhled velikosti
 poloviny obrazovky, což už není mapa.
 
-**R7. Co přežije vynulování postupu.** Návrh v A2: nastavení zůstávají,
+**R7. Rozhodnuto 13. září 2026 podle doporučení, hotovo v A.**
+**Co přežije vynulování postupu.** Návrh v A2: nastavení zůstávají,
 postup se maže. Alternativa je dnešní stav, kdy se maže všechno včetně ročníku,
 což je skoro jistě nezáměr.
 
-**R8. Mapa z modelového ŠVP dřív než ověřený Matýsek.** Dnes jsou v aplikaci
+**R8. Mapa z modelového ŠVP dřív než ověřený Matýsek. OTEVŘENÉ, blokuje G0.**
+Dnes jsou v aplikaci
 kurikula jen pro první až třetí ročník, takže rodič čtvrťáka si nemá co
 nastavit a zbývá mu adaptivní režim. Mapy `nns-matysek-4.md` a `-5.md` sice
 existují, ale vznikly jen z obsahů a před zapnutím se mají ověřit ze stránek,
@@ -2134,7 +2164,7 @@ posunout, a že přepínač bude hrubší než u třetí třídy, tedy po čtvrt
 místo po dvoustranách. Pokud ne, čeká se na Matýska a čtvrtý a pátý ročník
 zůstávají bez kurikula.
 
-**R9. Název kapitoly na dětské mapě je učitelský žargon.** `trackSub()` dává
+**R9. Název kapitoly na dětské mapě je učitelský žargon. OTEVŘENÉ.** `trackSub()` dává
 trati "Co máte ve škole" jako podtitulek název kapitoly z učebnice, tak jak
 stojí v `src/curricula.js`. Ty názvy jsou psané pro učitele a rodiče, takže
 osmiletý čte na svojí mapě "Početní operace se závorkami" (kapitola 13),
@@ -2159,7 +2189,11 @@ volitelné pole `kid` na kapitole, `trackSub()` vezme `kid`, když je, jinak
 neutrální text, a učebnicový název dítěti nedá nikdy. Pokud ne, zůstává dnešní
 stav a dítě čte, co stojí v knize.
 
-**R10. Smí se překreslit dnešních dvanáct zvířat?** Krok H6 chce nahradit
+**R10. Rozhodnuto 14. září 2026 podle doporučení, hotovo v H6 a H7.**
+Uživatel výslovně žádal zvířata, která vypadají jako konkrétní zvířata, takže
+se překreslilo deset z dvanácti a Lupi s Hvězdíkem si nechali svou identitu;
+žirafa a křeček přišli v H7 jako nová id. Původní zadání otázky:
+**Smí se překreslit dnešních dvanáct zvířat?** Krok H6 chce nahradit
 jeden parametrický tvar dvanácti vlastními kresbami, aby Méďa vypadal jako
 medvěd a Kiki jako králík. Formálně se neztratí nic: id, jméno, cena, `xp`
 i `owned` zůstávají, takže krabička, sbírka ani mince se nehnou a
@@ -2194,7 +2228,7 @@ Střední cesta, tedy překreslit jen ta zvířata, která dnes vypadají nejhů
 se nedoporučuje: to je právě ten stav dvou kresebných řečí v jedné mřížce.
 
 **R11. Garáž má po kroku H sto patnáct dlaždic a sedmdesát z nich je celá
-kačenka.** Past z H5 se potvrdila a je horší, než jak ji plán odhadoval: čekalo
+kačenka. OTEVŘENÉ.** Past z H5 se potvrdila a je horší, než jak ji plán odhadoval: čekalo
 se devadesát dlaždic, skutečnost je 115, tedy o čtvrtinu víc. Rozpad je osm
 strojů, osmadvacet zvířat, jedna kačenka, devět nátěrů (osm plus prázdná
 dlaždice) a devětašedesát kačenčích dílů (65 plus čtyři prázdné, kterými se
@@ -2301,8 +2335,11 @@ Nálezy jdou dalšímu implementačnímu subagentovi.
 **Rozdělení kroků na subagenty:** A jeden; B0 jeden; B jeden (B1 až B7 patří
 k sobě, rodina se nedá půlit); C dva, první C1 až C3 a C5, druhý C4 a C7;
 D1, D2, D3, D4 po jednom; E1 dva, nejdřív dvě políčka bez generátoru, pak
-generátor po rozhodnutí R2; F jeden; G až po ověření map; H1 až H8 po jednom
+generátor po rozhodnutí R2; F jeden; H1 až H8 po jednom
 a v pořadí, protože všechny sahají do `app.js`, H6 a H7 až po rozhodnutí R10.
+**Zbývá jen G, a to jsou dva subagenti**: G0 po rozhodnutí R8, G1 až po ověření
+map ze skutečných stránek. Nesahají si do stejných míst, takže na sobě
+nezávisí ani v pořadí.
 
 ---
 

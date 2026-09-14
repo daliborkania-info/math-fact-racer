@@ -1,191 +1,166 @@
 # Stav projektu a předávací dokument
 
-Poslední aktualizace: 14. září 2026, po krocích A, B0, B, opravě B0b, celém kroku C,
-celém kroku D, **celém kroku H** a **celém kroku E** nového plánu, opravě řazení mapy (C3b)
-a opravě nálezů z kontroly D1 a D2 (barvy palet, registr hlaviček, dokumentace)
+Poslední aktualizace: 14. září 2026, po dojetí celého `docs/PLAN.md` verze 2
+kromě kroku G
 
-**Kde se přestalo.** Z `docs/PLAN.md` je hotový **krok 1** (rodičovská heatmapa
-nad všemi rodinami), **první dvě položky kroku 2** (`mult_beyond` s `div_beyond`
-a trať `beyond`, `rounding_10` s `rounding_100` a trať `round`), celý **krok 3**
-(sbírky vázané na Leitnerovu krabičku, včetně dílny) a celý **krok 4** (čtyři
-světy a mapa jako krajina). K tomu dvě věci, které v plánu nebyly a přišly ze
-zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalšího roku,
-a rozdělení prvního ročníku na šest číselných oborů.
+**Kde se přestalo.** Z `docs/PLAN.md` verze 2 jsou hotové kroky **A** (opravy
+z revize), **B0** s opravou **B0b** (předěl ročníků na mapě), **B** (řetězec
+tří čísel, trať `chain`), **C** ve dvou částech a s opravou řazení mapy C3b
+(responzivita a písmo podle ročníku), **D1 až D4** (celá vlna A, tedy pořadí
+operací, kulatá čísla, převody jednotek a chybějící člen), **E1 až E4** (celá
+vlna B, tedy vstupní prvky `pad2`, `pad3`, `pick` a `cmp` a rodiny dělení se
+zbytkem, rozklad čísla, sudé a liché s počtem číslic a porovnávání), **F**
+(slovní úlohy v dílně, zakázka `words`) a **H1 až H8** (gumová kačenka s pěti
+vrstvami výstroje a osmadvacet zvířat). U každého z nich stojí v plánu značka
+HOTOVO s datem a odstavec o tom, co se proti plánu upřesnilo. Nic nezůstalo
+rozpracované.
+
+**Nedodělaný zůstal jediný krok, G, tedy čtvrtý a pátý ročník.** Rozpadá se na
+dvě části, které na sobě nezávisí, a každá visí na něčem jiném.
+
+**G0** je nová mapa `docs/kurikulum/npi-msvp-1st.md` z předmětového modelového
+ŠVP "Matematika pro 1. stupeň ZŠ", k ní řádky téhož tvaru jako u tří stávajících
+kurikul v `src/curricula.js`, název ve třech jazycích a fixture pro novou volbu
+kurikula. Do enginu se nesahá a na učebnici se nečeká, protože zdroj má
+samostatné oddíly pro jednotlivé ročníky i sloupec s učivem; průzkum je zapsaný
+v `docs/kurikulum/ZDROJE-RVP.md`. Visí to ale na **rozhodnutí R8**, tedy jestli
+se hrubší mapa ze státního zdroje má postavit dřív, než dorazí ověřený Matýsek.
+
+**G1** je zapnutí ročníků, tedy `MAX_GRADE` na 5 nebo 6. **Je to změna datového
+modelu**, protože starší profil má `grade: 4` ve významu "všechno" a nová
+hodnota "všechno" je jiná: `seedGrade()` musí starou čtyřku přeložit a přibude
+zamrazený profil v `tests/fixtures/legacy-profiles.json`. G1 navíc čeká na
+ověření map `docs/kurikulum/nns-matysek-4.md` a `-5.md` ze skutečných stránek,
+protože vznikly jen z obsahů; číselné rozsahy v nich jdou sundat z RVP hned,
+otazníky u formátu odpovědi ne. Hotový prompt je na konci, v oddílu 14.
+
+**Otevřená rozhodnutí pro uživatele jsou čtyři** a leží v oddílu 9
+`docs/PLAN.md`, každé i s doporučením a s důvodem. Nic z toho se nedělá bez
+pokynu.
+
+- **R1, učivo minulých let otevřené staršímu dítěti.** Třeťák dnes vidí pět ze
+  šesti oborů prvního ročníku zamčených za sebou a stovku zamčenou za mostem,
+  takže se k `4 + 5` dostane až přes `1 + 2`. Doporučení: ano, je to jeden řádek
+  v `unlockState()`, který jen otevírá a nikdy nezavírá, takže je migračně
+  bezpečný; po opravě B0b to ale netlačí, protože násobilku i hodiny má třeťák
+  otevřené od začátku.
+- **R8, mapa z modelového ŠVP dřív než ověřený Matýsek.** Rodič čtvrťáka si dnes
+  nemá co nastavit a zbývá mu adaptivní režim. Doporučení: ano, hrubá mapa je
+  proti ničemu zlepšení a `normalizeChapter()` umí uložené profily srovnat, až se
+  mapa zpřesní. **Na tomhle rozhodnutí visí celý krok G0.**
+- **R9, učitelský žargon v názvech kapitol na dětské mapě.** `trackSub()` dává
+  trati "Co máte ve škole" název kapitoly tak, jak stojí v učebnici, takže
+  osmiletý čte na své mapě "Sloučené početní operace". Doporučení: hned (b), tedy
+  dítěti název kapitoly neukazovat vůbec a nechat tam "podle učebnice", a později
+  (a), tedy dopsat dětský název ke všem pětadevadesáti kapitolám ve třech
+  jazycích.
+- **R11, garáž má po kroku H 115 dlaždic a je to past na výkon telefonu.**
+  Sedmdesát z nich je celá kačenka jako vlastní SVG, protože barevný čtvereček
+  dítěti neřekne, jak to bude vypadat. Doporučení: nejdřív změřit na telefonu,
+  pak sbalitelné sekce, a líné kreslení až tehdy, když sbalení nestačí; katalog
+  se v žádném případě nezmenšuje.
+
+**Rozhodnutí R2 až R7 a R10 padla** 13. a 14. září, všechna podle doporučení,
+a jsou v oddílu 9 plánu označená datem i krokem, ve kterém se udělala.
 
 **Stav v číslech.** Sedmadvacet tratí ve čtyřech světech, 108 palet prostředí,
-tři zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
-třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
-osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934 součástek v pěti
-vrstvách, 484 klíčů rozhraní ve třech jazycích, šest testových souborů.
+tři zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý
+43/44, třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová
+kačenka), osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934
+součástek v pěti vrstvách, 516 klíčů rozhraní ve třech jazycích, šest testových
+souborů.
 
-**Co se v téhle session událo, stručně.** Sbírka vázaná na krabičku a odkrývané
-okno v dílně (krok 3). Čtyři světy, ve kterých se mění **tvar cesty a její cíl**,
-ne jen barvy, a mapa přestala být svislým seznamem (krok 4). Ročník, podle
-kterého se skládá mapa, s ukázkou dalšího roku za dílnou (4c). První ročník
-rozložený na šest oborů podle učebnice, protože prvňák dostával 20 - 10, a
-přechod přes desítku přesunutý do druhé třídy (4d). Zakázky dílny dostaly ročník
-a přibylo počítání dílků pro prvňáky, čímž je první ročník pokrytý celý.
+Mapa má podle ročníku 8 míst u prvňáka, 18 u druháka, 21 složeně a 28 rozbaleně
+u třeťáka a 27 u čtvrťáka; dílna je v každém z těch počtů jedno místo a za
+dveřmi má třeťák sedm tratí. Garáž ukazuje 115 dlaždic, tedy 37 závodníků,
+devět nátěrů i s prázdnou dlaždicí a devětašedesát kačenčích dílů i se čtyřmi
+prázdnými.
 
-**13. září proběhla revize celého repozitáře** (kód, dokumentace, testy,
-vyrenderované obrazovky na telefonu a tabletu v obou orientacích) a z ní vznikl
-`docs/PLAN.md` verze 2. Mechanika je v pořádku, testy procházejí; našlo se šest
-drobných chyb k opravě (krok A plánu, mimo jiné nestabilní míchání fronty
-a vynulování postupu, které bere ročník) a jedno velké téma: hra není
-responzivní, na telefonu na šířku se závod ani dílna nevejdou na obrazovku,
-na tabletu běží v úzkém sloupci a písmo nerozlišuje ročník (krok C plánu).
+Testy jsou všechny zelené, tedy bez `!!`: `flow.test.js` 311 kontrol,
+`migration.test.js` 269, `style.test.js` 29, `items.test.js` pětapadesát okruhů,
+z nichž první sám ověří 14 240 vygenerovaných příkladů, `i18n.test.js` 516 klíčů
+ve všech třech jazycích bez děr a `names.test.js` jména závodníků a dílů ve
+třech jazycích.
 
-Tentýž den přišlo z hraní: syn s nastavenou třetí třídou viděl mapu jako
-pokračování prvních dvou tříd bez předělu, takže dřívější ročníky se mají
-složit a rozbalovat jen na žádost (krok B0 plánu; mění rozhodnutí z oddílu 7d).
+**Co se v téhle session událo.** Odjel se celý `docs/PLAN.md` verze 2 kromě
+kroku G, v pořadí, ve kterém plán stojí.
 
-**Krok A je hotový** (13. září): míchání fronty už nedá dvě stejné otázky za
-sebou, vynulování postupu nechá rodiči nastavení včetně ročníku, výsledek
-zakázky rozliší dvě různé chyby v počítání dílků a tři místa v CSS jsou
-srovnaná (`dvh` až za `vh`, strop výšky spodního listu, mrtvé selektory pro
-nízké displeje). Při tom se ukázalo, že `flow.test.js` a `names.test.js`
-padaly na zastaralém kroku a poslední kontroly nedobíhaly; opravené je to taky.
+Nejdřív **krok A**, tedy sedm oprav z revize: míchání fronty už nedá dvě stejné
+otázky za sebou, vynulování postupu nechá rodiči nastavení včetně ročníku,
+výsledek zakázky rozliší dvě různé chyby a tři místa v CSS jsou srovnaná. Při
+tom se ukázalo, že `flow.test.js` a `names.test.js` padaly na kroku, který
+rozhraní už nemá, takže poslední kontroly obou souborů nikdo dlouho neviděl.
 
-**Krok B0 je hotový** (13. září): dřívější ročníky jsou na mapě složené za
-dveřmi, nad letošním blokem stojí milník s ročníkem a nic z toho se nezapisuje
-do profilu.
+Pak **B0 s opravou B0b**: dřívější ročníky jsou na mapě složené za dveřmi a nad
+letošním blokem stojí milník s ročníkem. První pokus skládal podle roku, ve
+kterém se učivo zavádí, a schoval tím třeťákovi násobilku, stovku i hodiny, tedy
+to, čím třetí třída začíná; učivo má od té chvíle dvě čísla, `grade` a `thru`,
+viz oddíl 7d. **Krok B** přidal řetězec tří čísel jako trať `chain` a s ním
+měření délky otázky, které od té chvíle platí pro všechny rodiny.
 
-**Krok B je hotový** (13. září): řetězec tří čísel se dvěma znaménky, kapitola
-11 třetího ročníku, jako trať `chain` s hlavičkou klíče `q` a třemi kbelíky.
-Na mapě stojí před `beyond`, tedy v pořadí učebnice. K tomu přibylo, že dlouhé
-zadání si samo řekne o menší písmo, protože `47 + 5 - 3 = ?` se v plné velikosti
-na telefon nevejde.
+**Krok C** dal hře celou plochu: rozvržení se rozhoduje v JS a stojí jako
+`data-w` a `data-o` na `<html>`, závod i dílna se na šířku skládají do dvou
+sloupců, mapa má podle šířky dva, tři nebo čtyři sloupce, manifest dovolí obě
+orientace a písmo má měřítko podle ročníku (jedno `--tx` v CSS). Přibyl s ním
+šestý testový soubor `style.test.js`, který hlídá pravidla CSS textově. Hned
+po něm musela přijít **oprava C3b**: mapa se četla hadovitě, uživatel to zkusil
+s osmiletým synem a dítě nepoznalo, kudy cesta pokračuje, takže se místa od té
+chvíle řadí po řádcích zleva doprava ve všech šířkách.
 
-**Oprava B0b je hotová** (13. září): skládání se ptalo na rok, ve kterém se
-učivo zavádí, a schovalo tím třeťákovi malou násobilku, stovku i hodiny, tedy
-to, čím třetí třída začíná. Tratě mají od téhle opravy vedle `grade` i `thru`,
-poslední ročník, ve kterém se učivo ještě opakuje, a `yearOf()` se ptá na
-rozsah. Třeťákovi zůstalo za dveřmi sedm tratí, obory prvního ročníku a most,
-a v hlavním bloku má rovnou otevřenou násobilku a hodiny. Druhák dveře nemá
-vůbec, protože celý první ročník opakuje. Viz oddíl 7d.
+**D1 až D4 dojely vlnu A**, tedy všechno, co jde na `pad`: pořadí operací
+(trať `ops`), kulatá čísla (`tens`), převody jednotek (`units`, první rodina,
+jejíž odpověď nese jednotku) a doplňování chybějícího členu, které trať nemá,
+protože to není rodina, ale varianta nad existujícími klíči. Kontrola po D1 a D2
+našla, že tři palety trati `chain` jsou barevně totéž co jejich sousedi; odstup
+palet od té chvíle měří okruh 13c.
 
-**R1 z oddílu 9 plánu zůstává neudělaná a už netlačí.** Byla to odpověď na to,
-že čerstvý třeťák nemá na mapě jediné místo, na které jde klepnout; tenhle
-důvod padl s opravou B0b, protože násobilka i hodiny jsou otevřené od začátku.
-R1 (otevřít staršímu dítěti celé minulé roky) je tedy dnes jen pohodlí navíc
-a čeká na rozhodnutí uživatele.
+**E1 až E4 dojely vlnu B**, tedy nové vstupní prvky. `pad2` je odpověď do dvou
+políček a použilo ho dělení se zbytkem, `pad3` nebyl třetí cesta, ale další
+řádek v tabulce `SLOTS`, a použil ho rozklad čísla. `pick` je dvě až čtyři velká
+tlačítka a s ním přišlo první učivo, které se odpovídá výběrem, tedy sudé a liché
+a počet číslic; `cmp` se ukázal být týž `pick` se třemi znaky místo slov a přidal
+porovnávání. Obě rodiny za tou hranicí **vlastní trať nemají a mít nesmí** a drží
+je jedna jediná hlídka pod hlavičkou klíče `j`, viz oddíl 12e.
 
-**Krok C je hotový** (13. září), ve dvou commitech. První dal hře celou plochu:
-rozvržení se rozhoduje v JS a stojí jako `data-w` a `data-o` na `<html>`, závod
-i dílna se na šířku skládají do dvou sloupců, mapa má podle šířky dva, tři nebo
-čtyři sloupce a manifest dovolí obě orientace. Druhý (C4 a C7) přidal měřítko
-písma podle ročníku: jedno `--tx` v CSS, které `render()` zapíná přes
-`data-grade` na `<html>`, prvňák čte o čtvrtinu větší písmo než čtvrťák a žádný
-dětský text nezačíná pod 12,5 px. K tomu šestý testový soubor
-`tests/style.test.js`, který hlídá pravidla CSS textově, protože jsdom rozvržení
-nemá. Viz oddíl 7e.
+**Krok F** dal dílně slovní úlohy, tedy zakázku `words`, kde se výsledek píše na
+číselné klávesnici, ale uvnitř dílny, takže bez stopek a bez bodů za rychlost.
+Klávesnice se dá půjčit, obsluha ne: dílna má vlastní `jobKey()`.
 
-**Krok D1 je hotový** (13. září): pořadí operací, kapitoly 13 a 30 třetího
-ročníku, jako trať `ops` s hlavičkou klíče `z` a čtyřmi kbelíky. Na mapě stojí
-mezi `chain` a `beyond`, tedy v pořadí učebnice, a otevírá se od celé malé
-násobilky. Proti plánu se upřesnil čtvrtý kbelík, viz oddíl 4 a `docs/PLAN.md`.
+**H1 až H8** jsou první krok, který se netýká učiva. Sedmým startovním
+závodníkem je gumová kačenka zdarma a kupuje se u ní jen to, co má na sobě: pět
+nezávislých vrstev, 65 dílů, 392 700 kombinací, placené výhradně součástkami
+z dílny, čímž součástky dostaly druhé odbytiště. K tomu se dvanáct dnešních
+zvířat překreslilo tak, aby to byla poznatelná zvířata, a přibylo šestnáct
+nových, takže jich je osmadvacet. Celý model je v oddílu 7f.
 
-**Oprava C3b je hotová** (13. září): mapa se přestala číst hadovitě. Krok C
-řadil místa boustrofedonem, tedy druhý řádek zprava doleva, a dva sloupce na
-telefonu byly tentýž had, jen užší. Uživatel to zkusil s osmiletým synem
-a dítě nepoznalo, kudy cesta pokračuje. Od téhle opravy se místa řadí tak, jak
-se čte stránka, tedy po řádcích zleva doprava, ve všech šířkách, a na konci
-řádku se cesta vrací prázdným pásem mezi řádky k levému okraji. Viz oddíl 9.
+Mimo plán k tomu přibyly dvě věci. **Průzkum státního kurikula** se zápisem
+v `docs/kurikulum/ZDROJE-RVP.md`, ze kterého vznikl krok G0 a rozhodnutí R8.
+A **karta o dobrovolné podpoře projektu** v rodičovské sekci, která splňuje tři
+pravidla z oddílu 13 a v dětské části se neobjeví vůbec nikde.
 
-**Krok D2 je hotový** (13. září): násobení a dělení deseti, stem a kulatou
-desítkou, kapitola 28 třetího ročníku, jako trať `tens` s hlavičkou klíče `g`
-a dvěma kbelíky v obou směrech. Na mapě stojí hned za `beyond`, protože je to
-tentýž početní krok o stupeň dál, a odtud se taky otevírá. Proti plánu se
-upřesnilo, že součin smí dosáhnout na celý tisíc, viz oddíl 4 a `docs/PLAN.md`.
+**Co zůstalo neověřené okem, a je to jediná věc, kterou tahle session udělat
+nemohla.** Rozvržení obrazovek se v sandboxu prohlédnout nedá: prohlížeč tam
+nejde nainstalovat a artefakt běží v izolovaném rámu. Kresby se renderovaly přes
+`cairosvg` a obrazovky přes jsdom a WeasyPrint, což je **náhrada, ne prohlížeč**:
+jsdom nemá rozvržení vůbec a WeasyPrint sází stránku do tisku, ne do telefonu.
+Tohle si tedy musí uživatel projít na skutečném zařízení:
 
-**Krok D3 je hotový** (13. září): převody jednotek délky, hmotnosti, objemu
-a času, kapitoly 18 a 29 třetího ročníku, jako trať `units` s hlavičkou klíče
-`u` a čtyřmi kbelíky podle druhu veličiny, každý v obou směrech. Je to první
-rodina, jejíž **odpověď nese jednotku**: položka ji říká sama přes pole `unit`,
-kreslí ji `questionHTML()` za odpovídací políčko a měří se do délky řádku.
-Na mapě stojí hned za `a1000`, protože kilometr je tisíc metrů, a odtud se taky
-otevírá. Proti plánu se upřesnilo, že do tisíce zůstává i číslo v zadání, ne
-jen odpověď, viz oddíl 4 a `docs/PLAN.md`.
-
-**Oprava po kontrole kroků D1 a D2 je hotová** (13. září): tři palety trati
-`chain` byly barevně totéž co jejich sousedi a vizuální kontrola u kroku B to
-neukázala, protože `convert` přechod vůbec nekreslí, viz oddíl 9. `marsh` je
-teď tmavě bahenní zelená, `sk_haze` modrá obloha s fialovým oparem na obzoru
-a `dp_shoal` světlá lastura na dně pod jasnou vodou; nejbližší soused je
-32, 49 a 38 ΔE daleko. Aby se to nevrátilo, hlídá odstup palet okruh 13c
-v `items.test.js`. K tomu: registr hlaviček klíčů v oddílu 12c je srovnaný
-(chyběly `q`, `z`, `g`, `u` a nikdy tam nebylo `w`), `tests/README.md` mluví
-i o kulatých číslech, nejdelší zadání rodiny `ops` je `510 - (46 - 31)` místo
-příkladu, který nemohl vzniknout, v záporné závorce `z2` se losují oba členy
-z oboru kbelíku, takže vzniká i `(45 - 17) : 4`, a neznámý kbelík padá
-v `opsItem()` i `tensItem()` hlasitě. Název kapitoly na dětské mapě je
-učitelský žargon; je to starší věc a leží jako R9 v oddílu 9 `docs/PLAN.md`.
-
-**Krok D4 je hotový** (13. září), a s ním **celý krok D a celá vlna A**:
-doplňování chybějícího členu, kapitola 5 třetího ročníku, "Zkouška
-správnosti". Není to rodina, ale **varianta** nad existujícími klíči, tedy
-`6 × 7` položené pozpátku jako `▢ × 7 = 42`. Klíč se nemění, takže se nemění
-ani krabička, ani sbírka, ani heatmapa, vlastní trať nevzniká a jede se přes
-školní trať a přes kapitolu. `inverse_check` se do varianty skládá, protože
-zkouška v sešitě je na klávesnici tatáž otázka. Proti plánu se upřesnilo
-měření délky řádku, viz oddíl 7 a `docs/PLAN.md`.
-
-**Krok H je hotový** (14. září), v osmi commitech, a je to první krok, který se
-netýká učiva. Sedmým startovním závodníkem je gumová kačenka zdarma a kupuje se
-u ní jen to, co má na sobě: pět nezávislých vrstev, 65 dílů, 392 700 kombinací,
-a platí se výhradně součástkami z dílny. Tím dostaly součástky druhé odbytiště
-a dořešila se otevřená otázka kroku 3b starého plánu, viz oddíl 4b. K tomu se
-dnešních dvanáct zvířat překreslilo tak, aby to byla poznatelná zvířata, a
-přibylo šestnáct nových, takže jich je osmadvacet; kreslí je tabulka funkcí,
-jedna na zvíře, ne jeden tvar s přepínači. Celý kačenčí model je v novém
-oddílu 7f, včetně pravidla o autorských právech, které musí znát každý, kdo
-sáhne na kresbu.
-
-**Krok E1 je hotový** (14. září), ve dvou commitech. První dal hře **vstupní
-prvek `pad2`**, tedy odpověď do dvou políček: `RUN.typed` jako pole, `RUN.slot`,
-přeskok po naplnění, mazání přes hranici, klávesa se šipkou, klepnutí do
-políčka, třetí tvar řádku v `questionHTML()` se slovy `sep` a `tail`
-a `check`, který porovnává hodnoty zvlášť. Druhý postavil rodinu, která ho
-používá: **dělení se zbytkem**, kapitola 27 třetího ročníku, jako trať
-`divrem` s hlavičkou klíče `r`. Klíč je **dělitel**, `r2` až `r10`, dělenec se
-losuje; kbelíky jdou po dvojicích dělitelů podle sešitu. Na mapě stojí hned za
-`tens`, tedy na konci násobící a dělící řady, a otevírá se od dělení. Proti
-plánu se upřesnilo, jak často má dělení vyjít beze zbytku a proč, viz oddíl 4
-a `docs/PLAN.md`.
-
-**Krok E2 je hotový** (14. září), v jednom commitu. Vstupní prvek **`pad3`**
-nebyl třetí cesta, ale další řádek v tabulce `SLOTS`: `questionHTML()` kreslí
-políčka ve smyčce a slovo `sep` staví do každé mezery mezi nimi, `keypadHTML()`
-se ptá na počet políček místo na jméno `pad2`, `questionSize()` počítá `sep`
-tolikrát, kolikrát se kreslí, a přeskok, mazání přes hranici, šipka, klepnutí
-i `defaultCheck()` se nezměnily vůbec. Rodina, která ho používá, je **rozklad
-čísla**, kapitola 21 třetího ročníku, jako trať `split` s hlavičkou klíče `v`:
-otázka je číslo a odpověď to, kolik platí jednotlivá jeho místa, tedy
-`347 = 300 + 40 + 7`. Tři kbelíky po řádech, první dva do dvou políček, třetí
-do tří. Na mapě stojí těsně před `a1000`, protože je to zem, na které tisícovka
-teprve stojí. Proti plánu se upřesnil směr otázky a nejširší řádek hry, viz
-oddíl 4 a `docs/PLAN.md`.
-
-**Krok E3 je hotový** (14. září), v jednom commitu. Vstupní prvek **`pick`**,
-tedy dvě až čtyři velká tlačítka pod sebou, a s ním první učivo, které se
-odpovídá výběrem z nabídky: **sudé a liché a kolik má číslo číslic**, kapitola 6
-třetího ročníku, klíče `jp1`, `jp2` a `jd1` s hlavičkou `j`. Je to jediné místo
-ve hře, kde odpověď nevzniká v hlavě, takže **vlastní trať nemá a mít nesmí**
-a existuje jen jako doplněk uvnitř školní trati; hranici drží pět míst a celý
-oddíl 12e je o tom, proč je to v pořádku.
-
-**Krok E4 je hotový** (14. září), a s ním **celý krok E a celá vlna B**:
-**porovnávání**, kapitoly 17 a 22 třetího ročníku. Znak mezi dvěma stranami,
-tedy `348 ▢ 350` a `3 m ▢ 280 cm`, kde druhé je nejdřív převod a teprve pak
-porovnání. `cmp` **není třetí cesta**: je to `pick` se třemi znaky místo slov,
-takže přibyl jen čtvrtý tvar řádku (`layout:"mid"`, políčko mezi dvěma stranami)
-a větší písmo pro jednoznakovou volbu. Klíče jsou `jc1`, `jc2` (čísla) a `ju1`,
-`ju3`, `ju4` (délka, objem, čas) a **mají tutéž hlavičku `j`**, takže je hlídá
-táž jediná hlídka; druhá skoro stejná nevznikla. Proti plánu se upřesnilo, jak
-často vychází rovnost, proč se neporovnává hmotnost a proč obě strany zůstávají
-blízko u sebe, viz oddíl 4 a `docs/PLAN.md`.
-
-**Na řadě je krok F**, tedy slovní úlohy v dílně, a dál podle
-`docs/PLAN.md`. Hotový prompt je na konci, v oddílu 14.
+- mapa prvňáka na 375 × 812 při měřítku písma 1,25, tedy jestli se delší názvy
+  tratí vejdou na kartu a karty si nesedají jedna na druhou
+- závod na 360 × 640, tedy na nejmenším displeji, se kterým se počítá
+- závod a dílna na 812 × 375, tedy na telefonu na šířku, kde se obojí skládá do
+  dvou sloupců a kde se to před krokem C nevešlo vůbec
+- mapa na 768 × 1024 a na 1024 × 768, tedy tři a čtyři sloupce na tabletu
+- řádek se dvěma a se třemi políčky, tedy dělení se zbytkem (`36 : 5 = ▢ zb. ▢`)
+  a rozklad čísla (`347 = ▢ + ▢ + ▢`), i s vyplněnými políčky, ne s otazníky
+- plocha s velkými tlačítky, tedy výběr z nabídky a porovnávání, jestli má
+  opravdu tutéž výšku jako číselná klávesnice a palec nic nehledá znovu
+- slovní úloha v dílně na úzkém telefonu, kde má zadání menší písmo a vlastní
+  mřížku
+- garáž s kačenkou a s osmadvaceti zvířaty, tedy 115 dlaždic naráz; je to
+  zároveň měření, na kterém stojí rozhodnutí R11
+- karta o podpoře v rodičovské sekci, tedy jestli se značka drží prvního řádku
+  nadpisu a odkaz míří tam, kam má
 
 Tenhle soubor je psaný tak, aby se dal na začátku nové konverzace předat celý jako
 kontext. Obsahuje rozhodnutí, která už padla, mechaniku hry do detailu, architekturu
@@ -223,7 +198,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 471 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 516 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -1803,7 +1778,7 @@ python3 build.py
 for f in tests/*.test.js; do echo "$f"; node "$f" | grep '  !!  '; done
 ```
 
-`items.test.js` pokrývá pětačtyřicet okruhů: správnost všech generovaných příkladů,
+`items.test.js` pokrývá pětapadesát okruhů: správnost všech generovaných příkladů,
 shodu ciferníku s odpovědí včetně úhlů obou ručiček, složení závodu na každé
 trati, platnost SVG, konzistenci kurikul, závod podle kapitoly v obou režimech,
 stupně přechodu přes desítku, pravidla výběru kapitoly, kbelíky hodin, kroky
@@ -1900,9 +1875,22 @@ zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má od kroku H 231 kontrol, po kroku D4 jich bylo 196, po kroku
-D3 191, po kroku D2 188, po kroku
-D1 186, po kroku C 184, po kroku B0b 175, po kroku B0 170 a po kroku A 153.
+`flow.test.js` má dnes **311 kontrol**, `migration.test.js` 269 a `style.test.js`
+29; `i18n.test.js` projde 516 klíčů ve třech jazycích a celý závod v každém
+z nich. Jak počet kontrol ve `flow.test.js` rostl: po kroku A 153, po B0 170,
+po B0b 175, po C 184, po D1 186, po D2 188, po D3 191, po D4 196, po celém
+kroku H 231, po E1 250 (z toho 246 po samotných dvou políčkách a čtyři až
+s dělením se zbytkem), po E2 261, po E3 272, po E4 280, po F 292, po kartě
+o dobrovolné podpoře 306 a po stropu na výběr z nabídky 311.
+Devatenáct přibylo v kroku E a jsou to kontroly vstupních prvků, ne učiva:
+psaní do dvou a tří políček, předávání kláves mezi nimi, mazání přes hranici,
+šipka, klepnutí do políčka, odeslání až s vyplněnými políčky, porovnání hodnot
+zvlášť, návrat dvanáctiklávesnice na další otázce a plocha s velkými tlačítky,
+která nemá gumu, šipku ani fajfku a posílá odpověď hned. Dvanáct přibylo
+v kroku F a hlídají, že se do dílny nedostalo nic ze závodu: otisk rozehraného
+závodu vzatý před prvním stiskem a porovnaný po něm, průměrný čas odpovědi
+stejný před zakázkou i po ní, a tatáž úloha napsaná ještě jednou na opravdové
+klávesnici. Čtrnáct přibylo s kartou o podpoře a pět se stropem `PICK_MAX_SHARE`.
 Pětatřicet přibylo v kroku H a nejsou to kontroly učiva: že profil dostane
 startovní sedmičku a kačenka je mezi ní zdarma, že ji nejde koupit za mince ani
 jí narůst stupeň, že se dá nasadit a stojí v nabídce před startem, že garáž
@@ -2263,9 +2251,10 @@ kolik kapitol každý chybějící generátor odemkne. Řadí se podle toho, ne 
 dojmu. Stav po porovnávání je 91 hratelných
 kapitol z 95, po ročnících 18/18, 43/44 a 30/33; první ročník je tím celý
 a **vlna A i vlna B jsou hotové celé**, tedy všechno, co jde na `pad`, `pad2`,
-`pad3` a na tlačítka. Zbylé tři
-zamčené kapitoly třetí třídy čekají na dílnu a na dva vstupní prvky, které
-nemá, tedy na krok F plánu a dál.
+`pad3` a na tlačítka. **Dílna je taky hotová celá**, slovní úlohy včetně
+(krok F). Zbylé tři zamčené kapitoly třetí třídy tedy nečekají na žádný krok
+plánu, ale na **dva vstupní prvky, které hra nemá**: `frac` na zlomky a `col`
+na písemné počítání, obojí do dílny.
 
 | generátor | vstup | kapitol | kde |
 | --- | --- | --- | --- |
@@ -2334,8 +2323,8 @@ hotový celý**: `pad2` s `div_remainder` a `pad3` s `place_value` (oddíl 12d),
 `pick` s dvojicí `parity` a `digit_count` a nakonec `cmp` s porovnáváním
 (oddíl 12e). Byl to jiný druh práce než celá vlna A: sahalo se na klávesnici
 a na `tap()`, ne jen na generátor. **Od téhle chvíle čeká každá další kapitola
-na dílnu**, tedy na krok F, nebo na vstupní prvek, který hra nemá, tedy na
-zlomky a písemné počítání.
+na vstupní prvek, který hra nemá**, tedy na zlomky a na písemné počítání, a obojí
+patří do dílny, ne do závodu.
 
 **Dílna měla být až po tom všem, ale předběhla**, protože se ukázalo, že čtyři
 kapitoly nečekají na nic jiného a že bez ní nejde říct, kam patří slovní úlohy.
@@ -2391,14 +2380,15 @@ odpovědi. Bez toho test skončí hláškou, že rodina nemá uvedený rozsah. J
 schválně jediné místo, kde se test musí rozšířit ručně spolu s kódem.
 
 **B. Nové vstupní prvky, tedy `pad2`, `pad3`, `cmp`, `pick`.**
-**`pad2`, `pad3` i `pick` jsou hotové i s rodinami, 14. září 2026.** Políčka umí
+**Všechny čtyři jsou hotové i s rodinami, 14. září 2026, a `cmp` z nich nakonec
+nebyl čtvrtý prvek, ale `pick` se třemi znaky místo slov.** Políčka umí
 `tap()`, `typedText()`, `questionHTML()`, `keypadHTML()` i `submit()` v libovolném
 počtu, `check` dostane pole hodnot a porovná je zvlášť, celé je to popsané
 v oddílu 7 pod „Odpověď smí mít víc než jedno políčko“. `pad2` používá dělení se
 zbytkem, `divrem`, `pad3` i `pad2` rozklad čísla, `split`. `pick` používají
 sudá a lichá čísla a počet číslic, a stojí na vlastní ploše `.keypad-pick`
-s tlačítky pod sebou; podrobně v oddílu 7 a v oddílu 12e. Zbývá `cmp`,
-u kterého zbytek dole platí dál.
+s tlačítky pod sebou; `cmp` je tatáž plocha s `<`, `=` a `>` a čtvrtým tvarem
+řádku `layout:"mid"`. Podrobně v oddílu 7 a v oddílu 12e.
 
 Zadávání dřív počítalo s jedním polem: `RUN.typed` byl jeden řetězec, `#abox`
 jeden prvek a `typedText()` vracel jeden řetězec. Víc políček potřebuje pojem
@@ -2445,8 +2435,9 @@ tlačítka se to vyřešilo tím, že do třísloupcového gridu nejdou vůbec:*
 tedy 347 px na telefonu 375 px, do kterých se nejdelší slovo `jedna číslice`
 vejde se 118 px ve třetím ročníku a se 176 px v písmu prvního. Výšku drží na
 výšce číselné klávesnice výpočet `4K + 24 px` rozdělený mezi n tlačítek, kde
-`K` je výška klávesy psaná jednou jako `--keyh`. `cmp` tenhle problém pořád má,
-ale `<`, `=` a `>` jsou znaky, ne slova, takže se u něj bude rozhodovat znovu.
+`K` je výška klávesy psaná jednou jako `--keyh`. `cmp` ten problém nemá, protože
+`<`, `=` a `>` jsou znaky, ne slova: sedí na téže ploše, jen s `data-glyph`
+a s větším písmem pro jednoznakovou volbu.
 
 **C. Viditelnost pro rodiče. Hotovo, září 2026.** Heatmapa byla doslova tabulka
 jedenáct krát jedenáct pro malou násobilku a souhrn nahoře počítal taky jen
@@ -2463,17 +2454,18 @@ B a D1 až D3 byl čtyři kroky pozadu. Obsazené je `m` násobení, `d` dělen�
 `a` sčítání do 20, `s` odčítání do 20, `p` a `n` kbelíky do sta, `k` celý obor
 do tisíce včetně znaménka, `x` násobení a dělení za násobilkou včetně znaménka,
 `o` zaokrouhlování, `q` řetězec tří čísel, `z` pořadí operací, `g` kulatá čísla
-včetně znaménka, `u` převody jednotek, `r` dělení se zbytkem, `c` hodiny
-a `w` zakázky dílny, které
+včetně znaménka, `u` převody jednotek, `r` dělení se zbytkem, `v` rozklad čísla,
+`j` všechno, co se odpovídá výběrem z nabídky, tedy sudé a liché s počtem číslic
+i porovnávání, `c` hodiny a `w` zakázky dílny, které
 leží v téže krabičce, i když je žádný pool závodu nevyrobí (`isJobKey`).
 
 Kbelíkové rodiny z toho jsou `FAMILY_HEADS` v `src/app.js`, dnes řetězec
-`pnckxoqzgur`, tedy tenhle seznam bez jednotlivých spojů (`m`, `d`, `a`, `s`)
+`pnckxoqzgurvj`, tedy tenhle seznam bez jednotlivých spojů (`m`, `d`, `a`, `s`)
 a bez dílny (`w`); obojí musí sedět, `poolSize` a `buildRun` se ptají právě
 `FAMILY_HEADS`. Pozor na `h`, to je vnitřní id kbelíků do sta a klíč vzniká
 slepením `"p" + "h1"`; jako hlavička rodiny by se to pralo. Stejně tak `b` je
-vnitřní id kbelíků do tisíce. Šestnáct písmen je tedy pryč a volných zbývá
-deset (`b`, `e`, `f`, `h`, `i`, `j`, `l`, `t`, `v`, `y`, z toho `b` a `h` jen
+vnitřní id kbelíků do tisíce. Osmnáct písmen je tedy pryč a volných zbývá
+osm (`b`, `e`, `f`, `h`, `i`, `l`, `t`, `y`, z toho `b` a `h` jen
 opatrně), zatímco plánovaných generátorů je kolem deseti, takže nová rodina se
 znaménkem ho má nést uvnitř klíče jako tisícovka, ne brát si dvě písmena jako
 stovka.
@@ -2886,7 +2878,7 @@ letoška, dílna) a rozbaleno 26 cest a 28 míst, za dveřmi má 7 tratí; druh�
 18 míst bez dveří a bez milníku a k tomu dveře dopředu; prvňák má 8 a dveře
 zpátky nemá; čtvrťák vidí celou mapu, tedy 27 míst a žádné dveře ani milník.
 Dál sedí počet tratí v ukázce druhého ročníku (10) a počet zamčených kapitol
-třetí třídy (5 z 33). Krok D4 mapu neposunul, protože varianta vlastní trať
+třetí třídy (3 z 33). Krok D4 mapu neposunul, protože varianta vlastní trať
 nemá; posunul jen ten poslední počet, z devíti na osm. Krok E1 posunul obojí:
 `divrem` je třetiročníková trať, takže se mapa druháka ani prvňáka nehnula,
 a kapitola 27 dostala generátor, takže zamčených bylo sedm. Krok E2 posunul
@@ -2987,34 +2979,52 @@ Kratší, protože zvíře nemá vrstvy, ale první bod je tentýž.
 
 ### Prompt pro nejbližší krok
 
-Použij tenhle, pokud se pokračuje tam, kde se přestalo. Další kroky mají
-v `docs/PLAN.md` vlastní zadání a stačí v tomhle promptu vyměnit odstavec
-s dnešním úkolem.
+Použij tenhle, pokud se pokračuje tam, kde se přestalo. Odstavec s dnešním
+úkolem se vyměňuje, zbytek platí dál.
 
-**Kde přesně stojíme.** Kroky 1, 3 a 4 starého plánu jsou hotové, k tomu 4c
-a 4d. **Vlna A je hotová celá**, tedy všech sedm položek. Revize ze 13. září
-sepsala `docs/PLAN.md` verze 2 s kroky A až G; hotové jsou A, B0, B, oprava
-B0b, celý krok C (responzivita ve dvou commitech, druhý s písmem podle ročníku
-a šestým testovým souborem) a **celý krok D**: D1 (pořadí operací, trať `ops`),
-D2 (kulatá čísla, trať `tens`), D3 (převody jednotek, trať `units`) a D4
-(chybějící člen, varianta bez vlastní trati). **Hotový je i celý krok H**, tedy
-gumová kačenka s pěti vrstvami výstroje a osmadvacet zvířat, v osmi commitech;
-učiva se netýká a na mapu nesáhl. **Hotový je i celý krok E**, tedy vstupní
-prvky `pad2`, `pad3` a `pick` a rodiny dělení se zbytkem, rozklad čísla, sudé
-a liché s počtem číslic a porovnávání, v pěti commitech; `cmp` se ukázal být
-`pick` s jinými popiskami, ne pátý prvek. **Tím je hotová celá vlna B.**
-Nejbližší je krok F, tedy slovní úlohy v dílně.
-Z rozhodnutí
-v oddílu 9 plánu padla R4 (řetězec před `beyond`), R7 (vynulování nechá
-nastavení), R6 (tři sloupce mapy na tabletu, čtyři od 900 px), R5 (měřítka
-písma 1,25 / 1,12 / 1,04 / 1,0), R3 (chybějící člen pod původním klíčem),
-R10 (překreslit dnešních dvanáct zvířat, ale bez změny identity Lupi
-a Hvězdíka) a R2 (dělení se zbytkem jako rodina po dělitelích `r2` až `r10`),
-všechna podle doporučení. R1 (žebřík minulých
-let) je odložené a po B0b už není naléhavé, viz hlavička. Nová je **R11**,
-tedy počet dlaždic v garáži, viz oddíl 9 plánu.
+**Kde přesně stojíme.** Starý plán `docs/PLAN-2026-09-12.md` je hotový celý,
+tedy kroky 1, 3 a 4 plus 4c a 4d. `docs/PLAN.md` verze 2 má kroky A až H
+a **hotové jsou všechny kromě G**: A (opravy z revize), B0 s opravou B0b (předěl
+ročníků na mapě), B (řetězec tří čísel), C ve dvou částech a s opravou řazení
+mapy C3b (responzivita a písmo podle ročníku), D1 až D4, E1 až E4, F (slovní
+úlohy v dílně) a H1 až H8 (kačenka a zvířata). **Tím je hotová celá vlna A**,
+tedy všechno, co jde na `pad`, **i celá vlna B**, tedy nové vstupní prvky.
+Nic nezůstalo rozpracované a všech šest testů je zelených, tedy bez `!!`.
 
-**Co je čerstvě hotové a nesmí se rozbít.** Porovnávání je druhá rodina za
+**Dalším úkolem je krok G, tedy čtvrtý a pátý ročník**, a dělá se ve dvou
+částech, které na sobě nezávisí, v tomhle pořadí.
+
+**G0, mapa `npi-msvp-1st` z modelového ŠVP.** Nová mapa
+`docs/kurikulum/npi-msvp-1st.md` v témže tvaru jako mapy učebnic, k ní řádky
+v `src/curricula.js` včetně deklarativního popisu poolu, název kurikula ve třech
+jazycích v `src/i18n.js` a fixture pro novou volbu kurikula. Do enginu se
+nesahá, protože mapa nezavádí žádné téma mimo katalog. Nečeká to na učebnici,
+ale **čeká to na rozhodnutí R8**, tedy jestli se hrubší mapa ze státního zdroje
+postaví dřív, než dorazí ověřený Matýsek; doporučení je ano. Podklad je
+`docs/kurikulum/ZDROJE-RVP.md` a zadání je krok G0 v plánu.
+
+**G1, zapnutí čtvrtého a pátého ročníku.** `MAX_GRADE` na 5 nebo 6, a **je to
+změna datového modelu**: starší profil má `grade: 4` ve významu "všechno" a nová
+hodnota "všechno" je jiná, takže `seedGrade()` musí starou čtyřku přeložit a do
+`tests/fixtures/legacy-profiles.json` přibude zamrazený profil. Kromě toho to
+čeká na ověření map `docs/kurikulum/nns-matysek-4.md` a `-5.md` ze skutečných
+stránek, protože vznikly jen z obsahů; otazníky u číselných rozsahů jdou sundat
+z RVP i bez toho, otazníky u formátu odpovědi ne.
+
+**Otevřená rozhodnutí jsou čtyři**, R1, R8, R9 a R11, všechna v oddílu 9 plánu
+i s doporučením a shrnutá v hlavičce tohohle souboru. **R8 blokuje G0**, ostatní
+tři neblokují nic. Rozhodnutá jsou R2 až R7 a R10, všechna podle doporučení,
+a v oddílu 9 je to u nich napsané i s krokem, ve kterém se to udělalo.
+
+**Co se musí prohlédnout okem**, je vypsané v hlavičce pod "Co zůstalo
+neověřené okem". Sandbox to udělat nemohl a žádný test to nenahradí.
+
+**Co je čerstvě hotové a nesmí se rozbít.** Slovní úloha v dílně se píše na
+číselné klávesnici závodu, ale **obsluhu si závod nechává**: dílna má vlastní
+`jobKey()` a delegovaný posluchač i posluchač `keydown` se rozhodují podle
+`view.name`, takže se do dílny nedostaly stopky ani body za rychlost (F, oddíl
+4b). Předmět ve větě se skloňuje přes `pickForm()` a žádný počet ve větě není
+menší než dva, aby se první tvar nikdy nepoužil (F). Porovnávání je druhá rodina za
 hranicí výběru z nabídky a drží ji **tatáž hlavička klíče `j` a tatáž jediná
 hlídka na pěti místech**; druhá skoro stejná hlídka by byla past, takže nová
 rodina za touž hranicí si vezme touž hlavičku (E4, oddíl 12e). `cmp` není
@@ -3071,14 +3081,28 @@ ročníku (4b).
 > subagentovi, než půjdeš dál. Když subagent hlásí rozpor s plánem, rozhodni
 > autonomně podle plánu.
 >
-> Dneska chci krok F, tedy slovní úlohy v dílně; celý krok E je hotový.
-> Každý subagent má vlastní commit.
-> Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentovi
-> v zadání; R1 (žebřík minulých let) zatím nedělej.
+> Dneska chci **krok G, tedy čtvrtý a pátý ročník**; z celého plánu je to
+> jediný nedodělaný krok, všechno ostatní je hotové. Dělá se na dvakrát:
+> nejdřív **G0**, tedy mapa `npi-msvp-1st` z modelového ŠVP (nová mapa
+> v `docs/kurikulum/`, řádky v `src/curricula.js`, název ve třech jazycích,
+> fixture pro novou volbu kurikula, do enginu se nesahá), a pak **G1**, tedy
+> zapnutí ročníků přes `MAX_GRADE`, což **je změna datového modelu** a znamená
+> překlad staré čtyřky v `seedGrade()` a nový zamrazený profil ve
+> `fixtures/legacy-profiles.json`. Každý subagent má vlastní commit.
+>
+> **G0 visí na rozhodnutí R8** z oddílu 9 plánu, tedy jestli stavět mapu ze
+> státního zdroje dřív, než dorazí ověřený Matýsek; doporučení je ano, ale
+> zeptej se mě dřív, než to zadáš. **G1 visí na tom, že mapy
+> `nns-matysek-4.md` a `-5.md` nejsou ověřené ze skutečných stránek**, jen
+> z obsahů; to je na mně, pošlu odkaz nebo se přihlásím v prohlížeči. Čísla
+> rozsahů v obou mapách jdou sundat z RVP i bez toho. Zbylá otevřená
+> rozhodnutí R1, R9 a R11 nech na mně a nedělej je.
 >
 > Každá nová rodina si vyrenderuje své čtyři palety a prohlédne je na obrázku
-> podle oddílu 2; `convert` nekreslí přechody, takže se pozadí skládá zvlášť.
-> Rozvržení obrazovek se v sandboxu prohlédnout nedá, jsdom ho nemá.
+> podle oddílu 2; `cairosvg`, ne `convert`, protože `convert` nekreslí přechody,
+> průhlednost ani ořez. Rozvržení obrazovek se v sandboxu prohlédnout nedá,
+> jsdom ho nemá; co mám prohlédnout sám, je v hlavičce pod "Co zůstalo
+> neověřené okem".
 >
 > Pravidla, která patří do každého zadání subagentovi: zdroje se editují
 > v `src/`, nikdy `index.html`; po každé změně `python3 build.py` a testy
@@ -3091,15 +3115,15 @@ ročníku (4b).
 >
 > Piš mi česky, stručně a bez vaty. Push dělám sám, jen mi na konci řekni,
 > které commity poslat. Na konci sám aktualizuj tenhle soubor, hlavně
-> hlavičku "Kde se přestalo", stav v číslech a tenhle prompt tak, aby dalším
-> úkolem byl krok G (čtvrtý a pátý ročník) a rozhodnutí R1, a ověř, že
-> subagenti označili hotové kroky v `docs/PLAN.md`.
+> hlavičku "Kde se přestalo", stav v číslech a tenhle prompt, a ověř, že
+> subagenti označili hotové kroky v `docs/PLAN.md` značkou HOTOVO s datem.
 
 ### Prompt pro autonomní dokončení celého plánu
 
-Varianta bez průběžných otázek: session dojede zbytek plánu sama, rozhodnutí
-z oddílu 9 plánu bere podle doporučení a krok G jen připraví. Použij, když
-nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se krokem C.
+Varianta bez průběžných otázek: session dojede zbytek plánu sama a rozhodnutí
+z oddílu 9 plánu bere podle doporučení. Použij, když nechceš být u toho.
+**Z celého plánu zbývá jediný krok, G**, a jeho druhá polovina se bez tebe
+neobejde, takže autonomní běh dojede G0 a G1 jen připraví.
 
 > Pokračujeme v projektu Math Fact Racer, hra na procvičování počítání pro mého
 > osmiletého syna a jeho spolužáky, repozitář `~/Dokumenty/Kladska/math-fact-racer`.
@@ -3114,22 +3138,21 @@ nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se kro
 > přepiš v tomhle souboru hlavičku "Kde se přestalo" jednou větou, aby šlo
 > po případném přerušení navázat.
 >
-> Pořadí a rozdělení: C ve dvou subagentech (C1 až C3 s C5, pak C4 s C7);
-> D1, D2, D3, D4 po jednom; E1 ve dvou (nejdřív dvě políčka `pad2`, pak
-> generátor dělení se zbytkem); E2; E3; E4; F. Po obou částech C, po každém D
-> a po E1 pusť kontrolního subagenta a jeho nálezy dej opravit dalšímu
-> subagentovi před tím, než jdeš dál. Krok G nedělej: mapy čtvrtého a pátého ročníku nejsou
-> ověřené ze stránek a k tomu potřebuješ mě; místo toho na konci sepiš do
-> `docs/PLAN.md` u kroku G, co přesně je k ověření a co se změní v datovém
-> modelu.
+> **Kroky A až F a H jsou hotové, nedělej z nich nic znovu.** Zbývá jediný
+> krok, G, a ten se dělí na dvě části. **G0 udělej**, tedy mapu
+> `npi-msvp-1st` z modelového ŠVP podle zadání kroku G0 v plánu: nová mapa
+> v `docs/kurikulum/`, řádky v `src/curricula.js` včetně poolu, název ve třech
+> jazycích, fixture pro novou volbu kurikula, do enginu se nesahá. Je to
+> rozhodnutí **R8** a to ber podle doporučení, tedy ano. **G1 nedělej**: mapy
+> `nns-matysek-4.md` a `-5.md` nejsou ověřené ze skutečných stránek a k tomu
+> potřebuješ mě. Místo toho u kroku G1 v plánu sepiš, co přesně je k ověření,
+> a sundej z obou map otazníky u číselných rozsahů, které jdou doplnit z RVP
+> závazně; otazníky u formátu odpovědi nech být.
 >
-> Rozhodnutí z oddílu 9 plánu ber podle doporučení a řekni to subagentům
-> v zadání: R2 rodina po dělitelích `r2` až `r10`, R3 původní klíč,
-> R5 měřítka 1,25 / 1,12 / 1,04 / 1,0, R6 sloupce na tabletu. R4 a R7 už
-> padly v kroku A a B. R1 (učivo minulých let starším dětem otevřené) je
-> jediné, které nech na mně, ani ho nedělej. Kde subagent narazí na něco,
-> co plán neřeší, rozhodni ve prospěch nedotknutelných principů z oddílu 3
-> a zapiš rozhodnutí do plánu k danému kroku.
+> **Rozhodnutí R1, R9 a R11 z oddílu 9 nech na mně a nedělej je.** R2 až R7
+> a R10 už padla, ta jen ber jako hotová. Kde subagent narazí na něco, co plán
+> neřeší, rozhodni ve prospěch nedotknutelných principů z oddílu 3 a zapiš
+> rozhodnutí do plánu k danému kroku.
 >
 > Když krok dvakrát po sobě neprojde testy nebo kontrolou, nepokračuj v něm:
 > vrať pracovní strom na poslední čistý commit (`git checkout -- . && git
@@ -3139,13 +3162,12 @@ nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se kro
 > neopravuje škrtnutím kontroly.
 >
 > Vzhled se ověřuje na obrázku. Kresby (palety, cesty, sbírky) přes node
-> a `convert` podle oddílu 2 tohohle souboru. Rozvržení z kroku C tak, že
-> `dist/artifact.html` nahraješ do mého existujícího artefaktu "Math Fact
-> Racer" na claude.ai, který k tomu slouží, a ve vestavěném prohlížeči si ho
-> prohlédneš s emulací 375 × 812, 812 × 375, 768 × 1024, 1024 × 768
-> a 360 × 640 na mapě, v závodě, v dílně a na výsledku, pro prvňáka i pro
-> třeťáka; co nevypadá dobře, dostane subagent k opravě s popisem, co a kde.
-> Po skončení kroku C nahraj artefakt ještě jednou s hotovým stavem.
+> a `cairosvg` podle oddílu 2 tohohle souboru; `convert` nekreslí přechody,
+> průhlednost ani ořez, takže se podle něj nikdy nepřekresluje. **Rozvržení
+> obrazovek v sandboxu prohlédnout nejde**, prohlížeč tam nejde nainstalovat
+> a jsdom rozvržení nemá, takže seznam toho, co mám prohlédnout na telefonu
+> sám, udržuj v hlavičce pod "Co zůstalo neověřené okem" a doplň do něj
+> všechno, na co jsi sáhl.
 >
 > Pravidla do každého zadání subagentovi: zdroje v `src/`, nikdy `index.html`;
 > po každé změně `python3 build.py` a testy, hlídá se `!!`; nové chování
@@ -3153,13 +3175,13 @@ nechceš být u toho. Kroky A, B0, B a oprava B0b jsou hotové, začíná se kro
 > dotek datového modelu znamená další zamrazený profil ve
 > `tests/fixtures/legacy-profiles.json`; cokoli kresleného se vyrenderuje
 > a prohlédne; nedotknutelné principy z oddílu 3 se nemění; dokumentace
-> podle oddílu 8 plánu včetně označení kroku HOTOVO; kód a komentáře
+> podle oddílu 8 plánu včetně označení kroku HOTOVO s datem; kód a komentáře
 > anglicky, commit anglicky jednou větou; push ne.
 >
 > Na konci: aktualizuj celý tenhle soubor (hlavička, stav v číslech, tabulky
 > tratí a klíčů, oddíl 12, kontrolní seznam v oddílu 14 s novými čísly,
-> prompt pro další session, kde bude dalším úkolem krok G a rozhodnutí R1), ověř, že
+> prompt pro další session, kde bude dalším úkolem G1), ověř, že
 > `docs/PLAN.md` má u každého kroku HOTOVO nebo ODLOŽENO s datem, pusť
 > všech šest testů naposledy a napiš mi česky, stručně: seznam commitů
 > k pushnutí v pořadí, která rozhodnutí padla a proč, co je odložené a proč,
-> a co mám prohlédnout sám (obrazovky z kroku C, texty pro děti).
+> a co mám prohlédnout sám.

@@ -484,6 +484,23 @@ const pickKeys = ids => ids.map(id => "j" + id);
    comparing further down, so that this one line is the whole of the
    boundary rather than one line per family. */
 const isPickKey = k => !!k && k[0] === "j";
+/* AND HOW MUCH OF ONE RACE IT MAY EVER BE.
+   Keeping it out of every track but the school one is only half the
+   boundary. The other half is this: a chapter whose pool holds nothing
+   but questions answered by choosing would fill the race with them, and
+   a race is timed and pays points for speed. That would be paying a
+   child for recognising two or three buttons quickly, which is the very
+   thing the first of the untouchable principles forbids, and the plan
+   promised the opposite -- a supplement, a minority of the questions.
+   Nothing was holding it to that, so this does: at most a third of any
+   one race, whatever the chapter's pool holds and in the hard mode as
+   much as in the soft one. "The chapter and nothing else" cannot be
+   allowed to mean "guessing and nothing else".
+   A third rather than a half, because a minority has to be visibly one,
+   and six questions out of twenty is still each of chapter 6's three
+   keys practised twice. What the cap gives back is drawn from the
+   chapters before it, which is review the child is due anyway. */
+const PICK_MAX_SHARE = 1 / 3;
 
 /* Converting units, one bucket per kind of measure. The seventh part
    introduces length, weight and volume (chapter 17) and then the clock
@@ -1946,6 +1963,32 @@ function focusAndReview(p, focus, review, n, maxNew){
   const nf = Math.round(n * .7);
   return sampleKeys(p, focus, nf, maxNew).concat(sampleKeys(p, rest, n - nf, 0));
 }
+/* The ceiling on questions answered by choosing, applied to a finished
+   race rather than written into the draw: the keys can arrive as the
+   chapter's own material and as review of an earlier chapter at once,
+   so counting them once at the end is the only place that sees all of
+   them. Whatever is over the line is replaced by material that is
+   written rather than chosen: the chapter's own if it has any, so that
+   the hard mode stays inside the chapter wherever it still can, and
+   only otherwise the chapters the class has already been through.
+   `spare` empty would mean a curriculum whose first playable chapter is
+   made of nothing but choosing, with nothing behind it to fall back on.
+   No book here has one, and the circuit in items.test.js measures every
+   chapter of every curriculum that offers choosing, so the day one
+   appears the test says so rather than the child racing a guess. */
+function capChosen(p, keys, focus, earlier, n){
+  const max = Math.floor(n * PICK_MAX_SHARE);
+  const at = [];
+  for(let i = 0; i < keys.length; i++) if(isPickKey(keys[i])) at.push(i);
+  if(at.length <= max) return keys;
+  const mine = focus.filter(k => !isPickKey(k));
+  const spare = mine.length ? mine : [...new Set(earlier)].filter(k => !isPickKey(k));
+  if(!spare.length) return keys;
+  const need = at.length - max;
+  const fill = sampleKeys(p, spare, need, 2);
+  for(let i = 0; i < need && i < fill.length; i++) keys[at[at.length - 1 - i]] = fill[i];
+  return keys;
+}
 function buildRun(p, tr){
   const n = p.qCount || 20;
   let keys;
@@ -1964,16 +2007,22 @@ function buildRun(p, tr){
     const cur = curriculumById(p.curriculum);
     const ch = chapterOf(p);
     if(ch && ch.pool && ch.pool.variant) opts = {variant: ch.pool.variant};
+    // what the class has already been through, gathered whichever mode
+    // is set: the hard mode does not review, but the cap below still
+    // needs somewhere to take the rest of the race from
+    const earlier = [];
+    if(cur) for(const prev of cur.chapters){
+      if(prev.n >= p.chapter) break;
+      earlier.push(...poolKeys(prev.pool));
+    }
     if((p.chapterMode || "soft") === "hard" || !cur || !focus.length){
       keys = sampleKeys(p, focus, n, 6);
     } else {
-      const earlier = [];
-      for(const ch of cur.chapters){
-        if(ch.n >= p.chapter) break;
-        earlier.push(...poolKeys(ch.pool));
-      }
       keys = focusAndReview(p, focus, earlier, n, 6);
     }
+    // and then the one thing neither branch can be trusted with, in
+    // both modes alike; see PICK_MAX_SHARE
+    keys = capChosen(p, keys, focus, earlier, n);
   } else if(tr.op === "mult"){
     const focus = multFactsFor(tr.tables).map(f => mk(f.a,f.b));
     const earlier = [];
@@ -6295,14 +6344,6 @@ function mountGame(){
   placeCar(document.getElementById("rivalcar"), 0, -13);
   paintTrail(0);
   updateHud();
-  document.onkeydown = e => {
-    if(view.name !== "game") return;
-    if(e.key >= "0" && e.key <= "9") tap(e.key);
-    else if(e.key === "Backspace") tap("del");
-    else if(e.key === "Enter") tap("ok");
-    // the arrow key of a keyboard does what the arrow key of the pad does
-    else if(e.key === "ArrowRight") tap("next");
-  };
 }
 function drawRail(){ driveTo(myU(), ghostU()); }
 
@@ -6665,7 +6706,7 @@ function viewResult(p){
     </div>
   </div>`;
 }
-function mountResult(){ document.onkeydown = null; stopAnim(); }
+function mountResult(){ stopAnim(); }
 
 /* ---------- workshop ----------
    Deliberately quiet next to the race screen: no stage, no car, no
@@ -7867,6 +7908,26 @@ document.addEventListener("click", e => {
     });
     return;
   }
+});
+
+/* A key on a real keyboard is the same press as a key on the drawn pad,
+   so it is decided the same way, by the screen that is up, and it hangs
+   here beside the click rather than being set up by the race's own
+   screen. It used to be, and it returned unless a race was on, which
+   left a child on a laptop able to write a sum in a race and not the
+   answer to a word problem in the workshop, on the very screen that
+   draws the same twelve keys.
+   Nothing of the race comes with it: the workshop's press goes to
+   jobKey(), never to tap(), where the stopwatch, the points for speed
+   and the car are. The arrow moves between answer boxes, which the
+   workshop has none of, so it is the one key that stays with the race. */
+document.addEventListener("keydown", e => {
+  const to = view.name === "game" ? tap : view.name === "job" ? jobKey : null;
+  if(!to) return;
+  if(e.key >= "0" && e.key <= "9") to(e.key);
+  else if(e.key === "Backspace") to("del");
+  else if(e.key === "Enter") to("ok");
+  else if(e.key === "ArrowRight" && to === tap) to("next");
 });
 
 /* Selects need their own listener, the delegated one above is click only. */

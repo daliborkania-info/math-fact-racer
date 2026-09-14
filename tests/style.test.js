@@ -68,6 +68,37 @@ ok('rady klaves visi na .keypad-pad, ne na odpovidaci plose',
 ok('klavesa ma i na sirku podlahu podle rocniku',
    forSel('html[data-o="wide"] .key').some(r => /min-height\s*:\s*calc\([^)]*var\(--tx\)/.test(r.body)),
    (forSel('html[data-o="wide"] .key')[0] || {body: 'chybi'}).body.trim());
+/* Podlaha klavesy na nizkem displeji, a hlavne to, ze neni mrtva.
+   Krok C4 dal klavese podlahu, ktera roste s rocnikem, a nizkemu
+   displeji nizsi; krok E1 pak napsal vysku klavesy jednou provzdy jako
+   height:var(--keyh), cimz se z te nizsi podlahy stalo min-height pod
+   pevnou vyskou, tedy pravidlo, ktere se cte a nikdy nic neudela.
+   Prvnaku tim na 360 x 640 narostla klavesnice o 30 px, ktere vzala
+   otazce, a nikdo si toho nevsiml, protoze se nic neuriznulo.
+   Hlida se to proto ze dvou stran: podlaha na nizkem displeji musi byt
+   opravdu nizsi nez zakladni, a musi byt napsana tam, kde muze vyhrat,
+   tedy na --keyh, ne pod nim. */
+const iKratky = css.indexOf('@media (max-height:660px)');
+const keyhVse = [...css.matchAll(/--keyh\s*:([^;}]+)/g)];
+const podlaha = v => { const m = /calc\(\s*([\d.]+)px\s*\*\s*var\(--tx\)/.exec(v); return m ? parseFloat(m[1]) : null; };
+const keyhZakl = keyhVse.filter(m => iKratky < 0 || m.index < iKratky);
+const keyhKratky = keyhVse.filter(m => iKratky >= 0 && m.index > iKratky);
+ok('vyska klavesy stoji na --keyh', forSel('.key').some(r => /height\s*:\s*var\(--keyh\)/.test(r.body)));
+ok('nizky displej snizuje podlahu klavesy, a snizuje ji na --keyh',
+   keyhZakl.length === 1 && keyhKratky.length === 1
+   && podlaha(keyhZakl[0][1]) !== null && podlaha(keyhKratky[0][1]) !== null
+   && podlaha(keyhKratky[0][1]) < podlaha(keyhZakl[0][1]),
+   keyhZakl.map(m => podlaha(m[1])).join() + ' -> ' + keyhKratky.map(m => podlaha(m[1])).join());
+/* A obecne: jakakoli podlaha pod klavesou je mrtva, dokud si tataz
+   pravidlo nepusti pevnou vysku. Rozvrzeni na sirku to dela
+   (height:auto), takze jeho podlaha plati; kdo to neudela, prohral
+   s var(--keyh) a nikdy nic nezmeni. */
+const jeKey = r => r.sel.split(',').some(s => /(^|\s)\.key$/.test(s.trim().replace(/\s+/g, ' ')));
+const mrtvePodlahy = RULES.filter(r => jeKey(r) && /min-height\s*:/.test(r.body)
+                                    && !/(^|[^-\w])height\s*:\s*auto/.test(r.body));
+ok('zadna podlaha klavesy nelezi pod pevnou vyskou',
+   mrtvePodlahy.length === 0,
+   mrtvePodlahy.map(r => r.sel.trim() + ': ' + r.body.replace(/\s+/g, ' ').trim()).join(' | ') || 'zadna');
 // co se nevejde, to se roluje: otazka je ta cast zavodu, ktera ustupuje
 ok('otazka se pri nedostatku mista roluje',
    forSel('.qzone').some(r => /overflow-y\s*:\s*auto/.test(r.body)));

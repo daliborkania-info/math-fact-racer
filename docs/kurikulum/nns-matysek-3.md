@@ -145,6 +145,16 @@ porovnání, protože to sešit má na týchž dvou stranách. Tím je třetí r
 třiceti kapitolách z třiatřiceti a nehratelné zůstávají už jen písemné
 násobení a dvě kapitoly o zlomcích.
 
+**Kapitola 17 si k porovnávání vzala i `add_sub_100`**, tedy třetí téma, které
+u ní tahle mapa uvádí. Je to oprava z téhož dne: samotné porovnávání se
+odpovídá výběrem a kapitola složená jen z něj znamená závod, ve kterém se za
+čas a za body poznává místo počítá. Sedmnáctce šlo dosypat učivo, protože to
+sešit na těch stranách opravdu má; kapitolám 6 a 22 ne, u šestky mapa nabízí
+navíc jen číselnou osu, kterou hra neumí, a u dvaadvacítky porovnávání
+veličin, což je zase výběr. Ty dvě proto drží strop `PICK_MAX_SHARE`, tedy
+nejvýš třetina závodu, a zbytek se bere z dřívějších kapitol; podrobně
+v `PROJECT-STATE.md`, oddíl 12e.
+
 Násobí a dělí se v `ops` jen v oboru malé násobilky a dělení vždycky vyjde
 beze zbytku; `tens` dělí sice i za ní, ale jen kulatými čísly, a `div_remainder`
 dělí sice se zbytkem, ale jen v oboru do desetinásobku dělitele. Čtvrtý kbelík

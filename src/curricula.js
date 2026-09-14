@@ -199,7 +199,11 @@ const CURRICULA = [
              pool:{variant:"missing", as100:ALL_H, mult:ALL_TABLES}},
       // the one double page whose questions are answered by choosing
       // rather than by writing; it is a supplement inside this track and
-      // has no track of its own, see J_BUCKETS in app.js
+      // has no track of its own, see J_BUCKETS in app.js.
+      // The map lists one more topic for these pages, the number line,
+      // and the game has no generator for it, so there is nothing else
+      // to put here: the race is kept mostly recall by PICK_MAX_SHARE,
+      // which fills the rest of it from the chapters before this one
       {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:{pick:ALL_J}},
       // the seventh part is still under a hundred, so only two digit numbers
       {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:{round:["o1"]}},
@@ -220,9 +224,14 @@ const CURRICULA = [
       // and puts two quantities side by side to be compared, which is a
       // conversion done in the head; it does not yet ask for the
       // conversion written down, that is chapter 29. Weight is not
-      // compared and CMP_BUCKETS in app.js says why
+      // compared and CMP_BUCKETS in app.js says why.
+      // The sums within a hundred are the map's third topic for this
+      // chapter and they are here for two reasons at once: the pages do
+      // add and subtract alongside the units, and comparing is answered
+      // by choosing, so a chapter made of nothing else would race a
+      // child against the clock on recognising. See PICK_MAX_SHARE
       {n:17, name:"Jednotky délky, hmotnosti a objemu",   src:"7. díl, s. 40–43",
-             pool:{cmp:ALL_CMP_U}},
+             pool:{cmp:ALL_CMP_U, as100:ALL_H}},
       // the clock and the calendar are converted here, and the same
       // pages put two lengths of time next to each other
       {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45",
@@ -235,7 +244,10 @@ const CURRICULA = [
       {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:{split:ALL_V}},
       // the other double page answered by choosing, and the only one
       // about comparing numbers rather than quantities: two of a size,
-      // decided by their places rather than by how many figures they have
+      // decided by their places rather than by how many figures they have.
+      // The map lists comparing quantities here as well, and that is
+      // answered by choosing too, so it would be no counterweight to it;
+      // like chapter 6 this one leans on PICK_MAX_SHARE instead
       {n:22, name:"Porovnávání čísel do tisíce",          src:"8. díl, s. 4–5",
              pool:{cmp:ALL_CMP_N}},
       {n:23, name:"Sčítání a odčítání po stovkách",       src:"8. díl, s. 6–7",   pool:{as1000:["b1"]}},

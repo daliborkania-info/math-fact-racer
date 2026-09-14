@@ -13,7 +13,7 @@ zadání a z hraní, kroky **4c** a **4d**: ročník v profilu s ukázkou dalš�
 a rozdělení prvního ročníku na šest číselných oborů.
 
 **Stav v číslech.** Sedmadvacet tratí ve čtyřech světech, 108 palet prostředí,
-dvě zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
+tři zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý 43/44,
 třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová kačenka),
 osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934 součástek v pěti
 vrstvách, 484 klíčů rozhraní ve třech jazycích, šest testových souborů.
@@ -347,6 +347,17 @@ Jediná povolená výjimka je `normalizeChapter()`, která smí posunout uložen
 kapitolu na nejbližší dřívější hratelnou, protože kapitola bez generátoru
 neumí vyrobit závod. Nikdy dopředu.
 
+**A jediná výjimka z toho "nikdy dopředu"** je profil, jehož uložená kapitola
+leží před první hratelnou kapitolou celé učebnice. Takový profil nemá kam
+couvnout: dřívější hratelná neexistuje, takže se vezme první, která existuje,
+a ta je nutně dál. Je to rozhodnutí mezi dvěma ztrátami a tahle je menší, než
+nechat dítě na kapitole, která nevyrobí ani jeden příklad, nebo mu učebnici
+sebrat úplně. Dneska to nespustí žádná ze zamrazených fixtur ani žádná
+kombinace z `src/curricula.js`, protože první kapitola každé učebnice hratelná
+je; spustil by to jedině profil upravený rukou nebo učebnice, které by se
+generátor odebral. `tests/migration.test.js` proto hlídá směr zvlášť a výjimku
+si fixtura musí vyžádat polem `expectForward`, aby se nikdy nestala tiše.
+
 Hlídá to `tests/migration.test.js` nad zamrazenými profily ze starších verzí.
 Každá další verze, která sáhne na datový model, tam přidá další profil. Test
 nesmí nikdy začít procházet tak, že se z něj vyškrtne kontrola.
@@ -670,7 +681,7 @@ Druhý režim, postavený v září 2026. Vzniknul proto, že část učiva nen�
 k vybavení, ale malá úvaha, a na úvahu se nesmí pouštět stopky.
 
 **Co tam je.** Vlastní místo na mapě, výrazně jiné než tratě, teplé barvy
-a ikona nářadí. Uvnitř seznam zakázek, zatím dvě.
+a ikona nářadí. Uvnitř seznam zakázek, zatím tři.
 
 **Zakázka patří do ročníku, stejně jako trať.** Mince do padesáti jsou učivo
 druhé třídy a prvňák u nich může jen koukat, takže dílna ukazuje jen to, co
@@ -734,6 +745,17 @@ kterou obě části sdílejí, a jediné místo, kde se to rozhoduje. Napsané �
 drží `JOB.typed`, ne `RUN.typed`; `jobCheck()` bere podle vstupního prvku buď
 je, nebo hrst mincí. V dílně se ani u psané odpovědi neměří čas, `record()` se
 pořád volá s `ms = null`.
+
+**Totéž platí pro opravdovou klávesnici a od 14. září 2026 to i platí.**
+Klávesnice počítače visela na `document.onkeydown`, který zakládal `mountGame()`
+a který se hned na prvním řádku vracel, když nestála závodní obrazovka, takže
+dítě u notebooku umělo napsat příklad v závodě a slovní úlohu v dílně ne, na
+obrazovce, která těch dvanáct kláves kreslí. Posluchač `keydown` proto od téhle
+chvíle visí vedle posluchače kliknutí, jednou pro celou hru, a rozhoduje se
+**podle téhož `view.name`**: `game` jde do `tap()`, `job` do `jobKey()`, jinde
+se neděje nic. Šipka zůstala závodu, protože přepíná mezi odpovídacími políčky
+a dílna žádná nemá. Ze závodu se tím do dílny nedostalo nic: `flow.test.js` bere
+otisk rozehraného závodu a porovnává ho po psaní prsty i po psaní klávesnicí.
 
 **Skloňování řeší dvě věci, ne sto výjimek.** Předmět, o kterém věta mluví,
 má ve slovníku tři tvary oddělené svislítkem (`jablko|jablka|jablek`) a vybírá
@@ -2401,12 +2423,11 @@ má schválně přesně výšku číselné klávesnice, takže palec nemusí nic
 znovu. Za druhé, plocha s tlačítky je nezaměnitelná na první pohled, takže
 nevzniká chvíle, kdy by dítě ťukalo do číslic a divilo se; zaměnitelné by byly
 dvě číselné klávesnice, které se liší jednou klávesou, a to je přesně důvod,
-proč má `pad2` čtyři sloupce a ne přesunutou fajfku. Za třetí, v měkkém režimu,
-který je výchozí, je výběr menšina otázek závodu, takže se nestřídá plocha co
-otázku, ale spíš v hloučcích. Co by únosné nebylo, je střídat dvě plochy různé
-výšky; proto se výška drží a proto se to hlídá výpočtem, ne okem. Jediná jízda,
-ve které výběr zabere celou obrazovku, je závod podle kapitoly 6 v tvrdém
-režimu, což je přesně ta dvoustrana v sešitě.
+proč má `pad2` čtyři sloupce a ne přesunutou fajfku. Za třetí, výběr je nejvýš
+třetina otázek závodu, v obou režimech, protože to od 14. září 2026 drží
+`PICK_MAX_SHARE`; plocha se tedy nestřídá co otázku, ale spíš v hloučcích, a
+žádná jízda není celá z tlačítek. Co by únosné nebylo, je střídat dvě plochy
+různé výšky; proto se výška drží a proto se to hlídá výpočtem, ne okem.
 
 `record()` bere správnost jako ano nebo ne. U dvou políček to znamená, že
 "podíl dobře, zbytek špatně" spadne do krabičky jako celá chyba. Změna by sáhla
@@ -2556,11 +2577,55 @@ trať.**
 **Co to konkrétně znamená.** Cena za poznávání je, že se dá hádat: u dvou
 tlačítek je hádající dítě úspěšné v půlce případů. Kdyby z toho byla trať,
 platil by závod za hádání a mapa by ukazovala zvládnutí, které neexistuje.
-Uvnitř závodu podle kapitoly to nevadí: kapitola je ta dvoustrana v sešitě,
-dítě ji má tenhle týden ve škole a v měkkém režimu, který je výchozí, je
-výběr menšina otázek.
+Uvnitř závodu podle kapitoly to nevadí, ale jen dokud je výběr opravdu menšina
+otázek: kapitola je ta dvoustrana v sešitě a dítě ji má tenhle týden ve škole,
+jenže závod měří čas a dává body za rychlost, takže kapitola složená jen
+z výběru je dítě časované a bodované za poznávání ze dvou tlačítek.
 
-**Čím je to udržené, pět míst.**
+**Tohle přesně se 14. září 2026 stalo a je opravené.** Držet výběr mimo
+ostatní tratě je půlka hranice; druhá půlka, kolik ho smí být uvnitř školní
+trati, nebyla nikde. Změřeno na čerstvém profilu: kapitola 6 dávala 70,0 %
+otázek s tlačítky, kapitola 17 70,8 %, kapitola 22 71,2 % a v tvrdém režimu
+všechny tři 100 %; kapitola 18 měla 36,1 % a 50,0 %. Sedmdesát procent je tvar
+`focusAndReview()`, tedy kapitola nese závod a zbytek je opakování, a u kapitoly
+složené jen z výběru z toho vyjde závod za poznávání. Spravilo se to dvěma
+různými cestami podle toho, co u které kapitoly stojí v mapě učebnice:
+
+- **Kapitola 17 dostala, co jí v mapě chybělo.** `docs/kurikulum/nns-matysek-3.md`
+  u ní vedle `compare_units` uvádí i `add_sub_100`, a hra to umí, takže má
+  kapitola nově `as100:ALL_H` vedle porovnávání. Výběr v ní klesl na 12,3 %
+  měkce a 16,4 % tvrdě sám od sebe, bez stropu, protože počítání ho přirozeně
+  přehluší. Je to lepší cesta než strop, protože to není brzda, ale učivo:
+  kapitola se odpovídá převážně psaním, protože se převážně psaním odpovídá
+  i v sešitě.
+- **Kapitoly 6, 18 a 22 dostaly strop**, protože jim mapa nic dalšího nenabízí.
+  U šestky uvádí navíc jen číselnou osu, kterou hra neumí; u dvaadvacítky
+  porovnávání veličin, což je zase výběr, takže by to protiváha nebyla; u
+  osmnáctky jsou to dva klíče, převod času a jeho porovnání, a ten druhý je
+  výběr. Strop je `PICK_MAX_SHARE`, **jedna třetina závodu**, a drží ho
+  `capChosen()` na konci školní větve `buildRun()`: spočítá, kolik klíčů výběru
+  v hotovém závodě je, a co je přes čáru, nahradí učivem, které se píše, nejdřív
+  z kapitoly samotné a pak z dřívějších kapitol přes `focusAndReview()`.
+  Po opravě mají všechny tři 30,0 % v obou režimech.
+
+**Tvrdý režim je ošetřený stejně**, a je to důležité: "kapitola a nic jiného"
+nesmí znamenat "hádání a nic jiného". Strop proto platí v obou režimech.
+Náhrada se ale bere **nejdřív z kapitoly samotné**, takže kapitola 17 a 18
+zůstávají i v tvrdém režimu celé uvnitř sebe, změřeno; ven sahají jen kapitoly
+6 a 22, které nic psaného vlastního nemají. U nich tvrdý režim přestává být
+doslovný, což je vědomá cena a je menší než ta druhá. Třetina, ne polovina:
+menšina musí být vidět, že je menšina, a šest otázek z dvaceti je pořád každý
+ze tří klíčů kapitoly 6 dvakrát.
+
+**Hlídá to okruh 7y v `items.test.js`**, a měří, ne předpokládá: projede každou
+kapitolu každé učebnice, která výběr obsahuje, v obou režimech a ve všech
+čtyřech délkách závodu, osmdesátkrát na kombinaci, a spadne, když podíl
+přeleze třetinu, když ji přeleze jediný jednotlivý závod, nebo když naopak
+kapitola v závodě není vůbec. Okruh 5 tamtéž ví, že kapitola s výběrem je
+výjimka z pravidla "tvrdý režim nepustí nic cizího", a ověřuje místo toho,
+že to cizí je vždycky učivo dřívějších kapitol téže učebnice.
+
+**Čím je to udržené, pět míst** (šest i s tím stropem výš).
 
 1. Rodina nemá záznam v `TRACKS`, takže se na mapě neobjeví nikomu a `trackKeys()`
    ji nikde nevrátí.
@@ -2576,8 +2641,10 @@ výběr menšina otázek.
 5. Okruh 7x v `items.test.js` projede **každou trať** včetně šampionátu
    a trati "co ti nejde", s krabičkou plnou výběru a s nastavenou kapitolou 6,
    a ověří, že žádná otázku s výběrem nedostane; a naopak že školní trať na
-   kapitole 6 ji dostat musí, v měkkém režimu jako většinu a v tvrdém celou.
+   kapitole 6 ji dostat musí, v obou režimech, a v žádném z nich ne celou.
    Tenhle okruh je důvod, proč se to za rok nebude muset dohledávat.
+6. `PICK_MAX_SHARE` a `capChosen()` drží podíl uvnitř té jediné trati, kam se
+   výběr dostat smí, a měří to okruh 7y; celé je to popsané výš.
 
 **Sbírka žádná není a místa se nerozsvěcují**, protože velikost sbírky se bere
 z trati; viz oddíl 6. **V heatmapě rodina vidět je**, a je to záměr: rodič má
@@ -2598,8 +2665,9 @@ nikde: body plynou ze správnosti a z času jako všude jinde.
 
 **Hotovo je:** klíče `jp1`, `jp2` a `jd1` s hlavičkou `j`, `pick` v `poolKeys()`,
 kapitola 6 v `src/curricula.js`, vstupní prvek `pick` s vlastní plochou
-`.keypad-pick` a řádkem `.q-pick`, násobitel prahů 1,4, blok v heatmapě a texty
-ve třech jazycích, které obcházejí "cifru" i "řád" a mluví o číslicích.
+`.keypad-pick` a řádkem `.q-pick`, násobitel prahů 1,4, blok v heatmapě, texty
+ve třech jazycích, které obcházejí "cifru" i "řád" a mluví o číslicích,
+a `PICK_MAX_SHARE` s `capChosen()` v `buildRun()`.
 Podrobnosti k prvku v oddílu 7, rozhodnutí v `docs/PLAN.md`, krok E3.
 
 ### Porovnávání jde toutéž cestou a toutéž hlídkou
@@ -2636,8 +2704,9 @@ tří tipů**, ne nejlepší; podrobně v oddílu 4. Tlačítka stojí pořád v
 pořadí na stejném místě, stejně jako u slov.
 
 **Hotovo je:** klíče `jc1`, `jc2`, `ju1`, `ju3` a `ju4` pod toutéž hlavičkou,
-`cmp` v `poolKeys()`, kapitoly 17, 18 a 22 v `src/curricula.js`, čtvrtý tvar
-řádku `layout:"mid"` s třídou `.q-cmp`, `data-glyph` na odpovídací ploše,
+`cmp` v `poolKeys()`, kapitoly 17, 18 a 22 v `src/curricula.js`, z toho
+sedmnáctka i se sčítáním a odčítáním do sta, aby závod nebyl jen o poznávání,
+čtvrtý tvar řádku `layout:"mid"` s třídou `.q-cmp`, `data-glyph` na ploše,
 násobitele prahů 1,6 a 2,2, druhý blok v heatmapě a texty ve třech jazycích
 včetně tří znaků, které jdou přes slovník. Podrobnosti k prvku v oddílu 7,
 k učivu v oddílu 4, rozhodnutí v `docs/PLAN.md`, krok E4.
@@ -2765,7 +2834,11 @@ v `questionHTML()`. Viz oddíl 7.
    existuje a nová jde za touž hranicí, vezme si **tutéž hlavičku klíče**
    a nepíše druhou hlídku; dvě skoro stejné hlídky jsou past.** Dnes jsou
    takové dvě rodiny pod jednou hlavičkou, výběr z nabídky a porovnávání;
-   viz oddíl 12e
+   viz oddíl 12e. **A přidá si k tomu druhou půlku hranice, tedy strop:**
+   držet rodinu mimo ostatní tratě nestačí, když uvnitř té jedné povolené
+   zaplní celý závod. `PICK_MAX_SHARE` a `capChosen()` drží podíl na třetině
+   v obou režimech a okruh 7y v `items.test.js` ho měří na každé kapitole
+   každé učebnice, která rodinu obsahuje
 7. paleta v `ENVS` a **prostředí ve všech třech zbylých světech ve `WORLDS`**,
    jinak bude nová trať ve stezce, na obloze i v hlubině vypadat jako v okruhu;
    paleta si přes `tok` řekne, co se v ní sbírá, a přes `dark`, jestli je noční
@@ -2849,6 +2922,13 @@ obslužné místo.** Krok F si vzal klávesnici, tedy `keypadHTML()`, ale ne
 `tap()`, protože v `tap()` běží stopky, body za rychlost a auto. Dílna má
 proto `jobKey()` a delegovaný posluchač se rozhoduje podle `view.name`.
 Kreslit se ze závodu půjčit dá cokoli; obsluha ne.
+
+**Osmý bod k témuž: obrazovka, která se odpovídá, musí být obsluhovatelná i
+z opravdové klávesnice.** Posluchač `keydown` visí vedle posluchače kliknutí
+a rozhoduje se podle téhož `view.name`, takže nová odpovídací obrazovka si
+do něj dopíše svou větev, a to do své vlastní obsluhy, ne do závodní. Krok F
+na to zapomněl a slovní úlohu nešlo napsat na klávesnici, přestože se v ní
+píše totéž, co v závodě.
 
 ### Kontrolní seznam pro nový kus kačenčí výstroje
 

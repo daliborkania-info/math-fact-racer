@@ -1015,17 +1015,33 @@ for(const c of A.CURRICULA){
     A.DB.profiles=[q]; A.DB.current=q.id;
     if(!A.schoolReady(q)) continue;
     if(!A.visibleTracks(q).some(t=>t.id==='school')){runBad++;console.log('  !!  trat skoly chybi na mape',c.id,ch.n);}
-    const pool=new Set(A.schoolPool(q));
+    const klicePool=A.schoolPool(q), pool=new Set(klicePool);
+    /* Kapitola, ktera se cela odpovida vyberem, je z obou pravidel niz
+       vyjimka, a je to zamer: vyber smi byt nejvys tretina zavodu, tedy
+       ani tvrdy rezim nemuze byt "kapitola a nic jineho" a zbytek se
+       dobira z drivejsich kapitol. Cizi priklad se u ni nezakazuje,
+       overuje se, ze je to opravdu jen ucivo, kterym uz trida prosla.
+       Kapitole, ktera ma vedle vyberu i neco psaneho, se naopak nahrada
+       bere z ni samotne, takze tvrdy rezim zustava doslovny a plati pro
+       ni prvni pravidlo beze zmeny. Kolik vyberu v zavode skutecne je,
+       meri okruh 7y. */
+    const volba=klicePool.length>0 && klicePool.every(A.isPickKey);
+    const drive=new Set();
+    for(const prev of c.chapters){ if(prev.n>=ch.n) break; for(const k of A.poolKeys(prev.pool)) drive.add(k); }
     // tvrdy rezim nesmi pustit nic mimo kapitolu
     q.chapterMode='hard';
     const hard=A.buildRun(q,A.trackById('school'));
     if(hard.length!==20){runBad++;console.log('  !!  spatna delka zavodu',c.id,ch.n,hard.length);}
-    for(const it of hard) if(!pool.has(it.key)){runBad++;console.log('  !!  tvrdy rezim pustil cizi priklad',c.id,ch.n,it.key);break;}
-    // volny rezim musi mit vetsinu z kapitoly
+    for(const it of hard) if(!pool.has(it.key)&&!(volba&&drive.has(it.key))){
+      runBad++;console.log('  !!  tvrdy rezim pustil cizi priklad',c.id,ch.n,it.key);break;}
+    // volny rezim musi mit vetsinu z kapitoly; u kapitoly s vyberem
+    // misto vetsiny aspon tolik, kolik strop dovoli, jinak by v zavode
+    // kapitola, na ktere trida je, skoro nebyla
     q.chapterMode='soft';
     const soft=A.buildRun(q,A.trackById('school'));
     const inCh=soft.filter(it=>pool.has(it.key)).length;
-    if(inCh < soft.length*0.6){runBad++;console.log('  !!  volny rezim ma malo z kapitoly',c.id,ch.n,inCh+'/'+soft.length);}
+    const dolni=volba?Math.floor(soft.length/3):soft.length*0.6;
+    if(inCh < dolni){runBad++;console.log('  !!  volny rezim ma malo z kapitoly',c.id,ch.n,inCh+'/'+soft.length);}
   }
 }
 // bez zvolene ucebnice se trat skoly na mape neobjevi a hra nespadne
@@ -2133,17 +2149,17 @@ for(const tr of A.TRACKS){
   }
 }
 // a naopak: skolni trat na kapitole 6 ji dostat musi, jinak by kapitola
-// byla vybratelna a tise by nedelala nic
-// mekky rezim je vychozi, takze kapitola nese zavod a zbytek je
-// opakovani drivejsich kapitol; tvrdy rezim bere jen kapitolu
+// byla vybratelna a tise by nedelala nic. Vic nez tretinu zavodu ji ale
+// dostat nesmi ani tady, ani v tvrdem rezimu; to meri okruh 7y niz
 const hrSkola=A.buildRun(hr,A.trackById('school'));
 const hrKolik=hrSkola.filter(it=>A.isPickKey(it.key)).length;
-if(hrKolik<hrSkola.length*0.5)
+if(!hrKolik)
   hrsay('skolni trat na kapitole 6 nedostala otazky s vyberem: '+hrKolik+'/'+hrSkola.length);
 if(hrKolik===hrSkola.length) hrsay('mekky rezim zapomnel na opakovani drivejsich kapitol');
 hr.chapterMode='hard';
 const hrTvrdy=A.buildRun(hr,A.trackById('school'));
-if(!hrTvrdy.every(it=>A.isPickKey(it.key))) hrsay('tvrdy rezim pustil do kapitoly 6 neco jineho');
+if(!hrTvrdy.some(it=>A.isPickKey(it.key))) hrsay('tvrdy rezim vynechal ucivo kapitoly 6');
+if(hrTvrdy.every(it=>A.isPickKey(it.key))) hrsay('tvrdy rezim udelal z kapitoly 6 cely zavod za poznavani');
 hr.chapterMode='soft';
 // kapitola 6 uz jde vybrat a nese prave tri klice
 const hrCur3=A.CURRICULA.find(c=>c.id==='nns-matysek-3');
@@ -2155,7 +2171,13 @@ if(A.poolSize(['jp1'])!==4) hrsay('klic vyberu se nepocita jako rodina');
    kapitoly 17 a 22, tedy jednotky a cisla do tisice. Zkousi se to
    zvlast, protoze hlidka drzi klic, ne rodinu, a kdyby porovnavani
    dostalo vlastni hlavicku, tenhle kus by spadl. */
-for(const [kap,ocek] of [[17,'ju1,ju3'],[18,'u4,ju4'],[22,'jc1,jc2']]){
+// Kapitola 17 nese vedle porovnavani jednotek i scitani a odcitani do
+// sta, coz mapa ucebnice u techhle stran uvadi a hra to umi. Je to
+// protivaha, ktera z kapitoly dela zavod za pocitani s doplnkem misto
+// zavodu za poznavani; kapitola 6 a 22 zadnou takovou v mape nemaji
+// (cisla na ose hra neumi, porovnavani veliciny je zase vyber), takze
+// se u nich stejneho ucinku dosahuje stropem v buildRun().
+for(const [kap,ocek] of [[17,'ph1,ph2,ph3,ph4,ph5,nh1,nh2,nh3,nh4,nh5,ju1,ju3'],[18,'u4,ju4'],[22,'jc1,jc2']]){
   const ch=hrCur3.chapters.find(x=>x.n===kap);
   if(!A.isPlayable(ch)) hrsay('kapitola '+kap+' porad nejde vybrat');
   if(A.poolKeys(ch.pool).join()!==ocek) hrsay('kapitola '+kap+' nema cekane klice: '+A.poolKeys(ch.pool).join());
@@ -2173,8 +2195,9 @@ for(const tr of A.TRACKS){
 const hrPor=A.buildRun(hr,A.trackById('school'));
 if(!hrPor.some(it=>A.isCmpKey(it.key))) hrsay('skolni trat na kapitole 22 nedostala porovnavani');
 hr.chapterMode='hard';
-if(!A.buildRun(hr,A.trackById('school')).every(it=>A.isCmpKey(it.key)))
-  hrsay('tvrdy rezim pustil do kapitoly 22 neco jineho');
+const hrPorT=A.buildRun(hr,A.trackById('school'));
+if(!hrPorT.some(it=>A.isCmpKey(it.key))) hrsay('tvrdy rezim vynechal ucivo kapitoly 22');
+if(hrPorT.every(it=>A.isCmpKey(it.key))) hrsay('tvrdy rezim udelal z kapitoly 22 cely zavod za poznavani');
 hr.chapterMode='soft'; hr.chapter=6;
 // zadne misto ve sbirce, protoze zadna sbirka: misto, ktere se rozsviti
 // tam, kam se neda podivat, slibuje vic, nez obrazovka splni
@@ -2188,6 +2211,67 @@ const hrPol2=A.itemFromKey('m6x7');
 for(let i=0;i<8;i++) A.record(hrSb,hrPol2,true,900);
 if(!A.starred(hrSb,'m6x7')) hrsay('hlidka sbirky zhasla i beznemu prikladu');
 console.log('chyb v hranici vyberu z nabidky:',hrBad);
+
+/* 7y. STROP: kolik z jednoho zavodu smi byt vyber z nabidky
+ *
+ * Druha polovina teze hranice, a ta, ktera chybela. Drzet vyber mimo
+ * ostatni trati je k nicemu, kdyz uvnitr skolni trati zaplni cely
+ * zavod: zavod meri cas a dava body za rychlost, takze kapitola slozena
+ * jen z vyberu znamena dite casovane a bodovane za poznavani ze dvou
+ * nebo tri tlacitek. Presne to se dalo namerit: kapitoly 6, 17 a 22
+ * mely v mekkem rezimu kolem 70 % otazek s tlacitky a v tvrdem 100 %.
+ *
+ * Okruh proto meri skutecny podil, ne zamer: projede KAZDOU kapitolu
+ * KAZDE ucebnice, ktera vyber obsahuje, v obou rezimech a ve vsech
+ * delkach zavodu, a spadne, kdyz podil prelezne strop. Meri se pres
+ * mnoho zavodu, protoze jeden zavod by mohl vyjit nizko nahodou, a
+ * hlida se i jednotlivy zavod, protoze strop plati na kazdy zvlast. */
+let syBad=0, syKapitol=0;
+const sysay=m=>{syBad++;if(syBad<12)console.log('  !!  '+m);};
+const SY_STROP=1/3;
+for(const c of A.CURRICULA){
+  for(const ch of c.chapters){
+    const klice=A.poolKeys(ch.pool);
+    if(!klice.some(A.isPickKey)) continue;
+    const syPool=new Set(klice);
+    syKapitol++;
+    for(const delka of [10,15,20,25]){
+      for(const rezim of ['soft','hard']){
+        const sp=A.newProfile('SY'); sp.curriculum=c.id; sp.chapter=ch.n;
+        sp.chapterMode=rezim; sp.qCount=delka; sp.grade=3;
+        A.DB.profiles=[sp]; A.DB.current=sp.id;
+        const strop=Math.floor(delka*SY_STROP);
+        let celkem=0, vyber=0, nejvic=0, prazdnych=0;
+        for(let i=0;i<80;i++){
+          const run=A.buildRun(sp,A.trackById('school'));
+          if(run.length!==delka){sysay(c.id+' '+ch.n+' '+rezim+': zavod ma '+run.length+' otazek misto '+delka);break;}
+          const kolik=run.filter(it=>A.isPickKey(it.key)).length;
+          celkem+=run.length; vyber+=kolik;
+          if(kolik>nejvic) nejvic=kolik;
+          if(!run.some(it=>syPool.has(it.key))) prazdnych++;
+        }
+        if(!celkem) continue;
+        const podil=vyber/celkem;
+        if(nejvic>strop)
+          sysay(c.id+' kap '+ch.n+' '+rezim+' q'+delka+': jeden zavod mel '+nejvic+' otazek s vyberem, strop je '+strop);
+        if(podil>SY_STROP)
+          sysay(c.id+' kap '+ch.n+' '+rezim+' q'+delka+': vyber je '+(100*podil).toFixed(1)+' % zavodu, strop je '+(100*SY_STROP).toFixed(1)+' %');
+        // a druha strana: kapitola, kterou trida prave bere, v zavode
+        // byt musi, jinak by strop misto doplnku udelal nic. Meri se
+        // cely pool kapitoly, ne jen jeho vybirana cast: kapitola 17 ma
+        // vedle porovnavani i scitani a v desetiotazkovem zavode se ty
+        // dva klice porovnavani nemusi trefit, a to je v poradku
+        if(prazdnych)
+          sysay(c.id+' kap '+ch.n+' '+rezim+' q'+delka+': '+prazdnych+' z 80 zavodu nemelo z kapitoly nic');
+        if(delka===20 && rezim==='soft')
+          console.log('       '+c.id+' kap '+ch.n+': vyber '+(100*podil).toFixed(1)+' % mekce, nejvic '+nejvic+' z '+delka);
+      }
+    }
+  }
+}
+// okruh, ktery nic nenamerí, nic nehlida
+if(syKapitol<3) sysay('kapitol s vyberem se naslo jen '+syKapitol+', okruh nema co merit');
+console.log('kapitol s vyberem:',syKapitol,'| chyb ve stropu vyberu:',syBad);
 
 // 7k. dlouhe zadani si rekne o mensi pismo, kratke ne
 let qhBad=0;
@@ -2605,6 +2689,37 @@ const RESI={
 };
 const slSay=(k,m)=>{slBad++; if(slBad<10) console.log('  !!  '+m+'   ['+k+']');};
 const slJob=A.jobById('words');
+/* Ocekavane tvary predmetu, opsane rucne, ne vytazene z kodu hry.
+   Do kroku F se tady volala tataz thingLabel() a tentyz pickForm(),
+   ktere pouziva generator, takze kontrola videla chybejici tvar, ale ne
+   chybny: kdyz se hranice ceskeho tvaru posunula z "pod pet" na "pod
+   ctyri", zacala hra rikat "4 susenek" a test prosel. Tabulka je proto
+   vlastni a je v ni prvni tvar pro dve az ctyri a druhy pro pet a vic.
+   Ciselna hranice je tady schvalne napsana jeste jednou: to ona se
+   overuje. Anglictina ma oba tvary stejne, nemcina taky, a prave proto
+   stoji v tabulce oba: kdyby se nekdy lisit zacaly, je kam to napsat. */
+const SL_TVARY={
+  cs:{apple:['jablka','jablek'], marble:['kuličky','kuliček'], sticker:['samolepky','samolepek'],
+      crayon:['pastelky','pastelek'], chestnut:['kaštany','kaštanů'], screw:['šroubky','šroubků'],
+      cookie:['sušenky','sušenek'], card:['kartičky','kartiček']},
+  en:{apple:['apples','apples'], marble:['marbles','marbles'], sticker:['stickers','stickers'],
+      crayon:['crayons','crayons'], chestnut:['chestnuts','chestnuts'], screw:['screws','screws'],
+      cookie:['cookies','cookies'], card:['cards','cards']},
+  de:{apple:['Äpfel','Äpfel'], marble:['Murmeln','Murmeln'], sticker:['Aufkleber','Aufkleber'],
+      crayon:['Buntstifte','Buntstifte'], chestnut:['Kastanien','Kastanien'], screw:['Schrauben','Schrauben'],
+      cookie:['Kekse','Kekse'], card:['Karten','Karten']}};
+const slTvar=(lang,th,n)=>(SL_TVARY[lang][th]||[])[n<5?0:1];
+// rucne psana tabulka, ktera o novem predmetu nevi, kontroluje mene, nez
+// se zda, takze o nem musi vedet
+for(const lang of ['cs','en','de']) for(const th of A.W_THINGS)
+  if(!slTvar(lang,th,2)||!slTvar(lang,th,5)){slBad++;console.log('  !!  tabulka tvaru nezna predmet '+th+' v '+lang);}
+/* Tvar se overuje u sveho cisla, ne kdekoli ve vete: kdyz se predmet
+   ve vete opakuje, pouhe "nekde tam je" by chybny tvar u jednoho cisla
+   schovalo za spravny u druheho. Mezi cislem a predmetem smi stat
+   nejvys jedno slovo, protoze anglictina rika "35 more apples"; cislo
+   to byt nesmi, jinak by se kontrola svezla se sousednim udajem. */
+const slEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const slMaTvar=(veta,n,tvar)=>new RegExp('(^|\\D)'+n+' ([^\\d\\s]+ )?'+slEsc(tvar)).test(veta);
 for(const lang of ['cs','en','de']){
   A.DB.lang=lang; A.applyLang();
   for(const k of slJob.keys) for(let i=0;i<1000;i++){
@@ -2643,20 +2758,30 @@ for(const lang of ['cs','en','de']){
     if(/\{\d\}/.test(veta)){slSay(k,lang+': ve vete zustal nedosazeny placeholder: '+veta);continue;}
     let tvarBad=false;
     for(const at of sh.nounAt){
-      const tvar=A.thingLabel(it.thing,it.nums[at]);
-      if(veta.indexOf(tvar)<0){tvarBad=true;slSay(k,lang+': chybi tvar predmetu pro '+it.nums[at]+' ('+tvar+'): '+veta);break;}
+      const n=it.nums[at], tvar=slTvar(lang,it.thing,n);
+      if(!slMaTvar(veta,n,tvar)){tvarBad=true;slSay(k,lang+': u cisla '+n+' nestoji cekany tvar predmetu ('+tvar+'): '+veta);break;}
     }
     if(tvarBad) continue;
     // 7. a otazka sama predmet jmenuje taky, tedy v tvaru pro pet a vic
-    if(veta.indexOf(A.thingLabel(it.thing,5))<0){
+    if(veta.indexOf(slTvar(lang,it.thing,5))<0){
       slSay(k,lang+': v otazce chybi predmet: '+veta);continue;}
   }
 }
 console.log('zkontrolovano slovnich uloh:',slN,'| chyb:',slBad);
-// tvary predmetu se musi lisit tam, kde se lisit maji: cesky jinak dve
-// az ctyri a jinak pet a vic, jinak by prosla veta "5 jablka"
-A.DB.lang='cs'; A.applyLang();
+/* Tvary predmetu proti rucni tabulce, primo a ve vsech trech jazycich.
+   Kontroluje se okoli hranice, tedy ctyrka a petka, protoze prave ji
+   jde posunout a prave tam vznika "5 jablka". Kdyby se tady znovu
+   volalo to, co tvar vyrabi, neoverovalo by se nic. */
 let slFormBad=0;
+for(const lang of ['cs','en','de']){
+  A.DB.lang=lang; A.applyLang();
+  for(const th of A.W_THINGS) for(const n of [2,3,4,5,6,12]){
+    const cekano=slTvar(lang,th,n);
+    if(A.thingLabel(th,n)!==cekano){slFormBad++;
+      if(slFormBad<12) console.log('  !!  '+lang+': '+n+' '+th+' ma tvar '+A.thingLabel(th,n)+', ceka se '+cekano);}
+  }
+}
+A.DB.lang='cs'; A.applyLang();
 for(const th of A.W_THINGS){
   if(!A.thingLabel(th,5)){slFormBad++;console.log('  !!  predmet nema tvar',th);continue;}
   if(A.thingLabel(th,3)===A.thingLabel(th,5)){slFormBad++;console.log('  !!  cesky predmet nema zvlastni tvar pro pet a vic',th);}

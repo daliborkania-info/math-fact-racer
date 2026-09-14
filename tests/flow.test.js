@@ -516,6 +516,18 @@ console.log('--- slovni ulohy v dilne ---');
 // jako kresba, nikdy jako obsluha: tap() patri zavodu i s merenim casu
 // a body za rychlost, takze se tady hlida, ze se zavodni stav ani
 // nezalozi a ze prumerny cas zustane presne tam, kde byl.
+/* Do dilny se schvalne prichazi se zavodem, ktery ceka na odpoved:
+   tlacitko ven ze zavodu RUN nemaze, takze presne takhle vypada stav,
+   kdyz dite odejde uprostred otazky. Do teto opravy se otisk bral az po
+   dojetem zavodu, tedy ve stavu "feedback", ve kterem tap() vypadne na
+   prvnim radku, at se vola odkud chce; kontrola pak nemohla spadnout,
+   ani kdyby klavesy dilny opravdu pres tap() sly. Overeno mutaci. */
+ev('go("map")');
+click(qa('[data-act="play"]').find(b=>b.dataset.id==='t1')); click(q('[data-go]'));
+click(q('[data-act="quit"]')); click(q('[data-yes]'));
+ok('do dilny se prichazi se zavodem, ktery ceka na odpoved',
+   ev('RUN && RUN.state')==='ask' && ev('RUN.typed')==='',
+   'stav '+ev('RUN && RUN.state')+', napsano "'+ev('RUN && RUN.typed')+'"');
 ev('go("shop")');
 const msPred=DBg().profiles[0].msN, castiPred=DBg().profiles[0].parts;
 click(qa('[data-act="jobstart"]').find(b=>b.dataset.id==='words'));
@@ -530,12 +542,13 @@ ok('ani u psane odpovedi nejsou v dilne stopky ani body',
 const wans=()=>ev('JOB.items[JOB.idx].answer');
 const wkey=k=>click(qa('.tray.pad [data-k]').find(b=>b.dataset.k===k));
 const wtype=s=>String(s).split('').forEach(wkey);
+const wkeyb=k=>d.dispatchEvent(new w.KeyboardEvent('keydown',{key:k,bubbles:true}));
 // otisk zavodu tesne pred psanim: kdyby klavesy sly pres tap(), zmenil
 // by se, a s nim by v dilne zacaly bezet stopky posledniho zavodu
-const zavodPred=ev('RUN ? [RUN.idx,RUN.typed,RUN.coins,RUN.state,RUN.t0].join("|") : "null"');
+const otisk=()=>ev('RUN ? [RUN.idx,RUN.typed,RUN.coins,RUN.state,RUN.t0].join("|") : "null"');
+const zavodPred=otisk();
 wtype(wans());
-ok('klavesa v dilne se zavodnim stavem nehne',
-   ev('RUN ? [RUN.idx,RUN.typed,RUN.coins,RUN.state,RUN.t0].join("|") : "null"')===zavodPred, zavodPred);
+ok('klavesa v dilne se zavodnim stavem nehne', otisk()===zavodPred, zavodPred+' -> '+otisk());
 ok('napsane cislo je videt na pultu', q('#counter').textContent.indexOf(String(wans()))>=0,
    q('#counter').textContent);
 const predGumou=ev('JOB.typed');
@@ -547,6 +560,22 @@ wkey('ok');
 ok('fajfka na klavesnici odevzda ulohu dilny', ev('JOB.state')==='done-step' && ev('JOB.ok')===1);
 const wkryto=()=>qa('#reveal path').filter(x=>x.getAttribute('fill')==='#f2e3ca').length;
 ok('kruh se odkryva i u psane odpovedi', wkryto()===5, wkryto()+' zakrytych');
+click(q('[data-act="jobcheck"]'));
+/* Klavesnice pod prsty, ne jen nakreslena. V zavode se odpoved napsat
+   da, takze v dilne taky: jinak by dite u notebooku melo pult a nemelo
+   cim psat, presne na obrazovce, ktera tech dvanact klaves kresli. Jde
+   tudy obsluha dilny, ne zavodni tap(), takze se otisk zavodu nesmi
+   hnout ani tady. */
+const wOdp=String(wans());
+wOdp.split('').forEach(wkeyb);
+ok('fyzicka klavesnice pise i v dilne', ev('JOB.typed')===wOdp, ev('JOB.typed')+' vs '+wOdp);
+wkeyb('Backspace');
+ok('guma na klavesnici bere v dilne taky', ev('JOB.typed')===wOdp.slice(0,-1), ev('JOB.typed'));
+wkeyb(wOdp.slice(-1));
+wkeyb('Enter');
+ok('enter na klavesnici odevzda ulohu dilny',
+   ev('JOB.state')==='done-step' && ev('JOB.ok')===2, 'stav '+ev('JOB.state')+', hotovo '+ev('JOB.ok'));
+ok('psani na klavesnici v dilne zavodnim stavem nehne', otisk()===zavodPred, otisk());
 click(q('[data-act="jobcheck"]'));
 let wn=0;
 while(ev('view.name')==='job' && wn<20){

@@ -879,8 +879,15 @@ html[data-o="wide"] .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1
      same pixels. The key still grows with its digit, but from a lower
      floor: at 44 px the first year's keypad is the height everybody
      else's is, which leaves the question the 137 px it needs instead of
-     119, and the digit is still 32.5 px in a key of 55. */
-  .key{min-height:calc(44px * var(--tx))}
+     119, and the digit is still 32.5 px in a key of 55.
+     It is written as --keyh and not as a min-height on .key. Step E1
+     gave the key a single fixed height read from that property, and
+     from that moment a floor underneath it could never win: the rule
+     was still here, still read, and did nothing, which put 30 px back
+     on a first year's keypad on a 360 x 640 phone and took them off the
+     question. Moving the property is also what carries the floor to the
+     surface made of choices, which works its own heights out of it. */
+  html{--keyh:max(clamp(50px,8.6vh,64px), calc(44px * var(--tx)))}
 }
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}

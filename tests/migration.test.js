@@ -244,10 +244,22 @@ for(const c of FX.cases){
        chybi.length?'z mapy zmizelo '+chybi.join(','):vidi.length+' trati na mape');
   }
 
-  if(c.expectChapter!==null){
-    const ch=after.profiles[0].chapter;
-    ok('kapitola se srovnala jen dozadu', ch===c.expectChapter,
-       'kapitola '+before.profiles[0].chapter+' -> '+ch+', cekano '+c.expectChapter);
+  if(c.expectChapter!==null && c.expectChapter!==undefined){
+    const ch=after.profiles[0].chapter, mela=before.profiles[0].chapter;
+    ok('kapitola skoncila tam, kde ma', ch===c.expectChapter,
+       'kapitola '+mela+' -> '+ch+', cekano '+c.expectChapter);
+    /* A smer, ktery ma kontrola v nazvu. Do teto opravy se porovnavalo
+       jen s cislem ve fixture, takze se overovalo, kam kapitola dosla,
+       ne ze nesla dopredu; a protoze po kroku E4 uz zadna fixtura
+       nemela ocekavani mensi nez ulozenou kapitolu, nespoustela
+       srovnani dozadu ani jedna. Tohle je pravidlo z oddilu 3 psane
+       primo: ulozena kapitola se smi posunout jen zpatky.
+       Jedina povolena vyjimka je profil, jehoz kapitola je pred prvni
+       hratelnou; ten couvnout nema kam, a musi si o to rict polem
+       expectForward, aby to nikdy nebylo tise. */
+    const dopredu=typeof mela==='number' && typeof ch==='number' && ch>mela;
+    ok('kapitola se nikdy neposunula dopredu', !dopredu || c.expectForward===true,
+       mela+' -> '+ch+(c.expectForward?' (povolena vyjimka: driv nic hratelneho neni)':''));
   }
   dom.window.close();
 }

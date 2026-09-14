@@ -24,7 +24,12 @@
   "expectGrade = rocnik, ve kterem profil po nacteni skonci; starsi",
   "              profil zadny nema a dostane nejvyssi, protoze nizsi by",
   "              mu vzal trati, ktere uz na mape vidi",
-  "expectDuck = profil ma po nacteni dostat gumovou kacenku mezi zavodniky a k ni prazdne duckParts a duck, aniz by cokoli ztratil"
+  "expectDuck = profil ma po nacteni dostat gumovou kacenku mezi zavodniky a k ni prazdne duckParts a duck, aniz by cokoli ztratil",
+  "Srovnani kapitoly dozadu spousti dnes jedina fixtura,",
+  "v1-kapitola-porad-bez-generatoru: vsem ostatnim kapitola generator",
+  "mezitim dostala. Kdyz nekdy dostane i ta, pribude sem dalsi profil",
+  "s kapitolou, ktera hratelna neni, jinak by kontrola smeru zustala",
+  "bez prace."
  ],
  "cases": [
   {
@@ -393,6 +398,68 @@
    }
   },
   {
+   "id": "v1-kapitola-porad-bez-generatoru",
+   "note": "zari 2026, tyz rocnik jako pripad nad tim, jen s ulozenou kapitolou 19, tedy se zlomky. Ty generator nemaji, protoze hra nema, cim by se zlomek napsal, takze tahle kapitola hratelna neni a jen tak nebude. Profil se proto musi srovnat dozadu na nejblizsi drivejsi hratelnou, tedy na 18, a nikdy ne dopredu na 20. Je to jedina fixtura, ktera srovnani dozadu opravdu spousti: u vsech ostatnich kapitola generator mezitim dostala, takze uz se nesrovnavaji a smer by se nemel na cem overit",
+   "expectOpen": [
+    "t1",
+    "a20"
+   ],
+   "expectChapter": 18,
+   "db": {
+    "current": "pold4b",
+    "sound": true,
+    "lang": "cs",
+    "pin": "abc123",
+    "profiles": [
+     {
+      "id": "pold4b",
+      "name": "Ota",
+      "lang": "cs",
+      "facts": {
+       "m5x5": {
+        "lv": 2,
+        "reps": 3,
+        "ok": 2,
+        "bad": 1,
+        "best": 3000,
+        "seen": 1757000000000
+       }
+      },
+      "best": {},
+      "done": {},
+      "owned": [
+       "ri_auto",
+       "ri_raketa",
+       "ri_mech",
+       "pet_kiki",
+       "pet_lupi",
+       "pet_mecha"
+      ],
+      "runner": "ri_auto",
+      "xp": {},
+      "coins": 5,
+      "trackRuns": {},
+      "force": {},
+      "autoUnlock": true,
+      "qCount": 20,
+      "speedMode": "fast",
+      "curriculum": "nns-matysek-3",
+      "chapter": 19,
+      "chapterMode": "soft",
+      "streak": 0,
+      "lastDay": null,
+      "bestStreak": 0,
+      "runs": 1,
+      "totalOk": 15,
+      "totalAns": 20,
+      "msSum": 50000,
+      "msN": 20,
+      "created": 1757100000000
+     }
+    ]
+   }
+  },
+  {
    "id": "v2-pred-dilnou",
    "note": "zari 2026, profil z verze s tisicovkou, ale jeste bez dilny: nezna parts, paints, paint ani jobRuns",
    "expectOpen": [
@@ -488,7 +555,7 @@
   },
   {
    "id": "v3-pred-nasobenim-mimo-nasobilku",
-   "note": "zari 2026, profil z verze s dilnou, ale jeste bez rodiny za nasobilkou. Hlida, ze se nova trat starsimu profilu sama neotevre, kdyz si ji nezaslouzil. Ulozenou ma kapitolu 27, ktera tehdy generator nemela; zari 2026 ho dostala, tedy deleni se zbytkem, takze uz se srovnavat nema a profil na ni zustane. Zamrazeny profil zustava nedotceny, meni se jen ocekavani, protoze dite tim pristup ziskalo, neztratilo. Srovnani dozadu hlida od te chvile v13",
+   "note": "zari 2026, profil z verze s dilnou, ale jeste bez rodiny za nasobilkou. Hlida, ze se nova trat starsimu profilu sama neotevre, kdyz si ji nezaslouzil. Ulozenou ma kapitolu 27, ktera tehdy generator nemela; zari 2026 ho dostala, tedy deleni se zbytkem, takze uz se srovnavat nema a profil na ni zustane. Zamrazeny profil zustava nedotceny, meni se jen ocekavani, protoze dite tim pristup ziskalo, neztratilo. Samotne srovnani dozadu tedy tenhle pripad od te chvile nespousti; drzi ho v1-kapitola-porad-bez-generatoru",
    "expectOpen": [
     "t1",
     "t2",
@@ -2257,7 +2324,7 @@
   },
   {
    "id": "v13-pred-delenim-se-zbytkem",
-   "note": "zari 2026, tretak z verze pred tratí Co zbyde, tedy pred delenim se zbytkem. Celou malou nasobilku umi, takze si deleni zaslouzene odemkl a zavodil na nem, ale samo deleni drzi na 1/3, tedy pod branou 0,6, kterou se nova trat otevira; sama se mu tedy otevrit nesmi, presne jako to hlida v3 u trati za nasobilkou, v8 u retezce, v9 u poradi operaci, v10 u kulatych cisel a v11 u prevodu. Poradi operaci uz otevrene ma, protoze celou nasobilku umi, a to je spravne: brana se posuzuje podle zasluhy, ne podle stari profilu. Datovy model se nemeni, fixture je tu kvuli te brane a kvuli tomu, ze pribyla trat na mape. Ulozenou ma navic kapitolu 22, ktera generator nema a mit nebude, dokud se neumi porovnavani, takze se musi srovnat dozadu na nejblizsi hratelnou. Do zari 2026 to byla kapitola 20; kapitola 21 tehdy dostala generator, tedy rozklad cisla, takze se srovnavala na 21. Od kroku E4 ma generator i sama kapitola 22, tedy porovnavani cisel do tisice, takze se nesrovnava vubec a profil na ni zustava. Dite tim pristup ziskalo, neztratilo, coz je ta strana pravidla, ktera je v poradku; kontrola se nevyskrtava, jen se opravuje cislo. Kontrolu srovnani dozadu drzi dal v3 a v12",
+   "note": "zari 2026, tretak z verze pred trati Co zbyde, tedy pred delenim se zbytkem. Celou malou nasobilku umi, takze si deleni zaslouzene odemkl a zavodil na nem, ale samo deleni drzi na 1/3, tedy pod branou 0,6, kterou se nova trat otevira; sama se mu tedy otevrit nesmi, presne jako to hlida v3 u trati za nasobilkou, v8 u retezce, v9 u poradi operaci, v10 u kulatych cisel a v11 u prevodu. Poradi operaci uz otevrene ma, protoze celou nasobilku umi, a to je spravne: brana se posuzuje podle zasluhy, ne podle stari profilu. Datovy model se nemeni, fixture je tu kvuli te brane a kvuli tomu, ze pribyla trat na mape. Ulozenou ma navic kapitolu 22: do zari 2026 se srovnavala dozadu na 20, pak na 21, a od kroku E4 ma generator sama, tedy porovnavani cisel do tisice, takze se nesrovnava vubec a profil na ni zustava. Dite tim pristup ziskalo, neztratilo, coz je ta strana pravidla, ktera je v poradku; kontrola se nevyskrtava, jen se opravuje cislo. Srovnani dozadu proto ani tenhle pripad uz nespousti a drzi ho v1-kapitola-porad-bez-generatoru",
    "expectOpen": [
     "a3",
     "a5",

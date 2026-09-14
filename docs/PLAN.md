@@ -1132,6 +1132,23 @@ dovednost, a sbírka trati má devět míst místo pěti set.
 celá chyba. Změna by sáhla na datový model a na migrační test, takže se
 v E1 nedělá; zapsat do `PROJECT-STATE.md` jako známé zjednodušení.
 
+**Co našla kontrola a jak se to spravilo: E1 potichu zrušil rozhodnutí kroku
+C4 o výšce klávesy.** Plocha s tlačítky potřebovala znát výšku klávesy číslem,
+aby si z ní spočítala své vlastní řádky, takže E1 přepsal `.key` z dvojice
+`height` a `min-height` na jediné `height:var(--keyh)`. Tím se ale z podlahy
+pro nízký displej, `.key{min-height:calc(44px * var(--tx))}` v bloku
+`@media (max-height:660px)`, stalo pravidlo pod pevnou výškou, které nikdy
+nevyhraje. Prvňákovi tím na 360 × 640 narostla klávesnice ze 244 na 274 px
+a o těch třicet přišla otázka; na 320 × 568 je to +30, +24 a +8 px pro první
+až třetí ročník. Neuřízlo se nic, protože zóna otázky roluje, takže si toho
+nevšiml ani obrázek. Spravené je to tak, že nízký displej snižuje `--keyh`
+samotné, tedy `max(clamp(50px,8.6vh,64px), calc(44px * var(--tx)))`; čísla
+sedí zpátky na hodnotách C4 a podlaha se tím přenesla i na plochu s tlačítky,
+která si výšku z `--keyh` počítá. `tests/style.test.js` na to má dvě kontroly:
+nízký displej musí podlahu opravdu snížit, a **žádná podlaha klávesy nesmí
+ležet pod pevnou výškou**, což je ta obecná, která zachytí i příští mrtvé
+přebití. Ověřeno mutací, tedy vrácením původního `min-height` na `.key`.
+
 ### E2. `pad3` a `place_value`, kapitola 21 — HOTOVO 14. září 2026
 
 Tři políčka stovky, desítky, jednotky; `pad3` je rozšíření `pad2` na `n`
@@ -1267,6 +1284,24 @@ kapitola 6 ho dostat musí.
   a výška zůstává, a v měkkém režimu je výběr menšinou otázek; podmínku
   v `buildRun()` a `reachedKeys()` proto nepotřebujeme.
 
+**Co našla kontrola a jak se to spravilo: ta menšina žádná nebyla.** Věta
+o menšině stála v plánu i ve stavu projektu, ale nedržel ji žádný kód.
+Změřeno na čerstvém profilu: kapitola 6 dávala 70,0 % otázek s tlačítky
+v měkkém režimu a 100 % v tvrdém. Sedmdesát procent není náhoda, je to tvar
+`focusAndReview()`, tedy kapitola nese závod a zbytek je opakování; u kapitoly,
+jejíž celý pool se odpovídá výběrem, z toho vyjde závod za poznávání, a závod
+měří čas a dává body za rychlost. Šestce navíc nešlo dosypat nic jiného, mapa
+učebnice u ní kromě sudých, lichých a počtu číslic uvádí jen číselnou osu,
+kterou hra neumí. Přibyl proto **strop `PICK_MAX_SHARE`, jedna třetina závodu,
+a `capChosen()` na konci školní větve `buildRun()`**: co je přes čáru, nahradí
+učivem, které se píše, nejdřív z kapitoly samotné a teprve když žádné nemá,
+z dřívějších kapitol. Platí v obou režimech, protože "kapitola a nic jiného"
+nesmí znamenat "hádání a nic jiného"; tvrdý režim tím přestává být doslovný
+jen u kapitol, které kromě výběru nic vlastního nemají, tedy u šestky
+a dvaadvacítky. Po opravě je kapitola 6 na 30,0 % v obou režimech. Měří to
+nový okruh 7y v `items.test.js` přes všechny kapitoly, oba režimy a všechny
+čtyři délky závodu; ověřeno mutací, tedy vypnutím stropu.
+
 ### E4. `cmp`, `compare_numbers` a `compare_units`, kapitoly 22 a 17 — HOTOVO 14. září 2026
 
 Poslední schválně, viz `PROJECT-STATE.md`, oddíl 12d. **Tímhle je hotový celý
@@ -1338,6 +1373,27 @@ na kapitole 22 porovnávání dostat musí.
   812 × 375 a 525 px na tabletu 1024 × 768 a výšku si dělí stejně jako
   klávesnice. Znak sám je 25 px široký, proto se sází 48 px a ne 26 jako slovo.
 
+**Co našla kontrola a jak se to spravilo: kapitoly 17 a 22 byly na tom stejně
+jako šestka.** Naměřeno 70,8 % a 71,2 % výběru v měkkém režimu a 100 %
+v tvrdém, kapitola 18 pak 36,1 % a 50,0 %. Spravené je to dvěma různými
+cestami a rozhoduje o tom mapa učebnice, ne pohodlnost:
+
+- **Kapitola 17 dostala `as100:ALL_H`**, protože `nns-matysek-3.md` u těch
+  stran vedle `compare_units` uvádí i `add_sub_100` a hra to umí. Výběr v ní
+  spadl na 12,3 % měkce a 16,4 % tvrdě, a to bez stropu: kapitola se odpovídá
+  převážně psaním, protože se převážně psaním odpovídá i v sešitě. To je lepší
+  výsledek než strop, protože to není brzda, ale učivo.
+- **Kapitoly 22 a 18 mají strop z E3.** Dvaadvacítce mapa nabízí navíc jen
+  porovnávání veličin, což je zase výběr, takže protiváha to není; osmnáctka má
+  dva klíče a jeden z nich je výběr. Obě jsou po opravě na 30,0 % v obou
+  režimech.
+
+Okruh 7x v `items.test.js` tím přestal tvrdit, že tvrdý režim pustí do kapitoly
+6 a 22 jen výběr; ověřuje se místo toho, že výběr v závodě je a že netvoří celý
+závod. Okruh 5 tamtéž ví, že kapitola s výběrem je výjimka z pravidla "tvrdý
+režim nepustí nic cizího", a hlídá, že to cizí je vždycky učivo dřívějších
+kapitol téže učebnice.
+
 ---
 
 ## Krok F. Vlna C, slovní úlohy v dílně — HOTOVO 14. září 2026
@@ -1389,6 +1445,34 @@ okraj. Na telefonu 375 × 812 končí celý sloupec kolem 760 px.
 **Čísla, která se posunula:** žádné z mapy. Třeťák vidí v dílně tři zakázky
 místo dvou a jeho sbírka dílny má devět míst místo šesti. Zamčené kapitoly
 zůstaly tři, protože zakázka žádnou neodemyká.
+
+**Co našla kontrola a jak se to spravilo.** Tři věci, a dvě z nich byly
+kontroly, které nemohly spadnout.
+
+- **Slovní úlohu nešlo napsat na opravdové klávesnici.** Klávesnice počítače
+  visela na `document.onkeydown`, který zakládal `mountGame()` a který se
+  vracel, když nestála závodní obrazovka. Dítě u notebooku tedy umělo napsat
+  příklad v závodě a slovní úlohu ne, na obrazovce, která těch dvanáct kláves
+  kreslí. Posluchač `keydown` teď visí vedle posluchače kliknutí, jednou pro
+  celou hru, a rozhoduje se podle téhož `view.name`: `game` do `tap()`, `job`
+  do `jobKey()`, jinde nic. Šipka zůstala závodu, protože přepíná mezi
+  odpovídacími políčky a dílna žádná nemá. Ze závodu se tím do dílny nedostalo
+  nic a `flow.test.js` to hlídá otiskem rozehraného závodu.
+- **Kontrola "klavesa v dilne se zavodnim stavem nehne" brala otisk po
+  dojetém závodě**, tedy ve stavu `feedback`, ve kterém `tap()` vypadne na
+  prvním řádku, ať se volá odkud chce. Ověřeno mutací: když se udělalo, že
+  každá klávesa dílny jde i přes závodní `tap()`, test prošel. Teď se do dílny
+  přichází se závodem, který čeká na odpověď, protože odchod ze závodu
+  uprostřed otázky `RUN` nemaže; mutace od té chvíle padá.
+- **Kontrola tvarů předmětu volala tutéž `thingLabel()` a `pickForm()`, které
+  tvar vyrábějí.** Viděla tedy chybějící tvar, ale ne chybný: po posunu hranice
+  z `n < 5` na `n < 4` říkala čeština "4 sušenek" a test procházel. Okruh má
+  nově **vlastní tabulku očekávaných tvarů** pro všech osm předmětů ve všech
+  třech jazycích, ověřuje tvar **u jeho čísla** (mezi číslem a předmětem smí
+  stát nejvýš jedno slovo, kvůli anglickému "35 more apples") a navíc porovnává
+  `thingLabel()` proti té tabulce přímo na hranici, tedy na čtyřce a pětce.
+  Nový předmět bez řádku v tabulce test shodí. Ověřeno toutéž mutací, padá
+  obojí.
 
 ---
 

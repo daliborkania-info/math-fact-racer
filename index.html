@@ -898,8 +898,15 @@ html[data-o="wide"] .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1
      same pixels. The key still grows with its digit, but from a lower
      floor: at 44 px the first year's keypad is the height everybody
      else's is, which leaves the question the 137 px it needs instead of
-     119, and the digit is still 32.5 px in a key of 55. */
-  .key{min-height:calc(44px * var(--tx))}
+     119, and the digit is still 32.5 px in a key of 55.
+     It is written as --keyh and not as a min-height on .key. Step E1
+     gave the key a single fixed height read from that property, and
+     from that moment a floor underneath it could never win: the rule
+     was still here, still read, and did nothing, which put 30 px back
+     on a first year's keypad on a 360 x 640 phone and took them off the
+     question. Moving the property is also what carries the floor to the
+     surface made of choices, which works its own heights out of it. */
+  html{--keyh:max(clamp(50px,8.6vh,64px), calc(44px * var(--tx)))}
 }
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -2436,7 +2443,11 @@ const CURRICULA = [
              pool:{variant:"missing", as100:ALL_H, mult:ALL_TABLES}},
       // the one double page whose questions are answered by choosing
       // rather than by writing; it is a supplement inside this track and
-      // has no track of its own, see J_BUCKETS in app.js
+      // has no track of its own, see J_BUCKETS in app.js.
+      // The map lists one more topic for these pages, the number line,
+      // and the game has no generator for it, so there is nothing else
+      // to put here: the race is kept mostly recall by PICK_MAX_SHARE,
+      // which fills the rest of it from the chapters before this one
       {n:6,  name:"Jednociferná až trojciferná, sudá a lichá", src:"7. díl, s. 14–15", pool:{pick:ALL_J}},
       // the seventh part is still under a hundred, so only two digit numbers
       {n:7,  name:"Zaokrouhlování na desítky",            src:"7. díl, s. 16",    pool:{round:["o1"]}},
@@ -2457,9 +2468,14 @@ const CURRICULA = [
       // and puts two quantities side by side to be compared, which is a
       // conversion done in the head; it does not yet ask for the
       // conversion written down, that is chapter 29. Weight is not
-      // compared and CMP_BUCKETS in app.js says why
+      // compared and CMP_BUCKETS in app.js says why.
+      // The sums within a hundred are the map's third topic for this
+      // chapter and they are here for two reasons at once: the pages do
+      // add and subtract alongside the units, and comparing is answered
+      // by choosing, so a chapter made of nothing else would race a
+      // child against the clock on recognising. See PICK_MAX_SHARE
       {n:17, name:"Jednotky délky, hmotnosti a objemu",   src:"7. díl, s. 40–43",
-             pool:{cmp:ALL_CMP_U}},
+             pool:{cmp:ALL_CMP_U, as100:ALL_H}},
       // the clock and the calendar are converted here, and the same
       // pages put two lengths of time next to each other
       {n:18, name:"Jednotky času",                        src:"7. díl, s. 44–45",
@@ -2472,7 +2488,10 @@ const CURRICULA = [
       {n:21, name:"Obor do tisíce, číselná osa",          src:"8. díl, s. 2–5",   pool:{split:ALL_V}},
       // the other double page answered by choosing, and the only one
       // about comparing numbers rather than quantities: two of a size,
-      // decided by their places rather than by how many figures they have
+      // decided by their places rather than by how many figures they have.
+      // The map lists comparing quantities here as well, and that is
+      // answered by choosing too, so it would be no counterweight to it;
+      // like chapter 6 this one leans on PICK_MAX_SHARE instead
       {n:22, name:"Porovnávání čísel do tisíce",          src:"8. díl, s. 4–5",
              pool:{cmp:ALL_CMP_N}},
       {n:23, name:"Sčítání a odčítání po stovkách",       src:"8. díl, s. 6–7",   pool:{as1000:["b1"]}},
@@ -2987,6 +3006,23 @@ const pickKeys = ids => ids.map(id => "j" + id);
    comparing further down, so that this one line is the whole of the
    boundary rather than one line per family. */
 const isPickKey = k => !!k && k[0] === "j";
+/* AND HOW MUCH OF ONE RACE IT MAY EVER BE.
+   Keeping it out of every track but the school one is only half the
+   boundary. The other half is this: a chapter whose pool holds nothing
+   but questions answered by choosing would fill the race with them, and
+   a race is timed and pays points for speed. That would be paying a
+   child for recognising two or three buttons quickly, which is the very
+   thing the first of the untouchable principles forbids, and the plan
+   promised the opposite -- a supplement, a minority of the questions.
+   Nothing was holding it to that, so this does: at most a third of any
+   one race, whatever the chapter's pool holds and in the hard mode as
+   much as in the soft one. "The chapter and nothing else" cannot be
+   allowed to mean "guessing and nothing else".
+   A third rather than a half, because a minority has to be visibly one,
+   and six questions out of twenty is still each of chapter 6's three
+   keys practised twice. What the cap gives back is drawn from the
+   chapters before it, which is review the child is due anyway. */
+const PICK_MAX_SHARE = 1 / 3;
 
 /* Converting units, one bucket per kind of measure. The seventh part
    introduces length, weight and volume (chapter 17) and then the clock
@@ -4449,6 +4485,32 @@ function focusAndReview(p, focus, review, n, maxNew){
   const nf = Math.round(n * .7);
   return sampleKeys(p, focus, nf, maxNew).concat(sampleKeys(p, rest, n - nf, 0));
 }
+/* The ceiling on questions answered by choosing, applied to a finished
+   race rather than written into the draw: the keys can arrive as the
+   chapter's own material and as review of an earlier chapter at once,
+   so counting them once at the end is the only place that sees all of
+   them. Whatever is over the line is replaced by material that is
+   written rather than chosen: the chapter's own if it has any, so that
+   the hard mode stays inside the chapter wherever it still can, and
+   only otherwise the chapters the class has already been through.
+   `spare` empty would mean a curriculum whose first playable chapter is
+   made of nothing but choosing, with nothing behind it to fall back on.
+   No book here has one, and the circuit in items.test.js measures every
+   chapter of every curriculum that offers choosing, so the day one
+   appears the test says so rather than the child racing a guess. */
+function capChosen(p, keys, focus, earlier, n){
+  const max = Math.floor(n * PICK_MAX_SHARE);
+  const at = [];
+  for(let i = 0; i < keys.length; i++) if(isPickKey(keys[i])) at.push(i);
+  if(at.length <= max) return keys;
+  const mine = focus.filter(k => !isPickKey(k));
+  const spare = mine.length ? mine : [...new Set(earlier)].filter(k => !isPickKey(k));
+  if(!spare.length) return keys;
+  const need = at.length - max;
+  const fill = sampleKeys(p, spare, need, 2);
+  for(let i = 0; i < need && i < fill.length; i++) keys[at[at.length - 1 - i]] = fill[i];
+  return keys;
+}
 function buildRun(p, tr){
   const n = p.qCount || 20;
   let keys;
@@ -4467,16 +4529,22 @@ function buildRun(p, tr){
     const cur = curriculumById(p.curriculum);
     const ch = chapterOf(p);
     if(ch && ch.pool && ch.pool.variant) opts = {variant: ch.pool.variant};
+    // what the class has already been through, gathered whichever mode
+    // is set: the hard mode does not review, but the cap below still
+    // needs somewhere to take the rest of the race from
+    const earlier = [];
+    if(cur) for(const prev of cur.chapters){
+      if(prev.n >= p.chapter) break;
+      earlier.push(...poolKeys(prev.pool));
+    }
     if((p.chapterMode || "soft") === "hard" || !cur || !focus.length){
       keys = sampleKeys(p, focus, n, 6);
     } else {
-      const earlier = [];
-      for(const ch of cur.chapters){
-        if(ch.n >= p.chapter) break;
-        earlier.push(...poolKeys(ch.pool));
-      }
       keys = focusAndReview(p, focus, earlier, n, 6);
     }
+    // and then the one thing neither branch can be trusted with, in
+    // both modes alike; see PICK_MAX_SHARE
+    keys = capChosen(p, keys, focus, earlier, n);
   } else if(tr.op === "mult"){
     const focus = multFactsFor(tr.tables).map(f => mk(f.a,f.b));
     const earlier = [];
@@ -8798,14 +8866,6 @@ function mountGame(){
   placeCar(document.getElementById("rivalcar"), 0, -13);
   paintTrail(0);
   updateHud();
-  document.onkeydown = e => {
-    if(view.name !== "game") return;
-    if(e.key >= "0" && e.key <= "9") tap(e.key);
-    else if(e.key === "Backspace") tap("del");
-    else if(e.key === "Enter") tap("ok");
-    // the arrow key of a keyboard does what the arrow key of the pad does
-    else if(e.key === "ArrowRight") tap("next");
-  };
 }
 function drawRail(){ driveTo(myU(), ghostU()); }
 
@@ -9168,7 +9228,7 @@ function viewResult(p){
     </div>
   </div>`;
 }
-function mountResult(){ document.onkeydown = null; stopAnim(); }
+function mountResult(){ stopAnim(); }
 
 /* ---------- workshop ----------
    Deliberately quiet next to the race screen: no stage, no car, no
@@ -10370,6 +10430,26 @@ document.addEventListener("click", e => {
     });
     return;
   }
+});
+
+/* A key on a real keyboard is the same press as a key on the drawn pad,
+   so it is decided the same way, by the screen that is up, and it hangs
+   here beside the click rather than being set up by the race's own
+   screen. It used to be, and it returned unless a race was on, which
+   left a child on a laptop able to write a sum in a race and not the
+   answer to a word problem in the workshop, on the very screen that
+   draws the same twelve keys.
+   Nothing of the race comes with it: the workshop's press goes to
+   jobKey(), never to tap(), where the stopwatch, the points for speed
+   and the car are. The arrow moves between answer boxes, which the
+   workshop has none of, so it is the one key that stays with the race. */
+document.addEventListener("keydown", e => {
+  const to = view.name === "game" ? tap : view.name === "job" ? jobKey : null;
+  if(!to) return;
+  if(e.key >= "0" && e.key <= "9") to(e.key);
+  else if(e.key === "Backspace") to("del");
+  else if(e.key === "Enter") to("ok");
+  else if(e.key === "ArrowRight" && to === tap) to("next");
 });
 
 /* Selects need their own listener, the delegated one above is click only. */

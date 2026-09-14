@@ -1,7 +1,7 @@
 # Stav projektu a předávací dokument
 
 Poslední aktualizace: 14. září 2026, po dojetí celého `docs/PLAN.md` verze 2
-kromě kroku G
+kromě kroku G a po rozhodnutí R11 (police v garáži a líné kreslení)
 
 **Kde se přestalo.** Z `docs/PLAN.md` verze 2 jsou hotové kroky **A** (opravy
 z revize), **B0** s opravou **B0b** (předěl ročníků na mapě), **B** (řetězec
@@ -34,7 +34,7 @@ ověření map `docs/kurikulum/nns-matysek-4.md` a `-5.md` ze skutečných strá
 protože vznikly jen z obsahů; číselné rozsahy v nich jdou sundat z RVP hned,
 otazníky u formátu odpovědi ne. Hotový prompt je na konci, v oddílu 14.
 
-**Otevřená rozhodnutí pro uživatele jsou čtyři** a leží v oddílu 9
+**Otevřená rozhodnutí pro uživatele jsou tři** a leží v oddílu 9
 `docs/PLAN.md`, každé i s doporučením a s důvodem. Nic z toho se nedělá bez
 pokynu.
 
@@ -54,33 +54,34 @@ pokynu.
   dítěti název kapitoly neukazovat vůbec a nechat tam "podle učebnice", a později
   (a), tedy dopsat dětský název ke všem pětadevadesáti kapitolám ve třech
   jazycích.
-- **R11, garáž má po kroku H 115 dlaždic a je to past na výkon telefonu.**
-  Sedmdesát z nich je celá kačenka jako vlastní SVG, protože barevný čtvereček
-  dítěti neřekne, jak to bude vypadat. Doporučení: nejdřív změřit na telefonu,
-  pak sbalitelné sekce, a líné kreslení až tehdy, když sbalení nestačí; katalog
-  se v žádném případě nezmenšuje.
-
-**Rozhodnutí R2 až R7 a R10 padla** 13. a 14. září, všechna podle doporučení,
-a jsou v oddílu 9 plánu označená datem i krokem, ve kterém se udělala.
+**Rozhodnutí R2 až R7, R10 a R11 padla** 13. a 14. září, všechna podle
+doporučení, a jsou v oddílu 9 plánu označená datem i krokem, ve kterém se
+udělala. **R11**, tedy 115 dlaždic garáže, padlo jako poslední: nejdřív se
+změřilo, pak přišly sbalitelné police, a protože samo sbalení na padesát
+chystaných vlajek nestačilo, i líné kreslení. Viz oddíl 7f a čísla v oddílu 9
+plánu.
 
 **Stav v číslech.** Sedmadvacet tratí ve čtyřech světech, 108 palet prostředí,
 tři zakázky v dílně, 91 hratelných kapitol z 95 (první ročník 18/18, druhý
 43/44, třetí 30/33), sedmatřicet závodníků (osm strojů, 28 zvířat, gumová
 kačenka), osm nátěrů za 390 součástek a 65 dílů kačenčí výstroje za 934
-součástek v pěti vrstvách, 516 klíčů rozhraní ve třech jazycích, šest testových
+součástek v pěti vrstvách, 523 klíčů rozhraní ve třech jazycích, šest testových
 souborů.
 
 Mapa má podle ročníku 8 míst u prvňáka, 18 u druháka, 21 složeně a 28 rozbaleně
 u třeťáka a 27 u čtvrťáka; dílna je v každém z těch počtů jedno místo a za
-dveřmi má třeťák sedm tratí. Garáž ukazuje 115 dlaždic, tedy 37 závodníků,
+dveřmi má třeťák sedm tratí. Garáž **nabízí** 115 dlaždic, tedy 37 závodníků,
 devět nátěrů i s prázdnou dlaždicí a devětašedesát kačenčích dílů i se čtyřmi
-prázdnými.
+prázdnými, ale **kreslí jich nejvýš 58**: od rozhodnutí R11 jsou nátěry a pět
+kačenčích vrstev sbalitelné police a otevřená je vždycky jedna, viz oddíl 7f.
+Sbalená garáž má 962 až 1009 uzlů podle toho, jak je kačenka oblečená,
+s největší otevřenou policí nejvýš 1489; před R11 jich měla 2368.
 
-Testy jsou všechny zelené, tedy bez `!!`: `flow.test.js` 311 kontrol,
+Testy jsou všechny zelené, tedy bez `!!`: `flow.test.js` 329 kontrol,
 `migration.test.js` 269, `style.test.js` 29, `items.test.js` pětapadesát okruhů,
-z nichž první sám ověří 14 240 vygenerovaných příkladů, `i18n.test.js` 516 klíčů
-ve všech třech jazycích bez děr a `names.test.js` jména závodníků a dílů ve
-třech jazycích.
+z nichž první sám ověří 14 240 vygenerovaných příkladů, `i18n.test.js` 523 klíčů
+ve všech třech jazycích bez děr a `names.test.js` jména závodníků, dílů
+i cedulek sbalených polic ve třech jazycích.
 
 **Co se v téhle session událo.** Odjel se celý `docs/PLAN.md` verze 2 kromě
 kroku G, v pořadí, ve kterém plán stojí.
@@ -138,6 +139,17 @@ v `docs/kurikulum/ZDROJE-RVP.md`, ze kterého vznikl krok G0 a rozhodnutí R8.
 A **karta o dobrovolné podpoře projektu** v rodičovské sekci, která splňuje tři
 pravidla z oddílu 13 a v dětské části se neobjeví vůbec nikde.
 
+**A pak padlo R11, protože do hry mají přijít vlajky.** Uživatel chce kolem
+padesáti vlajek jako vzor na kačenku, čímž by garáž narostla ze 115 dlaždic na
+165. Nejdřív se změřilo, jak plán žádal: garáž dneška 115 dlaždic, 2368 uzlů,
+159 kB; s vlajkami 165 dlaždic, 3713 uzlů, 251 kB. Pak se udělaly **sbalitelné
+police**, tedy nátěry a pět kačenčích vrstev, otevřená vždycky jedna, závodníci
+nikdy. A protože vlajky jdou do jediné vrstvy a police vzorů by měla
+jednašedesát dlaždic a 2591 uzlů, tedy víc, než má dnes celá garáž, přidalo se
+k tomu i **líné kreslení**: dlaždice otevřené police dostane kresbu, až se
+přiblíží k zornému poli. Celý model je v oddílu 7f, čísla a zdůvodnění v oddílu
+9 plánu u R11. Datový model se nezměnil a katalog se nezmenšil ani o dlaždici.
+
 **Co zůstalo neověřené okem, a je to jediná věc, kterou tahle session udělat
 nemohla.** Rozvržení obrazovek se v sandboxu prohlédnout nedá: prohlížeč tam
 nejde nainstalovat a artefakt běží v izolovaném rámu. Kresby se renderovaly přes
@@ -157,8 +169,13 @@ Tohle si tedy musí uživatel projít na skutečném zařízení:
   opravdu tutéž výšku jako číselná klávesnice a palec nic nehledá znovu
 - slovní úloha v dílně na úzkém telefonu, kde má zadání menší písmo a vlastní
   mřížku
-- garáž s kačenkou a s osmadvaceti zvířaty, tedy 115 dlaždic naráz; je to
-  zároveň měření, na kterém stojí rozhodnutí R11
+- garáž s kačenkou a s osmadvaceti zvířaty, tedy jestli sbalená police čte
+  jako police a ne jako prázdný řádek, jestli se její tři řádky textu vejdou
+  na 375 px i při měřítku písma 1,25, a jestli se dlaždice doplňují dřív, než
+  na ně dítě dosune palec. Sbalení ani líné kreslení se v jsdomu s WeasyPrintem
+  ukázat nedají, protože ani jedno neumí `display:grid` a zorné pole tam
+  neexistuje vůbec; čísla za rozhodnutím R11 se proto měřila na uzlech, ne
+  okem
 - karta o podpoře v rodičovské sekci, tedy jestli se značka drží prvního řádku
   nadpisu a odkaz míří tam, kam má
 
@@ -198,7 +215,7 @@ index.html                sestavený hratelný soubor, tohle se otevírá a tohl
 build.py                  složí index.html ze zdrojů v src/
 src/index.template.html   kostra dokumentu se čtyřmi značkami
 src/styles.css            všechny styly
-src/i18n.js               všechny texty rozhraní, cs / en / de, 516 klíčů
+src/i18n.js               všechny texty rozhraní, cs / en / de, 523 klíčů
 src/curricula.js          kapitoly učebnic pro volbu podle školy, data, ne kód
 src/app.js                engine, obrazovky, interakce
 tests/                    regresní testy nad jsdom, viz tests/README.md
@@ -1055,6 +1072,12 @@ počítala tytéž příklady podruhé. Stejná úvaha jako u `overallMastery()`
    tratě jich je přes čtyři sta, což by byla zbytečná hromada uzlů. Tvar se
    řídí prostředím trati, každá paleta v `ENVS` si přes `tok` řekne, co se v ní
    sbírá, a barvu dá taky.
+   **Garáž ten princip použít nemůže a řeší totéž jinak.** Sbírka nálezů je
+   jedna kresba proto, že je to týž tvar v mřížce; v garáži je každá dlaždice
+   jiná kačenka, takže sloučit se nedají a jde jen zmenšit, **kdy** se kreslí.
+   Od rozhodnutí R11 se proto police garáže skládají a dlaždice otevřené police
+   dostane kresbu, teprve až se přiblíží k zornému poli. Model je v oddílu 7f,
+   funkce jsou `shelfHTML()`, `mountCollection()` a `drawTile()`.
 5. Cesta jednoho závodu. Bézierova křivka z osazeného generátoru, geometrie se
    počítá v JS, ne přes SVG DOM, aby šla testovat mimo prohlížeč. `route(svět, id)`
    vrací uzavřenou smyčku v okruhu a otevřenou cestu se zastávkami v ostatních
@@ -1751,6 +1774,43 @@ ne konkrétní filmová podoba. **Kontrolní otázka je jediná a platí pro ka�
 i pro každé zvíře: když se u kresby dá říct jméno postavy, je špatně.** Ptát se
 na ni je potřeba dřív, než se nový díl nakreslí, ne až potom.
 
+**Garáž se skládá do polic a kreslí líně, a je to rozhodnutí R11 ze 14. září
+2026.** Dlaždic je 115 a sedmdesát z nich je celá kačenka, protože barevný
+čtvereček dítěti neřekne, jak to bude vypadat; cena za to byl jeden pohled
+o 2368 uzlech a 159 kB, a s padesáti chystanými vlajkami by to bylo 3713 uzlů.
+Řeší to dvě věci najednou.
+
+**Police.** Nátěry a pět kačenčích vrstev je šest polic, které se skládají
+klepnutím na cedulku, a **otevřená je vždycky jedna**. Sbalená police se
+nekreslí vůbec, ne že by se schovala: `shelfHTML()` dostává buňky jako funkci,
+kterou u zavřené police nezavolá. Závodníci, tedy stroje, zvířata a kačenka,
+se **neskládají nikdy**; je to výběr závodníka, který se jen řadí a nikdy
+nefiltruje, a koupený stroj, na který se nedá klepnout, je horší než jakýkoli
+počet uzlů. Sbalená police o sobě řekne na jednom řádku, co v ní je, kolik toho
+je, kolik už toho dítě má a od kolika, a na druhém to, co z ní má dítě na sobě,
+takže katalog s cenami je vidět dál a police, ze které dítě něco nosí, nikdy
+nečte jako prázdná. Utrata součástek z dílny cílovou polici rovnou otevře.
+**Sbalení je způsob koukání, ne postup**, takže drží proměnná `SHELF` s id
+profilu, přesně jako `PEEK` a `BACK` na mapě: do profilu se nedostane a zavření
+hry i přepnutí hráče polici složí.
+
+**Líné kreslení.** Samo sbalení na vlajky nestačí, protože vlajky jdou do jedné
+vrstvy a ta by měla jednašedesát dlaždic, tedy 2591 uzlů, víc, než má dnes celá
+garáž. Dlaždice otevřené police se proto píše ve dvou kusech: tlačítko se
+jménem a cenou, tedy to, co dítě čte a na co klepá, a kresba, kterou doplní
+`IntersectionObserver`, až se dlaždice přiblíží k zornému poli. Prvních osm
+dlaždice police se kreslí rovnou (`SHELF_EAGER`), aby police neotevřela řadu
+děr. **Žádný nový stav to nepřidává**: co se má nakreslit, stojí na samotné
+dlaždici jako `data-draw`, takže obrazovka se pořád kreslí z profilu a `drawTile()`
+kreslí přesně to, co by nakreslila buňka. Prohlížeč bez `IntersectionObserver`
+dostane všechny kresby při připojení obrazovky, tedy přesně chování před R11.
+
+Čísla: sbalená garáž 962 až 1009 uzlů podle toho, jak je kačenka oblečená,
+s největší otevřenou policí nejvýš 1489, s padesáti vlajkami 1537. Hlídá to
+`flow.test.js` stropem **1800 uzlů**, měřeným na skutečném DOM se zaslepeným
+pozorovatelem; spadne, až garáž povyroste zhruba o dalších sedmdesát dlaždic,
+nebo až někdo skládání či líné kreslení vypne.
+
 **Žádný díl nemá jiný atribut než kresbu a cenu.** Vzhled nemá na jízdu vliv,
 soupeřem zůstává vlastní nejlepší jízda a celý katalog i s cenami je vidět od
 první chvíle: nic se nelosuje, nic se nedá ztratit ani zdražit. Zdarma je jedině
@@ -1875,13 +1935,31 @@ zase složí a že čtvrťák nemá dveře ani milník a vidí všechno.
 `a7` a `a10` a hlídá, že v nich není jediná dvojice sousedních otázek se stejným
 klíčem ani stejnou tváří; jeden závod na trať nic nedokazoval, protože dvojice
 vznikaly zhruba v jednom závodě z dvaceti, a kontrola proto bývala nestabilní.
-`flow.test.js` má dnes **311 kontrol**, `migration.test.js` 269 a `style.test.js`
-29; `i18n.test.js` projde 516 klíčů ve třech jazycích a celý závod v každém
+**Rozhodnutí R11 přidalo do `flow.test.js` vlastní blok o policích v garáži.**
+Hlídá, že se garáž otevírá sbalená a kreslí jen závodníky, že sbalená police
+řekne, co v ní je, kolik toho je, kolik už toho dítě má, od kolika a co z ní
+má dítě na sobě, že se otevře jedním klepnutím a druhým zase složí, že otevřená
+je vždycky jedna, že **otevření police nezmění uložená data ani o bajt**, že
+přepnutí hráče police složí, a že po nákupu zůstává police otevřená a koupený
+kus je v ní vidět vybraný, u nátěru i u kačenčího dílu. K tomu líné kreslení:
+osm dlaždic je nakreslených hned, zbytek čeká, čekající dlaždice má pořád cenu
+a dá se na ni klepnout, a po přiblížení se dokreslí. Zorné pole jsdom nezná
+a `IntersectionObserver` v něm není vůbec, takže si ho ten blok podstrčí sám
+jako pozorovatele, který si dlaždice zapamatuje a nikdy nic neohlásí, tedy
+prohlížeč, ve kterém se ještě nikam neposunulo; zbytek souboru běží bez něj,
+což je záložní cesta pro starý telefon. A **strop 1800 uzlů** na celé
+obrazovce, sbalené i s největší otevřenou policí, měřený na skutečném DOM.
+Před R11 měla garáž 2368 uzlů, dneska 962 až 1489 podle stavu, a s padesáti
+chystanými vlajkami vyjde na 1537.
+
+`flow.test.js` má dnes **329 kontrol**, `migration.test.js` 269 a `style.test.js`
+29; `i18n.test.js` projde 523 klíčů ve třech jazycích a celý závod v každém
 z nich. Jak počet kontrol ve `flow.test.js` rostl: po kroku A 153, po B0 170,
 po B0b 175, po C 184, po D1 186, po D2 188, po D3 191, po D4 196, po celém
 kroku H 231, po E1 250 (z toho 246 po samotných dvou políčkách a čtyři až
 s dělením se zbytkem), po E2 261, po E3 272, po E4 280, po F 292, po kartě
-o dobrovolné podpoře 306 a po stropu na výběr z nabídky 311.
+o dobrovolné podpoře 306, po stropu na výběr z nabídky 311 a po R11, tedy po
+policích v garáži a líném kreslení, 329.
 Devatenáct přibylo v kroku E a jsou to kontroly vstupních prvků, ne učiva:
 psaní do dvou a tří políček, předávání kláves mezi nimi, mazání přes hranici,
 šipka, klepnutí do políčka, odeslání až s vyplněnými políčky, porovnání hodnot
@@ -2952,6 +3030,12 @@ k celému modelu jsou v oddílu 7f.
 10. **Render a prohlédnutí.** Vykreslit díl na všech deset těl přes `cairosvg`
     podle oddílu 2 a podívat se; kresbu žádný test neuvidí a `convert` ji
     ukáže špatně.
+11. **Do garáže se nesahá.** Police si velikost, ceny i větu o sobě počítá
+    sama ze seznamu vrstvy, takže nový díl nikde jinde zapsaný být nemusí;
+    stačí, že stojí v `DUCK_*`. Jediné, co nový díl posune, je **strop uzlů**
+    ve `flow.test.js`: dokud se do jedné vrstvy nepřidá víc než zhruba
+    sedmdesát dlaždic, drží, a když spadne, je to výzva podívat se na garáž
+    znovu, ne důvod strop zvednout. Viz oddíl 7f.
 
 ### Kontrolní seznam pro nové zvíře
 
@@ -3011,10 +3095,11 @@ hodnota "všechno" je jiná, takže `seedGrade()` musí starou čtyřku přelož
 stránek, protože vznikly jen z obsahů; otazníky u číselných rozsahů jdou sundat
 z RVP i bez toho, otazníky u formátu odpovědi ne.
 
-**Otevřená rozhodnutí jsou čtyři**, R1, R8, R9 a R11, všechna v oddílu 9 plánu
-i s doporučením a shrnutá v hlavičce tohohle souboru. **R8 blokuje G0**, ostatní
-tři neblokují nic. Rozhodnutá jsou R2 až R7 a R10, všechna podle doporučení,
-a v oddílu 9 je to u nich napsané i s krokem, ve kterém se to udělalo.
+**Otevřená rozhodnutí jsou tři**, R1, R8 a R9, všechna v oddílu 9 plánu
+i s doporučením a shrnutá v hlavičce tohohle souboru. **R8 blokuje G0**, druhá
+dvě neblokují nic. Rozhodnutá jsou R2 až R7, R10 a R11, všechna podle
+doporučení, a v oddílu 9 je to u nich napsané i s krokem, ve kterém se to
+udělalo.
 
 **Co se musí prohlédnout okem**, je vypsané v hlavičce pod "Co zůstalo
 neověřené okem". Sandbox to udělat nemohl a žádný test to nenahradí.
@@ -3096,7 +3181,7 @@ ročníku (4b).
 > `nns-matysek-4.md` a `-5.md` nejsou ověřené ze skutečných stránek**, jen
 > z obsahů; to je na mně, pošlu odkaz nebo se přihlásím v prohlížeči. Čísla
 > rozsahů v obou mapách jdou sundat z RVP i bez toho. Zbylá otevřená
-> rozhodnutí R1, R9 a R11 nech na mně a nedělej je.
+> rozhodnutí R1 a R9 nech na mně a nedělej je.
 >
 > Každá nová rodina si vyrenderuje své čtyři palety a prohlédne je na obrázku
 > podle oddílu 2; `cairosvg`, ne `convert`, protože `convert` nekreslí přechody,
@@ -3149,8 +3234,8 @@ neobejde, takže autonomní běh dojede G0 a G1 jen připraví.
 > a sundej z obou map otazníky u číselných rozsahů, které jdou doplnit z RVP
 > závazně; otazníky u formátu odpovědi nech být.
 >
-> **Rozhodnutí R1, R9 a R11 z oddílu 9 nech na mně a nedělej je.** R2 až R7
-> a R10 už padla, ta jen ber jako hotová. Kde subagent narazí na něco, co plán
+> **Rozhodnutí R1 a R9 z oddílu 9 nech na mně a nedělej je.** R2 až R7, R10
+> a R11 už padla, ta jen ber jako hotová. Kde subagent narazí na něco, co plán
 > neřeší, rozhodni ve prospěch nedotknutelných principů z oddílu 3 a zapiš
 > rozhodnutí do plánu k danému kroku.
 >

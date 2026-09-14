@@ -21,6 +21,17 @@ async function check(lang){
   const start=qa('.pickitem .nm').map(e=>e.textContent);
   click(q('[data-more]'));
   const garage=qa('.item .nm').map(e=>e.textContent);
+  // Police s natery a s kacencimi dily jsou od R11 slozene, takze se
+  // jmena dilu overi az po otevreni kazde z nich; otevrena je vzdycky
+  // jedna, proto se police prochazeji po jedne. Do prohlidky patri
+  // i samotna cedulka slozene police, protoze i ta je text, ktery dite
+  // cte a ktery musi byt ve vsech trech jazycich.
+  const bars=qa('.shelfhead').map(b=>b.dataset.sec);
+  for(const sec of bars){
+    garage.push(...qa('#'+sec+' .shelfname, #'+sec+' .shelfsub, #'+sec+' .shelfworn').map(e=>e.textContent));
+    click(qa('.shelfhead').find(b=>b.dataset.sec===sec));
+    garage.push(...qa('#'+sec+' .item .nm').map(e=>e.textContent));
+  }
   const bad=[...start,...garage].filter(x=>!x||x==='undefined'||/undefined/.test(x));
   console.log('['+lang+'] pred startem:', start.join(', '));
   console.log('['+lang+'] v garazi   :', garage.filter(x=>!/^🪙/.test(x)).join(', '));

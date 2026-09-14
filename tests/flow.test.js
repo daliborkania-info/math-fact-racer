@@ -29,6 +29,17 @@ const tot=()=>parseFloat(d.getElementById('trail').getAttribute('stroke-dasharra
 const u=()=>+(1-parseFloat(d.getElementById('trail').style.strokeDashoffset)/tot()).toFixed(3);
 const ok=(n,c,x)=>console.log((c?'  OK  ':'  !!  ')+n+(x!==undefined?'   ['+x+']':''));
 const ev=s=>dom.window.eval(s);
+/* Garaz ma police pod zavodniky slozene a otevrena je vzdycky jedna,
+   takze se do police musi nejdriv klepnout, nez se z ni da neco koupit.
+   Presne to dela dite a presne to musi delat i test; kdyby se tady
+   sahalo rovnou do SHELF, neoverilo by se, ze se police da otevrit
+   klepnutim. */
+const shelf=sec=>{
+  const b=qa('.shelfhead').find(x=>x.dataset.sec===sec);
+  if(!b) throw new Error('police '+sec+' v garazi neni');
+  if(!q('#'+sec).classList.contains('open')) click(b);
+  return q('#'+sec);
+};
 
 (async()=>{
 /* Hlidac na cely beh. Kazda obrazovka prochazi render(), takze jedina
@@ -506,6 +517,12 @@ const kamUtrata=ev('view.focus'), soucastekPoZakazce=DBg().profiles[0].parts;
 ok('utrata soucastek otevre garaz u sekce, na kterou dite ma',
    ev('view.name')==='collection' && kamUtrata===ev('spendTarget(P())') && q('#'+kamUtrata)!==null,
    ev('view.name')+' / '+kamUtrata+' | soucastek '+soucastekPoZakazce);
+// a police, na kterou utrata posila, musi byt opravdu otevrena: dorazit
+// z dilny na zavrenou cedulku je totez jako dojit ke dverim, ktere jsou
+// zamcene
+ok('utrata soucastek tu polici rovnou otevre',
+   q('#'+kamUtrata).classList.contains('open') && q('#'+kamUtrata+' .grid')!==null,
+   q('#'+kamUtrata).className);
 ok('s par soucastkami neposila utrata dite na natery za tricet',
    kamUtrata!=='paintsec' && soucastekPoZakazce<30, kamUtrata+' se '+soucastekPoZakazce+' soucastkami');
 ok('vyber stroje uz zpatky k naterum neskace',
@@ -695,12 +712,25 @@ console.log('--- natery ---');
 const withParts=DBg(); withParts.profiles[0].parts=200;
 w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(withParts));
 jev('load(); go("collection")');
+// slozena police o sobe rekne, co v ni je, kolik toho je a od kolika,
+// takze dite nema duvod ji otevirat naslepo a katalog nezmizel
+ok('slozena police natery ohlasi i s cenou',
+   /Nátěry/.test(txt()) && qa('[data-act="buypaint"]').length===0
+   && /8 nátěrů/.test(txt()) && /od 30/.test(txt()), txt().match(/Nátěry[^N]{0,40}/));
+shelf('paintsec');
 ok('natery jsou v garazi', /Nátěry/.test(txt()) && qa('[data-act="buypaint"]').length===8);
 click(qa('[data-act="buypaint"]')[0]);
 click(q('[data-yes]'));
 ok('nater koupen a nasazen', DBg().profiles[0].paints.length===1 &&
    Object.keys(DBg().profiles[0].paint).length===1, JSON.stringify(DBg().profiles[0].paint));
 ok('nater stal soucastky, ne mince', DBg().profiles[0].parts===170, DBg().profiles[0].parts+' soucastek');
+// po nakupu se dite nesmi divat na slozeny seznam: police, ze ktere si
+// prave koupilo, zustava otevrena a koupeny kus je v ni videt vybrany
+ok('po nakupu je police porad otevrena a koupene je videt',
+   q('#paintsec').classList.contains('open')
+   && q('#paintsec .item.sel')!==null
+   && q('#paintsec .item.sel').dataset.id===DBg().profiles[0].paints[0],
+   q('#paintsec .item.sel') ? q('#paintsec .item.sel').dataset.id : 'nic vybraneho');
 click(qa('[data-act="usepaint"]')[0]);
 ok('nater jde zase sundat', Object.keys(DBg().profiles[0].paint).length===0);
 
@@ -713,19 +743,34 @@ const minciPred=DBg().profiles[0].coins, soucastekPred=DBg().profiles[0].parts;
 // H4 vedome: k 39 placenym dilum z H2 a H3 pribylo 25, tedy 64
 // k odemceni, a k jedinemu dilu zdarma (klasicka zluta) pribyly ctyri
 // prazdne dlazdice, tedy pet dlazdic, na ktere se klepne bez placeni
-ok('vrstvy kacenky jsou v garazi pod natery', !!d.getElementById('duckbodysec')
-   && !!d.getElementById('duckpatsec') && !!d.getElementById('duckheadsec')
-   && !!d.getElementById('duckeyesec') && !!d.getElementById('duckgearsec')
-   && qa('[data-act="buyduck"]').length===64, qa('[data-act="buyduck"]').length+' k odemceni');
+// Vrstvy jsou od rozhodnuti R11 police, ktere se sklada a rozbaluje;
+// pocty dilu se tim nezmenily, jen se k nim dochazi po jedne polici.
+const SEC={body:'duckbodysec',pat:'duckpatsec',head:'duckheadsec',eye:'duckeyesec',gear:'duckgearsec'};
+const vrstvy=Object.keys(SEC).map(l=>SEC[l]);
+let kOdemceni=0, bezPlaceni=0, prazdnych=0;
+for(const s of vrstvy){
+  shelf(s);
+  kOdemceni+=qa('#'+s+' [data-act="buyduck"]').length;
+  bezPlaceni+=qa('#'+s+' [data-act="useduck"]').length;
+  prazdnych+=qa('#'+s+' [data-act="useduck"]').filter(b=>b.dataset.id==='').length;
+}
+ok('vrstvy kacenky jsou v garazi pod natery', vrstvy.every(s=>!!d.getElementById(s))
+   && kOdemceni===64, kOdemceni+' k odemceni');
 // klasicka zluta je zdarma, takze se nekupuje, jen vybira, a vrstvy,
 // ktere jdou sundat, maji prazdnou dlazdici
-ok('telo zdarma a ctyri prazdne dlazdice se nekupuji', qa('[data-act="useduck"]').length===5
-   && qa('[data-act="useduck"]')[0].dataset.id==='db_klasik'
-   && qa('[data-act="useduck"]').filter(b=>b.dataset.id==='').length===4,
-   qa('[data-act="useduck"]').map(b=>b.dataset.id+':'+b.dataset.layer).join(' '));
+shelf(SEC.body);
+ok('telo zdarma a ctyri prazdne dlazdice se nekupuji', bezPlaceni===5
+   && qa('#'+SEC.body+' [data-act="useduck"]')[0].dataset.id==='db_klasik'
+   && prazdnych===4, bezPlaceni+' dlazdic bez placeni, z toho '+prazdnych+' prazdnych');
 const telo=qa('[data-act="buyduck"]')[0].dataset.id;
 const cenaTela=ev('duckPartById("'+telo+'").cost');
 click(qa('[data-act="buyduck"]')[0]); click(q('[data-yes]'));
+// tataz kontrola jako u nateru, tentokrat na dilu kacenky: po nakupu
+// zustava police otevrena a koupeny dil je v ni videt
+ok('po nakupu dilu je police porad otevrena a dil je videt',
+   q('#'+SEC.body).classList.contains('open')
+   && q('#'+SEC.body+' .item.sel').dataset.id===telo,
+   q('#'+SEC.body+' .item.sel') ? q('#'+SEC.body+' .item.sel').dataset.id : 'nic vybraneho');
 ok('barva koupena a kacenka ji ma na sobe', DBg().profiles[0].duckParts.includes(telo)
    && DBg().profiles[0].duck.body===telo, JSON.stringify(DBg().profiles[0].duck));
 ok('barva stala soucastky, ne mince', DBg().profiles[0].coins===minciPred
@@ -742,6 +787,7 @@ ok('koupena barva uz se znovu neprodava',
 // a nosit zaroven s barvou, a sundani jedne nesahne na zbytek ani na
 // koupene dily
 const koupVrstvu=layer=>{
+  shelf(SEC[layer]);
   const id=qa('[data-act="buyduck"]').find(b=>b.dataset.layer===layer).dataset.id;
   click(qa('[data-act="buyduck"]').find(b=>b.dataset.id===id)); click(q('[data-yes]'));
   return id;
@@ -753,6 +799,7 @@ ok('kacenka ma na sobe vsech pet vrstev najednou',
    && DBg().profiles[0].duck.head===klobouk && DBg().profiles[0].duck.eye===bryle
    && DBg().profiles[0].duck.gear===vybava, JSON.stringify(DBg().profiles[0].duck));
 // prazdna dlazdice vrstvu sundá, ale koupeny dil zustava koupeny
+shelf(SEC.head);
 click(qa('[data-act="useduck"]').find(b=>b.dataset.id===''&&b.dataset.layer==='head'));
 ok('klobouk jde sundat a zustane koupeny', DBg().profiles[0].duck.head===undefined
    && DBg().profiles[0].duckParts.includes(klobouk)
@@ -762,10 +809,97 @@ ok('klobouk jde sundat a zustane koupeny', DBg().profiles[0].duck.head===undefin
 const chudy=DBg(); chudy.profiles[0].parts=1;
 w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(chudy));
 jev('load(); go("collection")');
+shelf(SEC.body);
 click(qa('[data-act="buyduck"]')[0]);
 ok('bez soucastek se dil nekoupi', DBg().profiles[0].parts===1
    && DBg().profiles[0].duckParts.length===5, DBg().profiles[0].parts+' soucastek');
 q('.sheet').remove();
+
+console.log('--- police v garazi a kolik uzlu delaji ---');
+/* Rozhodnuti R11. Garaz kreslila 115 dlazdic naraz a kazda z nich je
+   cela kresba, takze pocet dlazdic je rovnou pocet uzlu. Police pod
+   zavodniky se proto skladaji, otevrena je vzdycky jedna, a dlazdice
+   otevrene police dostane kresbu, teprve az se priblizi k zornemu poli.
+   Meri se obojí, protoze prave pocet uzlu je to, kvuli cemu R11 vzniklo.
+
+   Zorne pole jsdom nezna a IntersectionObserver v nem neni vubec, takze
+   se bez nej kresli vsechno hned; to je zaloha pro stary telefon a plati
+   pro zbytek tohohle souboru. Aby se dalo zmerit, kolik uzlu garaz
+   opravdu postavi, dostane okno na tenhle jeden blok pozorovatele, ktery
+   si dlazdice zapamatuje a sam nikdy nic neohlasi, tedy prohlizec, ve
+   kterem se jeste nikam neposunulo. */
+ev('window.__eyes=[];window.IntersectionObserver=function(cb){var me=this;me.cb=cb;me.seen=[];'
+  +'me.observe=function(el){me.seen.push(el)};me.unobserve=function(){};me.disconnect=function(){};'
+  +'window.__eyes.push(me)};');
+click(q('[data-act="map"]')); click(q('[data-act="players"]'));
+click(qa('[data-act="pick"]')[0]);
+click(q('[data-act="collection"]'));
+const uzly=()=>d.getElementById('app').querySelectorAll('*').length;
+ok('prepnuti hrace police slozilo a garaz se otevira slozena',
+   qa('.shelf').length===6 && qa('.shelf.open').length===0 && qa('.shelf .grid').length===0,
+   qa('.shelf.open').length+' otevrenych z '+qa('.shelf').length);
+// slozena police neni prazdne misto: rekne, co v ni je, kolik toho je,
+// kolik uz toho dite ma a od kolika, takze katalog s cenami nezmizel
+ok('slozena police rekne, co v ni je, kolik a od kolika',
+   qa('.shelfsub').length===6
+   && qa('.shelfsub').every(e=>/\d+ (dílů|nátěrů)/.test(e.textContent))
+   && qa('.shelfsub').every(e=>/už máš/.test(e.textContent))
+   && qa('.shelfsub').filter(e=>/od \d+/.test(e.textContent)).length===6,
+   qa('.shelfsub')[0].textContent+' | '+qa('.shelfsub')[1].textContent);
+// a police, ze ktere ma dite neco na sobe, to na sobe rekne, takze
+// slozena nikdy necte jako prazdna
+ok('slozena police rekne i to, co ma dite z ni na sobe',
+   qa('.shelfworn').length>0 && qa('.shelfworn').every(e=>/vybráno: \S/.test(e.textContent)),
+   qa('.shelfworn').map(e=>e.textContent).join(' | '));
+const slozeno=uzly();
+ok('slozena garaz kresli jen zavodniky', qa('.item').length===37, qa('.item').length+' dlazdic');
+// slozeni je zpusob koukani, ne postup: nesmi se dostat do profilu
+const predOtevrenim=w.localStorage.getItem('math-fact-racer-v1');
+click(qa('.shelfhead').find(b=>b.dataset.sec==='duckheadsec'));
+ok('police se otevre jednim klepnutim',
+   qa('.shelf.open').length===1 && q('#duckheadsec').classList.contains('open')
+   && qa('#duckheadsec .item').length===21, qa('#duckheadsec .item').length+' dlazdic na hlavu');
+ok('otevreni police nic neulozilo',
+   w.localStorage.getItem('math-fact-racer-v1')===predOtevrenim
+   && !/shelf|paintsec|duckheadsec/i.test(JSON.stringify(DBg())));
+const otevreno=uzly();
+click(qa('.shelfhead').find(b=>b.dataset.sec==='duckgearsec'));
+ok('otevrena je vzdycky jedna', qa('.shelf.open').length===1
+   && q('#duckgearsec').classList.contains('open')
+   && !q('#duckheadsec').classList.contains('open'));
+click(qa('.shelfhead').find(b=>b.dataset.sec==='duckgearsec'));
+ok('druhe klepnuti polici zase slozi', qa('.shelf.open').length===0);
+// line kresleni: dlazdice, na kterou dite nevidi, je zatim jen tlacitko
+click(qa('.shelfhead').find(b=>b.dataset.sec==='duckheadsec'));
+const hned=qa('#duckheadsec .pic svg').length, ceka=qa('#duckheadsec .pic[data-draw]').length;
+ok('kresli se jen to, na co je videt, zbytek ceka na priblizeni',
+   hned===8 && ceka===13 && hned+ceka===21, hned+' nakreslenych, '+ceka+' cekajicich');
+const oko=ev('window.__eyes[window.__eyes.length-1]');
+ok('cekajici dlazdice jsou opravdu hlidane', oko.seen.length===ceka, oko.seen.length+' hlidanych');
+ok('cekajici dlazdice ma porad cenu a da se klepnout',
+   qa('#duckheadsec .pic[data-draw]').every(e=>/\d/.test(e.parentNode.textContent)
+      && e.parentNode.dataset.act==='buyduck'));
+ev('(function(){var o=window.__eyes[window.__eyes.length-1];'
+  +'o.cb(o.seen.map(function(el){return {target:el,isIntersecting:true}}));})()');
+ok('po priblizeni se dlazdice dokresli a uz neceka',
+   qa('#duckheadsec .pic[data-draw]').length===0 && qa('#duckheadsec .pic svg').length===21,
+   qa('#duckheadsec .pic svg').length+' kreseb');
+/* Strop poctu uzlu, a je to cele meritko rozhodnuti R11. Pred nim mela
+   garaz 2368 uzlu a 115 celych kreseb naraz. Dneska ma slozena 962 az
+   1009 podle toho, jak je kacenka oblecena, a s nejvetsi otevrenou
+   polici nejvys 1489. Padesat vlajek, ktere prijdou jako vzor na
+   kacenku, udela z police vzoru jednasedesat dlazdic a garaz s ni
+   otevrenou vyjde na 1537 uzlu, tedy porad hluboko pod stavem pred R11.
+   Strop 1800 ma na tech padesat vlajek rezervu zhruba sedmdesati
+   dalsich dlazdic a spadne, az garaz povyroste o dalsi takovy kus, nebo
+   az nekdo skladani ci line kresleni zase vypne: bez nich vyjde garaz
+   s vlajkami na 3713 uzlu. */
+const STROP=1800;
+ok('slozena garaz drzi pod stropem uzlu', slozeno<=STROP, slozeno+' uzlu, strop '+STROP);
+ok('i s nejvetsi otevrenou polici drzi pod stropem uzlu',
+   otevreno<=STROP, otevreno+' uzlu, strop '+STROP);
+// a zbytek souboru at zase vidi cely katalog, jako ho vidi stary telefon
+ev('delete window.IntersectionObserver; render()');
 
 console.log('--- kam soucastky jdou ---');
 // Otevrena otazka kroku 3b: stitek u soucastek se ma prestat tvarit jako

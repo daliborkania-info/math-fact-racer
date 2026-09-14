@@ -1564,7 +1564,8 @@ na obrázku přehlédne.
 
 Otevřené po kroku zůstalo jedno, a je z něj rozhodnutí **R11** v oddílu 9: garáž
 má 115 dlaždic, z toho 70 celých kačenek, a past z H5 je tedy o čtvrtinu horší,
-než jak ji plán odhadoval.
+než jak ji plán odhadoval. **R11 padlo 14. září 2026**, sbalitelné police plus
+líné kreslení; podrobnosti a naměřená čísla jsou u něj v oddílu 9.
 
 **Na pořadí s krokem G nezávisí.** G je učivo a kurikula, H je jen to, co se
 dá vlastnit a na co se dá koukat; nesdílejí jediný soubor kromě `app.js`
@@ -1899,9 +1900,10 @@ náhled dlaždice nebo kreslit v dlaždici jen vybíranou vrstvu nad šedou
 siluetou, ne zmenšit katalog.
 
 **Past se potvrdila a je o čtvrtinu horší:** dlaždic je 115, ne devadesát,
-a sedmdesát z nich je celá kačenka. Leží to jako rozhodnutí **R11** v oddílu 9;
-změřeno na telefonu zatím není a katalog se v žádné z navržených cest
-nezmenšuje.
+a sedmdesát z nich je celá kačenka. Leželo to jako rozhodnutí **R11** v oddílu 9
+a padlo 14. září 2026: nejdřív se změřilo (2368 uzlů), pak se udělaly sbalitelné
+police a k nim líné kreslení, protože samo sbalení na padesát vlajek nestačilo.
+Katalog se nezmenšil.
 
 ### H6. Zvířata: přesnější kresba dvanácti dnešních — HOTOVO 14. září 2026
 
@@ -2084,12 +2086,11 @@ v garáži; past z H5 se potvrdila a je o čtvrtinu horší, než plán čekal.
 Nic z tohohle není chyba a nic z toho se nedělá bez pokynu. Každé má
 doporučení a důvod.
 
-**Stav k 14. září 2026.** Otevřená jsou čtyři: **R1** (učivo minulých let
+**Stav k 14. září 2026.** Otevřená jsou tři: **R1** (učivo minulých let
 otevřené staršímu dítěti), **R8** (mapa z modelového ŠVP dřív než ověřený
-Matýsek, **na tomhle visí krok G0**), **R9** (učitelský žargon v názvech kapitol
-na dětské mapě) a **R11** (garáž má 115 dlaždic a je to past na výkon telefonu).
-Rozhodnutá jsou **R2 až R7 a R10**, všechna podle doporučení, a je to u nich
-napsané i s krokem, ve kterém se to udělalo.
+Matýsek, **na tomhle visí krok G0**) a **R9** (učitelský žargon v názvech
+kapitol na dětské mapě). Rozhodnutá jsou **R2 až R7, R10 a R11**, všechna podle
+doporučení, a je to u nich napsané i s krokem, ve kterém se to udělalo.
 
 **R1. Žebřík dřívějšího ročníku pro starší dítě. OTEVŘENÉ.** Profil třetího nebo
 čtvrtého ročníku dnes vidí šest oborů prvního ročníku, z nichž pět je zamčených
@@ -2228,7 +2229,47 @@ Střední cesta, tedy překreslit jen ta zvířata, která dnes vypadají nejhů
 se nedoporučuje: to je právě ten stav dvou kresebných řečí v jedné mřížce.
 
 **R11. Garáž má po kroku H sto patnáct dlaždic a sedmdesát z nich je celá
-kačenka. OTEVŘENÉ.** Past z H5 se potvrdila a je horší, než jak ji plán odhadoval: čekalo
+kačenka. ROZHODNUTO 14. září 2026 podle doporučení, a to obojí: sbalitelné
+sekce i líné kreslení.** Nejdřív se změřilo, jak plán žádal. Garáž dneška
+postaví **115 dlaždic, 2368 uzlů a 159 kB HTML**; s padesáti vlajkami přidanými
+jako vzor na kačenku by to bylo **165 dlaždic, 3713 uzlů a 251 kB**. Měřeno nad
+skutečným kódem, zdroje načtené do node se zaslepeným `document` jako
+v `items.test.js`, uzly spočítané jsdomem.
+
+Pak **sbalitelné sekce**: šest polic pod závodníky, tedy nátěry a pět kačenčích
+vrstev, se skládá a **otevřená je vždycky jedna**. Sbalená police se nekreslí
+vůbec, ne že by se jen schovala. Závodníci, tedy stroje, zvířata a kačenka, se
+neskládají nikdy: je to výběr závodníka, který se jen řadí a nikdy nefiltruje.
+Sbalená police o sobě na jednom řádku řekne, co v ní je, kolik toho je, kolik
+už toho dítě má a od kolika, a na druhém řádku to, co z ní má dítě na sobě,
+takže katalog s cenami nezmizel a police, ze které něco nosí, nikdy nečte jako
+prázdná. Stav sbalení drží proměnná `SHELF` s id profilu, přesně jako `PEEK`
+a `BACK`, takže se do profilu nedostane a zavření hry i přepnutí hráče ji
+složí. Utrata součástek z dílny cílovou polici rovnou otevře.
+
+Samo sbalení ale na těch padesát vlajek **nestačilo, a je to vidět z měření**:
+vlajky jdou do jedné jediné vrstvy, takže by police vzorů měla jednašedesát
+dlaždic a garáž s ní otevřenou **2591 uzlů**, tedy víc, než má dnes celá garáž.
+Proto se udělalo i **líné kreslení**. Dlaždice otevřené police se píše ve dvou
+kusech: tlačítko se jménem a cenou, tedy to, co dítě čte a na co klepá, a
+kresba, která se doplní, teprve až se dlaždice přiblíží k zornému poli
+(`IntersectionObserver`, `rootMargin` 400 px). Prvních osm dlaždic police se
+kreslí rovnou, aby to, na co se police otevře, nebyla řada děr. **Nový stav to
+do kódu nepřidává**: co se má nakreslit, stojí na samotné dlaždici jako
+`data-draw`, takže obrazovka se pořád kreslí z profilu. Prohlížeč bez
+`IntersectionObserver` dostane všechny kresby při připojení obrazovky, tedy
+přesně dnešní chování.
+
+Výsledek: garáž se otevírá na **37 dlaždicích a 962 až 1009 uzlech** podle toho,
+jak je kačenka oblečená, s největší otevřenou policí má **nejvýš 1489 uzlů**,
+a s padesáti vlajkami vyjde police vzorů na **1537 uzlů a 104 kB**, tedy pořád
+hluboko pod dneškem. Hlídá to kontrola ve `flow.test.js` se **stropem 1800
+uzlů**, měřená na skutečném DOM se zaslepeným pozorovatelem; spadne, až garáž
+povyroste zhruba o dalších sedmdesát dlaždic, nebo až někdo skládání či líné
+kreslení vypne. Náhled jen hlavy se neudělal, jak plán říkal, a stránkování
+taky ne. Katalog se nezmenšil ani o dlaždici.
+
+Původní zadání rozhodnutí: past z H5 se potvrdila a je horší, než jak ji plán odhadoval: čekalo
 se devadesát dlaždic, skutečnost je 115, tedy o čtvrtinu víc. Rozpad je osm
 strojů, osmadvacet zvířat, jedna kačenka, devět nátěrů (osm plus prázdná
 dlaždice) a devětašedesát kačenčích dílů (65 plus čtyři prázdné, kterými se

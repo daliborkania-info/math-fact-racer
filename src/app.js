@@ -5578,6 +5578,7 @@ function render(){
   app.innerHTML = html;
   if(view.name === "game") mountGame();
   if(view.name === "result") mountResult();
+  if(view.name === "collection") mountCollection();
   // A screen may be entered at a particular section rather than at the
   // top: coming out of the workshop with parts to spend, the garage
   // should already be showing the paints instead of asking the child to
@@ -7040,6 +7041,95 @@ function tokenCardHTML(p, spec, gained){
 }
 
 /* ---------- garage / collection ---------- */
+/* Which shelf of the garage is open, and whose it is. Deliberately a
+   variable and not a field in the profile, exactly like PEEK and BACK on
+   the map: folding is a way of looking at the catalogue, not a piece of
+   progress, so closing the game forgets it and the next start opens the
+   garage folded again. It holds a profile id, so switching player folds
+   it away too. */
+let SHELF = null;
+const shelfOpen = (p, sec) => !!SHELF && SHELF.id === p.id && SHELF.sec === sec;
+/* What a folded shelf says about itself, and it has to be enough that
+   folding reads as tidying rather than as hiding: what is on the shelf,
+   how many of them there are, how many are already the child's, what the
+   cheapest thing still left costs, and what is being worn from it. The
+   last one is why a shelf a child already has something on never reads
+   as empty while it is shut. */
+function shelfInfo(sh){
+  const n = sh.list.length;
+  const left = sh.list.filter(x => !sh.owns(x));
+  const bits = [n + " " + pickForm(sh.word, n), t("shelfHas", n - left.length)];
+  bits.push(left.length
+    ? t("shelfFrom", Math.min.apply(null, left.map(x => x.cost))) + " &#9881;"
+    : t("shelfAll"));
+  // what is worn from the shelf goes on a line of its own: the counting
+  // line is already as long as a phone holds, and a line that wrapped in
+  // the middle of a phrase would read worse than two short ones
+  return `<span class="shelfsub">${bits.join(" &middot; ")}</span>`
+    + (sh.worn ? `<span class="shelfworn">${t("shelfOn", sh.worn)}</span>` : "");
+}
+/* The six shelves, in the order they hang: the paints for the machines
+   first, then the five duck layers in the order the duck is built up.
+   Each says what it holds, how to tell whether a thing on it is already
+   the child's and what is worn from it, so one piece of code draws the
+   bar for all six and a seventh shelf would be one entry here. */
+function garageShelves(p){
+  const wornPaint = (p.paint || {})[paintBase(p).id] || "";
+  const out = [{
+    sec: "paintsec", title: t("paints"), note: t("paintsNote"),
+    list: PAINTS, word: "shelfPaint",
+    owns: pa => (p.paints || []).includes(pa.id),
+    worn: wornPaint ? t(wornPaint) : "",
+    cells: () => paintCells(p)
+  }];
+  for(const spec of DUCK_LAYERS){
+    // a layer that cannot be empty is wearing its first part when the
+    // profile says nothing, the same way the duck is drawn
+    const worn = (p.duck || {})[spec.layer] || (spec.none ? "" : spec.list[0].id);
+    out.push({
+      sec: spec.sec, title: t(spec.title), note: t(spec.note),
+      list: spec.list, word: "shelfPart",
+      owns: part => ownsDuckPart(p, part),
+      worn: worn ? t(worn) : "",
+      cells: () => duckPartCells(p, spec)
+    });
+  }
+  return out;
+}
+/* One shelf: the bar always, what is on it only while it is open. The
+   cells arrive as a function and not as a string on purpose -- a shut
+   shelf must not build sixty whole ducks and throw them away, because
+   not building them is the entire point. */
+function shelfHTML(p, sh){
+  const open = shelfOpen(p, sh.sec);
+  return `<section class="shelf${open ? " open" : ""}" id="${sh.sec}">
+    <button class="shelfhead" data-act="shelf" data-sec="${sh.sec}" aria-expanded="${open}">
+      <span class="shelfmark" aria-hidden="true">${open ? "&#9662;" : "&#9656;"}</span>
+      <span class="shelftxt"><span class="shelfname">${sh.title}</span>${shelfInfo(sh)}</span>
+    </button>
+    ${open ? `<div class="pad muted" style="margin-bottom:10px">${sh.note}</div>
+    <div class="grid">${sh.cells()}</div>` : ""}
+  </section>`;
+}
+/* The garage draws whole things and never swatches: a machine, an
+   animal, or a whole duck wearing the one part a tile is offering. That
+   is the right call, because a coloured square tells a child nothing
+   about what they would end up with, but it means the number of tiles is
+   the number of nodes, and after step H a hundred and fifteen of them
+   were built at once.
+
+   So the six shelves below the racers fold, and one is open at a time.
+   That is what puts a ceiling on the screen -- the racers plus one
+   shelf, whatever the catalogue grows to -- and a shut shelf is not
+   built at all rather than merely hidden. Nothing is taken away by it:
+   the bar of a shut shelf says what is on it, how much of it, how much
+   is already the child's, from what price and what is worn from it, and
+   one tap opens it.
+
+   The racers themselves never fold. That row is how a racer is chosen,
+   the choice only ever sorts and never filters, and a bought machine
+   that could not be picked would be a worse thing than any number of
+   nodes. (R11, decided 14 September 2026.) */
 function viewCollection(p){
   const cell = it => {
     const owned = p.owned.includes(it.id);
@@ -7076,13 +7166,8 @@ function viewCollection(p){
       <div class="grid">${PETS.map(cell).join("")}</div>
       <div class="h2 pad" id="ducksec" style="margin-bottom:8px">${t("ducks")}</div>
       <div class="grid">${DUCKS.map(cell).join("")}</div>
-      <div class="h2 pad" id="paintsec" style="margin-bottom:8px">${t("paints")}</div>
-      <div class="pad muted" style="margin-bottom:10px">${t("paintsNote")}</div>
-      <div class="grid">${paintCells(p)}</div>
-      ${DUCK_LAYERS.map(spec => `
-      <div class="h2 pad" id="${spec.sec}" style="margin-bottom:8px">${t(spec.title)}</div>
-      <div class="pad muted" style="margin-bottom:10px">${t(spec.note)}</div>
-      <div class="grid">${duckPartCells(p, spec)}</div>`).join("")}
+      <div class="pad muted" style="margin:18px 0 0">${t("shelfNote")}</div>
+      ${garageShelves(p).map(sh => shelfHTML(p, sh)).join("")}
       <div style="height:20px"></div>
     </div>
   </div>`;
@@ -7091,21 +7176,51 @@ function viewCollection(p){
    chip tells a child nothing about what the car will look like. The
    machine shown is the one currently chosen, so the preview is of their
    own racer; an animal has nothing to paint, so the plain car stands in. */
+const paintBase = p => itemById(p.runner).kind ? itemById(p.runner) : RIDES.find(r => r.id === "ri_auto");
+/* The one place that knows what a paint tile shows, so the tile and the
+   filling in of a tile later cannot drift apart. An empty id is the
+   machine as it came. */
+function paintPic(p, id){
+  const base = paintBase(p), pa = paintById(id);
+  return rideSVG(pa ? Object.assign({}, base, {c1: pa.c1, c2: pa.c2}) : base);
+}
+/* The same for a duck tile: the child's own duck, dressed the way they
+   have it, with this one part swapped into its layer. An empty id
+   leaves the layer bare, which is what the empty tile is for. */
+function duckPic(p, layer, id){
+  return duckSVG(DUCKS[0], Object.assign({}, p.duck, {[layer]: id}));
+}
+/* How many tiles of a shelf are drawn together with the screen. The rest
+   carry only what they need to be drawn from and get their picture when
+   they come near the screen; see mountCollection(). Eight is a row of
+   the widest grid the garage draws and getting on for three rows of a
+   phone, so what the shelf opens onto is drawn already and the observer
+   only ever has to keep up with a thumb. */
+const SHELF_EAGER = 8;
+/* A tile's picture, either now or later. What the tile says about itself
+   is enough to draw it from, so nothing about the waiting tiles is held
+   anywhere: the screen is still drawn from the profile. */
+function tilePic(p, kind, layer, id, i){
+  if(i < SHELF_EAGER){
+    return `<span class="pic">${kind === "paint" ? paintPic(p, id) : duckPic(p, layer, id)}</span>`;
+  }
+  return `<span class="pic" data-draw="${kind}:${layer}:${id}"></span>`;
+}
 function paintCells(p){
-  const base = itemById(p.runner).kind ? itemById(p.runner) : RIDES.find(r => r.id === "ri_auto");
+  const base = paintBase(p);
   const worn = (p.paint || {})[base.id] || "";
-  const cell = (id, svg, label, cost, on) => `
+  let i = 0;
+  const cell = (id, label, cost, on) => `
     <button class="item ${on ? "sel" : ""}" data-act="${cost === null ? "usepaint" : "buypaint"}" data-id="${id}">
-      <span class="pic">${svg}</span>
+      ${tilePic(p, "paint", "", id, i++)}
       <span class="nm">${label}</span>
     </button>`;
-  const none = cell("", rideSVG(base), t("paintNone"), null, !worn);
+  const none = cell("", t("paintNone"), null, !worn);
   const rest = PAINTS.map(pa => {
-    const svg = rideSVG(Object.assign({}, base, {c1: pa.c1, c2: pa.c2}));
     const owned = (p.paints || []).includes(pa.id);
     return owned
-      ? cell(pa.id, svg, t(pa.id), null, worn === pa.id)
-      : cell(pa.id, svg, "&#9881; " + pa.cost, pa.cost, false);
+      ? cell(pa.id, t(pa.id), null, worn === pa.id)
+      : cell(pa.id, "&#9881; " + pa.cost, pa.cost, false);
   }).join("");
   return none + rest;
 }
@@ -7115,10 +7230,11 @@ function paintCells(p){
    dressed the way the child has it, with this one part swapped in, so
    the tile is a preview of their own duck. */
 function duckPartCells(p, spec){
-  const duck = DUCKS[0], worn = (p.duck || {})[spec.layer] || "";
+  const worn = (p.duck || {})[spec.layer] || "";
+  let i = 0;
   const tile = (id, label, on, owned) => `<button class="item ${on ? "sel" : ""}"
     data-act="${owned ? "useduck" : "buyduck"}" data-id="${id}" data-layer="${spec.layer}">
-    <span class="pic">${duckSVG(duck, Object.assign({}, p.duck, {[spec.layer]: id}))}</span>
+    ${tilePic(p, "duck", spec.layer, id, i++)}
     <span class="nm">${label}</span>
   </button>`;
   // a layer that can be taken off gets an empty tile first, the way the
@@ -7128,6 +7244,38 @@ function duckPartCells(p, spec){
         ownsDuckPart(p, part) ? t(part.id) : "&#9881; " + part.cost,
         worn === part.id || (!worn && !spec.none && part === spec.list[0]),
         ownsDuckPart(p, part))).join("");
+}
+/* Putting the picture into one waiting tile. Everything it needs stands
+   on the tile itself, so this draws exactly what the cell would have
+   drawn, and the tile stops waiting once it has it. */
+function drawTile(p, el){
+  const a = String(el.dataset.draw || "").split(":");
+  el.innerHTML = a[0] === "paint" ? paintPic(p, a[2]) : duckPic(p, a[1], a[2]);
+  el.removeAttribute("data-draw");
+}
+let TILE_EYE = null;
+/* Drawing the rest of a shelf only as it is scrolled to. Folding the
+   shelves was the first half of R11 and it bounds the screen at the
+   racers plus one shelf; this is the second half, and it is what lets
+   one shelf hold sixty whole ducks, which is where the flags are going.
+   A whole duck is some thirty nodes of drawing against five of button,
+   so a tile is written in two pieces and only the piece the child can
+   see is paid for.
+
+   A browser with no IntersectionObserver gets every picture at mount
+   time, which is exactly what the garage did before: a catalogue of
+   empty squares would be worse than a slow screen. */
+function mountCollection(){
+  let late;
+  try{ late = [].slice.call(document.querySelectorAll(".shelf .pic[data-draw]")); }catch(e){ return; }
+  if(!late.length) return;
+  const p = P();
+  if(typeof IntersectionObserver !== "function"){ late.forEach(el => drawTile(p, el)); return; }
+  if(TILE_EYE) TILE_EYE.disconnect();
+  TILE_EYE = new IntersectionObserver(function(entries){
+    for(const e of entries) if(e.isIntersecting){ drawTile(p, e.target); TILE_EYE.unobserve(e.target); }
+  }, {rootMargin: "400px 0px"});
+  late.forEach(el => TILE_EYE.observe(el));
 }
 /* The five layers in the order the garage shows them: the body first,
    because it is the one that is never empty, then what is painted on,
@@ -7671,7 +7819,7 @@ document.addEventListener("click", e => {
     inp.onkeydown = ev => { if(ev.key === "Enter") create(); };
     return;
   }
-  if(act === "pick"){ DB.current = id; PEEK = null; BACK = null; save(); go("map"); return; }
+  if(act === "pick"){ DB.current = id; PEEK = null; BACK = null; SHELF = null; save(); go("map"); return; }
   // looking ahead is a toggle and nothing is written down: the year in
   // the profile stays where the parent put it
   if(act === "peek"){ PEEK = (PEEK === p.id) ? null : p.id; sfx.coin(); render(); return; }
@@ -7724,7 +7872,14 @@ document.addEventListener("click", e => {
   // something in it, so it stands at the paints while paints are left
   // and moves on to the duck afterwards, and stays there while the child
   // tries things on
-  if(act === "spendparts"){ go("collection", {focus: spendTarget(p) || partsShelves(p)[0] || "paintsec"}); return; }
+  // and it opens that shelf on the way, because landing on a shut bar
+  // would be walking the child to a closed door
+  if(act === "spendparts"){
+    const sec = spendTarget(p) || partsShelves(p)[0] || "paintsec";
+    SHELF = {id: p.id, sec};
+    go("collection", {focus: sec});
+    return;
+  }
 
   if(act === "shop"){ go("shop"); return; }
   if(act === "jobstart"){ startJob(p, id); return; }
@@ -7780,6 +7935,20 @@ document.addEventListener("click", e => {
     return;
   }
 
+  /* Opening a shelf, and shutting the one that was open: the garage
+     shows the racers plus at most one shelf, which is what keeps the
+     screen from building the whole catalogue at once. The screen is then
+     drawn at that shelf, so the bar the child tapped stays under the
+     thumb instead of the page growing out from under it, the same way
+     the map lands on the year sign when the earlier years unfold.
+     Nothing about this is written to the profile. */
+  if(act === "shelf"){
+    const sec = el.dataset.sec;
+    SHELF = shelfOpen(p, sec) ? null : {id: p.id, sec};
+    sfx.coin();
+    go("collection", {focus: sec});
+    return;
+  }
   // picking a machine or an animal means the child has scrolled away
   // from the paints, so the screen must stop jumping back down to them
   if(act === "use"){ delete view.focus; p.runner = id; save(); render(); return; }

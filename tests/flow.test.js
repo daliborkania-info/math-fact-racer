@@ -437,12 +437,17 @@ ok('chyba zakazku prodlouzila o opravu', jev('JOB.retries')===1 && jev('JOB.item
 ok('opravena uloha odkryla dil taky, kruh je i po chybe cely',
    jev('JOB.ok')===6 && jev('JOB.marks.filter(m=>m===2).length')===1, 'vyreseno '+jev('JOB.ok')+' z 6');
 
-// utrata soucastek ma skocit tam, kde jeste neco koupitelneho zbyva;
-// dokud jsou natery neuplne, jsou to natery
+// utrata soucastek ma skocit tam, kde si dite opravdu muze neco koupit.
+// Nejlevnejsi nater stoji 30 soucastek, nejlevnejsi kacenci dil 6, takze
+// dite po prvni zakazce patri do kacenci sekce, ne k naterum, na ktere
+// jeste dlouho mit nebude
 click(q('[data-act="spendparts"]'));
-ok('utrata soucastek otevre garaz rovnou u nateru',
-   ev('view.name')==='collection' && ev('view.focus')==='paintsec' && q('#paintsec')!==null,
-   ev('view.name')+' / '+ev('view.focus'));
+const kamUtrata=ev('view.focus'), soucastekPoZakazce=DBg().profiles[0].parts;
+ok('utrata soucastek otevre garaz u sekce, na kterou dite ma',
+   ev('view.name')==='collection' && kamUtrata===ev('spendTarget(P())') && q('#'+kamUtrata)!==null,
+   ev('view.name')+' / '+kamUtrata+' | soucastek '+soucastekPoZakazce);
+ok('s par soucastkami neposila utrata dite na natery za tricet',
+   kamUtrata!=='paintsec' && soucastekPoZakazce<30, kamUtrata+' se '+soucastekPoZakazce+' soucastkami');
 ok('vyber stroje uz zpatky k naterum neskace',
    (click(qa('[data-act="use"]')[0]), ev('view.focus')===undefined));
 
@@ -625,27 +630,47 @@ console.log('--- kam soucastky jdou ---');
 const zaloha=w.localStorage.getItem('math-fact-racer-v1');
 const vsechnyNatery=JSON.parse(ev('JSON.stringify(PAINTS.map(x=>x.id))'));
 const vsechnyDily=JSON.parse(ev('JSON.stringify(DUCK_PARTS.map(x=>x.id))'));
-const stav=(nat,dily)=>{
+const stav=(nat,dily,soucastky)=>{
   const s=JSON.parse(zaloha);
   s.profiles[0].paints=nat?vsechnyNatery.slice():[];
   s.profiles[0].duckParts=dily?vsechnyDily.slice():[];
-  s.profiles[0].parts=50;
+  s.profiles[0].parts=soucastky===undefined?50:soucastky;
   w.localStorage.setItem('math-fact-racer-v1', JSON.stringify(s));
   ev('load()');
   return {prazdno:ev('shelvesEmpty(P())'),
-          police:JSON.parse(ev('JSON.stringify(partsShelves(P()))'))};
+          police:JSON.parse(ev('JSON.stringify(partsShelves(P()))')),
+          cil:ev('spendTarget(P())')};
 };
 const nic=stav(false,false), jenNatery=stav(true,false);
 const jenDily=stav(false,true), vsechno=stav(true,true);
-ok('dokud zbyvaji natery, miri utrata soucastek na ne',
-   nic.police[0]==='paintsec' && !nic.prazdno, nic.police.join(','));
-ok('po poslednim nateru miri utrata rovnou do kacenci sekce',
-   jenNatery.police[0]==='duckbodysec' && !jenNatery.prazdno, jenNatery.police.join(','));
+// police jsou razene od nejlevnejsiho zbyvajiciho dilu, ne podle toho,
+// jak je garaz ukazuje: nejlevnejsi kacenci dil stoji 6 soucastek,
+// nejlevnejsi nater 30, takze utrata miri nejdriv ke kacence
+ok('police jsou razene od nejlevnejsiho a natery za tricet jsou az posledni',
+   nic.police[0]!=='paintsec' && nic.police[nic.police.length-1]==='paintsec'
+   && nic.cil===nic.police[0] && !nic.prazdno, nic.police.join(','));
+ok('po poslednim nateru zustanou kacenci sekce',
+   jenNatery.police[0]!=='paintsec' && jenNatery.police.indexOf('paintsec')<0
+   && !jenNatery.prazdno, jenNatery.police.join(','));
 ok('samotne natery stitek neprepnou', !jenNatery.prazdno);
 ok('samotne dily kacenky stitek neprepnou taky',
-   !jenDily.prazdno && jenDily.police.join(',')==='paintsec', jenDily.police.join(','));
+   !jenDily.prazdno && jenDily.police.join(',')==='paintsec' && jenDily.cil==='paintsec',
+   jenDily.police.join(','));
 ok('stitek se prepne az pri naterech i vsech dilech',
-   vsechno.prazdno && vsechno.police.length===0, vsechno.police.join(','));
+   vsechno.prazdno && vsechno.police.length===0 && vsechno.cil===null, vsechno.police.join(','));
+// dite se sesti az devetadvaceti soucastkami ma na kacenci dil, ale na
+// zadny nater, takze ho utrata nesmi poslat mezi ceny, na ktere nema
+const malo=stav(false,false,9);
+ok('s devíti soucastkami miri utrata na dil, ktery si dite koupi',
+   malo.cil && malo.cil!=='paintsec', malo.cil);
+// a kdyz nema nikde na nic, neni co nabizet: zadne falesne tlacitko
+// a zadna sekce plna cen, na ktere dite nedosahne
+const nula=stav(false,false,3);
+ok('bez soucastek na cokoli se utrata nenabizi, ale police zustavaji plne',
+   nula.cil===null && !nula.prazdno && nula.police.length===6, nula.police.length+' polic');
+ev('go("jobdone")');
+ok('na vysledku zakazky pak tlacitko utraty neni, cislo ale zustava penezenkou',
+   q('[data-act="spendparts"]')===null && /celkem/.test(txt()), txt().slice(0,90));
 // a to same, jak to uvidi dite: dilna rika, na co soucastky jsou, a kdyz
 // uz neni na co, rekne misto toho, kolik prace je hotove
 stav(false,false); ev('go("shop")');

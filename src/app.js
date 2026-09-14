@@ -74,10 +74,7 @@ function load(){
   DB.profiles = DB.profiles || [];
   DB.lang = DB.lang || detectLang();
   for(const p of DB.profiles){
-    // the free starter set belongs to everyone, including older profiles
-    p.owned = p.owned || [];
-    for(const s of STARTERS) if(!p.owned.includes(s)) p.owned.push(s);
-    if(!p.runner || !p.owned.includes(p.runner)) p.runner = STARTERS[0];
+    seedStarters(p);
     p.lang = p.lang || DB.lang;
     // curriculum choice, added later: older profiles stay adaptive
     if(p.curriculum === undefined) p.curriculum = null;
@@ -94,6 +91,18 @@ function load(){
     seedGrade(p);
     seedBands(p);
   }
+}
+/* The free starter set belongs to everyone, including older profiles and
+   backups restored from an older version. It is a seed like any other,
+   and it has to run on the imported profile too: a backup made before
+   the duck existed carries a list of racers without it, and the import
+   overwrites the fresh profile's list with that one, so without this the
+   duck a child already had would come back as a locked tile with a price
+   on it. Nothing is ever taken away here, only added. */
+function seedStarters(p){
+  p.owned = p.owned || [];
+  for(const s of STARTERS) if(!p.owned.includes(s)) p.owned.push(s);
+  if(!p.runner || !p.owned.includes(p.runner)) p.runner = STARTERS[0];
 }
 /* What goes on the duck, added later. An older profile knows none of it
    and starts with an empty wardrobe; it loses nothing by that, because a
@@ -2216,15 +2225,29 @@ const DUCK_HEAD = [
     return arc(-170, -95) + arc(-85, -45)
       + leaves([-166, -144, -122, -100], 46) + leaves([-80, -58], -46);
   }},
+  // a dome with a ridge along it and a brim in front. The shallow slice
+  // of the head it used to be read as a saucer balanced on the duck
   {id:"dh_prilba", cost:16, draw:(g) =>
-    `<path d="${g.dome(g.brim-2, g.r+2.5)}" fill="#ffb700" stroke="#c07d00" stroke-width="1"/>`
-    + `<path d="M${g.x} ${g.n(g.top-2.5)} L${g.x} ${g.n(g.brim-4)}" stroke="#c07d00" stroke-width="2.4" fill="none"/>`
+    `<path d="M${g.n(g.x-12.5)} ${g.n(g.brim-2)} Q ${g.n(g.x-12)} ${g.n(g.top-8)} ${g.x} ${g.n(g.top-8.5)}`
+    + ` Q ${g.n(g.x+12)} ${g.n(g.top-8)} ${g.n(g.x+12.5)} ${g.n(g.brim-2)} Z"`
+    + ` fill="#ffb700" stroke="#c07d00" stroke-width="1"/>`
+    + `<path d="M${g.x} ${g.n(g.top-8.2)} L${g.x} ${g.n(g.brim-2)}" stroke="#c07d00" stroke-width="2.4" fill="none"/>`
     + `<path d="M${g.n(g.x-14)} ${g.n(g.brim-1.5)} Q ${g.x} ${g.n(g.brim+2.5)} ${g.n(g.x+14)} ${g.n(g.brim-1.5)}`
     + ` Q ${g.x} ${g.n(g.brim-5)} ${g.n(g.x-14)} ${g.n(g.brim-1.5)} Z" fill="#ffb700" stroke="#c07d00" stroke-width="1"/>`},
-  {id:"dh_kudrny", cost:18, draw:(g) =>
-    [[-180, 6], [-157, 6], [-134, 5.8], [-110, 5.4], [-78, 4.4], [163, 5.4], [192, 5]].map(c => {
-      const p = g.at(c[0], g.r-1.5);
-      return `<circle cx="${p[0]}" cy="${p[1]}" r="${c[1]}" fill="#fdf0c8" stroke="#c9a13c" stroke-width="1.1"/>`; }).join("")},
+  // curls all the way round the head, from the nape up over the crown and
+  // down to the fringe above the eye, with a second row inside the first
+  // for depth. Curls only behind the crown left the front of the head
+  // bare, and what a child saw was a heap of eggs sitting on a duck
+  {id:"dh_kudrny", cost:18, draw:(g) => {
+    const curl = (a, q, r) => { const p = g.at(a, q);
+      return `<circle cx="${p[0]}" cy="${p[1]}" r="${g.n(r)}" fill="#fdf0c8" stroke="#c9a13c" stroke-width="1.1"/>`; };
+    return [[-208, 5], [-192, 5.6], [-174, 6], [-156, 6], [-138, 5.8], [-120, 5.4],
+            [-102, 5], [-85, 4.6], [-68, 4.2]].map(c => curl(c[0], g.r - 1.6, c[1])).join("")
+      // the inner row stops short of the forehead: a curl there would be
+      // hair hanging over the eye, and the eye is the whole face
+      + [[-196, 4.2], [-172, 4.6], [-148, 4.6], [-124, 4.2]]
+        .map(c => curl(c[0], g.r - 5.5, c[1])).join("");
+  }},
   {id:"dh_cylindr", cost:18, draw:(g) =>
     `<path d="M${g.n(g.x-10.5)} ${g.n(g.brim-4)} L${g.n(g.x-9.5)} ${g.n(g.brim-22)}`
     + ` Q ${g.x} ${g.n(g.brim-24)} ${g.n(g.x+9.5)} ${g.n(g.brim-22)} L${g.n(g.x+10.5)} ${g.n(g.brim-4)} Z"`
@@ -2284,13 +2307,23 @@ const DUCK_HEAD = [
     // big enough to hold the whole duck's head and bill inside the
     // glass: a rim crossing the bill would read as a bill cut in half
     const cx = g.x + 3, cy = g.y - 3, rad = g.r + 11;
-    const a1 = [g.n(cx + rad * Math.cos(-160 * Math.PI / 180)), g.n(cy + rad * Math.sin(-160 * Math.PI / 180))];
-    const a2 = [g.n(cx + rad * Math.cos(-125 * Math.PI / 180)), g.n(cy + rad * Math.sin(-125 * Math.PI / 180))];
-    return `<ellipse cx="${g.n(cx)}" cy="${g.n(cy+rad-3)}" rx="15" ry="4.5" fill="#cfe0f0" stroke="#9fb8cc" stroke-width="1"/>`
-      + `<circle cx="${g.n(cx)}" cy="${g.n(cy)}" r="${g.n(rad)}" fill="#dff1ff" opacity=".22"/>`
+    const on = (deg) => [g.n(cx + rad * Math.cos(deg * Math.PI / 180)),
+                         g.n(cy + rad * Math.sin(deg * Math.PI / 180))];
+    const a1 = on(-160), a2 = on(-125);
+    // the collar is the bottom edge of the glass itself, thickened where
+    // the helmet meets the duck. A dish drawn under the sphere came away
+    // from it and read as a glass bowl lying on the duck's chest, worst
+    // of all on a dark body, where the pale oval was the brightest thing
+    // in the picture
+    const c1 = on(40), c2 = on(140);
+    return `<circle cx="${g.n(cx)}" cy="${g.n(cy)}" r="${g.n(rad)}" fill="#dff1ff" opacity=".22"/>`
       + `<circle cx="${g.n(cx)}" cy="${g.n(cy)}" r="${g.n(rad)}" fill="none" stroke="#bcdcf5" stroke-width="1.6" opacity=".85"/>`
       + `<path d="M${a1[0]} ${a1[1]} A ${g.n(rad)} ${g.n(rad)} 0 0 1 ${a2[0]} ${a2[1]}"`
-      + ` fill="none" stroke="#ffffff" stroke-width="3.4" opacity=".5"/>`;
+      + ` fill="none" stroke="#ffffff" stroke-width="3.4" opacity=".5"/>`
+      + `<path d="M${c1[0]} ${c1[1]} A ${g.n(rad)} ${g.n(rad)} 0 0 1 ${c2[0]} ${c2[1]}"`
+      + ` fill="none" stroke="#9fb8cc" stroke-width="5" stroke-linecap="round"/>`
+      + `<path d="M${c1[0]} ${c1[1]} A ${g.n(rad)} ${g.n(rad)} 0 0 1 ${c2[0]} ${c2[1]}"`
+      + ` fill="none" stroke="#eaf4fc" stroke-width="1.8" stroke-linecap="round"/>`;
   }}
 ];
 
@@ -2370,28 +2403,43 @@ const DUCK_EYE = [
   // between them and the scalloped top they are what makes the thing a
   // mask from a party shop rather than a disguise
   {id:"de_maska", cost:12, draw:(g, rim) => { const E = g.E;
-    const hole = `M${g.n(E.x-1.2)} ${g.n(E.y-4.2)} Q ${g.n(E.x+3.2)} ${g.n(E.y-4.2)} ${g.n(E.x+3.2)} ${g.n(E.y)}`
-      + ` Q ${g.n(E.x+3.2)} ${g.n(E.y+4.2)} ${g.n(E.x-1.2)} ${g.n(E.y+4.2)}`
-      + ` Q ${g.n(E.x-5.6)} ${g.n(E.y+4.2)} ${g.n(E.x-5.6)} ${g.n(E.y)}`
-      + ` Q ${g.n(E.x-5.6)} ${g.n(E.y-4.2)} ${g.n(E.x-1.2)} ${g.n(E.y-4.2)} Z`;
-    // a scalloped top edge, which is what says party shop; a smooth
-    // lens of a shape read as a fish lying across the duck's face
-    const top = `M${g.n(E.x+4)} ${g.n(E.y+0.6)} Q ${g.n(E.x+3.4)} ${g.n(E.y-4)} ${g.n(E.x+0.6)} ${g.n(E.y-4.8)}`
-      + ` Q ${g.n(E.x-2.4)} ${g.n(E.y-6.4)} ${g.n(E.x-5.4)} ${g.n(E.y-4.6)}`
-      + ` Q ${g.n(E.x-8.6)} ${g.n(E.y-6.4)} ${g.n(E.x-11.6)} ${g.n(E.y-4.6)}`
-      + ` Q ${g.n(E.x-14.6)} ${g.n(E.y-6)} ${g.n(E.x-15.4)} ${g.n(E.y-2.8)}`;
-    const face = top + ` L${g.n(E.x-14.6)} ${g.n(E.y+4.6)}`
-      + ` Q ${g.n(E.x-7)} ${g.n(E.y+7)} ${g.n(E.x-1.4)} ${g.n(E.y+5.6)}`
-      + ` Q ${g.n(E.x+3)} ${g.n(E.y+4)} ${g.n(E.x+4)} ${g.n(E.y+0.6)} Z`;
-    const kn = [g.n(E.x-15), g.n(E.y+1)];
-    // two ties running back round the head, not a bow on the end of the
-    // mask: with a bow there the thing read as a fish with a tail fin
-    return [[-3.2, 1.15], [2.6, 1.1]].map(d =>
-        `<path d="M${kn[0]} ${g.n(kn[1]+d[0]*.5)} Q ${g.n(E.x-g.r*.9)} ${g.n(E.y+d[0])} ${g.n(E.x-g.r*1.18)} ${g.n(E.y+d[0]*1.4)}"`
+    // The eye hole comes first, because the whole part is built round it:
+    // the eye stays open under the mask and the hole is what a child
+    // reads as a mask rather than as a patch.
+    const hole = `M${g.n(E.x+3.4)} ${g.n(E.y-0.4)} Q ${g.n(E.x+3.4)} ${g.n(E.y-4.6)} ${g.n(E.x-0.6)} ${g.n(E.y-4.6)}`
+      + ` Q ${g.n(E.x-4.8)} ${g.n(E.y-4.6)} ${g.n(E.x-4.8)} ${g.n(E.y-0.2)}`
+      + ` Q ${g.n(E.x-4.8)} ${g.n(E.y+4.2)} ${g.n(E.x-0.6)} ${g.n(E.y+4.2)}`
+      + ` Q ${g.n(E.x+3.4)} ${g.n(E.y+4.2)} ${g.n(E.x+3.4)} ${g.n(E.y-0.4)} Z`;
+    /* The outline, and every line of it is there to stop the thing being
+       a fish. A straight brow across the top instead of scallops, which
+       read as a dorsal fin; a squared off back edge instead of a point,
+       which read as a tail; and a deep scoop out of the underside behind
+       the eye, so the silhouette has a waist where a fish has a belly.
+       The front edge drops below the eye to the cheek, which is where a
+       party mask ends on a face. */
+    const face = `M${g.n(E.x+5)} ${g.n(E.y-3.6)}`
+      + ` Q ${g.n(E.x+1.4)} ${g.n(E.y-6.8)} ${g.n(E.x-4.6)} ${g.n(E.y-6.8)}`
+      + ` Q ${g.n(E.x-10.6)} ${g.n(E.y-6.8)} ${g.n(E.x-13.6)} ${g.n(E.y-5.2)}`
+      + ` L${g.n(E.x-14.2)} ${g.n(E.y+2.6)}`
+      + ` Q ${g.n(E.x-11.4)} ${g.n(E.y+3.6)} ${g.n(E.x-8.6)} ${g.n(E.y+1.4)}`
+      + ` Q ${g.n(E.x-6.4)} ${g.n(E.y+5.4)} ${g.n(E.x-2)} ${g.n(E.y+6)}`
+      // the front edge leans back below the eye, the way a mask ends on a
+      // cheek, and that is also what keeps it off the root of the bill
+      + ` Q ${g.n(E.x+2.4)} ${g.n(E.y+6.4)} ${g.n(E.x+4.4)} ${g.n(E.y+3.4)}`
+      + ` Q ${g.n(E.x+5.4)} ${g.n(E.y-1.8)} ${g.n(E.x+5)} ${g.n(E.y-3.6)} Z`;
+    const kn = [g.n(E.x-13.9), g.n(E.y-1.2)];
+    // two ties running back round the head at different angles, never a
+    // bow on the end of the mask: a bow there was the fin that finished
+    // the fish off
+    return [[-2.6, 1.15], [3, 1.05]].map(d =>
+        `<path d="M${kn[0]} ${g.n(kn[1]+d[0]*.4)} Q ${g.n(E.x-g.r*.95)} ${g.n(E.y+d[0])} ${g.n(E.x-g.r*1.2)} ${g.n(E.y+d[0]*1.5)}"`
         + ` fill="none" stroke="#8a6ab8" stroke-width="${d[1]}"/>`).join("")
       + `<path d="${face} ${hole}" fill-rule="evenodd" fill="#6f4fa8" stroke="${rim}" stroke-width=".9"/>`
-      + `<path d="${top}" fill="none" stroke="#e8c14a" stroke-width="1.1"/>`
-      + `<circle cx="${kn[0]}" cy="${kn[1]}" r="1.6" fill="#e8c14a"/>`;
+      // the brow, drawn as a trim along the top edge only: a line all the
+      // way round turned the outline into a lens
+      + `<path d="M${g.n(E.x+4.4)} ${g.n(E.y-4.6)} Q ${g.n(E.x+1)} ${g.n(E.y-7.4)}`
+      + ` ${g.n(E.x-4.6)} ${g.n(E.y-7.4)} Q ${g.n(E.x-10.4)} ${g.n(E.y-7.4)} ${g.n(E.x-13.2)} ${g.n(E.y-5.9)}"`
+      + ` fill="none" stroke="#e8c14a" stroke-width="1.2" stroke-linecap="round"/>`;
   }},
   // a patch is a thing worn, not an eye shut: a soft square of leather
   // with a shine on it and two straps round the head, so what a child
@@ -2515,19 +2563,26 @@ const DUCK_GEAR = [
   // arm bands go round the wing, which is the nearest thing a duck has
   // to an arm
   {id:"dg_kridla", cost:14, draw:(g, rim) => { const W = g.W;
-    // a band gripping the wing, small and pinched in the middle. A ring
-    // round it read as a second swim ring, and two filled lobes read as
-    // two oranges lying on the duck
-    return `<path d="M${g.n(W.x-8)} ${g.n(W.y-2.6)} Q ${g.n(W.x+2)} ${g.n(W.y-5.4)} ${g.n(W.x+11)} ${g.n(W.y-1.6)}`
-      + ` Q ${g.n(W.x+12)} ${g.n(W.y+3)} ${g.n(W.x+10)} ${g.n(W.y+7.4)}`
-      + ` Q ${g.n(W.x+1)} ${g.n(W.y+10.4)} ${g.n(W.x-8.6)} ${g.n(W.y+6)}`
-      + ` Q ${g.n(W.x-9.6)} ${g.n(W.y+1.6)} ${g.n(W.x-8)} ${g.n(W.y-2.6)} Z"`
+    /* An arm band goes round the wing, across it rather than over it, so
+       the root of the wing and its tip both still show: a patch laid
+       along the wing hid the whole thing and read as an orange barrel
+       with a stripe, which is also what the life jacket looked like, and
+       two pieces of gear a child cannot tell apart are one piece of gear.
+       The band is drawn about a line across the wing, so every number in
+       it is an offset from the wing anchor. `s` runs along that line and
+       `t` across it; two bulges with a pinch between them are what makes
+       an inflated band rather than a cuff. */
+    const pt = (s, t) => `${g.n(W.x - 8 - .41 * s + .91 * t)} ${g.n(W.y - 3 + .91 * s + .41 * t)}`;
+    return `<path d="M${pt(-11.5, -5.4)} Q ${pt(-15.4, 0)} ${pt(-11.5, 5.4)}`
+      + ` Q ${pt(-5.4, 7) } ${pt(0, 4.2)} Q ${pt(5.4, 7)} ${pt(11.5, 5.4)}`
+      + ` Q ${pt(15.4, 0)} ${pt(11.5, -5.4)} Q ${pt(5.4, -7)} ${pt(0, -4.2)}`
+      + ` Q ${pt(-5.4, -7)} ${pt(-11.5, -5.4)} Z"`
       + ` fill="#ff8a3d" stroke="${rim}" stroke-width=".9"/>`
-      + `<path d="M${g.n(W.x-8.8)} ${g.n(W.y+1.8)} Q ${g.n(W.x+1)} ${g.n(W.y+4.6)} ${g.n(W.x+11.4)} ${g.n(W.y+1.4)}"`
-      + ` fill="none" stroke="#fdfdff" stroke-width="2.4"/>`
-      + [[-8.4, 5.2], [11.4, 4.8]].map(d =>
-          `<path d="M${g.n(W.x+d[0])} ${g.n(W.y-1.6)} Q ${g.n(W.x+d[0]+(d[0]<0?2:-2))} ${g.n(W.y+3)} ${g.n(W.x+d[0])} ${g.n(W.y+6.4)}"`
-          + ` fill="none" stroke="#d8641f" stroke-width="1.1"/>`).join("");
+      // the seam between the two chambers, and a short highlight on the
+      // upper one so the band reads as inflated
+      + `<path d="M${pt(0, -4.4)} L${pt(0, 4.4)}" fill="none" stroke="#d8641f" stroke-width="1.4"/>`
+      + `<path d="M${pt(-8.6, -2.6)} Q ${pt(-4.6, -4.4)} ${pt(-2.4, -3)}"`
+      + ` fill="none" stroke="#ffd9b8" stroke-width="1.8" stroke-linecap="round"/>`;
   }},
   // a pennant on a stick, carried leaning back over the duck's
   // shoulder. The stick is drawn in front and the flag hangs off its
@@ -2581,22 +2636,31 @@ const DUCK_GEAR = [
     return `<path d="${s}" fill="none" stroke="${rim}" stroke-width="4.4"/>`
       + `<path d="${s}" fill="none" stroke="#8c97ab" stroke-width="3.2"/>`;
   }},
-  {id:"dg_vesta", cost:20, draw:(g, rim) => { const B = g.B;
-    // a collar at the neck and a panel down the front, tapering the way
-    // a jacket does; an even oval on the side reads as a beach ball
-    return `<path d="M${g.n(B.x-16)} ${g.n(B.y+2)} Q ${g.n(B.x+4)} ${g.n(B.y+8)} ${g.n(B.x+23)} ${g.n(B.y+1)}"`
-      + ` fill="none" stroke="#d8641f" stroke-width="2.6"/>`
-      + `<path d="M${g.n(B.x+4)} ${g.n(B.y-12)} Q ${g.n(B.x+14)} ${g.n(B.y-9)} ${g.n(B.x+23)} ${g.n(B.y-13)}`
-      + ` Q ${g.n(B.x+26)} ${g.n(B.y-2)} ${g.n(B.x+22)} ${g.n(B.y+10)}`
-      + ` Q ${g.n(B.x+13)} ${g.n(B.y+14)} ${g.n(B.x+4)} ${g.n(B.y+9)}`
-      + ` Q ${g.n(B.x+1)} ${g.n(B.y-2)} ${g.n(B.x+4)} ${g.n(B.y-12)} Z"`
+  {id:"dg_vesta", cost:20, draw:(g, rim) => { const B = g.B, k = g.neck;
+    /* A life jacket is what goes round a neck and round a body, and that
+       is what tells it apart from the arm band on the wing: a collar
+       sitting on the neck point, a panel hanging from it down the chest,
+       and a belt running right across the duck with a buckle on it. A
+       panel on its own, with no collar and no belt, was an upright
+       striped box, and at tile size it and the arm band were the same
+       orange thing twice. */
+    const collar = `M${g.n(k[0]-9)} ${g.n(k[1]-1.6)} Q ${g.n(k[0]-1)} ${g.n(k[1]+5.4)} ${g.n(k[0]+8)} ${g.n(k[1]-3.4)}`
+      + ` Q ${g.n(k[0]+10.4)} ${g.n(k[1]+0.6)} ${g.n(k[0]+8.6)} ${g.n(k[1]+3)}`
+      + ` Q ${g.n(k[0]-1)} ${g.n(k[1]+11)} ${g.n(k[0]-10.6)} ${g.n(k[1]+2.6)} Z`;
+    // the belt goes round the whole duck, not just across the panel
+    const belt = `M${g.n(B.x-26)} ${g.n(B.y+6)} Q ${g.n(B.x-2)} ${g.n(B.y+12)} ${g.n(B.x+22)} ${g.n(B.y+4)}`;
+    return `<path d="M${g.n(B.x+6)} ${g.n(B.y-9)} Q ${g.n(B.x+16)} ${g.n(B.y-7)} ${g.n(B.x+24)} ${g.n(B.y-11)}`
+      + ` Q ${g.n(B.x+27)} ${g.n(B.y-1)} ${g.n(B.x+23)} ${g.n(B.y+9)}`
+      + ` Q ${g.n(B.x+14)} ${g.n(B.y+13)} ${g.n(B.x+5)} ${g.n(B.y+8)}`
+      + ` Q ${g.n(B.x+2)} ${g.n(B.y-2)} ${g.n(B.x+6)} ${g.n(B.y-9)} Z"`
       + ` fill="#ff7a1f" stroke="${rim}" stroke-width=".9"/>`
-      + `<path d="M${g.n(B.x+3.4)} ${g.n(B.y-4)} Q ${g.n(B.x+13)} ${g.n(B.y-1)} ${g.n(B.x+24)} ${g.n(B.y-5)}"`
-      + ` fill="none" stroke="#fdfdff" stroke-width="2.4"/>`
-      + `<path d="M${g.n(B.x+4.4)} ${g.n(B.y+4)} Q ${g.n(B.x+13)} ${g.n(B.y+7)} ${g.n(B.x+23)} ${g.n(B.y+3)}"`
-      + ` fill="none" stroke="#fdfdff" stroke-width="2.4"/>`
-      + `<path d="M${g.n(B.x+5)} ${g.n(B.y-13)} Q ${g.n(B.x+14)} ${g.n(B.y-8)} ${g.n(B.x+22.6)} ${g.n(B.y-14)}"`
-      + ` fill="none" stroke="#d8641f" stroke-width="3.4"/>`;
+      + `<path d="M${g.n(B.x+4.6)} ${g.n(B.y+0.4)} Q ${g.n(B.x+14)} ${g.n(B.y+3.4)} ${g.n(B.x+24.4)} ${g.n(B.y-0.6)}"`
+      + ` fill="none" stroke="#fdfdff" stroke-width="2.6"/>`
+      + `<path d="${collar}" fill="#ff7a1f" stroke="${rim}" stroke-width=".9"/>`
+      + `<path d="${belt}" fill="none" stroke="${rim}" stroke-width="3.6"/>`
+      + `<path d="${belt}" fill="none" stroke="#d8641f" stroke-width="2.4"/>`
+      + `<rect x="${g.n(B.x+6)}" y="${g.n(B.y+4.4)}" width="5.6" height="4.6" rx="1.2"`
+      + ` fill="#f6efe0" stroke="#a8783a" stroke-width=".8"/>`;
   }},
   // a plain shield with a band across it. A crest or a letter on it
   // would make it one particular knight's shield, so it has neither
@@ -2639,14 +2703,67 @@ const DUCK_GEAR = [
    before the duck and the near half after it, so the numbers live in
    one place rather than in two halves that could drift apart. The
    contrast line underneath is what keeps the black tyre off the coal
-   duck and the red ring off the fire one. */
+   duck and the red ring off the fire one, and it is deliberately wide:
+   at a hair either side of a ten wide band it was there in the file and
+   not there on the tile, and the coal duck wearing the tyre was one
+   dark blot with a face somewhere in it. */
 function ringArc(g, far, colour, wide, rim){
   // a curve rather than an elliptical arc: the half it draws is the
   // same, and a curve can be read back out of the drawing by the test
   const x1 = svgn(g.B.x - 38), x2 = svgn(g.B.x + 38), y = svgn(g.water);
   const d = `M${x1} ${y} Q ${svgn(g.B.x)} ${svgn(y + (far ? -18 : 18))} ${x2} ${y}`;
   const arc = (c, w) => `<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
-  return arc(rim, wide + 1.4) + arc(colour, wide);
+  return arc(rim, wide + 3.2) + arc(colour, wide);
+}
+/* --- a part the body would swallow ---
+   The snow body already had this problem and answered it by drawing its
+   own three shapes underneath in an outline colour, so that a duck the
+   same colour as the tile it stands on still has a silhouette. A part
+   has it too, and the other way round: the round gold frames vanish on
+   the classic yellow, the dark blue cap and the red headscarf vanish on
+   the coal duck, and a part nobody can see is a part a child paid for
+   twice over.
+   So the same answer, worked out per part instead of written into one
+   body: the colours a part draws with are measured against the colours
+   of the body under it, and when not one of them stands out, the whole
+   part is drawn a second time underneath, as outline only, in the
+   contrast colour the layer already carries. It holds for every layer
+   and for every part added later, which is the point of doing it here
+   rather than in twenty drawings. Distance is measured in Lab, because
+   two colours that look different in the file can be the same colour on
+   the tile; the threshold is the same 25 the ten bodies are held to. */
+const DUCK_INK = 25;
+function duckLab(hex){
+  const h = hex.length === 4 ? "#" + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3] : hex;
+  const n = parseInt(h.slice(1), 16);
+  const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const r = lin((n >> 16) & 255), g = lin((n >> 8) & 255), b = lin(n & 255);
+  const f = t => t > 0.008856 ? Math.cbrt(t) : (7.787 * t + 16 / 116);
+  const X = f((r * 0.4124564 + g * 0.3575761 + b * 0.1804375) / 0.95047);
+  const Y = f(r * 0.2126729 + g * 0.7151522 + b * 0.0721750);
+  const Z = f((r * 0.0193339 + g * 0.1191920 + b * 0.9503041) / 1.08883);
+  return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+}
+function duckDE(a, b){
+  const x = duckLab(a), y = duckLab(b);
+  return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
+}
+function partInk(frag, rim, hues){
+  if(!frag) return "";
+  const cols = frag.match(/(?:fill|stroke)="(#[0-9a-fA-F]{3,6})"/g) || [];
+  const seen = cols.map(s => s.slice(s.indexOf("#"), -1))
+    .some(c => hues.every(h => duckDE(c, h) >= DUCK_INK));
+  if(seen) return frag;
+  // outline only, never a second filled copy: the space helmet is drawn
+  // through glass, and a filled ghost of it would put a grey disc over
+  // the duck's face
+  const ghost = frag.replace(/<(circle|ellipse|rect|path|polygon)\b([^>]*?)\/>/g, (m, tag, at) => {
+    let a = at.replace(/(fill|stroke)="[^"]*"/g, "").replace(/stroke-line(join|cap)="[^"]*"/g, "")
+             .replace(/stroke-width="([\d.]+)"/, (w, v) => `stroke-width="${svgn(+v + 2.4)}"`);
+    if(!/stroke-width=/.test(a)) a += ` stroke-width="2.4"`;
+    return `<${tag}${a} fill="none" stroke="${rim}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  return ghost + frag;
 }
 
 /* Every layer's catalogue in one list, so a part can be looked up by
@@ -3277,22 +3394,33 @@ const PET_SHAPES = {
     return {g, eye: {xs: [40, 60], y: 43, r: 5.4}, mouth: {x: 50, y: 58, w: 10, d: 4}};
   },
 
-  /* A capybara is a brick with a nose: a head as square as a head gets,
-     flat on top, tiny ears right at the corners, eyes high and far
-     apart and an enormous blunt muzzle underneath. */
+  /* A capybara is a brick with a nose on it. Everything here is aimed at
+     the two animals it kept turning into: a bear, because the colours
+     are brown and the head was round, and a hamster, because it had
+     whiskers and a heap of a body. So the head is a block with a flat
+     top and straight sides, the ears are tiny and sit right on the
+     corners rather than high and round, the eyes are small, set high and
+     wide, the muzzle is the whole lower half of the head and ends in an
+     enormous blunt nose pad, there are no whiskers at all, and the body
+     is a barrel on short legs with no tail behind it.
+     The head also overlaps the body on purpose: a capybara has no neck,
+     and the drawing that left daylight between the two read as a head
+     floating above a bear. */
   capybara(it){
-    const muzzle = shade(it.c1, .22), dark = shade(it.c2, .35);
-    const g = `<ellipse cx="50" cy="86" rx="29" ry="15" fill="${it.c1}"/>`
-      + paws(50, 97, 18, 9, 5.5, it.c2)
-      + earRound(32, 34, 5.5, it.c2, dark)
-      + earRound(68, 34, 5.5, it.c2, dark)
-      + `<path d="M28 40 C 28 33, 72 33, 72 40 L72 60 C 72 72, 28 72, 28 60 Z" fill="${it.c1}"/>`
-      + `<path d="M30 54 C 30 76, 70 76, 70 54 Z" fill="${muzzle}"/>`
-      + `<ellipse cx="45" cy="60" rx="3" ry="2.2" fill="${dark}"/>`
-      + `<ellipse cx="55" cy="60" rx="3" ry="2.2" fill="${dark}"/>`
-      + whiskers(34, 64, -1, 18, shade(it.c2, .2))
-      + whiskers(66, 64, 1, 18, shade(it.c2, .2));
-    return {g, eye: {xs: [38, 62], y: 46, r: 4.2}, mouth: {x: 50, y: 68, w: 11, d: 2.6}};
+    const muzzle = tint(it.c1, .3), dark = shade(it.c2, .3), pad = shade(it.c2, .5);
+    const g = `<path d="M18 78 Q18 66 34 66 L66 66 Q82 66 82 78 L82 90 Q82 99 64 99`
+      + ` L36 99 Q18 99 18 90 Z" fill="${it.c1}"/>`
+      + paws(50, 97, 18, 9, 5, it.c2)
+      + `<ellipse cx="50" cy="86" rx="19" ry="10" fill="${tint(it.c1, .26)}"/>`
+      + earRound(27, 37, 4.8, it.c2, dark)
+      + earRound(73, 37, 4.8, it.c2, dark)
+      + `<path d="M26 44 Q26 34 36 34 L64 34 Q74 34 74 44 L74 60 Q74 70 62 70`
+      + ` L38 70 Q26 70 26 60 Z" fill="${it.c1}"/>`
+      + `<path d="M33 56 L67 56 L67 64 Q67 74 50 74 Q33 74 33 64 Z" fill="${muzzle}"/>`
+      + `<rect x="40" y="57" width="20" height="10" rx="4.6" fill="${pad}"/>`
+      + `<ellipse cx="45" cy="61" rx="1.8" ry="1.2" fill="${muzzle}"/>`
+      + `<ellipse cx="55" cy="61" rx="1.8" ry="1.2" fill="${muzzle}"/>`;
+    return {g, eye: {xs: [36.5, 63.5], y: 43, r: 3.8}, mouth: {x: 50, y: 70.5, w: 12, d: 2.2}};
   },
 
   /* A sloth hangs, and that is the whole drawing: a branch across the
@@ -3686,11 +3814,17 @@ function duckSVG(it, outfit){
   // body, `front` after everything, so a swim ring can go round the
   // duck rather than in front of it.
   const fit = duckFit();
-  const pat = patPart ? `<g clip-path="url(#duckskin)">${patPart.draw(fit, rim)}</g>` : "";
-  const headwear = headPart ? headPart.draw(fit, rim) : "";
-  const eyewear = eyePart ? eyePart.draw(fit, rim) : "";
-  const back = gearPart && gearPart.back ? gearPart.back(fit, rim) : "";
-  const front = gearPart ? gearPart.draw(fit, rim) : "";
+  /* The colours the body is wearing, so a part that would be lost in
+     them can be given an outline; see `partInk`. The rainbow body hands
+     over all five of its stops, because a part on it lies on more than
+     one colour at once. */
+  const hues = b.grad ? b.grad.slice() : [c1, c2];
+  const ink = frag => partInk(frag, rim, hues);
+  const pat = patPart ? `<g clip-path="url(#duckskin)">${ink(patPart.draw(fit, rim))}</g>` : "";
+  const headwear = headPart ? ink(headPart.draw(fit, rim)) : "";
+  const eyewear = eyePart ? ink(eyePart.draw(fit, rim)) : "";
+  const back = gearPart && gearPart.back ? ink(gearPart.back(fit, rim)) : "";
+  const front = gearPart ? ink(gearPart.draw(fit, rim)) : "";
   const g = defs + back
     + edge
     + shell(c2, skin, "")
@@ -5753,6 +5887,7 @@ function viewJobDone(p){
   // is nothing left to shop for
   const shelves = partsShelves(p);
   const totalLabel = shelves.length ? t("statPartsAll") : t("statPartsWork");
+  const spendTo = spendTarget(p);
   return `<div class="scr narrow">
     <div class="scr-scroll">
       <div class="result">
@@ -5771,7 +5906,7 @@ function viewJobDone(p){
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
           <button class="btn mint wide" data-act="jobagain">${t("jobAgain")}</button>
           <button class="btn ghost wide" data-act="shop">${t("jobBackToShop")}</button>
-          ${shelves.length ? `<button class="btn ghost wide" data-act="spendparts">${t("jobSpendParts")}</button>` : ""}
+          ${spendTo ? `<button class="btn ghost wide" data-act="spendparts">${t("jobSpendParts")}</button>` : ""}
         </div>
       </div>
     </div>
@@ -5918,21 +6053,37 @@ const DUCK_LAYERS = [
 /* Where parts go, and the one place that knows it. Parts buy two
    different things now, paints for the machines and an outfit for the
    duck, so the workshop can say what they are for and send the child
-   straight to the first section that still has something in it; the
-   sections come back in the order the garage shows them, and each of
-   them puts its cheapest part first, so the first tile the child lands
-   on is one they can afford.
+   straight to a section that still has something in it.
+   The sections come back cheapest first, by what the cheapest thing
+   still left in each of them costs, and that is the whole point of the
+   order: the cheapest paint is thirty parts and the cheapest duck part
+   is six, so a child with one job's worth of parts in hand who was sent
+   to the paints was being walked to a shelf where everything was out of
+   reach. Ordering by price means the first section named is one the
+   child has the most chance of being able to buy from.
    This answers with places, never with how many are left. A line saying
    "nine of sixty-five" would turn a shelf to browse into a target to
    chase, and the workshop is the one room in the game with nothing to
    chase in it. */
-function partsShelves(p){
+function shelvesLeft(p){
   const out = [];
-  if(PAINTS.some(pa => !(p.paints || []).includes(pa.id))) out.push("paintsec");
-  for(const spec of DUCK_LAYERS)
-    if(spec.list.some(part => !ownsDuckPart(p, part))) out.push(spec.sec);
-  return out;
+  const paints = PAINTS.filter(pa => !(p.paints || []).includes(pa.id));
+  if(paints.length) out.push({sec: "paintsec", cost: Math.min(...paints.map(pa => pa.cost))});
+  for(const spec of DUCK_LAYERS){
+    const rest = spec.list.filter(part => !ownsDuckPart(p, part));
+    if(rest.length) out.push({sec: spec.sec, cost: Math.min(...rest.map(part => part.cost))});
+  }
+  return out.sort((a, b) => a.cost - b.cost);
 }
+const partsShelves = p => shelvesLeft(p).map(s => s.sec);
+/* Where the "spend your parts" button goes, and whether it is offered at
+   all. It is the cheapest section the child can actually pay from today;
+   when everything left costs more than they have, there is nothing to
+   offer and the button stays away, exactly as it does when the shelves
+   are empty altogether. A button that walks a child to a wall of prices
+   they cannot meet is a promise the game does not keep, and an offer
+   that quietly does nothing is the thing this game does not do. */
+const spendTarget = p => (shelvesLeft(p).find(s => s.cost <= p.parts) || {}).sec || null;
 /* What parts are for once every shelf is empty, decided long before the
    duck existed: the number stops looking like a purse and starts saying
    how much work has been done altogether. The condition is both shelves
@@ -6390,7 +6541,7 @@ document.addEventListener("click", e => {
   // something in it, so it stands at the paints while paints are left
   // and moves on to the duck afterwards, and stays there while the child
   // tries things on
-  if(act === "spendparts"){ go("collection", {focus: partsShelves(p)[0] || "paintsec"}); return; }
+  if(act === "spendparts"){ go("collection", {focus: spendTarget(p) || partsShelves(p)[0] || "paintsec"}); return; }
 
   if(act === "shop"){ go("shop"); return; }
   if(act === "jobstart"){ startJob(p, id); return; }
@@ -6543,6 +6694,7 @@ document.addEventListener("click", e => {
       DB.profiles[i] = Object.assign(newProfile(obj.name || t("defaultName")), obj);
       if(DB.profiles[i].curriculum && !curriculumById(DB.profiles[i].curriculum)) DB.profiles[i].curriculum = null;
       normalizeChapter(DB.profiles[i]);
+      seedStarters(DB.profiles[i]);
       seedOpened(DB.profiles[i]);
       seedShop(DB.profiles[i]);
       seedDuck(DB.profiles[i]);

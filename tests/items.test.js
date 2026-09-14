@@ -12,7 +12,7 @@ global.document={getElementById:id=>id==='app'?appEl:el(),querySelector:()=>el()
 global.window={addEventListener(){},innerWidth:375,innerHeight:812};const store={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v};
 global.navigator={};global.setTimeout=()=>0;
-src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
+src+="\n;module.exports={itemFromKey,MULT,ADD,mk,dk,ak,sk,H_BUCKETS,K_BUCKETS,as1000Keys,as1000Stage,C_BUCKETS,clockKeys,clockStage,X_BUCKETS,beyondKeys,beyondStage,O_BUCKETS,roundKeys,roundStage,Q_BUCKETS,chainKeys,chainStage,Z_BUCKETS,opsKeys,opsStage,G_BUCKETS,tensKeys,tensStage,U_BUCKETS,unitKeys,unitsStage,questionHTML,rightAnswerText,thresholds,crossesTen,as20Keys,unlockState,seedOpened,rememberUnlocks,trackKeys,newProfile,buildRun,TRACKS,DB,petSVG,rideSVG,duckSVG,PET,PET_SHAPES,PETS,RIDES,DUCKS,DUCK,DUCK_BODY,DUCK_PAT,DUCK_HEAD,DUCK_EYE,DUCK_GEAR,DUCK_PARTS,DUCK_LAYERS,BODY_LAYER,PAT_LAYER,HEAD_LAYER,EYE_LAYER,GEAR_LAYER,duckFit,partInk,DUCK_INK,duckPartById,duckLayerOf,duckBodyOf,ownsDuckPart,wearDuckPart,seedDuck,STARTERS,isPet,itemById,ENVS,circuit,route,routeOf,atU,sceneSVG,sceneThumb,E_STAGES,stageKeys,bridgeStage,BANDS,bandKeys,seedBands,mastery,CURRICULA,poolKeys,poolSize,schoolPool,schoolReady,isPlayable,playableChapters,normalizeChapter,visibleTracks,chapterOf,trackById,chapterJobs,JOBS,jobStage,jobById,jobsInGrade,buildJob,jobItemFromKey,MONEY,fewestCoins,PAINTS,isJobKey,record,I18N,STAR_LV,starred,starCount,seedStars,trackSpec,shopSpec,collectionSpecs,starsAll,tokenSVG,tokenGridSVG,revealSVG,WORLDS,worldById,envOf,seedWorld,ridesOrder,ALL_ITEMS,MAX_GRADE,seedGrade,inGrade,gradeOf,peekTracks,yearOf,foldsYears,overallMastery,heatSpecs,collectionSpecs,worldSpots,worldRoad,placeBox,placeHeight,PLACE_GAP,PLACE_MAX,WORLD_EDGE,TX_BY_GRADE,txNow,layoutClass,mapCols};";
 const mod={};new Function('module','exports','require',src)(mod,{},require);
 const A=mod.exports;
 
@@ -880,6 +880,72 @@ if(pf5.duck.eye!==undefined||pf5.duck.gear!=='dg_kruh'||pf5.duck.head!=='dh_koru
 if(!pf5.duckParts.includes('de_maska')) esay('sundani bryli pripravilo dite o koupeny dil');
 console.log('oci a vybava:',eBad?'chyb '+eBad:'v poradku',
   '| vrstva Oci stoji '+cenaOci+', Vybava '+cenaVyb+' soucastek');
+
+// 3f. kontrast dilu proti telu
+//
+// Dil nakresleny v barve, kterou uz ma telo pod nim, je dil, ktery neni
+// videt: cerna pneumatika na uhlikove kacence byla jedna tmava skvrna
+// s oblicejem nekde uvnitr a kulate zlate obroucky na klasicke zlute
+// nebyly videt vubec. Kacenka ma pet vrstev a deset tel, takze dvojic je
+// 550 a na obrazku se prehlednou; tohle je presne ten druh chyby, ktery
+// musi hlidat stroj.
+// Meri se v Lab, stejne jako u palet z okruhu 15 a u samotnych tel
+// v okruhu 3c, protoze dve barvy, ktere v kodu vypadaji odlisne, mohou
+// na dlazdici splynout. Prah je tychz 25 dE, kterym se drzi deset tel od
+// sebe navzajem. Test si vzdalenost pocita sam a nebere ji z app.js:
+// merit definici sebou samou nechytne nic.
+// Dil projde tehdy, kdyz aspon jedna jeho barva stoji dost daleko od
+// **vsech** barev tela; nemusi se lisit celý, staci, aby mel na sobe
+// linku, kterou telo nesnese. Prave to dela `partInk`, a hlida se
+// i to, ze ho kresba kacenky opravdu vola.
+let ktBad=0;
+const ktsay=m=>{ktBad++;console.log('  !!  '+m);};
+const KONTRAST_PRAH=25, kackaK=A.DUCKS[0], sedK=A.duckFit();
+if(A.DUCK_INK>KONTRAST_PRAH) ktsay('app.js si dovoluje mensi kontrast ('+A.DUCK_INK+') nez tenhle test');
+// ktery ze dvou kontrastnich odstinu telo dostane, je totez pravidlo
+// jako v duckSVG: svetle telo tmavou linku, tmave svetlou
+const jasT=h=>{const n=parseInt((h.length===4?'#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3]:h).slice(1),16);
+  return (((n>>16)&255)*.299+((n>>8)&255)*.587+(n&255)*.114)/255;};
+const hexy=frag=>[...new Set((frag.match(/(?:fill|stroke)="#[0-9a-fA-F]{3,6}"/g)||[])
+  .map(s=>s.slice(s.indexOf('#'),-1).toLowerCase())
+  .map(h=>h.length===4?'#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3]:h))];
+const DILY_K=VZORY.concat(HLAVA,OCI,VYBAVA);
+let nejhorsi=1e9, nejhorsiPar='', sObrysem=[];
+for(const telo of A.DUCK_BODY){
+  const c1=telo.c1||kackaK.c1, c2=telo.c2||kackaK.c2;
+  const barvyTela=telo.grad?telo.grad.slice():[c1,c2];
+  const jas=telo.grad?telo.grad.reduce((s,c)=>s+jasT(c),0)/telo.grad.length:jasT(c1);
+  const rimT=jas<.45?'#f2f7ff':'#26324c';
+  for(const part of DILY_K){
+    const syrove=(part.back?part.back(sedK,rimT):'')+part.draw(sedK,rimT);
+    const hotove=(part.back?A.partInk(part.back(sedK,rimT),rimT,barvyTela):'')
+                +A.partInk(part.draw(sedK,rimT),rimT,barvyTela);
+    if(hotove!==syrove) sObrysem.push(part.id+' na '+telo.id);
+    if(/NaN|undefined/.test(hotove)) ktsay('obrys rozbil kresbu '+part.id+' na '+telo.id);
+    if((hotove.match(/</g)||[]).length!==(hotove.match(/>/g)||[]).length)
+      ktsay('obrys rozbil tagy u '+part.id+' na '+telo.id);
+    // dva stejne pojmenovane atributy v jednom tvaru prohlizec vezme,
+    // ale opravdovy parser SVG na nich spadne
+    for(const tag of hotove.match(/<[a-z]+[^>]*\/>/g)||[]){
+      const jm=(tag.match(/([a-z-]+)="/g)||[]).map(s=>s.slice(0,-2));
+      if(new Set(jm).size!==jm.length) ktsay(part.id+' na '+telo.id+' ma tvar s dvojim atributem: '+tag.slice(0,40));
+    }
+    const d=Math.max(...hexy(hotove).map(c=>Math.min(...barvyTela.map(b=>deLab(c,b)))));
+    if(d<nejhorsi){nejhorsi=d; nejhorsiPar=part.id+' na '+telo.id;}
+    if(d<KONTRAST_PRAH)
+      ktsay(part.id+' splyva s telem '+telo.id+': nejlepsi barva je jen '+d.toFixed(1)+' dE');
+  }
+}
+// a obrys opravdu musi byt v hotove kacence, ne jen ve funkci vedle ni
+const zlutaK=A.DUCK_BODY[0], hueK=[zlutaK.c1||kackaK.c1, zlutaK.c2||kackaK.c2];
+const dioptr=A.duckPartById('de_dioptr');
+if(!A.duckSVG(kackaK,{body:zlutaK.id,eye:'de_dioptr'})
+    .includes(A.partInk(dioptr.draw(sedK,'#26324c'),'#26324c',hueK)))
+  ktsay('kacenka kresli dily bez obrysu, partInk visi ve vzduchu');
+if(!sObrysem.length) ktsay('obrys nedostal ani jeden dil, pravidlo je nejspis mrtve');
+console.log('kontrast dilu:',ktBad?'chyb '+ktBad:'v poradku',
+  '| nejtesnejsi '+nejhorsiPar+' '+nejhorsi.toFixed(1)+' dE | obrys dostalo '+sObrysem.length
+  +' dvojic z '+(A.DUCK_BODY.length*DILY_K.length)+': '+sObrysem.join(', '));
 
 // 4. kurikulum: kazda kapitola s poolem musi dat pouzitelnou zasobu klicu
 const VALID=new Set();

@@ -129,6 +129,32 @@ for(const c of FX.cases){
   const pribylo=(after.profiles[0].owned||[]).filter(id=>!(before.profiles[0].owned||[]).includes(id));
   ok('nove zvire se neobjevilo jako koupene', pribylo.every(id=>start.includes(id)),
      pribylo.length?'pribylo '+pribylo.join(','):'nepribylo nic');
+  // profil se neobnovuje jen nactenim, ale i rucnim importem zalohy
+  // v rodicovske sekci, a ta vetev sklada profil jinak: seznam zavodniku
+  // prepise tim, co je v zaloze. Starsi zaloha nezna zavodniky, kteri
+  // pribyli pozdeji, takze bez doplneni startovni sestavy by po obnove
+  // zmizeli z garaze a dite by prislo o pristup, ktery uz melo.
+  const poImportu=JSON.parse(w.eval(`(function(){
+    const raw=${JSON.stringify(JSON.stringify(before.profiles[0]))};
+    const box=document.createElement('textarea'); box.id='dump'; box.value=raw;
+    const btn=document.createElement('button'); btn.dataset.act='import';
+    document.body.appendChild(box); document.body.appendChild(btn);
+    btn.click(); box.remove(); btn.remove();
+    return JSON.stringify(P());
+  })()`));
+  const chybiPoImportu=start.filter(id=>!(poImportu.owned||[]).includes(id));
+  ok('po importu starsi zalohy ma profil celou startovni sestavu vcetne kacenky',
+     chybiPoImportu.length===0 && (poImportu.owned||[]).includes('du_kacka'),
+     chybiPoImportu.length?'chybi '+chybiPoImportu.join(','):(poImportu.owned||[]).length+' zavodniku');
+  const ztratilImport=[];
+  compare(before.profiles[0], poImportu, '', ztratilImport, false);
+  ok('import starsi zalohy nic z profilu neztratil',
+     ztratilImport.filter(d=>!allowed(d)).length===0,
+     ztratilImport.filter(d=>!allowed(d)).join(' | ')||'vse na miste');
+  ok('po importu ma kacenka zalozenou vystroj a jde vykreslit',
+     Array.isArray(poImportu.duckParts) && poImportu.duck && typeof poImportu.duck==='object'
+     && w.eval('typeof itemSVG(P(),"du_kacka")==="string"')===true,
+     JSON.stringify(poImportu.duckParts)+' / '+JSON.stringify(poImportu.duck));
 
   const opened=JSON.parse(w.eval('JSON.stringify(TRACKS.filter(t=>unlockState(P(),t).open).map(t=>t.id))'));
   const chybi=(c.expectOpen||[]).filter(id=>!opened.includes(id));
